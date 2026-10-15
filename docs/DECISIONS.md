@@ -42,6 +42,9 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 19 | 15 Ekim | Git düzeni: Windows oturumu `fenpo` klasöründe `main` dalında. iPhone `..\fenpo-ios` (`ios` dalı), Android `..\fenpo-android` (`android` dalı) worktree'lerinde. Mobil oturumlar her iş bloğunun başında `git merge main` yapar; Buğra kilometre taşlarında dalları `main`'e birleştirir | Aynı klasörde üç oturum birbirinin git index'ine karışır |
 | 20 | 15 Ekim | Protokol değişikliği her zaman ayrı bir commit (`protocol: ...`), `protocol/` ve `docs/ARCHITECTURE.md` birlikte. Mobil oturumlar değişiklik gerekirse kendi dallarında yapar ve Buğra'ya söyler; Buğra hemen `main`'e alır | Üç uygulamanın sözleşmesi tek yerde, sapmadan |
 | 21 | 15 Ekim | Başlatma promptları `docs/KICKOFF.md` içinde | |
+| 22 | 15 Ekim | Windows spike sırası: S1 (S8 ve RSSI dahil), S2, S3, S4'ün Windows tarafı, S5'in Windows tarafı, S7 | Yakınlık kilidi Aşama 1'de ama RSSI kaynağı belirsiz; iOS kilometre taşı 1 (S4) PC'de bir çevre birim istiyor |
+| 23 | 15 Ekim | Protokol v1 boşlukları S5 sırasında tek bir `protocol: ...` commit'iyle kapatılır: 6 haneli yedek kodun güvenliği, eşleşme bağlantısının `PairingResult` sonrası akışı, `PairingRequest.certificate_sha256` (PC parmak izini TLS'ten hesaplar), BLE kanalında AES-GCM nonce düzeni ve şifreleme/parçalama sırası, veri bağlantısında `TransferStreamHeader` çerçevesi | Taslakta tanımsız veya güvensiz kalan yerler |
+| 24 | 15 Ekim | Cihazdan kaydedilen ham baytlar `captures/` altında kalır ve repoya girmez; repoya sadece metinleri ve numaraları değiştirilmiş fixture'lar girer | Kayıtlar gerçek mesaj ve kişi içeriği taşıyor |
 
 ## Açık konular
 
