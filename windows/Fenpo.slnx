@@ -9,6 +9,7 @@
     <Project Path="src/Fenpo.Core/Fenpo.Core.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Fenpo.Bluetooth.Tests/Fenpo.Bluetooth.Tests.csproj" />
     <Project Path="tests/Fenpo.Core.Tests/Fenpo.Core.Tests.csproj" />
   </Folder>
 </Solution>

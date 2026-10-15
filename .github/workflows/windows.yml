@@ -21,6 +21,7 @@ jobs:
         working-directory: windows
         run: |
           dotnet test --project tests/Fenpo.Core.Tests -c Release
+          dotnet test --project tests/Fenpo.Bluetooth.Tests -c Release
 
       - name: Build app (x64)
         working-directory: windows

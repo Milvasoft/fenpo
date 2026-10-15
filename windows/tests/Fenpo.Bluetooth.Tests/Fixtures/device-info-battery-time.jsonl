@@ -1,0 +1,4 @@
+{"kind": "read", "source": "Manufacturer Name", "hex": "4170706C6520496E632E"}
+{"kind": "read", "source": "Model Number", "hex": "6950686F6E6531342C35"}
+{"kind": "read", "source": "Current Time (char)", "hex": "EA070A0F17380104FF02"}
+{"kind": "read", "source": "Battery Level", "hex": "28"}
