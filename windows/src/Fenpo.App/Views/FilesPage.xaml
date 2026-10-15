@@ -2,11 +2,49 @@
 <Page
     x:Class="Fenpo.App.Views.FilesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Fenpo.App.Controls">
 
     <ScrollViewer>
         <StackPanel Padding="32,28">
             <TextBlock x:Uid="FilesTitle" Style="{StaticResource FenpoPageTitleStyle}" />
+            <controls:NeedsAppBanner x:Uid="Files_NeedsApp" Visibility="{x:Bind ViewModel.NeedsApp, Mode=OneWay}" />
+
+            <!-- Design "Dosyalar ve fotoğraflar": drop area, transfers, recent photos. -->
+            <StackPanel Spacing="16" Opacity="{x:Bind ViewModel.ContentOpacity, Mode=OneWay}" IsHitTestVisible="{x:Bind ViewModel.AppConnected, Mode=OneWay}">
+                <Grid MinHeight="96">
+                    <Rectangle RadiusX="8" RadiusY="8" Stroke="{ThemeResource FenpoTextTertiaryBrush}" StrokeThickness="1.5" StrokeDashArray="4,3" Fill="{ThemeResource FenpoCardSecondaryBrush}" />
+                    <Grid Padding="20,16" ColumnSpacing="16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="12" Background="{ThemeResource FenpoAccentSoftBrush}">
+                            <FontIcon Glyph="&#xE896;" FontSize="22" Foreground="{ThemeResource FenpoAccentBrush}" />
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Uid="Files_DropTitle" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" TextWrapping="Wrap" />
+                            <TextBlock x:Uid="Files_DropHint" Style="{StaticResource FenpoSecondaryTextStyle}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button Grid.Column="2" x:Uid="Files_Pick" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" />
+                    </Grid>
+                </Grid>
+
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel Padding="16,14">
+                        <TextBlock x:Uid="Files_Transfers" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <TextBlock x:Uid="Files_NoTransfers" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel Padding="16,14">
+                        <TextBlock x:Uid="Files_RecentPhotos" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <TextBlock x:Uid="Files_NoPhotos" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </Page>

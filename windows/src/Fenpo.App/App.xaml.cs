@@ -75,6 +75,7 @@ public partial class App : Application
                 .AddTransient<NotificationsViewModel>()
                 .AddTransient<MessagesViewModel>()
                 .AddTransient<CallsViewModel>()
+                .AddTransient<AppFeatureViewModel>()
                 .AddTransient<PairingViewModel>()
                 .AddTransient<SettingsViewModel>())
             .Build();

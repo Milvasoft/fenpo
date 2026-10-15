@@ -2,11 +2,85 @@
 <Page
     x:Class="Fenpo.App.Views.CameraPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Fenpo.App.Controls">
 
     <ScrollViewer>
         <StackPanel Padding="32,28">
             <TextBlock x:Uid="CameraTitle" Style="{StaticResource FenpoPageTitleStyle}" />
+            <controls:NeedsAppBanner x:Uid="Camera_NeedsApp" Visibility="{x:Bind ViewModel.NeedsApp, Mode=OneWay}" />
+
+            <!-- Design "Kamera": preview on the left, lens and options on the right. -->
+            <Grid ColumnSpacing="16" Opacity="{x:Bind ViewModel.ContentOpacity, Mode=OneWay}" IsHitTestVisible="{x:Bind ViewModel.AppConnected, Mode=OneWay}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="300" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Spacing="10">
+                    <Grid CornerRadius="8" Background="{ThemeResource FenpoIslandBrush}">
+                        <Viewbox Stretch="Uniform">
+                            <Grid Width="320" Height="180" />
+                        </Viewbox>
+                        <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
+                    </Grid>
+                    <TextBlock x:Uid="Camera_Hint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Spacing="16">
+                    <Border Style="{StaticResource FenpoCardStyle}" Padding="14">
+                        <StackPanel Spacing="8">
+                            <TextBlock x:Uid="Camera_Lens" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            <Border Style="{StaticResource FenpoSegmentBarStyle}">
+                                <Grid ColumnSpacing="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <RadioButton x:Name="LensWide" x:Uid="Camera_LensWide" GroupName="Lens" Style="{StaticResource FenpoSegmentStyle}" Checked="OnLensChecked" />
+                                    <RadioButton x:Name="LensUltraWide" x:Uid="Camera_LensUltraWide" Grid.Column="1" GroupName="Lens" Style="{StaticResource FenpoSegmentStyle}" Checked="OnLensChecked" />
+                                    <RadioButton x:Name="LensFront" x:Uid="Camera_LensFront" Grid.Column="2" GroupName="Lens" Style="{StaticResource FenpoSegmentStyle}" Checked="OnLensChecked" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource FenpoCardStyle}">
+                        <StackPanel>
+                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Uid="Camera_CenterStage" Style="{StaticResource FenpoRowLabelStyle}" />
+                                    <TextBlock x:Uid="Camera_CenterStageHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.CenterStage, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_CenterStageToggle" />
+                            </Grid>
+                            <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Uid="Camera_Portrait" Style="{StaticResource FenpoRowLabelStyle}" VerticalAlignment="Center" />
+                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.PortraitBlur, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_PortraitToggle" />
+                            </Grid>
+                            <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Uid="Camera_Microphone" Style="{StaticResource FenpoRowLabelStyle}" VerticalAlignment="Center" />
+                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.UseMicrophone, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_MicrophoneToggle" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Page>
