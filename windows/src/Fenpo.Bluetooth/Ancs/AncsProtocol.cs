@@ -191,8 +191,7 @@ public static class AncsCommands
     /// <param name="value">Attribute text.</param>
     /// <param name="offset">UTC offset to assume (the PC's).</param>
     /// <returns>The date, or null when malformed.</returns>
-    public static DateTimeOffset? ParseDate(string value, TimeSpan offset) =>
-        DateTime.TryParseExact(value, "yyyyMMdd'T'HHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var local)
-            ? new DateTimeOffset(local, offset)
-            : null;
+    public static DateTimeOffset? ParseDate(string value, TimeSpan offset) => DateTime.TryParseExact(value, "yyyyMMdd'T'HHmmss", CultureInfo.InvariantCulture, DateTimeStyles.None, out var local)
+        ? new DateTimeOffset(local, offset)
+        : null;
 }
