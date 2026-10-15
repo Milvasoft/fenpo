@@ -16,7 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Assets\**" />
+    <!-- Copied next to the exe: the build output is registered directly as a loose package (tools/Register-Dev.ps1). -->
+    <Content Include="Assets\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

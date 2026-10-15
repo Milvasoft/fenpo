@@ -87,6 +87,16 @@ public partial class App : Application
         await _host.StartAsync();
         GetService<ILogger<App>>().LogInformation("Fenpo {Version} started from {BaseDirectory}", typeof(App).Assembly.GetName().Version, AppContext.BaseDirectory);
         _window = GetService<MainWindow>();
+
+        // "fenpo --page Settings" opens on a given page (used by the screenshot checks in both themes and languages).
+        var arguments = Environment.GetCommandLineArgs();
+        var pageIndex = Array.IndexOf(arguments, "--page");
+
+        if (pageIndex >= 0 && pageIndex + 1 < arguments.Length)
+        {
+            _window.Navigate(arguments[pageIndex + 1]);
+        }
+
         _window.Activate();
     }
 
