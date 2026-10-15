@@ -1,6 +1,7 @@
 using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
+using Fenpo.Core.Api;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,6 +64,7 @@ public partial class App : Application
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
                 .AddHostedService<MediaBridge>()
+                .AddHostedService<LocalApiServer>()
                 .AddSingleton<CallService>()
                 .AddHostedService(sp => sp.GetRequiredService<CallService>())
                 .AddSingleton<ProximityLockService>()
