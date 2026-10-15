@@ -33,6 +33,27 @@ Windows kullanan bir iPhone sahibi bilgisayarına oturduğunda telefonuna dokunm
 
 Detaylar ve kaynaklar: [RESEARCH.md](RESEARCH.md).
 
+## KDE Connect ile karşılaştırma
+
+KDE Connect (masaüstü eklentileri ve iOS uygulaması, Ekim 2026) Fenpo'ya en yakın açık kaynak örnek. Planda olmayanlar aşağıda; hepsi ilgili aşamaya eklendi.
+
+| KDE Connect | Fenpo'da | Nereye |
+|---|---|---|
+| Telefonu PC için dokunmatik yüzey ve klavye olarak kullanma (`mousepad`, `remotekeyboard`) | Yoktu | Aşama 3: iOS uygulaması ön plandayken, Fenpo kanalı üzerinden; PC'de `SendInput` |
+| Sunum kumandası, lazer işaretçi (`presenter`) | Yoktu | Aşama 3: ileri/geri, ekranda işaretçi; Kısayollar ve Eylem Düğmesi'ne bağlanabilir |
+| Telefondan PC'de tanımlı komut çalıştırma (`runcommand`) | Yoktu | Aşama 3: kullanıcının PC'de tanımladığı ve izin verdiği komutlar, App Intent olarak Kısayollar'da |
+| Telefondan PC'nin medyasını ve sesini kontrol (`mpriscontrol`, `remotesystemvolume`) | Ters yönü vardı (PC'den iPhone medyası) | Aşama 3: `GlobalSystemMediaTransportControlsSessionManager` ve ses düzeyi |
+| PC'yi çaldırma (`findthisdevice`) | Telefonu çaldır vardı | Aşama 3: tersi de |
+| Arama gelince PC'deki müziği duraklatma (`pausemusic`) | Yoktu | Aşama 2: ANCS `IncomingCall` ile, uygulamasız |
+| Telefondan PC dosyalarına, PC'den telefon dosyalarına göz atma (`sftp`) | PC klasörleri Dosyalar'da (Aşama 4) vardı; iPhone fotoğraflarına PC'den göz atma yoktu | Aşama 3: uygulama açıkken PC'den iPhone fotoğraf kitaplığı (PhotoKit) |
+| PC bildirimlerini telefona gönderme (`sendnotifications`) | Yoktu | Aşama 4, kısıtlı: BLE ile uyandırılan uygulama yerel bildirim gösterir; sadece seçilen uygulamalar |
+| Bağlıyken ekran koruyucuyu engelleme (`screensaver-inhibit`) | Yoktu | Aşama 3, ayar: "Sunum sırasında ekranı açık tut" (sunum kumandasıyla birlikte) |
+| Telefonun şebeke sinyali (`connectivity-report`) | Yoktu | iOS'ta uygulamaya açık değil (ANCS ve MAP vermiyor, HFP beklemede). Android iş koluna not |
+| İkinci ekran (`virtualmonitor`), kalemle çizim tableti (`digitizer`) | Yoktu (Sidecar kapsam dışı) | Kapsam dışı kalır; sanal ekran Windows'ta imzalı bir sürücü (IddCx) ister. iPad gelirse yeniden değerlendirilir |
+| Birden fazla cihaz, PC ile PC arası | Tek telefon varsayılıyordu | Açık konu: birden fazla telefon ve birden fazla PC (S4'teki PC ayırt etme sorusuyla bağlantılı) |
+
+Zaten planda olanlar: pil, pano, dosya paylaşımı, bildirimler, SMS, aramalar, rehber eşitleme, telefonu çaldırma, PC'yi kilitleme, ping, PC'nin klavye ve faresini başka cihazla paylaşma (Aşama 5'teki HID over GATT).
+
 ## Yol haritası
 
 Her aşama kendi başına kullanılabilir bir ürün çıkarıyor. Aşama bitmeden bir sonrakine geçilmez.
@@ -55,6 +76,10 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 **Durum:**
 - **S1 ve S8 bitti (16 Ekim).** ANCS, AMS, Battery ve Current Time çalışıyor. Eşleşme Windows Ayarlar'dan yapılıyor; yakınlık kilidi reklam RSSI'siyle yapılacak (DECISIONS #28–30). DIS'ten model kimliği okunuyor, iOS sürümü okunmuyor. Yeniden bağlandıktan sonra abonelik yenileme ve canlı bildirim gecikmesi Aşama 1'de doğrulanacak ([README](../spikes/S1-ancs-ams/README.md)).
 - **S2 bitti (16 Ekim).** MAP ile okuma, okundu işaretleme, yeni mesaj bildirimi ve gönderme çalışıyor; OBEX Fenpo içinde yazılacak. Gelen kutusu eski SMS'leri de veriyor, `sent` klasörü boş geliyor. Yeni mesaj ANCS'den gösterilecek (DECISIONS #32–33, [README](../spikes/S2-map/README.md)).
+- **S3 bitti, olumsuz (16 Ekim).** Bu makinede (Windows 11 26H2 Insider) `RegisterApp` HFP kaydını almıyor, LAF `Unavailable`. Aramalar Aşama 2'de ANCS aksiyonlarıyla yapılacak, ses iPhone'da kalacak; HFP beklemede (DECISIONS #34, [README](../spikes/S3-hfp/README.md)).
+- **S4 Windows tarafı hazır (16 Ekim).** Sabit UUID'lerle GATT sunucusu ve reklam çalışıyor; reklama servis verisi sığmıyor. iPhone'la (nRF Connect, sonra Fenpo uygulaması) denenmedi ([README](../spikes/S4-ble-peripheral/README.md)).
+- **S5 Windows tarafı yazıldı, çalıştırılamadı (16 Ekim).** TLS 1.3 sunucusu, eşleşme, `Hello`, QR, DNS-SD ve telefon simülatörüyle 9 senaryo hazır. Windows Defender sunucu DLL'ini yanlış alarmla karantinaya aldı; çalıştırmak Buğra'nın Defender kararını bekliyor. Protokol önerisi README'de ([README](../spikes/S5-tls-pairing/README.md)).
+- **S7 kısmen bitti (16 Ekim).** Native AOT medya kaynağı derleniyor; MSIX içindeki paketli COM sınıfını Frame Server görmüyor, kamera ayrı ve yönetici onaylı bir kurulum gerektiriyor (DECISIONS #35). HKLM kaydıyla görüntü denemesi bekliyor ([README](../spikes/S7-virtual-camera/README.md)).
 
 ### Aşama 1: Telefonun masada (MVP)
 
@@ -75,7 +100,8 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 
 - MAP: konuşma listesi, mesaj okuma, gönderme, okundu işaretleme, bildirimden yanıt
 - PBAP: rehber ve arama geçmişi, mesaj ve aramalarda isim çözümleme
-- HFP: arama başlatma, gelen aramayı yanıtlama, ses PC'den
+- Aramalar: gelen arama Ada'da, "Yanıtla" ve "Reddet" ANCS aksiyonlarıyla, ses iPhone'da (DECISIONS #34). HFP (PC'den arama, ses PC'den) beklemede
+- Arama gelince PC'deki medyayı duraklatma (ANCS `IncomingCall`)
 - Fenpo Ada: gelen arama ve aktarımlar için ekranın üst ortasındaki pencere
 
 ### Aşama 3: iPhone uygulaması ve aktarım
@@ -87,6 +113,8 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 - "PC'de aç" ve "iPhone'da aç"
 - Telefonu çaldır, PC'yi kilitle
 - LocalSend v2.2 uyumluluğu (Windows tarafında)
+- Telefondan PC'ye: dokunmatik yüzey ve klavye, sunum kumandası (ekran açık tutma dahil), PC'nin medyası ve ses düzeyi, PC'yi çaldırma, tanımlı PC komutları (App Intent)
+- PC'den iPhone fotoğraf kitaplığına göz atma (uygulama açıkken)
 
 ### Aşama 4: Mac'te olmayanı yap
 
@@ -96,6 +124,7 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 - Hotspot'a tek tık bağlanma
 - Odak eşitleme (iPhone → PC)
 - Ekran görüntülerini otomatik aktarma (uygulama uyandığında)
+- Seçilen PC bildirimlerini iPhone'a (BLE ile uyandırma + yerel bildirim)
 
 ### Aşama 5: Deneysel
 
@@ -122,5 +151,8 @@ Android, iPhone ile paralel ayrı bir oturumda geliştiriliyor (DECISIONS #10, #
 
 Kararlaşmış her şey [DECISIONS.md](DECISIONS.md) içinde. Açık kalanlar:
 
-1. **Android'in en düşük sürümü:** Android oturumu önerir.
-2. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
+1. **Birden fazla cihaz:** bir PC'ye birden fazla telefon, bir telefona birden fazla PC (KDE Connect karşılaştırması, S4).
+2. **Android'in en düşük sürümü:** Android oturumu önerir.
+3. **HFP (aramalar PC'den):** kararlı Windows 11'de deneme ve Microsoft'a `phonelinetransportdevice_v1` LAF talebi (DECISIONS #34).
+4. **Antivirüs yanlış alarmları:** S5'te Windows Defender kendi derlediğimiz TLS sunucusunu `Backdoor:Win32/Farfli!pz` sandı. Yayından önce kod imzalama, her sürümü Microsoft'a önceden gönderme ve CI'da Defender taraması gerekiyor.
+5. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
