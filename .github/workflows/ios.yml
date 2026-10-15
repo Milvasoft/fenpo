@@ -37,8 +37,8 @@ jobs:
 
       - uses: compnerd/gha-setup-swift@main
         with:
-          branch: swift-6.4-release
-          tag: 6.4-RELEASE
+          swift-version: swift-6.4.1-release
+          swift-build: 6.4.1-RELEASE
 
       - name: Install protoc
         run: |
@@ -105,7 +105,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: xcodebuild-logs
           path: ${{ runner.temp }}/*.log
