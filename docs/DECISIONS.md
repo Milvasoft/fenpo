@@ -52,6 +52,8 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 29 | 16 Ekim | Yakınlık kilidi reklam RSSI'si (`BluetoothLEAdvertisementWatcher`) ve bağlantı durumuyla yapılır. Başlangıç kuralı: 5 saniyelik ortalama −80 dBm'in altına iner veya bağlantı koparsa, 30 saniye sonra kilitle; eşik ayarlanabilir | S1: bağ adresiyle gelen reklam RSSI'si masada −50…−55, uzaklaşınca −78…−92 dBm |
 | 30 | 16 Ekim | iPhone'un iOS sürümü ve model adı uygulamasız okunamıyor (DIS'te sadece `iPhone14,5` gibi model kimliği var). Model adı eşleme tablosundan çıkarılır; iOS sürümü Fenpo kanalından gelir, `Hello`'ya bunun için alan eklenmesi S5'teki protokol commit'ine (#23) alınır | S1/S8 |
 | 31 | 16 Ekim | Tasarımda değişmesi gerekenler (`design/desktop/desktop.html`, Buğra'nın onayıyla): WhatsApp bildirimindeki "iPhone'da aç" düğmesi kalkar (ANCS'de karşılığı yok); cihaz satırındaki iOS sürümü iOS uygulaması yoksa gösterilmez; "Odak modunu eşitle" açıklaması "Fenpo bildirimlerini susturur" olur (RESEARCH §13) | S1 ve RESEARCH ile çelişen metinler |
+| 32 | 16 Ekim | MAP (ve PBAP) için OBEX katmanı Fenpo içinde yazılır; MyPhone sadece referans | S2: OBEX istemci ve MNS sunucusu birkaç yüz satır, iPhone'la okuma, bildirim ve gönderme çalıştı |
+| 33 | 16 Ekim | Yeni mesajın ilk gösterimi ANCS'den yapılır; MAP sohbet geçmişi, yanıt, gönderme ve okundu işaretleme için kullanılır | S2: MAP olay raporu gönderen ve metin taşımıyor, `GetMessage` bir kez 33 saniye gecikti |
 
 ## Açık konular
 
