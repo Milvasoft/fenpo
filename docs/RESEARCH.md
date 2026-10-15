@@ -90,6 +90,7 @@ Kaynak: [windows-ble-hid](https://github.com/abhishek-raj/windows-ble-hid)
 - `MFCreateVirtualCamera` (Windows 11 22000+) özel medya kaynağının CLSID'sini alıyor. Kaynak Frame Server sürecinde yüklendiği için HKLM'de kayıtlı bir COM sunucusu olmalı ve Local Service tarafından okunabilir bir yerde durmalı (kullanıcı profili değil).
 - `smourier/VCamNetSample` (MIT): .NET 10 Native AOT sürümü var. Fenpo.exe ile medya kaynağı arasında paylaşımlı bellek veya paylaşımlı doku gerekiyor.
 - MSIX ile HKLM kaydı spike'ta netleşmeli; gerekirse kamera bileşeni ayrı, yönetici yetkili bir kurulumla gelir.
+- **S7 sonucu (16 Ekim, gece):** VCamNetSample'ın AOT medya kaynağı .NET 10 Native AOT ile 5,5 MB'lık tek bir DLL'e derleniyor. İmzalı bir MSIX içinde `com:SurrogateServer/com:Class` ile bildirildiğinde `MFCreateVirtualCamera` `S_OK` dönüyor, ama `Start` **`Class not registered`** veriyor: Frame Server paketli COM sınıfını görmüyor. Kamera bileşeni ayrı, yönetici onaylı bir kurulum gerektiriyor. HKLM kaydıyla görüntü denemesi henüz yapılmadı ([spikes/S7-virtual-camera](../spikes/S7-virtual-camera/README.md)).
 
 Kaynaklar: [MFCreateVirtualCamera](https://learn.microsoft.com/en-us/windows/win32/api/mfvirtualcamera/nf-mfvirtualcamera-mfcreatevirtualcamera), [VCamNetSample](https://github.com/smourier/VCamNetSample)
 
@@ -114,6 +115,7 @@ Kaynak: [UxPlay](https://github.com/FDH2/UxPlay)
 - Windows 1703'ten beri yerleşik mDNS: `DnssdServiceInstance.RegisterStreamSocketListenerAsync`.
 - Sessiz başarısızlıklar: güvenlik duvarı UDP 5353'ü engelliyor, ağ profili "Genel", birden fazla adaptör veya VPN.
 - iOS: `NSLocalNetworkUsageDescription` ve `NSBonjourServices` içinde `_fenpo._tcp` olmalı. Yerel ağ izni soruluyor. Arka planda tarama yok.
+- **S5 notu (16 Ekim, gece):** Kayıt için WinRT `DnssdServiceInstance` yerine Win32 `DnsServiceRegister` (dnsapi.dll) kullanıldı; TLS sunucusu sade bir `TcpListener` üzerinde kalabiliyor. Çalıştırılamadı: Windows Defender, TLS sunucusu, DPAPI ve mDNS kaydını birlikte taşıyan `PcServer.dll`'i `Backdoor:Win32/Farfli!pz` olarak karantinaya aldı (buluşsal yanlış alarm). Ürünün de aynı riski taşıdığı için imzalı ikili dosyalar ve sürümlerin Microsoft'a önceden gönderilmesi gerekiyor ([spikes/S5-tls-pairing](../spikes/S5-tls-pairing/README.md)).
 
 Kaynaklar: [DnssdServiceInstance](https://learn.microsoft.com/en-us/uwp/api/windows.networking.servicediscovery.dnssd.dnssdserviceinstance), [Apple forum 653316](https://developer.apple.com/forums/thread/653316)
 
