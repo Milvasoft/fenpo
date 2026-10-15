@@ -45,10 +45,10 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 22 | 15 Ekim | Windows spike sırası: S1 (S8 ve RSSI dahil), S2, S3, S4'ün Windows tarafı, S5'in Windows tarafı, S7 | Yakınlık kilidi Aşama 1'de ama RSSI kaynağı belirsiz; iOS kilometre taşı 1 (S4) PC'de bir çevre birim istiyor |
 | 23 | 15 Ekim | Protokol v1 boşlukları S5 sırasında tek bir `protocol: ...` commit'iyle kapatılır: 6 haneli yedek kodun güvenliği, eşleşme bağlantısının `PairingResult` sonrası akışı, `PairingRequest.certificate_sha256` (PC parmak izini TLS'ten hesaplar), BLE kanalında AES-GCM nonce düzeni ve şifreleme/parçalama sırası, veri bağlantısında `TransferStreamHeader` çerçevesi | Taslakta tanımsız veya güvensiz kalan yerler |
 | 24 | 15 Ekim | Cihazdan kaydedilen ham baytlar `captures/` altında kalır ve repoya girmez; repoya sadece metinleri ve numaraları değiştirilmiş fixture'lar girer | Kayıtlar gerçek mesaj ve kişi içeriği taşıyor |
+| 25 | 15 Ekim | Repo **açık**, Milvasoft hesabı altında: `https://github.com/Milvasoft/fenpo` | iOS CI'ın macOS dakikaları açık repoda ücretsiz (#17) |
+| 26 | 15 Ekim | Apple Developer Program hesabı Milvasoft'un mevcut hesabı | Hesap zaten var |
+| 27 | 15 Ekim | Android test telefonu var; Android oturumu cihaza USB üzerinden `adb` ile bağlanır | Bluetooth için gerçek cihaz şart (#16) |
 
 ## Açık konular
 
-- Repo açık mı özel mi olacak, hangi hesap altında (kişisel mi Milvasoft mı) -> https://github.com/Milvasoft/fenpo.git 
-- Test için Android telefon -> var en son adb ile bağlanabileceksin usb üzerinden 
-- Apple Developer hesabı kimin adına açılacak (Buğra mı ortak mı) -> var zaten milva 
-- Android'in en düşük sürümü (Android oturumunun ilk aşamasında önerilecek) -> öner ne diyim amk---
+- Android'in en düşük sürümü: Android oturumu ilk aşamada güncel dağılım verisiyle önerir, Buğra onaylar

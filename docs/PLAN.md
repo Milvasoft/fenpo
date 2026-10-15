@@ -118,7 +118,5 @@ Android, iPhone ile paralel ayrı bir oturumda geliştiriliyor (DECISIONS #10, #
 
 Kararlaşmış her şey [DECISIONS.md](DECISIONS.md) içinde. Açık kalanlar:
 
-1. **Apple Developer Program (yıllık 99$):** TestFlight ve App Store için gerekli. Hesabın kimin adına açılacağı.
-2. **Repo:** GitHub'da açık mı özel mi, hangi hesap altında. iOS CI'ın macOS dakikaları açık repoda ücretsiz.
-3. **Android test telefonu.**
-4. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
+1. **Android'in en düşük sürümü:** Android oturumu önerir.
+2. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
