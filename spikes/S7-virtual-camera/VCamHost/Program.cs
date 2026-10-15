@@ -65,7 +65,7 @@ static async Task SnapshotAsync(string path)
 {
     var cameras = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
     Log($"Video capture devices: {string.Join(", ", cameras.Select(c => $"\"{c.Name}\""))}");
-    var ours = cameras.FirstOrDefault(c => c.Name == friendlyName);
+    var ours = cameras.FirstOrDefault(c => c.Name.StartsWith(friendlyName, StringComparison.Ordinal));
 
     if (ours is null)
     {

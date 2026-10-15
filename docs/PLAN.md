@@ -79,7 +79,7 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 - **S3 bitti, olumsuz (16 Ekim).** Bu makinede (Windows 11 26H2 Insider) `RegisterApp` HFP kaydını almıyor, LAF `Unavailable`. Aramalar Aşama 2'de ANCS aksiyonlarıyla yapılacak, ses iPhone'da kalacak; HFP beklemede (DECISIONS #34, [README](../spikes/S3-hfp/README.md)).
 - **S4 Windows tarafı hazır (16 Ekim).** Sabit UUID'lerle GATT sunucusu ve reklam çalışıyor; reklama servis verisi sığmıyor. iPhone'la (nRF Connect, sonra Fenpo uygulaması) denenmedi ([README](../spikes/S4-ble-peripheral/README.md)).
 - **S5 Windows tarafı yazıldı, çalıştırılamadı (16 Ekim).** TLS 1.3 sunucusu, eşleşme, `Hello`, QR, DNS-SD ve telefon simülatörüyle 9 senaryo hazır. Windows Defender sunucu DLL'ini yanlış alarmla karantinaya aldı; çalıştırmak Buğra'nın Defender kararını bekliyor. Protokol önerisi README'de ([README](../spikes/S5-tls-pairing/README.md)).
-- **S7 kısmen bitti (16 Ekim).** Native AOT medya kaynağı derleniyor; MSIX içindeki paketli COM sınıfını Frame Server görmüyor, kamera ayrı ve yönetici onaylı bir kurulum gerektiriyor (DECISIONS #35). HKLM kaydıyla görüntü denemesi bekliyor ([README](../spikes/S7-virtual-camera/README.md)).
+- **S7 bitti (16 Ekim).** .NET Native AOT medya kaynağı HKLM kaydıyla Frame Server içinde görüntü veriyor; MSIX içindeki paketli COM sınıfını ise Frame Server görmüyor, kamera ayrı ve yönetici onaylı bir kurulum gerektiriyor (DECISIONS #35) ([README](../spikes/S7-virtual-camera/README.md)).
 
 ### Aşama 1: Telefonun masada (MVP)
 
