@@ -35,23 +35,6 @@
         }
       }
     },
-    "NSLocalNetworkUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenpo sends files and photos to your PC on the same Wi-Fi network."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenpo, dosya ve fotoğrafları aynı Wi‑Fi ağındaki bilgisayarına gönderir."
-          }
-        }
-      }
-    },
     "NSCameraUsageDescription": {
       "extractionState": "manual",
       "localizations": {
@@ -65,6 +48,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenpo, bilgisayardaki eşleştirme kodunu okumak için kamerayı kullanır."
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo sends files and photos to your PC on the same Wi-Fi network."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo, dosya ve fotoğrafları aynı Wi‑Fi ağındaki bilgisayarına gönderir."
           }
         }
       }

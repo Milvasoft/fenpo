@@ -1,30 +1,36 @@
 import SwiftUI
 
-/// Top level view. Replaced by the tab bar in the UI work block.
+/// Tab bar with Fenpo, Transfers, PC and Settings, plus the pairing flow on top.
 struct RootView: View {
+    @Environment(AppModel.self) private var model
+
     var body: some View {
-        NavigationStack {
-            ContentUnavailableView {
-                Label("root.placeholder.title", systemImage: "laptopcomputer.and.iphone")
-            } description: {
-                Text("root.placeholder.message")
+        @Bindable var model = model
+
+        TabView(selection: $model.selectedTab) {
+            Tab("tab.home", systemImage: "house", value: AppModel.Tab.home) {
+                HomeView()
             }
-            .foregroundStyle(.textPrimary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(.canvas)
-            .navigationTitle("app.name")
+            Tab("tab.transfers", systemImage: "arrow.up.arrow.down", value: AppModel.Tab.transfers) {
+                TransfersView()
+            }
+            Tab("tab.pc", systemImage: "display", value: AppModel.Tab.pc) {
+                PCView()
+            }
+            Tab("tab.settings", systemImage: "gearshape", value: AppModel.Tab.settings) {
+                SettingsView()
+            }
+        }
+        .fullScreenCover(isPresented: $model.isPairingPresented) {
+            PairingFlowView()
         }
     }
 }
 
-#Preview("Light, English") {
-    RootView()
-        .preferredColorScheme(.light)
-        .environment(\.locale, Locale(identifier: "en"))
+#Preview("Light · English") {
+    RootView().sampleModel().preview(.light, "en")
 }
 
-#Preview("Dark, Türkçe") {
-    RootView()
-        .preferredColorScheme(.dark)
-        .environment(\.locale, Locale(identifier: "tr"))
+#Preview("Dark · Türkçe") {
+    RootView().sampleModel().preview(.dark, "tr")
 }

@@ -1,19 +1,19 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "widget.status.name": {
+    "widget.status.connected": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "PC status"
+            "value": "Connected"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "PC durumu"
+            "value": "Bağlı"
           }
         }
       }
@@ -35,23 +35,6 @@
         }
       }
     },
-    "widget.status.connected": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connected"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bağlı"
-          }
-        }
-      }
-    },
     "widget.status.disconnected": {
       "extractionState": "manual",
       "localizations": {
@@ -65,6 +48,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bağlı değil"
+          }
+        }
+      }
+    },
+    "widget.status.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC status"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC durumu"
           }
         }
       }
