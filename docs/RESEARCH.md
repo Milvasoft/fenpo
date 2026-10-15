@@ -35,6 +35,14 @@ Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [an
 - BestOwl/MyPhone (MIT): OBEX istemci ve sunucu, `MasClient`, `MnsServer`, `PbapClient`. 2022'den beri durgun, `PushMessage()` yarım. iPhone klasör gezinmeye izin vermiyor.
 - iPhone kısıtları (Phone Link'te de aynı): sadece bağlıyken gelen ve giden mesajlar, grup mesajı yok, resim gönderme yok, SMS ile iMessage ayırt edilemiyor.
 
+**S2 sonucu (16 Ekim, iPhone 13, cihazda):** MAP kendi OBEX kodumuzla çalışıyor ([spikes/S2-map](../spikes/S2-map/README.md)).
+- İlk bağlantı `Forbidden` dönüyor; iPhone'da "Show Message Notifications" açılınca bağlanıyor.
+- SDP: MAP 1.4, RFCOMM kanal 8, L2CAP PSM `0x100B`, mesaj türü sadece `SMS_GSM`, en büyük OBEX paketi 4000 bayt.
+- Yukarıdaki iki bilgi bu iOS'ta geçerli değil: **`SetPath` ile klasör gezinme çalışıyor**, **gelen kutusunda eşleşmeden önceki SMS'ler de var**. `sent` klasörü ise boş geliyor; telefondan gönderilmiş eski mesajlar yok.
+- bMessage, gönderenin rehberdeki adını (`FN`) da taşıyor.
+- Okundu işaretleme, MNS bildirim kaydı (iPhone 260 ms'de bizim RFCOMM sunucumuza bağlanıyor) ve **gönderme çalışıyor**: PushMessage 1,8 saniyede `Success` döndü, sonra `MessageShift` ve `SendingSuccess` olayları geldi, mesaj karşıya ulaştı.
+- Olay raporları MAP 1.0 biçiminde: gönderen ve metin yok. `NewMessage` sonrası `GetMessage` bir kez 33 saniye gecikti; yeni mesajın ilk gösterimi ANCS'den yapılmalı.
+
 Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https://github.com/BestOwl/MyPhone), [RfcommServiceId](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.rfcomm.rfcommserviceid.phonebookaccesspse?view=winrt-20348), [imsg-map](https://docs.rs/crate/imsg-map/0.3.1)
 
 ## 4. Aramalar: HFP
