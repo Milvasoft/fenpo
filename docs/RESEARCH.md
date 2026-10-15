@@ -10,6 +10,14 @@ Her başlıkta kısa bir karar, en önemli bilgiler ve kaynaklar var. "Spike" ya
 - ANCS ile yazılı yanıt yok, sadece bildirimin sunduğu olumlu/olumsuz aksiyon. "Sessiz teslim" ayarlı uygulamalar iletilmiyor.
 - iOS 26.3+ "Notification Forwarding" (AccessoryNotifications) sadece AB'de; Türkiye için işe yaramıyor.
 
+**S1 sonucu (16 Ekim, iPhone 13, cihazda):** ANCS ve AMS, paketlenmemiş bir .NET 10 sürecinden çalışıyor ([spikes/S1-ancs-ams](../spikes/S1-ancs-ams/README.md)).
+- Windows Ayarlar > Cihaz ekle ile yapılan tek eşleşme klasik ve LE kaydını birlikte oluşturuyor; ANCS ilk `Uncached` keşifte görünüyor. Phone Link'ten kalan bozuk bir bağ "bağlan, 10 saniyede kop, keşif `Unreachable`" döngüsüne sokuyor; çözümü iki taraftan eşleşmeyi kaldırıp yeniden eşleştirmek.
+- Service Changed karakteristiğine abone olunamıyor (`AccessDenied`) ama `GattServicesChanged` olayı geliyor. iPhone her yeniden bağlanmada iki kez Service Changed gönderiyor ve **eski GATT nesneleri geçersiz kalıyor**; keşif ve abonelikler baştan kurulmalı.
+- Abone olunca var olan bildirimler `PreExisting` bayrağıyla geliyor. Öznitelikler 120–400 ms'de okunuyor. Görülen uygulamaların hepsinde sadece olumsuz aksiyon ("Clear") var. **UID'ler her bağlantıda sıfırlanıyor.**
+- MTU 527'de en uzun Data Source yanıtı 488 bayt, parçalanmadı.
+- AMS komutları 40–90 ms içinde yansıyor. Desteklenen komut listesi oyuncunun durumuna göre değişiyor; ses güncellemeleri birleştiriliyor.
+- Cihazda doğrulanmayanlar: yeniden bağlandıktan sonra bildirimlerin akmaya devam etmesi, bağlıyken gelen canlı bildirimin gecikmesi.
+
 Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [ancs4linux](https://github.com/pzmarzly/ancs4linux), [BluetoothLEAdvertisementPublisher](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.advertisement.bluetoothleadvertisementpublisher?view=winrt-26100), [ANCS spec](https://developer.apple.com/library/content/documentation/CoreBluetooth/Reference/AppleNotificationCenterServiceSpecification/Specification/Specification.html), [AMS spec](https://developer.apple.com/library/ios/documentation/CoreBluetooth/Reference/AppleMediaService_Reference/Specification/Specification.html), [Accessory Design Guidelines](https://developer.apple.com/accessories/Accessory-Design-Guidelines.pdf) §58.12.4
 
 ## 2. Pil, saat, cihaz bilgisi
@@ -17,6 +25,8 @@ Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [an
 - Apple ADG §58.12.4: iOS 7'den beri her eşleşmiş aksesuara Battery Service, Current Time Service ve ANCS açık. iPhone, eşleşme sürdükçe ve bu servislerden biri kullanıldıkça bağlantıyı açık tutuyor; bu, bağlantıyı canlı tutmak için kullanışlı.
 - Device Information (0x180A) belgelenmemiş, gerçek cihazda denenmeli.
 - iOS uygulamaları bu servisleri kendileri yayınlayamaz (§58.14).
+
+**S1/S8 sonucu (16 Ekim, cihazda):** Battery okunuyor ve değişince bildirim geliyor. Current Time okunuyor, PC ile 1–2 saniye fark var. Device Information sadece `Manufacturer Name` ("Apple Inc.") ve `Model Number` ("iPhone14,5") veriyor; **iOS sürümü yok**. Model adı için bir eşleme tablosu gerekiyor; iOS sürümü ancak Fenpo kanalından gelebilir.
 
 ## 3. Mesajlar ve rehber: MAP + PBAP
 **Karar: Çalışıyor, iOS kısıtları var.**
@@ -73,6 +83,7 @@ Kaynaklar: [MFCreateVirtualCamera](https://learn.microsoft.com/en-us/windows/win
 - `SecondaryAuthenticationFactor` Windows 10 2004'ten beri kullanımdan kaldırılmış; oturum açma yeteneği artık verilmiyor.
 - Gerçek yol: C++ `ICredentialProvider` DLL'i (Microsoft Windows-classic-samples), Fenpo.exe ile güvenli yerel kanal, DPAPI/TPM ile kimlik bilgisi saklama.
 - Dynamic Lock yerleşik ama API'si yok. Kendi mantığımız: BLE RSSI + `LockWorkStation()`.
+- **S1 sonucu (16 Ekim, cihazda):** Bağlı GATT bağlantısının RSSI'si WinRT'de yok. Ama Windows, eşleşmiş iPhone'un değişen özel adresini bağ adresine çözüyor: pasif `BluetoothLEAdvertisementWatcher` ve `System.Devices.Aep.SignalStrength` aynı değeri veriyor. Masada −50…−55 dBm (arada tek tük −75), uzaklaşırken −78…−92 dBm, başka odada reklam kesiliyor ve bağlantı ~10 saniyede kopuyor. Geri gelince `MaintainConnection` ile 1 saniyede yeniden bağlanıyor. Klasik adresin `SignalStrength` değeri kullanışsız (çoğunlukla 0).
 
 Kaynaklar: [Companion device unlock](https://learn.microsoft.com/en-us/windows/uwp/security/companion-device-unlock), [line-win-credprov](https://github.com/der3318/line-win-credprov)
 

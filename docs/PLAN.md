@@ -52,6 +52,9 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 | S7 | Sanal kamera | `VCamNetSample` ile .NET Native AOT medya kaynağı, MSIX ile kayıt | C++ medya kaynağına geçilir |
 | S8 | iPhone Device Information (0x180A) | Model adını uygulamasız okuyabilir miyiz | Model bilgisi Fenpo kanalından gelir |
 
+**Durum:**
+- **S1 ve S8 bitti (16 Ekim).** ANCS, AMS, Battery ve Current Time çalışıyor. Eşleşme Windows Ayarlar'dan yapılıyor; yakınlık kilidi reklam RSSI'siyle yapılacak (DECISIONS #28–30). DIS'ten model kimliği okunuyor, iOS sürümü okunmuyor. Yeniden bağlandıktan sonra abonelik yenileme ve canlı bildirim gecikmesi Aşama 1'de doğrulanacak ([README](../spikes/S1-ancs-ams/README.md)).
+
 ### Aşama 1: Telefonun masada (MVP)
 
 iPhone'da Fenpo uygulaması olmadan çalışan her şey.

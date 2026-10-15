@@ -48,6 +48,10 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 25 | 15 Ekim | Repo **açık**, Milvasoft hesabı altında: `https://github.com/Milvasoft/fenpo` | iOS CI'ın macOS dakikaları açık repoda ücretsiz (#17) |
 | 26 | 15 Ekim | Apple Developer Program hesabı Milvasoft'un mevcut hesabı | Hesap zaten var |
 | 27 | 15 Ekim | Android test telefonu var; Android oturumu cihaza USB üzerinden `adb` ile bağlanır | Bluetooth için gerçek cihaz şart (#16) |
+| 28 | 16 Ekim | Aşama 1 eşleşmesi Windows Ayarlar üzerinden: sihirbaz Bluetooth ayarlarını açar, LE kaydının oluşmasını ve ANCS'nin görünmesini bekler. Uygulama içinden eşleşme Aşama 1'de ayrıca denenir | S1: tek eşleşme klasik ve LE kaydını birlikte kuruyor, ANCS ilk keşifte görünüyor |
+| 29 | 16 Ekim | Yakınlık kilidi reklam RSSI'si (`BluetoothLEAdvertisementWatcher`) ve bağlantı durumuyla yapılır. Başlangıç kuralı: 5 saniyelik ortalama −80 dBm'in altına iner veya bağlantı koparsa, 30 saniye sonra kilitle; eşik ayarlanabilir | S1: bağ adresiyle gelen reklam RSSI'si masada −50…−55, uzaklaşınca −78…−92 dBm |
+| 30 | 16 Ekim | iPhone'un iOS sürümü ve model adı uygulamasız okunamıyor (DIS'te sadece `iPhone14,5` gibi model kimliği var). Model adı eşleme tablosundan çıkarılır; iOS sürümü Fenpo kanalından gelir, `Hello`'ya bunun için alan eklenmesi S5'teki protokol commit'ine (#23) alınır | S1/S8 |
+| 31 | 16 Ekim | Tasarımda değişmesi gerekenler (`design/desktop/desktop.html`, Buğra'nın onayıyla): WhatsApp bildirimindeki "iPhone'da aç" düğmesi kalkar (ANCS'de karşılığı yok); cihaz satırındaki iOS sürümü iOS uygulaması yoksa gösterilmez; "Odak modunu eşitle" açıklaması "Fenpo bildirimlerini susturur" olur (RESEARCH §13) | S1 ve RESEARCH ile çelişen metinler |
 
 ## Açık konular
 
