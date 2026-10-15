@@ -56,7 +56,7 @@ Zaten planda olanlar: pil, pano, dosya paylaşımı, bildirimler, SMS, aramalar,
 
 ## Yol haritası
 
-Her aşama kendi başına kullanılabilir bir ürün çıkarıyor. Aşama bitmeden bir sonrakine geçilmez.
+Her aşama kendi başına kullanılabilir bir ürün çıkarıyor. Windows uygulaması aşamalara bölünmeden baştan sona yapılıyor (DECISIONS #36); aşamalar iç sıralamayı ve iPhone tarafının kilometre taşlarını gösteriyor.
 
 ### Aşama 0: Spike'lar (2–3 hafta)
 
