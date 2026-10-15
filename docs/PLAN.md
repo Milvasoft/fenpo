@@ -43,10 +43,10 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 
 | # | Spike | Neyi cevaplıyor | Başarısız olursa |
 |---|---|---|---|
-| S1 | .NET'ten ANCS + AMS + Battery | Eşleşme akışı (Windows Ayarlar mı, uygulama tetiklemesi mi), `Uncached` servis keşfi, Service Changed | Python örneği (`312arjun/iphone-companion`) referans alınır |
+| S1 | .NET'ten ANCS + AMS + Battery | Eşleşme akışı (Windows Ayarlar mı, uygulama tetiklemesi mi), `Uncached` servis keşfi, Service Changed. Yakınlık kilidi için RSSI nereden okunur (bağlı GATT bağlantısı, reklam, klasik bağlantı) | Python örneği (`312arjun/iphone-companion`) referans alınır. RSSI okunamazsa yakınlık kilidi bağlantı kopmasına dayanır |
 | S2 | MAP ile mesaj okuma ve gönderme | OBEX istemcisi, iPhone tuhaflıkları, gönderme | MyPhone'un `MyPhone.OBEX` kodu temel alınır |
 | S3 | HFP arama, PC'den ses | `PhoneLineTransportDevice.RequestAccessAsync` güncel Windows 11'de çalışıyor mu | Aramalar "iPhone'da yanıtla" düzeyinde kalır (ANCS aksiyonları) |
-| S4 | iOS uygulaması BLE merkez, PC çevre birim | AccessorySetupKit ile kurulum, arka planda uyanma, zorla kapatma sonrası | Fenpo kanalı sadece uygulama açıkken çalışır |
+| S4 | iOS uygulaması BLE merkez, PC çevre birim | AccessorySetupKit ile kurulum, arka planda uyanma, zorla kapatma sonrası. Windows tarafı (`GattServiceProvider`, reklam, `rx`/`tx` karakteristikleri) Windows oturumunda S5'ten önce yapılır, iOS testinin karşı ucu olur | Fenpo kanalı sadece uygulama açıkken çalışır |
 | S5 | Wi‑Fi üzerinden TLS eşleşme | QR → karşılıklı sertifika sabitleme, DNS-SD keşif | Elle IP girme yedeği |
 | S6 | Arka planda `UIPasteboard` yazma | PC→iPhone pano kendiliğinden olabilir mi | PC'den gelen içerik bildirimden "Kopyala" ile alınır |
 | S7 | Sanal kamera | `VCamNetSample` ile .NET Native AOT medya kaynağı, MSIX ile kayıt | C++ medya kaynağına geçilir |
