@@ -1,0 +1,97 @@
+# XcodeGen spec. Generate the project with: cd ios && xcodegen generate
+# Fenpo.xcodeproj is generated and never committed.
+name: Fenpo
+
+options:
+  bundleIdPrefix: com.fenpo
+  deploymentTarget:
+    iOS: "18.0"
+  developmentLanguage: en
+  createIntermediateGroups: true
+
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    TARGETED_DEVICE_FAMILY: "1"
+    LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+    SWIFT_EMIT_LOC_STRINGS: YES
+    ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+    ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    GENERATE_INFOPLIST_FILE: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+packages:
+  FenpoKit:
+    path: FenpoKit
+
+targets:
+  Fenpo:
+    type: application
+    platform: iOS
+    sources:
+      - path: Fenpo
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app
+        INFOPLIST_FILE: Fenpo/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Fenpo/Fenpo.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_CFBundleDisplayName: Fenpo
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Fenpo keeps the connection to your PC over Bluetooth, so it can receive what the PC sends even when the app is closed.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+        INFOPLIST_KEY_NSCameraUsageDescription: Fenpo uses the camera to scan the pairing code on your PC.
+    dependencies:
+      - package: FenpoKit
+        product: FenpoProtocol
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
+      - target: FenpoShare
+      - target: FenpoWidgets
+    scheme: {}
+
+  FenpoShare:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FenpoShare
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.share
+        INFOPLIST_FILE: FenpoShare/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FenpoShare/FenpoShare.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Fenpo
+    dependencies:
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
+
+  FenpoWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FenpoWidgets
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.widgets
+        INFOPLIST_FILE: FenpoWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FenpoWidgets/FenpoWidgets.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Fenpo
+    dependencies:
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
