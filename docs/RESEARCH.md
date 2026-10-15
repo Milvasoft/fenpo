@@ -52,6 +52,12 @@ Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https
 - `MYSTRAVIL/klangbruecke` (2026) bu yolla iki yönlü sesli gerçek HFP araması raporluyor; ses yolunu Windows yönetiyor. Microsoft Q&A'da `RequestAccessAsync`'in yetenek varken bile DeniedBySystem döndüğü çözülmemiş bir rapor var.
 - HFP aktarımını aynı anda tek uygulama tutabilir; Phone Link çakışır.
 
+**S3 sonucu (16 Ekim, Windows 11 26H2 build 26300 Insider, iPhone 13): bu makinede çalışmadı** ([spikes/S3-hfp](../spikes/S3-hfp/README.md)).
+- Paketli (gevşek kayıt, Geliştirici Modu) bir uygulamada `RequestAccessAsync` `Allowed` dönüyor. Ama `RegisterApp` hata vermeden **kaydı almıyor**: `IsRegistered` false kalıyor, iPhone için `PhoneLine` oluşmuyor, `ConnectAsync` false dönüyor.
+- LAF `phonelinetransportdevice_v1` durumu `Unavailable`.
+- Phone Link kapalıyken ve iPhone sıfırdan eşleştirildikten sonra da sonuç aynı; rolü başka bir uygulamanın tutması elendi.
+- Kararlı Windows 11'de davranış bilinmiyor. Sefirah (Windows 11) ve klangbruecke (Windows 10) kaydı alabildiğini bildiriyor.
+
 Kaynaklar: [Yetenek bildirimleri](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/app-capability-declarations), [PhoneLineTransportDevice](https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.calls.phonelinetransportdevice?view=winrt-26100), [klangbruecke](https://github.com/MYSTRAVIL/klangbruecke), [MyPhone #7](https://github.com/bestowl/myphone/issues/7), [Q&A](https://learn.microsoft.com/en-us/answers/questions/1258935/in-phonelinetransportdevice-windows-applicationmod)
 
 ## 5. Pano
