@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Your phone and Windows, at the same desk.</value>
+  </data>
+  <data name="CallsTitle.Text" xml:space="preserve">
+    <value>Calls</value>
+  </data>
+  <data name="CameraTitle.Text" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="ClipboardTitle.Text" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="FilesTitle.Text" xml:space="preserve">
+    <value>Files and photos</value>
+  </data>
+  <data name="HomeTitle.Text" xml:space="preserve">
+    <value>My iPhone</value>
+  </data>
+  <data name="Language_System" xml:space="preserve">
+    <value>System language ({0})</value>
+  </data>
+  <data name="LanguageCombo.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="LanguageRestart_Later.Content" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="LanguageRestart_Message" xml:space="preserve">
+    <value>Fenpo switches to {0} after a restart.</value>
+  </data>
+  <data name="LanguageRestart_Now.Content" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="LanguageRestart_Title.Text" xml:space="preserve">
+    <value>The language will change.</value>
+  </data>
+  <data name="MessagesTitle.Text" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Nav_Calls.Content" xml:space="preserve">
+    <value>Calls</value>
+  </data>
+  <data name="Nav_Camera.Content" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="Nav_Clipboard.Content" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Nav_Files.Content" xml:space="preserve">
+    <value>Files and photos</value>
+  </data>
+  <data name="Nav_Home.Content" xml:space="preserve">
+    <value>My iPhone</value>
+  </data>
+  <data name="Nav_Messages.Content" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Nav_Notifications.Content" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Nav_Settings.Content" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="NotificationsTitle.Text" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Search.PlaceholderText" xml:space="preserve">
+    <value>Search messages, people or files</value>
+  </data>
+  <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
+    <value>Appearance and language</value>
+  </data>
+  <data name="Settings_Calls.Text" xml:space="preserve">
+    <value>Show incoming calls at the top of the screen</value>
+  </data>
+  <data name="Settings_CallsHint.Text" xml:space="preserve">
+    <value>Answer and Decline go to the iPhone</value>
+  </data>
+  <data name="Settings_CallsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Show incoming calls</value>
+  </data>
+  <data name="Settings_ChangeFolder.Content" xml:space="preserve">
+    <value>Change</value>
+  </data>
+  <data name="Settings_Clipboard.Text" xml:space="preserve">
+    <value>Clipboard sharing</value>
+  </data>
+  <data name="Settings_ClipboardToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Clipboard sharing</value>
+  </data>
+  <data name="Settings_DeviceHeader.Text" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="Settings_FeaturesHeader.Text" xml:space="preserve">
+    <value>Features</value>
+  </data>
+  <data name="Settings_Focus.Text" xml:space="preserve">
+    <value>Sync Focus</value>
+  </data>
+  <data name="Settings_FocusHint.Text" xml:space="preserve">
+    <value>Fenpo notifications go quiet while Do Not Disturb is on</value>
+  </data>
+  <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Sync Focus</value>
+  </data>
+  <data name="Settings_IncomingFiles.Text" xml:space="preserve">
+    <value>Incoming files</value>
+  </data>
+  <data name="Settings_Language.Text" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="Settings_LanguageHint.Text" xml:space="preserve">
+    <value>Notifications, the tray panel and the island use it too</value>
+  </data>
+  <data name="Settings_Media.Text" xml:space="preserve">
+    <value>Media control</value>
+  </data>
+  <data name="Settings_MediaHint.Text" xml:space="preserve">
+    <value>Keyboard media keys control the iPhone</value>
+  </data>
+  <data name="Settings_MediaToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Media control</value>
+  </data>
+  <data name="Settings_NoDevice.Text" xml:space="preserve">
+    <value>No paired iPhone</value>
+  </data>
+  <data name="Settings_NoDeviceHint.Text" xml:space="preserve">
+    <value>Pair once and Fenpo connects by itself</value>
+  </data>
+  <data name="Settings_Notifications.Text" xml:space="preserve">
+    <value>Show notifications</value>
+  </data>
+  <data name="Settings_NotificationsHint.Text" xml:space="preserve">
+    <value>iPhone notifications arrive as Windows notifications</value>
+  </data>
+  <data name="Settings_NotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Show notifications</value>
+  </data>
+  <data name="Settings_Pair.Content" xml:space="preserve">
+    <value>Pair</value>
+  </data>
+  <data name="Settings_ProximityHeader.Text" xml:space="preserve">
+    <value>Proximity and focus</value>
+  </data>
+  <data name="Settings_ProximityLock.Text" xml:space="preserve">
+    <value>Lock the PC when the iPhone moves away</value>
+  </data>
+  <data name="Settings_ProximityLockHint.Text" xml:space="preserve">
+    <value>About 3 meters, 30 seconds</value>
+  </data>
+  <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Proximity lock</value>
+  </data>
+  <data name="Settings_Theme.Text" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="Settings_ThemeHint.Text" xml:space="preserve">
+    <value>With System, follows the Windows light or dark setting</value>
+  </data>
+  <data name="Settings_Unlock.Text" xml:space="preserve">
+    <value>Unlock with iPhone</value>
+  </data>
+  <data name="Settings_UnlockHint.Text" xml:space="preserve">
+    <value>Unlocks Windows after Face ID approval. Needs a separate component (experimental)</value>
+  </data>
+  <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Unlock with iPhone</value>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Theme_Dark.Content" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="Theme_Light.Content" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Theme_System.Content" xml:space="preserve">
+    <value>System</value>
+  </data>
+</root>

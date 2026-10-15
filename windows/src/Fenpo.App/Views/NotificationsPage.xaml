@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fenpo.App.Views.NotificationsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel Padding="32,28">
+            <TextBlock x:Uid="NotificationsTitle" Style="{StaticResource FenpoPageTitleStyle}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
