@@ -1,0 +1,112 @@
+name: iOS
+
+on:
+  push:
+    branches: [ios, main]
+    paths:
+      - "ios/**"
+      - "protocol/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "ios/**"
+      - "protocol/**"
+      - ".github/workflows/ios.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROTOC_VERSION: "31.1"
+
+jobs:
+  # The platform independent part of FenpoKit must keep building with the Swift toolchain on Windows.
+  core-windows:
+    name: FenpoKit core (Windows)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: compnerd/gha-setup-swift@main
+        with:
+          branch: swift-6.4-release
+          tag: 6.4-RELEASE
+
+      - name: Install protoc
+        run: |
+          curl -sSLo protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-win64.zip"
+          mkdir -p "$RUNNER_TEMP/protoc"
+          unzip -q protoc.zip -d "$RUNNER_TEMP/protoc"
+          echo "$RUNNER_TEMP/protoc/bin" >> "$GITHUB_PATH"
+
+      - name: Generate protocol code
+        run: ios/scripts/generate-proto.sh
+
+      - name: Test
+        run: swift test --package-path ios/FenpoKit
+
+  app-macos:
+    name: App and FenpoKit (iOS Simulator)
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select newest Xcode
+        run: |
+          xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+          swift --version
+
+      - name: Install tools
+        run: brew install xcodegen protobuf
+
+      - name: Generate protocol code
+        run: ios/scripts/generate-proto.sh
+
+      - name: Generate Xcode project
+        working-directory: ios
+        run: xcodegen generate
+
+      - name: Pick simulator
+        run: echo "SIMULATOR_ID=$(ios/scripts/simulator-id.sh)" >> "$GITHUB_ENV"
+
+      - name: Test FenpoKit
+        working-directory: ios/FenpoKit
+        run: |
+          log="$RUNNER_TEMP/fenpokit-test.log"
+          xcodebuild test \
+            -scheme FenpoKit-Package \
+            -destination "id=$SIMULATOR_ID" \
+            -skipPackagePluginValidation \
+            > "$log" 2>&1 || { grep -E "error:|failed|✘" "$log"; tail -60 "$log"; exit 1; }
+          grep -E "✔|✘|Test run|\*\* TEST" "$log" | tail -40
+
+      - name: Build app
+        working-directory: ios
+        run: |
+          log="$RUNNER_TEMP/app-build.log"
+          xcodebuild build \
+            -project Fenpo.xcodeproj \
+            -scheme Fenpo \
+            -destination "id=$SIMULATOR_ID" \
+            CODE_SIGNING_ALLOWED=NO \
+            > "$log" 2>&1 || { grep -E "error:" "$log"; tail -60 "$log"; exit 1; }
+          grep -E "warning:" "$log" | sort -u | head -40 || true
+          tail -3 "$log"
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-logs
+          path: ${{ runner.temp }}/*.log
+          if-no-files-found: ignore
