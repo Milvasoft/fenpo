@@ -51,7 +51,8 @@ Gözlenecekler: reklamdaki ad, şifreli karakteristiğe ilk erişimde iOS'un ne 
   1. Reklamdaki yerel ad. Windows'un bunu kendiliğinden koyup koymadığını nRF Connect gösterecek.
   2. Ayrı bir `BluetoothLEAdvertisementPublisher` ile üretici verisi. Ama bu ayrı bir reklam seti; iPhone'un iki reklamı aynı PC'ye bağlayabileceği belli değil.
   3. Bağlandıktan sonra şifreli bir karakteristikten `pc_id` okumak. Eşleşmeyi gerektirir ama her durumda çalışır.
-- Seçim nRF Connect sonucundan ve iOS tarafında ASK seçicisinin neyi gösterdiğinden sonra yapılır. Protokole bir "info" karakteristiği eklenirse ayrı bir `protocol:` commit'i olur.
+- iPhone oturumunun görüşü: ASK'ın `ASDiscoveryDescriptor`'ı servis UUID'sine ek olarak `bluetoothNameSubstring` ile de süzebiliyor. Reklamda yerel ad varsa 1. seçenek en temizi (ad QR'daki `n` alanından gelir). Ad yoksa 3. seçenek: telefon bağlanınca info karakteristiğinden `pc_id`'yi okur, eşleşmedeki `pc_id`'yle tutmazsa bağlantıyı bırakır ve kullanıcıya söyler. 2. seçenek tercih edilmiyor.
+- Seçim nRF Connect sonucundan ve iOS tarafında ASK seçicisinin neyi gösterdiğinden sonra yapılır (iPhone oturumu bunu kilometre taşı 1 test listesine ekledi). Protokole bir "info" karakteristiği eklenirse ayrı bir `protocol:` commit'i olur ve Windows oturumu atar.
 
 ## Ürün koduna etkisi
 
