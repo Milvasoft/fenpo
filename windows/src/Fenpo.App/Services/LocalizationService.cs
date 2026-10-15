@@ -45,6 +45,14 @@ public sealed class LocalizationService(ISettingsStore settings)
         // The packaged override persists between launches. The WinRT setter accepts an empty string to clear it
         // (the Windows App SDK one does not), and MRT Core reads the same value in a packaged app.
         Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride = language == AppSettings.SystemLanguage ? string.Empty : language;
+
+        // Dates, numbers and month names follow the language the resources resolved to, not the Windows display language.
+        var resolved = Windows.Globalization.ApplicationLanguages.Languages.FirstOrDefault() ?? "en-US";
+        var culture = new CultureInfo(resolved);
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+        CultureInfo.CurrentCulture = culture;
+        CultureInfo.CurrentUICulture = culture;
     }
 
     /// <summary>

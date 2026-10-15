@@ -12,8 +12,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Action_Camera.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Action_CameraText.Text" xml:space="preserve">
+    <value>Use as camera</value>
+  </data>
+  <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Action_HotspotText.Text" xml:space="preserve">
+    <value>Join hotspot</value>
+  </data>
+  <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Action_MirrorText.Text" xml:space="preserve">
+    <value>Mirror screen</value>
+  </data>
+  <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Action_RingText.Text" xml:space="preserve">
+    <value>Ring phone</value>
+  </data>
+  <data name="Action_SendFile.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Action_SendFileText.Text" xml:space="preserve">
+    <value>Send file</value>
+  </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Your phone and Windows, at the same desk.</value>
+  </data>
+  <data name="Battery_Percent" xml:space="preserve">
+    <value>{0}%</value>
   </data>
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Calls</value>
@@ -21,11 +54,71 @@
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Camera</value>
   </data>
+  <data name="Chip_Bluetooth.Text" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Chip_UsbOff" xml:space="preserve">
+    <value>No USB</value>
+  </data>
+  <data name="Chip_UsbOn" xml:space="preserve">
+    <value>USB connected</value>
+  </data>
+  <data name="Chip_WifiOff" xml:space="preserve">
+    <value>No Wi‑Fi link</value>
+  </data>
+  <data name="Chip_WifiOn" xml:space="preserve">
+    <value>Same Wi‑Fi</value>
+  </data>
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Clipboard</value>
   </data>
   <data name="FilesTitle.Text" xml:space="preserve">
     <value>Files and photos</value>
+  </data>
+  <data name="Filter_All.Content" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Filter_Calls.Content" xml:space="preserve">
+    <value>Calls</value>
+  </data>
+  <data name="Filter_Messages.Content" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Filter_Other.Content" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="Home_Files.Content" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Home_NoNotifications.Text" xml:space="preserve">
+    <value>No notifications yet</value>
+  </data>
+  <data name="Home_NoPhone" xml:space="preserve">
+    <value>No iPhone connected</value>
+  </data>
+  <data name="Home_NothingPlaying.Text" xml:space="preserve">
+    <value>Nothing playing</value>
+  </data>
+  <data name="Home_NothingPlayingHint.Text" xml:space="preserve">
+    <value>Shows up when music starts on the iPhone</value>
+  </data>
+  <data name="Home_NoTransfers.Text" xml:space="preserve">
+    <value>No transfers yet</value>
+  </data>
+  <data name="Home_PairButton.Content" xml:space="preserve">
+    <value>Connect your iPhone</value>
+  </data>
+  <data name="Home_PairHint.Text" xml:space="preserve">
+    <value>Pair once and Fenpo connects whenever the phone is near.</value>
+  </data>
+  <data name="Home_RecentNotifications.Text" xml:space="preserve">
+    <value>Recent notifications</value>
+  </data>
+  <data name="Home_RecentTransfers.Text" xml:space="preserve">
+    <value>Recent transfers</value>
+  </data>
+  <data name="Home_SeeAll.Content" xml:space="preserve">
+    <value>See all</value>
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>My iPhone</value>
@@ -47,6 +140,15 @@
   </data>
   <data name="LanguageRestart_Title.Text" xml:space="preserve">
     <value>The language will change.</value>
+  </data>
+  <data name="Media_Next.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="Media_PlayPause.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Play or pause</value>
+  </data>
+  <data name="Media_Previous.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Previous</value>
   </data>
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Messages</value>
@@ -75,8 +177,107 @@
   <data name="Nav_Settings.Content" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Notification_Dismiss" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Notification_DismissButton.Content" xml:space="preserve">
+    <value>Dismiss</value>
+  </data>
+  <data name="Notifications_ClearAll.Content" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Notifications_Count" xml:space="preserve">
+    <value>{0} notifications</value>
+  </data>
+  <data name="Notifications_Empty.Text" xml:space="preserve">
+    <value>No notifications on the iPhone</value>
+  </data>
+  <data name="Notifications_Footnote.Text" xml:space="preserve">
+    <value>Apps like WhatsApp cannot be answered from here; iOS does not allow it. SMS and iMessage from the Messages app can be.</value>
+  </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Notifications</value>
+  </data>
+  <data name="Pair_BrokenText.Text" xml:space="preserve">
+    <value>Remove it in Windows Settings and on the iPhone, then pair again.</value>
+  </data>
+  <data name="Pair_BrokenTitle.Text" xml:space="preserve">
+    <value>The pairing looks broken.</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Hint" xml:space="preserve">
+    <value>This PC can pair with the phone</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Title" xml:space="preserve">
+    <value>Bluetooth is on</value>
+  </data>
+  <data name="Pair_CheckMessages.Hint" xml:space="preserve">
+    <value>Optional, can be turned on later</value>
+  </data>
+  <data name="Pair_CheckMessages.Title" xml:space="preserve">
+    <value>Messages</value>
+  </data>
+  <data name="Pair_CheckNotifications.Hint" xml:space="preserve">
+    <value>Checks itself once allowed</value>
+  </data>
+  <data name="Pair_CheckNotifications.Title" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Pair_CheckPhone.Hint" xml:space="preserve">
+    <value>Shows up here once paired</value>
+  </data>
+  <data name="Pair_CheckPhone.Title" xml:space="preserve">
+    <value>iPhone</value>
+  </data>
+  <data name="Pair_Intro.Text" xml:space="preserve">
+    <value>Start without installing anything on the iPhone. Notifications, messages and music come over Bluetooth.</value>
+  </data>
+  <data name="Pair_Later.Content" xml:space="preserve">
+    <value>Do it later</value>
+  </data>
+  <data name="Pair_OpenSettings.Content" xml:space="preserve">
+    <value>Open Bluetooth settings</value>
+  </data>
+  <data name="Pair_PhoneLinkClose.Content" xml:space="preserve">
+    <value>Close it</value>
+  </data>
+  <data name="Pair_PhoneLinkText.Text" xml:space="preserve">
+    <value>Notifications may not arrive while both run.</value>
+  </data>
+  <data name="Pair_PhoneLinkTitle.Text" xml:space="preserve">
+    <value>Phone Link is running.</value>
+  </data>
+  <data name="Pair_StatusHeader.Text" xml:space="preserve">
+    <value>Connection status</value>
+  </data>
+  <data name="Pair_Step1.Hint" xml:space="preserve">
+    <value>Stay on Settings &gt; Bluetooth so the iPhone stays visible</value>
+  </data>
+  <data name="Pair_Step1.Title" xml:space="preserve">
+    <value>Open Bluetooth settings on the iPhone</value>
+  </data>
+  <data name="Pair_Step2.Hint" xml:space="preserve">
+    <value>Add device &gt; Bluetooth &gt; pick your iPhone, confirm the code on both screens</value>
+  </data>
+  <data name="Pair_Step2.Title" xml:space="preserve">
+    <value>Pair on this PC</value>
+  </data>
+  <data name="Pair_Step3.Hint" xml:space="preserve">
+    <value>The iPhone asks to share notifications, tap Allow</value>
+  </data>
+  <data name="Pair_Step3.Title" xml:space="preserve">
+    <value>Allow notification sharing</value>
+  </data>
+  <data name="Pair_Step4.Hint" xml:space="preserve">
+    <value>Settings &gt; Bluetooth &gt; (i) next to this PC &gt; Show Message Notifications</value>
+  </data>
+  <data name="Pair_Step4.Title" xml:space="preserve">
+    <value>Allow messages</value>
+  </data>
+  <data name="Pair_Title.Text" xml:space="preserve">
+    <value>Connect your iPhone</value>
+  </data>
+  <data name="Pair_WithApp.Content" xml:space="preserve">
+    <value>Connect with the iPhone app</value>
   </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>
@@ -183,6 +384,21 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Status_BrokenBond" xml:space="preserve">
+    <value>Pairing broken, pair again</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>Connecting</value>
+  </data>
+  <data name="Status_Disconnected" xml:space="preserve">
+    <value>Not connected</value>
+  </data>
+  <data name="Status_NotPaired" xml:space="preserve">
+    <value>No paired iPhone</value>
+  </data>
   <data name="Theme_Dark.Content" xml:space="preserve">
     <value>Dark</value>
   </data>
@@ -191,5 +407,14 @@
   </data>
   <data name="Theme_System.Content" xml:space="preserve">
     <value>System</value>
+  </data>
+  <data name="Time_Minutes" xml:space="preserve">
+    <value>{0} min</value>
+  </data>
+  <data name="Time_Now" xml:space="preserve">
+    <value>now</value>
+  </data>
+  <data name="Time_Yesterday" xml:space="preserve">
+    <value>Yesterday</value>
   </data>
 </root>

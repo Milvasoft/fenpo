@@ -12,8 +12,41 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Action_Camera.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_CameraText.Text" xml:space="preserve">
+    <value>Kamera olarak kullan</value>
+  </data>
+  <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_HotspotText.Text" xml:space="preserve">
+    <value>Hotspot’a bağlan</value>
+  </data>
+  <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_MirrorText.Text" xml:space="preserve">
+    <value>Ekranı yansıt</value>
+  </data>
+  <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_RingText.Text" xml:space="preserve">
+    <value>Telefonu çaldır</value>
+  </data>
+  <data name="Action_SendFile.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_SendFileText.Text" xml:space="preserve">
+    <value>Dosya gönder</value>
+  </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Telefonun ve Windows, aynı masada.</value>
+  </data>
+  <data name="Battery_Percent" xml:space="preserve">
+    <value>%{0}</value>
   </data>
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Aramalar</value>
@@ -21,11 +54,71 @@
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Kamera</value>
   </data>
+  <data name="Chip_Bluetooth.Text" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Chip_UsbOff" xml:space="preserve">
+    <value>USB yok</value>
+  </data>
+  <data name="Chip_UsbOn" xml:space="preserve">
+    <value>USB bağlı</value>
+  </data>
+  <data name="Chip_WifiOff" xml:space="preserve">
+    <value>Wi‑Fi bağlantısı yok</value>
+  </data>
+  <data name="Chip_WifiOn" xml:space="preserve">
+    <value>Aynı Wi‑Fi ağı</value>
+  </data>
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Pano</value>
   </data>
   <data name="FilesTitle.Text" xml:space="preserve">
     <value>Dosyalar ve fotoğraflar</value>
+  </data>
+  <data name="Filter_All.Content" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="Filter_Calls.Content" xml:space="preserve">
+    <value>Aramalar</value>
+  </data>
+  <data name="Filter_Messages.Content" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Filter_Other.Content" xml:space="preserve">
+    <value>Diğer</value>
+  </data>
+  <data name="Home_Files.Content" xml:space="preserve">
+    <value>Dosyalar</value>
+  </data>
+  <data name="Home_NoNotifications.Text" xml:space="preserve">
+    <value>Henüz bildirim yok</value>
+  </data>
+  <data name="Home_NoPhone" xml:space="preserve">
+    <value>iPhone bağlı değil</value>
+  </data>
+  <data name="Home_NothingPlaying.Text" xml:space="preserve">
+    <value>Şu an bir şey çalmıyor</value>
+  </data>
+  <data name="Home_NothingPlayingHint.Text" xml:space="preserve">
+    <value>iPhone’da müzik başlayınca burada görünür</value>
+  </data>
+  <data name="Home_NoTransfers.Text" xml:space="preserve">
+    <value>Henüz aktarım yok</value>
+  </data>
+  <data name="Home_PairButton.Content" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
+  <data name="Home_PairHint.Text" xml:space="preserve">
+    <value>Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</value>
+  </data>
+  <data name="Home_RecentNotifications.Text" xml:space="preserve">
+    <value>Son bildirimler</value>
+  </data>
+  <data name="Home_RecentTransfers.Text" xml:space="preserve">
+    <value>Son aktarılanlar</value>
+  </data>
+  <data name="Home_SeeAll.Content" xml:space="preserve">
+    <value>Tümünü gör</value>
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>iPhone’um</value>
@@ -47,6 +140,15 @@
   </data>
   <data name="LanguageRestart_Title.Text" xml:space="preserve">
     <value>Dil değişecek.</value>
+  </data>
+  <data name="Media_Next.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Sonraki</value>
+  </data>
+  <data name="Media_PlayPause.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Oynat veya duraklat</value>
+  </data>
+  <data name="Media_Previous.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Önceki</value>
   </data>
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Mesajlar</value>
@@ -75,8 +177,107 @@
   <data name="Nav_Settings.Content" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
+  <data name="Notification_Dismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Notification_DismissButton.Content" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Notifications_ClearAll.Content" xml:space="preserve">
+    <value>Tümünü temizle</value>
+  </data>
+  <data name="Notifications_Count" xml:space="preserve">
+    <value>{0} bildirim</value>
+  </data>
+  <data name="Notifications_Empty.Text" xml:space="preserve">
+    <value>iPhone’da bildirim yok</value>
+  </data>
+  <data name="Notifications_Footnote.Text" xml:space="preserve">
+    <value>WhatsApp gibi uygulamalarda yanıt yazılamıyor, iOS buna izin vermiyor. Mesajlar uygulamasındaki SMS ve iMessage’lar buradan yanıtlanabiliyor.</value>
+  </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Bildirimler</value>
+  </data>
+  <data name="Pair_BrokenText.Text" xml:space="preserve">
+    <value>Windows Ayarlar’da ve iPhone’da bu eşleşmeyi kaldırıp yeniden eşleştir.</value>
+  </data>
+  <data name="Pair_BrokenTitle.Text" xml:space="preserve">
+    <value>Eşleşme bozuk görünüyor.</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Hint" xml:space="preserve">
+    <value>Bu bilgisayar telefonla eşleşebilir</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Title" xml:space="preserve">
+    <value>Bluetooth açık</value>
+  </data>
+  <data name="Pair_CheckMessages.Hint" xml:space="preserve">
+    <value>İsteğe bağlı, sonra da açılabilir</value>
+  </data>
+  <data name="Pair_CheckMessages.Title" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Pair_CheckNotifications.Hint" xml:space="preserve">
+    <value>İzin verince kendiliğinden işaretlenir</value>
+  </data>
+  <data name="Pair_CheckNotifications.Title" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Pair_CheckPhone.Hint" xml:space="preserve">
+    <value>Eşleşme bitince burada görünür</value>
+  </data>
+  <data name="Pair_CheckPhone.Title" xml:space="preserve">
+    <value>iPhone</value>
+  </data>
+  <data name="Pair_Intro.Text" xml:space="preserve">
+    <value>iPhone’a bir şey yüklemeden başlayabilirsin. Bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir.</value>
+  </data>
+  <data name="Pair_Later.Content" xml:space="preserve">
+    <value>Sonra yap</value>
+  </data>
+  <data name="Pair_OpenSettings.Content" xml:space="preserve">
+    <value>Bluetooth ayarlarını aç</value>
+  </data>
+  <data name="Pair_PhoneLinkClose.Content" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Pair_PhoneLinkText.Text" xml:space="preserve">
+    <value>Aynı anda çalışırsa bildirimler gelmeyebilir.</value>
+  </data>
+  <data name="Pair_PhoneLinkTitle.Text" xml:space="preserve">
+    <value>Telefon Bağlantısı açık.</value>
+  </data>
+  <data name="Pair_StatusHeader.Text" xml:space="preserve">
+    <value>Bağlantı durumu</value>
+  </data>
+  <data name="Pair_Step1.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth ekranında kal, iPhone böylece görünür olur</value>
+  </data>
+  <data name="Pair_Step1.Title" xml:space="preserve">
+    <value>iPhone’da Bluetooth ayarlarını aç</value>
+  </data>
+  <data name="Pair_Step2.Hint" xml:space="preserve">
+    <value>Cihaz ekle &gt; Bluetooth &gt; iPhone’unu seç, iki ekrandaki kodu onayla</value>
+  </data>
+  <data name="Pair_Step2.Title" xml:space="preserve">
+    <value>Bu bilgisayarda eşleştir</value>
+  </data>
+  <data name="Pair_Step3.Hint" xml:space="preserve">
+    <value>iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</value>
+  </data>
+  <data name="Pair_Step3.Title" xml:space="preserve">
+    <value>Bildirimleri paylaşmaya izin ver</value>
+  </data>
+  <data name="Pair_Step4.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster</value>
+  </data>
+  <data name="Pair_Step4.Title" xml:space="preserve">
+    <value>Mesajlara izin ver</value>
+  </data>
+  <data name="Pair_Title.Text" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
+  <data name="Pair_WithApp.Content" xml:space="preserve">
+    <value>iPhone uygulamasıyla bağla</value>
   </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
@@ -183,6 +384,21 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
+  <data name="Status_BrokenBond" xml:space="preserve">
+    <value>Eşleşme bozuk, yeniden eşleştir</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>Bağlı</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>Bağlanıyor</value>
+  </data>
+  <data name="Status_Disconnected" xml:space="preserve">
+    <value>Bağlı değil</value>
+  </data>
+  <data name="Status_NotPaired" xml:space="preserve">
+    <value>Eşleşmiş iPhone yok</value>
+  </data>
   <data name="Theme_Dark.Content" xml:space="preserve">
     <value>Koyu</value>
   </data>
@@ -191,5 +407,14 @@
   </data>
   <data name="Theme_System.Content" xml:space="preserve">
     <value>Sistem</value>
+  </data>
+  <data name="Time_Minutes" xml:space="preserve">
+    <value>{0} dk</value>
+  </data>
+  <data name="Time_Now" xml:space="preserve">
+    <value>şimdi</value>
+  </data>
+  <data name="Time_Yesterday" xml:space="preserve">
+    <value>Dün</value>
   </data>
 </root>

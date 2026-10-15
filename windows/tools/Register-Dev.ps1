@@ -11,5 +11,16 @@ if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
 
 $layout = Join-Path $PSScriptRoot "..\src\Fenpo.App\bin\$Platform\$Configuration\net10.0-windows10.0.22621.0"
 Get-AppxPackage Milvasoft.Fenpo | Where-Object { $_.InstallLocation -ne (Resolve-Path $layout).Path } | Remove-AppxPackage
-Add-AppxPackage -Register (Join-Path $layout 'AppxManifest.xml') -ForceApplicationShutdown
+try
+{
+    Add-AppxPackage -Register (Join-Path $layout 'AppxManifest.xml') -ForceApplicationShutdown
+}
+catch
+{
+    # 0x80073CFB: the manifest changed but the version did not. Removing also clears LocalState (settings, logs).
+    if ($_.Exception.HResult -ne 0x80073CFB -and $_.Exception.Message -notmatch '0x80073CFB') { throw }
+    Write-Warning 'Manifest changed, removing the old registration (LocalState is cleared)'
+    Get-AppxPackage Milvasoft.Fenpo | Remove-AppxPackage
+    Add-AppxPackage -Register (Join-Path $layout 'AppxManifest.xml') -ForceApplicationShutdown
+}
 Get-AppxPackage Milvasoft.Fenpo | Select-Object Name, Version, InstallLocation

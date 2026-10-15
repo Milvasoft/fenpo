@@ -96,5 +96,8 @@
 
             <Frame x:Name="ContentFrame" />
         </NavigationView>
+
+        <!-- First-run pairing wizard over the content (title bar stays usable). -->
+        <ContentControl x:Name="PairingHost" Grid.Row="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Visibility="Collapsed" />
     </Grid>
 </Window>

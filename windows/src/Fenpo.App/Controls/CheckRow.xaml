@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Fenpo.App.Controls.CheckRow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Fenpo.App.Helpers">
+
+    <Border Style="{StaticResource FenpoCardStyle}" Padding="12,10" Margin="0,0,0,8">
+        <Grid ColumnSpacing="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="24" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Width="20" Height="20" VerticalAlignment="Top" Margin="0,1,0,0">
+                <Ellipse Stroke="{ThemeResource FenpoTextTertiaryBrush}" StrokeThickness="1.5" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(IsOk), Mode=OneWay}" />
+                <ProgressRing Width="20" Height="20" IsActive="{x:Bind IsWaiting, Mode=OneWay}" Visibility="{x:Bind IsWaiting, Mode=OneWay}" />
+                <Grid Visibility="{x:Bind IsOk, Mode=OneWay}">
+                    <Ellipse Fill="{ThemeResource FenpoOkBrush}" />
+                    <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="White" />
+                </Grid>
+            </Grid>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                <TextBlock Text="{x:Bind Hint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

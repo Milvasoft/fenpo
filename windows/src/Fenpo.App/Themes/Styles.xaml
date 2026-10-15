@@ -96,6 +96,46 @@
         </Setter>
     </Style>
 
+    <!-- Filter pill (Notifications: All / Messages / Calls / Other); the checked one takes the accent. -->
+    <Style x:Key="FenpoPillStyle" TargetType="RadioButton">
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Grid>
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal" />
+                                <VisualState x:Name="PointerOver">
+                                    <VisualState.Setters>
+                                        <Setter Target="Pill.BorderBrush" Value="{ThemeResource FenpoAccentBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Pressed" />
+                                <VisualState x:Name="Disabled" />
+                            </VisualStateGroup>
+                            <VisualStateGroup x:Name="CheckStates">
+                                <VisualState x:Name="Checked">
+                                    <VisualState.Setters>
+                                        <Setter Target="Pill.Background" Value="{ThemeResource FenpoAccentBrush}" />
+                                        <Setter Target="Pill.BorderBrush" Value="Transparent" />
+                                        <Setter Target="Label.Foreground" Value="{ThemeResource FenpoOnAccentBrush}" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Unchecked" />
+                                <VisualState x:Name="Indeterminate" />
+                            </VisualStateGroup>
+                        </VisualStateManager.VisualStateGroups>
+                        <Border x:Name="Pill" Height="30" Padding="12,0" CornerRadius="15" Background="{ThemeResource FenpoCardBrush}" BorderBrush="{ThemeResource FenpoStrokeBrush}" BorderThickness="1">
+                            <ContentPresenter x:Name="Label" VerticalAlignment="Center" Content="{TemplateBinding Content}" Foreground="{ThemeResource FenpoTextBrush}" />
+                        </Border>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="FenpoSegmentBarStyle" TargetType="Border">
         <Setter Property="Background" Value="{ThemeResource FenpoCardSecondaryBrush}" />
         <Setter Property="BorderBrush" Value="{ThemeResource FenpoStrokeBrush}" />
