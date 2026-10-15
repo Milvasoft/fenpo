@@ -32,7 +32,8 @@ foreach (var info in transports)
     Log("transport", $"  {info.Name} [{info.Id}]");
 }
 
-var nameFilter = args.Length > 0 ? args[0] : "iphone";
+var nameIndex = Array.IndexOf(args, "--name");
+var nameFilter = nameIndex >= 0 && nameIndex + 1 < args.Length ? args[nameIndex + 1] : "iphone";
 var chosen = transports.FirstOrDefault(t => t.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase)) ?? transports.FirstOrDefault();
 
 if (chosen is null)
@@ -47,6 +48,34 @@ Log("transport", $"Chosen {chosen.Name}, IsRegistered={transport.IsRegistered()}
 TryLog("transport", () => $"AudioRoutingStatus={transport.AudioRoutingStatus}, InBandRingingEnabled={transport.InBandRingingEnabled}");
 TryRun("transport", () => transport.AudioRoutingStatusChanged += (sender, _) => Log("transport", $"AudioRoutingStatus changed: {sender.AudioRoutingStatus}"));
 TryRun("transport", () => transport.InBandRingingEnabledChanged += (sender, _) => Log("transport", $"InBandRingingEnabled changed: {sender.InBandRingingEnabled}"));
+
+// "FenpoS3 ui": register from a visible, foreground window on an STA UI thread, the way the working
+// reference apps (WinForms, WinUI) do, to rule out a console/MTA caller as the reason RegisterApp is ignored.
+if (args.Contains("ui"))
+{
+    var windowDone = new TaskCompletionSource();
+    var uiThread = new Thread(() =>
+    {
+        var form = new Form { Text = "Fenpo S3", Width = 420, Height = 160, TopMost = true, StartPosition = FormStartPosition.CenterScreen };
+        form.Shown += async (_, _) =>
+        {
+            form.Activate();
+            await Task.Delay(500);
+            Log("ui", $"Apartment={Thread.CurrentThread.GetApartmentState()}, foreground={GetForegroundWindow() == form.Handle}");
+            Log("ui", $"RequestAccessAsync: {await transport.RequestAccessAsync()}");
+            TryRun("ui", transport.RegisterApp);
+            Log("ui", $"IsRegistered={transport.IsRegistered()}");
+            Log("ui", $"ConnectAsync returned {await transport.ConnectAsync()}");
+            await Task.Delay(1500);
+            form.Close();
+        };
+        Application.Run(form);
+        windowDone.SetResult();
+    });
+    uiThread.SetApartmentState(ApartmentState.STA);
+    uiThread.Start();
+    await windowDone.Task;
+}
 
 // Diagnostic only: an invalid token cannot unlock anything, the status says whether a gate exists.
 TryLog("transport", () => $"LAF phonelinetransportdevice_v1: {LimitedAccessFeatures.TryUnlockFeature("com.microsoft.windows.applicationmodel.phonelinetransportdevice_v1", "FENPO-PROBE-NOT-A-TOKEN", "Fenpo probe").Status}");
@@ -269,3 +298,6 @@ static void TryRun(string area, Action action)
         Log(area, $"{exception.GetType().Name} 0x{exception.HResult:X8}: {exception.Message}");
     }
 }
+
+[System.Runtime.InteropServices.DllImport("user32.dll")]
+static extern IntPtr GetForegroundWindow();
