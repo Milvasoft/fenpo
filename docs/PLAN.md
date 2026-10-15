@@ -55,6 +55,7 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 **Durum:**
 - **S1 ve S8 bitti (16 Ekim).** ANCS, AMS, Battery ve Current Time çalışıyor. Eşleşme Windows Ayarlar'dan yapılıyor; yakınlık kilidi reklam RSSI'siyle yapılacak (DECISIONS #28–30). DIS'ten model kimliği okunuyor, iOS sürümü okunmuyor. Yeniden bağlandıktan sonra abonelik yenileme ve canlı bildirim gecikmesi Aşama 1'de doğrulanacak ([README](../spikes/S1-ancs-ams/README.md)).
 - **S2 bitti (16 Ekim).** MAP ile okuma, okundu işaretleme, yeni mesaj bildirimi ve gönderme çalışıyor; OBEX Fenpo içinde yazılacak. Gelen kutusu eski SMS'leri de veriyor, `sent` klasörü boş geliyor. Yeni mesaj ANCS'den gösterilecek (DECISIONS #32–33, [README](../spikes/S2-map/README.md)).
+- **S3 bitti, olumsuz (16 Ekim).** Bu makinede (Windows 11 26H2 Insider) `RegisterApp` HFP kaydını almıyor, LAF `Unavailable`. Aramalar Aşama 2'de ANCS aksiyonlarıyla yapılacak, ses iPhone'da kalacak; HFP beklemede (DECISIONS #34, [README](../spikes/S3-hfp/README.md)).
 
 ### Aşama 1: Telefonun masada (MVP)
 
@@ -123,4 +124,5 @@ Android, iPhone ile paralel ayrı bir oturumda geliştiriliyor (DECISIONS #10, #
 Kararlaşmış her şey [DECISIONS.md](DECISIONS.md) içinde. Açık kalanlar:
 
 1. **Android'in en düşük sürümü:** Android oturumu önerir.
-2. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
+2. **HFP (aramalar PC'den):** kararlı Windows 11'de deneme ve Microsoft'a `phonelinetransportdevice_v1` LAF talebi (DECISIONS #34).
+3. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
