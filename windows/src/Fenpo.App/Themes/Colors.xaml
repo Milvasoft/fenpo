@@ -31,6 +31,8 @@
             <SolidColorBrush x:Key="FenpoFlyoutBrush" Color="#E6F6F7FC" />
             <SolidColorBrush x:Key="FenpoIslandBrush" Color="#0E1022" />
             <SolidColorBrush x:Key="FenpoSolidBrush" Color="#F3F4FA" />
+            <SolidColorBrush x:Key="FenpoBubbleOutBrush" Color="#34A853" />
+            <SolidColorBrush x:Key="FenpoOnBubbleOutBrush" Color="#FFFFFF" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
@@ -57,6 +59,8 @@
             <SolidColorBrush x:Key="FenpoFlyoutBrush" Color="#EB24263C" />
             <SolidColorBrush x:Key="FenpoIslandBrush" Color="#0E1022" />
             <SolidColorBrush x:Key="FenpoSolidBrush" Color="#1F2136" />
+            <SolidColorBrush x:Key="FenpoBubbleOutBrush" Color="#34A853" />
+            <SolidColorBrush x:Key="FenpoOnBubbleOutBrush" Color="#FFFFFF" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

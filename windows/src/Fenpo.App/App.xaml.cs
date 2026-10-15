@@ -59,6 +59,7 @@ public partial class App : Application
                 .AddFenpoBluetooth()
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
+                .AddSingleton<MessageContacts>()
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
                 .AddHostedService<MediaBridge>()
@@ -70,6 +71,7 @@ public partial class App : Application
                 .AddSingleton<TrayIconService>()
                 .AddTransient<HomeViewModel>()
                 .AddTransient<NotificationsViewModel>()
+                .AddTransient<MessagesViewModel>()
                 .AddTransient<PairingViewModel>()
                 .AddTransient<SettingsViewModel>())
             .Build();

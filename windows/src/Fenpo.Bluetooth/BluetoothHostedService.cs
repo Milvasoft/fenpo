@@ -1,6 +1,7 @@
 using Fenpo.Bluetooth.Ams;
 using Fenpo.Bluetooth.Ancs;
 using Fenpo.Bluetooth.Link;
+using Fenpo.Bluetooth.Map;
 using Fenpo.Bluetooth.Status;
 using Fenpo.Core.Devices;
 using Fenpo.Core.Settings;
@@ -18,6 +19,7 @@ public sealed class BluetoothHostedService(
     IphoneLink link,
     AncsClient ancs,
     AmsClient ams,
+    MapMessageSource messages,
     PhoneStatusTracker status,
     ISettingsStore settings,
     ILogger<BluetoothHostedService> logger) : BackgroundService
@@ -28,6 +30,7 @@ public sealed class BluetoothHostedService(
     private readonly IphoneLink _link = link;
     private readonly AncsClient _ancs = ancs;
     private readonly AmsClient _ams = ams;
+    private readonly MapMessageSource _messages = messages;
     private readonly PhoneStatusTracker _status = status;
     private readonly ISettingsStore _settings = settings;
     private readonly ILogger<BluetoothHostedService> _logger = logger;
@@ -42,6 +45,7 @@ public sealed class BluetoothHostedService(
     {
         _ancs.Attach();
         _ams.Attach();
+        _messages.Attach();
         _status.Attach();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -53,6 +57,7 @@ public sealed class BluetoothHostedService(
                 if (phone is not null && await _link.StartAsync(phone.LeDeviceId, stoppingToken))
                 {
                     Phone = phone;
+                    _messages.UsePhone(phone.ClassicDeviceId);
                     _settings.Update(s => s with { PhoneDeviceId = phone.LeDeviceId });
                     _status.Update(s => s with { Name = phone.Name, State = _link.IsConnected ? PhoneConnectionState.Connecting : PhoneConnectionState.Disconnected });
                     return;
@@ -73,6 +78,7 @@ public sealed class BluetoothHostedService(
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
+        await _messages.DisposeAsync();
         await _link.DisposeAsync();
     }
 }

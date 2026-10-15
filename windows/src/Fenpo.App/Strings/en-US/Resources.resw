@@ -150,6 +150,87 @@
   <data name="Media_Previous.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Previous</value>
   </data>
+  <data name="Messages_ConnectingText" xml:space="preserve">
+    <value>Asking the iPhone for the message list.</value>
+  </data>
+  <data name="Messages_ConnectingTitle" xml:space="preserve">
+    <value>Connecting to messages</value>
+  </data>
+  <data name="Messages_Draft.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Messages_Draft.PlaceholderText" xml:space="preserve">
+    <value>Write a message</value>
+  </data>
+  <data name="Messages_FindingNumber" xml:space="preserve">
+    <value>Getting the number from the iPhone for a reply.</value>
+  </data>
+  <data name="Messages_HistoryNote.Text" xml:space="preserve">
+    <value>Messages you sent from the iPhone do not show here; the ones sent from Fenpo do.</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>New message</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>New message</value>
+  </data>
+  <data name="Messages_NewCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Messages_NewNumber" xml:space="preserve">
+    <value>Phone number</value>
+  </data>
+  <data name="Messages_NewSend" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Messages_NewText" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Messages_NewTitle" xml:space="preserve">
+    <value>New message</value>
+  </data>
+  <data name="Messages_NoReply" xml:space="preserve">
+    <value>This sender cannot be answered.</value>
+  </data>
+  <data name="Messages_PermissionText" xml:space="preserve">
+    <value>On the iPhone, open Settings &gt; Bluetooth &gt; (i) next to this PC and turn on Show Message Notifications. Fenpo tries again in a few seconds.</value>
+  </data>
+  <data name="Messages_PermissionTitle" xml:space="preserve">
+    <value>The iPhone does not allow messages</value>
+  </data>
+  <data name="Messages_PickConversation.Text" xml:space="preserve">
+    <value>Pick a conversation on the left</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Messages_SendFailed" xml:space="preserve">
+    <value>Not sent. Try again with the iPhone near and unlocked.</value>
+  </data>
+  <data name="Messages_Sms" xml:space="preserve">
+    <value>SMS</value>
+  </data>
+  <data name="Messages_TodayAt" xml:space="preserve">
+    <value>Today {0}</value>
+  </data>
+  <data name="Messages_UnavailableText" xml:space="preserve">
+    <value>Messages show up while the iPhone is near and connected over Bluetooth.</value>
+  </data>
+  <data name="Messages_UnavailableTitle" xml:space="preserve">
+    <value>iPhone not connected</value>
+  </data>
+  <data name="Messages_YesterdayAt" xml:space="preserve">
+    <value>Yesterday {0}</value>
+  </data>
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Messages</value>
   </data>
