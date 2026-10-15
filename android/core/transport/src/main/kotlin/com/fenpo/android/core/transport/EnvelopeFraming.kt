@@ -15,10 +15,10 @@ public object EnvelopeFraming {
     public const val HEADER_BYTES: Int = 4
 
     /**
-     * Largest Envelope accepted on the control connection. Clipboard images above 512 KB and all
-     * files travel on separate data connections, so anything near this limit is a broken peer.
+     * Largest Envelope accepted on the control connection, the same limit as the PC (S5). Clipboard
+     * images above 512 KB and all files travel on separate data connections.
      */
-    public const val MAX_ENVELOPE_BYTES: Int = 4 * 1024 * 1024
+    public const val MAX_ENVELOPE_BYTES: Int = 1024 * 1024
 
     /**
      * Writes one framed [envelope] to [sink] and flushes it.

@@ -2,7 +2,39 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="scanner_title">Bilgisayardaki kodu okut</string>
     <string name="scanner_body">Windows’ta Fenpo’yu aç, ekrandaki kodu kameraya göster. İkisi aynı Wi‑Fi ağında olmalı.</string>
-    <string name="scanner_enter_code">Kodu elle gir</string>
+
+    <string name="scanner_allow_camera">Kameraya izin ver</string>
+    <string name="scanner_open_settings">Ayarları aç</string>
+    <string name="scanner_camera_needed">Kodu okumak için Fenpo’nun kameraya ihtiyacı var.</string>
+    <string name="scanner_camera_blocked">Kamera erişimi kapalı. Fenpo’nun ayarlarından aç.</string>
+    <string name="scanner_not_fenpo">Bu bir Fenpo kodu değil. Windows’taki Fenpo penceresindeki kodu okut.</string>
+    <string name="scanner_update_needed">Bu kod daha yeni bir Fenpo’dan geliyor. Telefondaki Fenpo’yu güncelle.</string>
+
+    <string name="step_connecting">Bağlanıyor</string>
+    <string name="step_failed">Olmadı</string>
+    <string name="step_permissions_next">Fenpo’nun ihtiyaç duyduklarını aç</string>
+    <string name="pairing_rescan">Kodu yeniden okut</string>
+    <string name="pairing_open_permissions">İzinlere geç</string>
+    <string name="pairing_later">Sonra</string>
+
+    <string name="pairing_error_unreachable">Bilgisayara ulaşılamadı</string>
+    <string name="pairing_error_certificate">Bu kod başka bir bilgisayara ait</string>
+    <string name="pairing_error_handshake">Şifreli bağlantı kurulamadı</string>
+    <string name="pairing_error_token_expired">Kodun süresi doldu</string>
+    <string name="pairing_error_token_invalid">Kod artık geçerli değil</string>
+    <string name="pairing_error_rejected">Bilgisayarda reddedildi</string>
+    <string name="pairing_error_protocol">Sürümler uyuşmuyor</string>
+    <string name="pairing_error_timeout">Bilgisayar yanıt vermedi</string>
+    <string name="pairing_error_unexpected">Eşleşme yarıda kaldı</string>
+
+    <string name="pairing_fix_unreachable">Telefon ve bilgisayar aynı Wi‑Fi ağında olmalı. Windows’ta Fenpo’nun açık olduğuna ve güvenlik duvarının izin verdiğine bak.</string>
+    <string name="pairing_fix_certificate">Güvenlik kontrolü tutmadı. Windows’taki Fenpo’da görünen güncel kodu yeniden okut. Tekrar olursa ağda araya giren bir cihaz olabilir.</string>
+    <string name="pairing_fix_handshake">İki uygulamanın da güncel olduğundan emin ol, sonra kodu yeniden okut.</string>
+    <string name="pairing_fix_new_code">Her kod bir kez ve birkaç dakika geçerli. Windows’taki yeni kodu okut.</string>
+    <string name="pairing_fix_rejected">Windows’taki pencerede İzin ver’i seç, sonra yeniden dene.</string>
+    <string name="pairing_fix_update">Telefondaki ve bilgisayardaki Fenpo’yu güncelle.</string>
+    <string name="pairing_fix_timeout">Windows’taki onay penceresi açık kalmış olabilir. Kodu yeniden okut.</string>
+    <string name="pairing_fix_unexpected">Kodu yeniden okut. Tekrar olursa iki uygulamayı da güncelle.</string>
 
     <string name="steps_title">Neredeyse bitti</string>
     <string name="step_wifi">Wi‑Fi bağlantısı</string>

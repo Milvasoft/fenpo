@@ -9,6 +9,7 @@ android {
 
 dependencies {
     api(libs.kotlinx.coroutines.core)
+    api(project(":core:security"))
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

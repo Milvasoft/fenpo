@@ -7,9 +7,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data object ScannerKey : NavKey
 
-/** "Almost done" steps after the code was read. */
+/**
+ * "Almost done" steps after a valid code was read.
+ *
+ * @property code The scanned `fenpo://pair?...` text.
+ */
 @Serializable
-data object PairingStepsKey : NavKey
+data class PairingStepsKey(
+    val code: String,
+) : NavKey
 
 /** Permissions screen, reached from pairing and from Settings. */
 @Serializable

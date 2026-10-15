@@ -2,7 +2,39 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="scanner_title">Scan the code on your computer</string>
     <string name="scanner_body">Open Fenpo on Windows and show the code on the screen to the camera. Both must be on the same Wi‑Fi network.</string>
-    <string name="scanner_enter_code">Enter the code manually</string>
+
+    <string name="scanner_allow_camera">Allow camera</string>
+    <string name="scanner_open_settings">Open settings</string>
+    <string name="scanner_camera_needed">Fenpo needs the camera to read the code.</string>
+    <string name="scanner_camera_blocked">Camera access is off. Turn it on in Fenpo’s settings.</string>
+    <string name="scanner_not_fenpo">This is not a Fenpo code. Scan the code in the Fenpo window on Windows.</string>
+    <string name="scanner_update_needed">This code comes from a newer Fenpo. Update Fenpo on this phone.</string>
+
+    <string name="step_connecting">Connecting</string>
+    <string name="step_failed">Did not work</string>
+    <string name="step_permissions_next">Turn on what Fenpo needs</string>
+    <string name="pairing_rescan">Scan the code again</string>
+    <string name="pairing_open_permissions">Continue to permissions</string>
+    <string name="pairing_later">Later</string>
+
+    <string name="pairing_error_unreachable">Can’t reach the computer</string>
+    <string name="pairing_error_certificate">This code belongs to another computer</string>
+    <string name="pairing_error_handshake">Can’t set up an encrypted connection</string>
+    <string name="pairing_error_token_expired">The code has expired</string>
+    <string name="pairing_error_token_invalid">The code is no longer valid</string>
+    <string name="pairing_error_rejected">Declined on the computer</string>
+    <string name="pairing_error_protocol">Versions don’t match</string>
+    <string name="pairing_error_timeout">The computer did not answer</string>
+    <string name="pairing_error_unexpected">Pairing stopped halfway</string>
+
+    <string name="pairing_fix_unreachable">The phone and the computer must be on the same Wi‑Fi network. Check that Fenpo is open on Windows and that the firewall lets it through.</string>
+    <string name="pairing_fix_certificate">The security check failed. Scan the current code in Fenpo on Windows again. If it happens again, a device on the network may be in between.</string>
+    <string name="pairing_fix_handshake">Make sure both apps are up to date, then scan the code again.</string>
+    <string name="pairing_fix_new_code">Each code works once and for a few minutes. Scan the new code on Windows.</string>
+    <string name="pairing_fix_rejected">Choose Allow in the window on Windows, then try again.</string>
+    <string name="pairing_fix_update">Update Fenpo on the phone and on the computer.</string>
+    <string name="pairing_fix_timeout">The approval window on Windows may still be open. Scan the code again.</string>
+    <string name="pairing_fix_unexpected">Scan the code again. If it happens again, update both apps.</string>
 
     <string name="steps_title">Almost done</string>
     <string name="step_wifi">Wi‑Fi connection</string>

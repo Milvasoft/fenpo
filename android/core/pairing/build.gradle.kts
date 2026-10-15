@@ -4,4 +4,7 @@ plugins {
 
 dependencies {
     api(project(":core:protocol"))
+    api(project(":core:transport"))
+
+    testImplementation(testFixtures(project(":core:transport")))
 }

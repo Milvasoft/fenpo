@@ -1,5 +1,13 @@
 package com.fenpo.android.feature.pairing
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,6 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,20 +40,128 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.fenpo.android.core.designsystem.component.FenpoSubTopBar
 import com.fenpo.android.core.designsystem.theme.FenpoTheme
+import com.fenpo.android.core.pairing.PairingUri
+import com.fenpo.android.core.pairing.PairingUriError
+import com.fenpo.android.core.pairing.PairingUriResult
+
+/** What the scanner says under its instructions. */
+enum class ScannerHint {
+    /** The camera permission is missing; the button asks for it. */
+    CAMERA_NEEDED,
+
+    /** The camera permission was denied for good; the button opens the app's settings. */
+    CAMERA_BLOCKED,
+
+    /** A QR code was read but it is not a Fenpo pairing code. */
+    NOT_FENPO,
+
+    /** The code comes from a newer Fenpo on the PC. */
+    UPDATE_NEEDED,
+}
 
 /**
- * QR scanner (design: "Eşleştirme"). Always dark, like a camera. The camera preview and QR decoding
- * come in phase C; until then [cameraPreview] shows the dark backdrop of the design.
+ * Scanner with camera permission handling. A valid code goes to [onCode]; anything else becomes
+ * a hint. There is no manual code entry: a 6 digit code without the certificate fingerprint
+ * cannot stop a man in the middle (S5; Buğra's decision, 16 October).
+ */
+@Composable
+fun ScannerRoute(
+    onBack: () -> Unit,
+    onCode: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    var granted by rememberSaveable { mutableStateOf(false) }
+    var asked by rememberSaveable { mutableStateOf(false) }
+    var blocked by rememberSaveable { mutableStateOf(false) }
+    var codeHint by rememberSaveable { mutableStateOf<ScannerHint?>(null) }
+    var handled by rememberSaveable { mutableStateOf(false) }
+
+    LifecycleResumeEffect(Unit) {
+        granted =
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        handled = false
+        onPauseOrDispose {}
+    }
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { result ->
+            granted = result
+            // Android shows its dialog at most twice; a second refusal means only Settings can help.
+            blocked = !result && asked
+            asked = true
+        }
+
+    val hint =
+        when {
+            !granted && blocked -> ScannerHint.CAMERA_BLOCKED
+            !granted -> ScannerHint.CAMERA_NEEDED
+            else -> codeHint
+        }
+    ScannerScreen(
+        onBack = onBack,
+        hint = hint,
+        onAllowCamera = {
+            if (blocked) {
+                val settings =
+                    Intent(
+                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", context.packageName, null),
+                    )
+                context.startActivity(settings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } else {
+                launcher.launch(Manifest.permission.CAMERA)
+            }
+        },
+        modifier = modifier,
+        cameraPreview = {
+            if (granted) {
+                QrCameraPreview(onCode = { text ->
+                    if (!handled) {
+                        when (val result = PairingUri.parse(text)) {
+                            is PairingUriResult.Valid -> {
+                                handled = true
+                                onCode(text)
+                            }
+
+                            is PairingUriResult.Invalid -> {
+                                codeHint =
+                                    if (result.error ==
+                                        PairingUriError.UNSUPPORTED_VERSION
+                                    ) {
+                                        ScannerHint.UPDATE_NEEDED
+                                    } else {
+                                        ScannerHint.NOT_FENPO
+                                    }
+                            }
+                        }
+                    }
+                })
+            } else {
+                CameraBackdrop()
+            }
+        },
+    )
+}
+
+/**
+ * QR scanner (design: "Eşleştirme"). Always dark, like a camera.
+ *
+ * @param hint Extra line under the instructions; camera hints also show a button.
+ * @param cameraPreview The live camera, or the dark backdrop of the design when there is none.
  */
 @Composable
 fun ScannerScreen(
     onBack: () -> Unit,
-    onEnterCode: () -> Unit,
     modifier: Modifier = Modifier,
+    hint: ScannerHint? = null,
+    onAllowCamera: () -> Unit = {},
     cameraPreview: @Composable () -> Unit = { CameraBackdrop() },
 ) {
     FenpoTheme(darkTheme = true) {
@@ -70,21 +190,47 @@ fun ScannerScreen(
                     Text(text = stringResource(R.string.scanner_title), style = MaterialTheme.typography.headlineSmall)
                     Text(
                         text = stringResource(R.string.scanner_body),
-                        modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
+                        modifier = Modifier.padding(top = 8.dp, bottom = if (hint == null) 4.dp else 12.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    FilledTonalButton(onClick = onEnterCode, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                    if (hint != null) {
                         Text(
-                            text = stringResource(R.string.scanner_enter_code),
-                            style = MaterialTheme.typography.titleMedium,
+                            text = stringResource(hint.text()),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary,
                         )
+                    }
+                    if (hint == ScannerHint.CAMERA_NEEDED || hint == ScannerHint.CAMERA_BLOCKED) {
+                        FilledTonalButton(
+                            onClick = onAllowCamera,
+                            modifier = Modifier.padding(top = 20.dp).fillMaxWidth().height(56.dp),
+                        ) {
+                            val label =
+                                if (hint ==
+                                    ScannerHint.CAMERA_BLOCKED
+                                ) {
+                                    R.string.scanner_open_settings
+                                } else {
+                                    R.string.scanner_allow_camera
+                                }
+                            Text(text = stringResource(label), style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                 }
             }
         }
     }
 }
+
+@StringRes
+private fun ScannerHint.text(): Int =
+    when (this) {
+        ScannerHint.CAMERA_NEEDED -> R.string.scanner_camera_needed
+        ScannerHint.CAMERA_BLOCKED -> R.string.scanner_camera_blocked
+        ScannerHint.NOT_FENPO -> R.string.scanner_not_fenpo
+        ScannerHint.UPDATE_NEEDED -> R.string.scanner_update_needed
+    }
 
 /** Dark gradient behind the finder while the camera is not running. */
 @Composable

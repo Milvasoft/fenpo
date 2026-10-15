@@ -138,6 +138,12 @@ Kaynaklar: [Android 17 sürüm notları](https://developer.android.com/about/ver
 
 Kaynaklar: [KeyGenParameterSpec](https://raw.githubusercontent.com/aosp-mirror/platform_frameworks_base/main/keystore/java/android/security/keystore/KeyGenParameterSpec.java), [Conscrypt CryptoUpcalls](https://raw.githubusercontent.com/google/conscrypt/master/common/src/main/java/org/conscrypt/CryptoUpcalls.java), [Network security config](https://developer.android.com/privacy-and-security/security-config)
 
+### Eşleşme akışı (Aşama C, uygulandı)
+- QR kamerayla (CameraX + zxing-cpp) okunur. **Elle kod girişi yok** (Buğra'nın kararı, 16 Ekim): S5'e göre parmak izi taşımayan 6 haneli kod, araya giren saldırgana karşı koruma sağlamıyor. Windows ve iPhone tarafının da aynı kararı alması gerekiyor; DECISIONS.md'ye eklenmeli.
+- Telefon QR'daki adresleri sırayla dener; sertifika parmak izi tutmazsa diğer adresleri denemeden durur. `PairingRequest` gönderir, `certificate_sha256` alanını boş bırakır (S5 önerisi 1: PC parmak izini TLS'ten alır). `PairingResult` kabul edilirse aynı bağlantıda `Hello` alışverişi yapılır (S5 önerisi 2) ve yetenekler kesişimle belirlenir.
+- PC'nin kimliği, sertifika parmak izi, adresleri ve BLE servis UUID'si DataStore'a; BLE kanal anahtarı Keystore'daki AES-GCM anahtarıyla şifrelenip yazılır.
+- Kontrol bağlantısında zarf sınırı PC ile aynı: 1 MB.
+
 ## 14. Kütüphaneler ve sürümler
 **Karar: aşağıdaki tablo. Dış bağımlılık sadece özgür lisanslı (F-Droid şartı); Google Play Services, Firebase, ML Kit yok.**
 

@@ -31,10 +31,12 @@ import com.fenpo.android.feature.home.HomeKey
 import com.fenpo.android.feature.home.HomeRoute
 import com.fenpo.android.feature.home.PcKey
 import com.fenpo.android.feature.home.PcRoute
+import com.fenpo.android.feature.pairing.PairingStepsKey
+import com.fenpo.android.feature.pairing.PairingStepsRoute
 import com.fenpo.android.feature.pairing.PermissionsKey
 import com.fenpo.android.feature.pairing.PermissionsRoute
 import com.fenpo.android.feature.pairing.ScannerKey
-import com.fenpo.android.feature.pairing.ScannerScreen
+import com.fenpo.android.feature.pairing.ScannerRoute
 import com.fenpo.android.feature.settings.SettingsKey
 import com.fenpo.android.feature.settings.SettingsRoute
 import com.fenpo.android.feature.transfers.TransfersKey
@@ -104,8 +106,23 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                             )
                         }
                     }
-                    // Manual code entry arrives with pairing in phase C.
-                    entry<ScannerKey> { ScannerScreen(onBack = pop, onEnterCode = {}) }
+                    entry<ScannerKey> {
+                        ScannerRoute(
+                            onBack = pop,
+                            onCode = { code -> backStack.replaceTop(PairingStepsKey(code)) },
+                        )
+                    }
+                    entry<PairingStepsKey> { key ->
+                        Inset(bottom = true) {
+                            PairingStepsRoute(
+                                code = key.code,
+                                onBack = pop,
+                                onRescan = { backStack.replaceTop(ScannerKey) },
+                                onOpenPermissions = { backStack.replaceTop(PermissionsKey) },
+                                onDone = { backStack.selectTab(HomeKey) },
+                            )
+                        }
+                    }
                     entry<PermissionsKey> { Inset(bottom = true) { PermissionsRoute(onBack = pop) } }
                 },
         )
@@ -144,4 +161,10 @@ private fun NavBackStack<NavKey>.selectTab(key: NavKey) {
     clear()
     add(HomeKey)
     if (key != HomeKey) add(key)
+}
+
+/** Replaces the top screen, so Back skips it (scanner → steps → permissions). */
+private fun NavBackStack<NavKey>.replaceTop(key: NavKey) {
+    if (size > 1) removeAt(lastIndex)
+    add(key)
 }

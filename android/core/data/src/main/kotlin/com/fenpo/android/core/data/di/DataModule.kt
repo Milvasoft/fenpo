@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.fenpo.android.core.data.device.AndroidLocalDeviceRepository
+import com.fenpo.android.core.data.device.LocalDeviceRepository
 import com.fenpo.android.core.data.pc.DataStorePairedPcRepository
 import com.fenpo.android.core.data.pc.PairedPcRepository
 import com.fenpo.android.core.data.permissions.PermissionChecker
@@ -29,6 +31,9 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun pairedPcRepository(impl: DataStorePairedPcRepository): PairedPcRepository
+
+    @Binds
+    abstract fun localDeviceRepository(impl: AndroidLocalDeviceRepository): LocalDeviceRepository
 
     @Binds
     abstract fun languageController(impl: AppCompatLanguageController): LanguageController

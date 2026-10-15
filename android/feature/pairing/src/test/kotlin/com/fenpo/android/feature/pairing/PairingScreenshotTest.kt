@@ -2,6 +2,7 @@ package com.fenpo.android.feature.pairing
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fenpo.android.core.data.permissions.AppPermission
+import com.fenpo.android.core.pairing.PairingError
 import com.fenpo.android.core.testing.captureScreenVariants
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -13,20 +14,47 @@ class PairingScreenshotTest {
     @Test
     fun scanner() =
         captureScreenVariants("scanner", fixedDark = true) {
-            ScannerScreen(onBack = {}, onEnterCode = {})
+            ScannerScreen(onBack = {})
         }
 
     @Test
-    fun pairingSteps() =
-        captureScreenVariants("pairing_steps") {
+    fun scannerWithoutCamera() =
+        captureScreenVariants("scanner_camera_needed", fixedDark = true) {
+            ScannerScreen(onBack = {}, hint = ScannerHint.CAMERA_NEEDED)
+        }
+
+    private val steps =
+        PairingStepsState(
+            pcName = "BUGRA-PC",
+            wifi = StepStatus.DONE,
+            device = StepStatus.ACTIVE,
+            bluetooth = StepStatus.QUEUED,
+            permissions = StepStatus.QUEUED,
+        )
+
+    /** The state drawn in the design. */
+    @Test
+    fun pairingSteps() = captureScreenVariants("pairing_steps") { PairingStepsScreen(state = steps, onBack = {}) }
+
+    /** What phase C shows today after a successful Wi‑Fi pairing. */
+    @Test
+    fun pairingStepsPaired() =
+        captureScreenVariants("pairing_steps_paired") {
+            PairingStepsScreen(
+                state = steps.copy(device = StepStatus.QUEUED, permissions = StepStatus.ACTIVE, paired = true),
+                onBack = {},
+            )
+        }
+
+    @Test
+    fun pairingStepsFailed() =
+        captureScreenVariants("pairing_steps_failed") {
             PairingStepsScreen(
                 state =
-                    PairingStepsState(
-                        pcName = "BUGRA-PC",
-                        wifi = StepStatus.DONE,
-                        device = StepStatus.ACTIVE,
-                        bluetooth = StepStatus.QUEUED,
-                        permissions = StepStatus.QUEUED,
+                    steps.copy(
+                        wifi = StepStatus.FAILED,
+                        device = StepStatus.QUEUED,
+                        error = PairingError.UNREACHABLE,
                     ),
                 onBack = {},
             )

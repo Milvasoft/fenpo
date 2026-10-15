@@ -1,6 +1,7 @@
 package com.fenpo.android.core.pairing
 
 import com.fenpo.android.core.protocol.ProtocolVersion
+import com.fenpo.android.core.transport.Endpoint
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.decodeHex
@@ -26,12 +27,6 @@ public data class PairingUri(
     val certificateSha256: ByteString,
     val token: ByteString,
 ) {
-    /** A data channel address. IPv6 hosts are stored without brackets. */
-    public data class Endpoint(
-        val host: String,
-        val port: Int,
-    )
-
     public companion object {
         private const val PREFIX = "fenpo://pair?"
         private const val FINGERPRINT_BYTES = 32

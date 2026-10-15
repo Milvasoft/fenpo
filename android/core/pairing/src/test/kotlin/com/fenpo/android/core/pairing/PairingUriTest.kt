@@ -1,5 +1,6 @@
 package com.fenpo.android.core.pairing
 
+import com.fenpo.android.core.transport.Endpoint
 import okio.ByteString.Companion.decodeHex
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -26,8 +27,8 @@ class PairingUriTest {
             assertEquals("BUGRA-PC Çalışma", pcName)
             assertEquals(
                 listOf(
-                    PairingUri.Endpoint("192.168.1.20", 52000),
-                    PairingUri.Endpoint("fe80::1c2b:3aff:fe11:2233", 52000),
+                    Endpoint("192.168.1.20", 52000),
+                    Endpoint("fe80::1c2b:3aff:fe11:2233", 52000),
                 ),
                 addresses,
             )
