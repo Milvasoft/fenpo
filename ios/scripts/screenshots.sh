@@ -13,6 +13,8 @@ scenes=(home home-unpaired transfers pc settings scan code steps)
 mkdir -p "$out"
 xcrun simctl bootstatus "$udid" -b >/dev/null
 xcrun simctl install "$udid" "$app"
+# The scanner asks for the camera; a pending system alert would cover the following screenshots.
+xcrun simctl privacy "$udid" grant camera "$bundle_id"
 xcrun simctl status_bar "$udid" override --time "18:51" --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4 || true
 
 for appearance in light dark; do
@@ -25,6 +27,12 @@ for appearance in light dark; do
             xcrun simctl io "$udid" screenshot "$out/$scene-$appearance-$lang.png" >/dev/null
         done
     done
+done
+
+# System alerts use the simulator's language, so list the localized Info.plist strings instead.
+for strings in "$app"/*.lproj/InfoPlist.strings; do
+    echo "== $strings"
+    plutil -p "$strings"
 done
 
 echo "Saved $(ls "$out" | wc -l | tr -d ' ') screenshots to $out"
