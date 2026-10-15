@@ -5,7 +5,7 @@ import SwiftUI
 @main
 struct FenpoApp: App {
     @State private var appearance = AppearanceStore()
-    @State private var model = AppModel(session: SampleSession())
+    @State private var model = FenpoApp.makeModel()
 
     var body: some Scene {
         WindowGroup {
@@ -17,5 +17,14 @@ struct FenpoApp: App {
                     await model.refresh()
                 }
         }
+    }
+
+    private static func makeModel() -> AppModel {
+        #if DEBUG
+        if let scene = ScreenshotScene.current {
+            return scene.makeModel()
+        }
+        #endif
+        return AppModel(session: SampleSession())
     }
 }

@@ -98,10 +98,21 @@ jobs:
             -project Fenpo.xcodeproj \
             -scheme Fenpo \
             -destination "id=$SIMULATOR_ID" \
+            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             > "$log" 2>&1 || { grep -E "error:" "$log"; tail -60 "$log"; exit 1; }
           grep -E "warning:" "$log" | sort -u | head -40 || true
           tail -3 "$log"
+
+      - name: Screenshots
+        run: ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/screenshots"
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v5
+        with:
+          name: screenshots
+          path: ${{ runner.temp }}/screenshots
+          if-no-files-found: error
 
       - name: Upload logs
         if: always()
