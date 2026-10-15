@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fenpo Android Tasarımı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@700;800&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page-bg: #E9ECF4; --page-text: #1B1F3B; --page-muted: #5D6382; --page-line: #D5DAE7;
+    --bloom: #E8577E; --leaf: #2F8F6B; --ink: #1B1F3B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page-bg: #11132A; --page-text: #EEF0F8; --page-muted: #A3A8C3; --page-line: #2C3152; }
+  }
+  :root[data-theme="dark"] { --page-bg: #11132A; --page-text: #EEF0F8; --page-muted: #A3A8C3; --page-line: #2C3152; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page-bg); color: var(--page-text); font: 15px/1.5 Inter, system-ui, sans-serif; }
+  .page-head { max-width: 1400px; margin: 0 auto; padding: 28px 24px 8px; display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
+  .page-head h1 { font-family: Gabarito, sans-serif; font-size: 34px; letter-spacing: -0.02em; margin: 0; line-height: 1; }
+  .page-head p { margin: 6px 0 0; color: var(--page-muted); max-width: 70ch; }
+  .theme-btn { font: inherit; font-size: 14px; border: 1px solid var(--page-line); background: transparent; color: var(--page-text); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  .theme-btn:hover { border-color: var(--bloom); }
+  .theme-btn:focus-visible { outline: 2px solid var(--bloom); outline-offset: 2px; }
+  .gallery { max-width: 1400px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 40px 28px; }
+  figure { margin: 0; }
+  figcaption { margin-top: 14px; max-width: 40ch; }
+  figcaption b { font-family: Gabarito, sans-serif; font-size: 19px; display: block; font-weight: 700; }
+  figcaption span { color: var(--page-muted); font-size: 14px; }
+  .scaler { width: 330px; height: calc(912px * 330 / 432); margin: 0 auto; }
+  .scaler > .device { transform: scale(calc(330 / 432)); transform-origin: 0 0; }
+
+  /* ---------- Device (Pixel-like, gesture navigation) ---------- */
+  .device { width: 432px; height: 912px; border-radius: 52px; padding: 10px; background: linear-gradient(145deg, #4A4F6A, #20233A 40%, #3A3F5A); box-shadow: 0 40px 70px -40px rgba(27,31,59,.6), inset 0 0 0 2px rgba(255,255,255,.12); }
+
+  /* Material 3 colour roles generated from the Fenpo palette (see "Renk rolleri" below). */
+  .screen {
+    --primary: #C93A63; --on-primary: #FFFFFF; --primary-container: #FFD9E2; --on-primary-container: #3E0019;
+    --secondary-container: #F7DCE4; --on-secondary-container: #2B151C;
+    --tertiary: #4E54C8; --on-tertiary: #FFFFFF; --tertiary-container: #E0E0FF; --on-tertiary-container: #0A0E68;
+    --success: #2F8F6B; --on-success: #FFFFFF; --success-container: #C9F0DD; --on-success-container: #00382A;
+    --error: #BA1A1A; --error-container: #FFDAD6; --on-error-container: #410002;
+    --surface: #F6F7FB; --surface-lowest: #FFFFFF; --surface-low: #F0F2F8; --surface-container: #EAEDF5; --surface-high: #E4E8F2; --surface-highest: #DCE6F5;
+    --on-surface: #1B1F3B; --on-surface-variant: #5D6382; --outline: #8A8FA8; --outline-variant: #D5DAE7;
+    --inverse-surface: #1B1F3B; --inverse-on-surface: #F6F7FB; --scrim: rgba(0,0,0,.32);
+    width: 412px; height: 892px; border-radius: 42px; overflow: hidden; position: relative; background: var(--surface); color: var(--on-surface);
+    font-family: Roboto, "Google Sans Text", system-ui, sans-serif; font-size: 14px; letter-spacing: .01em;
+  }
+  .screen.dark {
+    --primary: #FF86A6; --on-primary: #5C1130; --primary-container: #7E2545; --on-primary-container: #FFD9E2;
+    --secondary-container: #5A3341; --on-secondary-container: #FFD9E2;
+    --tertiary: #BEC2FF; --on-tertiary: #1B2084; --tertiary-container: #353BAF; --on-tertiary-container: #E0E0FF;
+    --success: #7DD8B0; --on-success: #00382A; --success-container: #005139; --on-success-container: #C9F0DD;
+    --error: #FFB4AB; --error-container: #93000A; --on-error-container: #FFDAD6;
+    --surface: #11132A; --surface-lowest: #0C0E22; --surface-low: #171A33; --surface-container: #1C1F3A; --surface-high: #232744; --surface-highest: #2A2E4D;
+    --on-surface: #EEF0F8; --on-surface-variant: #A3A8C3; --outline: #6F7493; --outline-variant: #2C3152;
+    --inverse-surface: #EEF0F8; --inverse-on-surface: #1B1F3B; --scrim: rgba(0,0,0,.5);
+  }
+  .cutout { position: absolute; top: 13px; left: 50%; transform: translateX(-50%); width: 13px; height: 13px; border-radius: 50%; background: #05060C; z-index: 30; }
+  .status { position: absolute; top: 0; left: 0; right: 0; height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 2px 26px 0 28px; font-size: 14px; font-weight: 500; z-index: 29; }
+  .status .r { display: flex; gap: 5px; align-items: center; }
+  .status svg.i { width: 15px; height: 15px; }
+  .status .bat { width: 9px; height: 15px; border-radius: 2px; border: 1.5px solid currentColor; position: relative; }
+  .status .bat::before { content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px; height: 70%; background: currentColor; border-radius: 1px; }
+  .status .chip { height: 22px; border-radius: 11px; padding: 0 9px 0 7px; display: flex; align-items: center; gap: 5px; background: var(--primary); color: var(--on-primary); font-size: 12px; font-weight: 500; }
+  .status .chip svg.i { width: 13px; height: 13px; }
+  .gesture { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 108px; height: 4px; border-radius: 2px; background: currentColor; opacity: .7; z-index: 30; }
+  .content { position: absolute; inset: 40px 0 0 0; overflow: hidden; }
+
+  svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  svg.i.f { fill: currentColor; stroke: none; }
+
+  /* Top app bars */
+  .appbar { height: 64px; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 16px; }
+  .appbar.sub { padding-left: 4px; }
+  .appbar h2 { flex: 1; margin: 0; font-size: 22px; font-weight: 400; line-height: 28px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .appbar h2.big { font-size: 28px; line-height: 36px; }
+  .ibtn { width: 48px; height: 48px; border-radius: 24px; display: grid; place-items: center; color: var(--on-surface-variant); flex: none; }
+  .ibtn.on-surface { color: var(--on-surface); }
+  .pad { padding: 0 16px; }
+
+  /* Cards and lists */
+  .card { background: var(--surface-lowest); border-radius: 24px; }
+  .screen.dark .card { background: var(--surface-container); }
+  .card.out { background: transparent; border: 1px solid var(--outline-variant); }
+  .label { font-size: 14px; font-weight: 500; color: var(--primary); margin: 22px 16px 6px; letter-spacing: .01em; }
+  .li { display: flex; align-items: center; gap: 16px; padding: 10px 24px 10px 16px; min-height: 56px; }
+  .li.two { min-height: 72px; }
+  .li .tx { flex: 1; min-width: 0; }
+  .li .tx b { display: block; font-size: 16px; font-weight: 400; line-height: 24px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: .01em; }
+  .li .tx small { display: block; font-size: 14px; line-height: 20px; color: var(--on-surface-variant); }
+  .li .lead { color: var(--on-surface-variant); }
+  .li .meta { font-size: 12px; color: var(--on-surface-variant); }
+  .divider { height: 1px; background: var(--outline-variant); margin: 0 16px; }
+  .ft { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 10px; font-weight: 700; flex: none; }
+  .ft.pdf { background: var(--error-container); color: var(--on-error-container); }
+  .ft.img { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; font-weight: 500; flex: none; background: var(--primary-container); color: var(--on-primary-container); }
+  .avatar.t { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+  .avatar.s { background: var(--success-container); color: var(--on-success-container); }
+  .avatar.n { background: var(--surface-highest); color: var(--on-surface); }
+
+  /* Buttons, chips, switches, segmented buttons */
+  .btn { height: 40px; border-radius: 20px; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 500; letter-spacing: .01em; flex: none; }
+  .btn.filled { background: var(--primary); color: var(--on-primary); }
+  .btn.tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
+  .btn.text { color: var(--primary); padding: 0 12px; }
+  .btn.small { height: 32px; padding: 0 16px; border-radius: 16px; }
+  .btn.wide { display: flex; width: 100%; height: 56px; border-radius: 28px; font-size: 16px; }
+  .chips { display: flex; gap: 8px; }
+  .chip { height: 32px; border-radius: 8px; border: 1px solid var(--outline-variant); padding: 0 12px 0 8px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--on-surface-variant); }
+  .chip.on { border-color: transparent; background: var(--success-container); color: var(--on-success-container); }
+  .chip svg.i { width: 18px; height: 18px; }
+  .sw { width: 52px; height: 32px; border-radius: 16px; border: 2px solid var(--outline); background: var(--surface-highest); position: relative; flex: none; cursor: pointer; }
+  .sw::after { content: ""; position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--outline); transition: all .15s; }
+  .sw.on { background: var(--primary); border-color: var(--primary); }
+  .sw.on::after { top: 2px; left: 22px; width: 24px; height: 24px; background: var(--on-primary); }
+  .seg { display: grid; grid-template-columns: repeat(3, 1fr); height: 40px; border: 1px solid var(--outline); border-radius: 20px; overflow: hidden; margin-top: 10px; }
+  .seg span { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 14px; font-weight: 500; cursor: pointer; }
+  .seg span + span { border-left: 1px solid var(--outline); }
+  .seg span.sel { background: var(--secondary-container); color: var(--on-secondary-container); }
+  .seg span svg.i { width: 18px; height: 18px; display: none; }
+  .seg span.sel svg.i { display: block; }
+  .radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--on-surface-variant); flex: none; display: grid; place-items: center; }
+  .radio.on { border-color: var(--primary); }
+  .radio.on::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--primary); }
+  .progress { height: 4px; border-radius: 2px; background: var(--primary-container); overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--primary); border-radius: 2px; }
+  .note { margin: 12px 16px 0; padding: 14px 16px; border-radius: 16px; background: var(--primary-container); color: var(--on-primary-container); font-size: 14px; line-height: 20px; display: flex; gap: 12px; }
+  .note svg.i { width: 20px; height: 20px; margin-top: 1px; }
+  .note.neutral { background: var(--surface-high); color: var(--on-surface); }
+  .note.neutral svg.i { color: var(--on-surface-variant); }
+
+  /* Navigation bar */
+  .navbar { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; padding: 12px 8px 24px; background: var(--surface-container); display: grid; grid-template-columns: repeat(4, 1fr); z-index: 10; }
+  .nav { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--on-surface-variant); }
+  .nav .pill { width: 64px; height: 32px; border-radius: 16px; display: grid; place-items: center; }
+  .nav.sel { color: var(--on-surface); }
+  .nav.sel .pill { background: var(--secondary-container); color: var(--on-secondary-container); }
+
+  /* Home */
+  .pc { padding: 20px; position: relative; overflow: hidden; }
+  .pc .glow { position: absolute; right: -60px; top: -80px; width: 240px; height: 240px; border-radius: 50%; background: radial-gradient(circle, rgba(232,87,126,.26), transparent 70%); }
+  .pc-top { display: flex; gap: 16px; align-items: center; position: relative; }
+  .laptop { width: 64px; height: 44px; border-radius: 6px; background: linear-gradient(160deg, #DCE6F5, #F3C8D6); border: 3px solid #2A2E48; position: relative; flex: none; }
+  .laptop::after { content: ""; position: absolute; left: -9px; right: -9px; bottom: -9px; height: 5px; border-radius: 0 0 5px 5px; background: #2A2E48; }
+  .screen.dark .laptop { border-color: #6D7190; }
+  .screen.dark .laptop::after { background: #6D7190; }
+  .pc .state { font-size: 14px; color: var(--success); font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .pc .state i { width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+  .pc b { font-size: 22px; line-height: 28px; display: block; font-weight: 400; }
+  .pc small { font-size: 14px; color: var(--on-surface-variant); }
+  .pc .chips { margin-top: 16px; position: relative; }
+  .qa { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .qa .tile { background: var(--surface-lowest); border-radius: 24px; padding: 16px; height: 104px; display: flex; flex-direction: column; justify-content: space-between; font-size: 16px; font-weight: 500; }
+  .screen.dark .qa .tile { background: var(--surface-container); }
+  .qa .tile small { display: block; font-weight: 400; color: var(--on-surface-variant); font-size: 13px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qa .ic { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; }
+  .qa .ic svg.i { width: 20px; height: 20px; }
+  .ic.p { background: var(--primary); color: var(--on-primary); }
+  .ic.t { background: var(--tertiary); color: var(--on-tertiary); }
+  .ic.s { background: var(--success); color: var(--on-success); }
+  .ic.n { background: var(--inverse-surface); color: var(--inverse-on-surface); }
+  .mirror { display: flex; align-items: center; gap: 16px; padding: 14px 16px; margin-top: 8px; }
+  .mirror .ic { width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; background: var(--secondary-container); color: var(--on-secondary-container); flex: none; }
+  .mirror .tx { flex: 1; }
+  .mirror .tx b { display: block; font-size: 16px; font-weight: 500; }
+  .mirror .tx small { color: var(--on-surface-variant); font-size: 14px; }
+
+  /* Scanner (always dark) */
+  .cam-bg { position: absolute; inset: 0; background: radial-gradient(400px 300px at 50% 40%, #4A4F6A 0%, #1E2035 60%, #0B0C16 100%); }
+  .monitor { position: absolute; left: 50%; top: 250px; transform: translateX(-50%) rotate(-3deg); width: 300px; height: 200px; border-radius: 10px; background: #F3F4FA; box-shadow: 0 0 0 8px #1A1C2C; filter: blur(.4px); display: grid; place-items: center; }
+  .mini-qr { width: 110px; height: 110px; background: repeating-conic-gradient(#1B1F3B 0 25%, #fff 0 50%) 0 0 / 14px 14px; border: 8px solid #fff; outline: 1px solid #ddd; }
+  .finder { position: absolute; left: 50%; top: 232px; transform: translateX(-50%); width: 236px; height: 236px; }
+  .finder i { position: absolute; width: 44px; height: 44px; border: 4px solid #fff; }
+  .finder i:nth-child(1) { left: 0; top: 0; border-right: 0; border-bottom: 0; border-top-left-radius: 24px; }
+  .finder i:nth-child(2) { right: 0; top: 0; border-left: 0; border-bottom: 0; border-top-right-radius: 24px; }
+  .finder i:nth-child(3) { left: 0; bottom: 0; border-right: 0; border-top: 0; border-bottom-left-radius: 24px; }
+  .finder i:nth-child(4) { right: 0; bottom: 0; border-left: 0; border-top: 0; border-bottom-right-radius: 24px; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 28px 28px 0 0; padding: 8px 24px 44px; background: var(--surface-low); z-index: 5; }
+  .handle { width: 32px; height: 4px; border-radius: 2px; background: var(--on-surface-variant); opacity: .4; margin: 14px auto 22px; }
+  .sheet h3 { margin: 0 0 8px; font-size: 24px; font-weight: 400; line-height: 32px; }
+  .sheet p { margin: 0 0 24px; color: var(--on-surface-variant); font-size: 14px; line-height: 20px; }
+
+  /* Dialogs */
+  .dim { position: absolute; inset: 0; background: var(--scrim); z-index: 12; }
+  .dialog { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 316px; border-radius: 28px; background: var(--surface-high); z-index: 13; padding: 24px; }
+  .dialog .dic { display: grid; place-items: center; margin-bottom: 16px; }
+  .dialog h4 { margin: 0 0 16px; font-size: 24px; line-height: 32px; font-weight: 400; }
+  .dialog h4.c { text-align: center; }
+  .dialog p { margin: 0 0 8px; font-size: 14px; line-height: 20px; color: var(--on-surface-variant); }
+  .dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+  .dialog .ropt { display: flex; align-items: center; gap: 16px; height: 48px; font-size: 16px; }
+  .dialog.sys .acts { flex-direction: column; gap: 8px; }
+  .dialog.sys .acts .btn { width: 100%; }
+
+  /* Pairing steps */
+  .steps { padding: 4px 16px; }
+  .step { display: flex; gap: 16px; align-items: center; padding: 12px 0; }
+  .step .dot { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--surface-highest); color: var(--on-surface-variant); }
+  .step .dot.done { background: var(--success-container); color: var(--on-success-container); }
+  .step .dot.now { background: var(--primary-container); color: var(--on-primary-container); }
+  .step b { display: block; font-size: 16px; font-weight: 400; }
+  .step small { color: var(--on-surface-variant); font-size: 14px; }
+
+  /* Share sheet */
+  .photo-full { position: absolute; inset: 0; background: radial-gradient(300px 240px at 30% 30%, #F3C8D6, transparent 70%), radial-gradient(300px 300px at 70% 60%, #4E54C8, transparent 70%), linear-gradient(170deg, #DCE6F5, #2F8F6B); }
+  .share { position: absolute; left: 0; right: 0; bottom: 0; top: 300px; border-radius: 28px 28px 0 0; background: var(--surface-low); padding: 0 16px; z-index: 5; }
+  .share .head { display: flex; gap: 14px; align-items: center; padding: 0 8px 18px; }
+  .share .head .thumb { width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #F3C8D6, #4E54C8); flex: none; }
+  .share .head b { display: block; font-size: 16px; font-weight: 500; }
+  .share .head small { color: var(--on-surface-variant); }
+  .share .acts { display: flex; gap: 8px; padding: 0 8px 16px; }
+  .targets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 14px 0; }
+  .targets + .targets { border-top: 1px solid var(--outline-variant); }
+  .targets div { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; text-align: center; line-height: 16px; position: relative; }
+  .targets .ring { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 500; }
+  .targets .ring.pc { background: var(--surface-highest); color: var(--on-surface); }
+  .targets .app { width: 60px; height: 60px; border-radius: 18px; overflow: hidden; display: grid; place-items: center; }
+  .targets .badge { position: absolute; left: 50%; top: 40px; margin-left: 10px; width: 24px; height: 24px; border-radius: 8px; overflow: hidden; border: 2px solid var(--surface-low); }
+  .targets .cap { color: var(--on-surface-variant); font-size: 11px; display: block; }
+
+  /* Shade and Quick Settings */
+  .shade { position: absolute; inset: 0; background: var(--surface-low); }
+  .shade-top { display: flex; justify-content: space-between; align-items: center; padding: 6px 24px 10px; font-size: 14px; color: var(--on-surface-variant); }
+  .shade-top b { font-size: 32px; font-weight: 400; color: var(--on-surface); letter-spacing: 0; }
+  .qs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px; }
+  .qt { height: 68px; border-radius: 34px; background: var(--surface-highest); display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 14px; font-weight: 500; line-height: 18px; }
+  .qt small { display: block; font-weight: 400; font-size: 12px; color: var(--on-surface-variant); }
+  .qt.on { background: var(--primary); color: var(--on-primary); }
+  .qt.on small { color: var(--on-primary); opacity: .85; }
+  .qt .qi { width: 36px; height: 36px; border-radius: 18px; display: grid; place-items: center; flex: none; }
+  .qt.on .qi { background: rgba(255,255,255,.2); }
+  .screen.dark .qt.on .qi { background: rgba(0,0,0,.12); }
+  .qt .qi svg.i { width: 20px; height: 20px; }
+  .bright { margin: 12px 16px 4px; height: 40px; border-radius: 20px; background: var(--surface-highest); position: relative; overflow: hidden; }
+  .bright i { position: absolute; left: 0; top: 0; bottom: 0; width: 62%; background: var(--primary-container); border-radius: 20px; }
+  .bright svg.i { position: absolute; left: 12px; top: 8px; color: var(--on-primary-container); width: 24px; height: 24px; }
+  .notifs { padding: 12px 8px 0; display: grid; gap: 2px; }
+  .ntf { background: var(--surface-lowest); border-radius: 8px; padding: 14px 16px 12px; }
+  .screen.dark .ntf { background: var(--surface-high); }
+  .ntf:first-child { border-radius: 24px 24px 8px 8px; }
+  .ntf:last-child { border-radius: 8px 8px 24px 24px; }
+  .ntf .h { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--on-surface-variant); margin-bottom: 6px; }
+  .ntf .h .ap { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--primary); color: var(--on-primary); }
+  .ntf .h .ap svg.i { width: 12px; height: 12px; stroke-width: 2.4; }
+  .ntf b { display: block; font-size: 15px; font-weight: 500; }
+  .ntf p { margin: 2px 0 0; font-size: 14px; color: var(--on-surface-variant); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ntf .progress { margin: 12px 0 2px; }
+  .ntf .nacts { display: flex; gap: 8px; margin-top: 10px; }
+  .ntf .nacts span { height: 32px; border-radius: 16px; padding: 0 14px; display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; background: var(--surface-container); color: var(--on-surface); }
+  .screen.dark .ntf .nacts span { background: var(--surface-highest); }
+  .ntf .mono { font-family: "Roboto Mono", ui-monospace, Consolas, monospace; font-size: 13px; }
+
+  /* Webcam mode (always dark) */
+  .cam-live { position: absolute; inset: 0; background: radial-gradient(90px 104px at 50% 40%, #C9A08E 0 98%, transparent 100%), radial-gradient(240px 160px at 50% 92%, #4E54C8 0 98%, transparent 100%), radial-gradient(400px 260px at 75% 20%, #F3C8D6 0%, transparent 70%), linear-gradient(180deg, #DCE6F5, #9AA5C4); }
+  .cam-top { position: absolute; top: 56px; left: 16px; right: 16px; display: flex; justify-content: space-between; z-index: 3; }
+  .pillx { height: 36px; border-radius: 18px; padding: 0 14px; display: flex; align-items: center; gap: 8px; background: rgba(20,22,40,.6); color: #fff; font-size: 14px; font-weight: 500; }
+  .pillx i.rec { width: 8px; height: 8px; border-radius: 50%; background: #FF4D6A; }
+  .pillx svg.i { width: 18px; height: 18px; }
+  .cam-bottom { position: absolute; left: 12px; right: 12px; bottom: 32px; border-radius: 28px; padding: 16px; background: rgba(17,19,42,.82); color: #fff; }
+  .lens { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
+  .lens span { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 500; background: rgba(255,255,255,.12); }
+  .lens span.sel { background: #FFD9E2; color: #3E0019; }
+  .cam-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .cam-row div { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+  .cam-row div span { width: 100%; height: 56px; border-radius: 18px; display: grid; place-items: center; background: rgba(255,255,255,.12); }
+  .cam-row div.on span { background: #FF86A6; color: #5C1130; }
+
+  /* Settings */
+  .set-row { display: flex; align-items: center; gap: 16px; padding: 12px 24px 12px 16px; min-height: 56px; }
+  .set-row .tx { flex: 1; min-width: 0; }
+  .set-row .tx b { display: block; font-size: 16px; font-weight: 400; line-height: 24px; }
+  .set-row .tx small { display: block; font-size: 14px; line-height: 20px; color: var(--on-surface-variant); }
+  .set-row .lead { color: var(--on-surface-variant); }
+  .set-block { padding: 12px 24px 12px 56px; }
+  .set-block b { display: block; font-size: 16px; font-weight: 400; }
+  .set-block small { display: block; font-size: 14px; color: var(--on-surface-variant); }
+  .badge-err { height: 24px; min-width: 24px; padding: 0 8px; border-radius: 12px; background: var(--error); color: #fff; font-size: 12px; font-weight: 500; display: grid; place-items: center; }
+  .screen.dark .badge-err { color: #690005; }
+  .ok { color: var(--success); display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 500; }
+  .ok svg.i { width: 18px; height: 18px; }
+
+  /* Colour role table */
+  .roles { max-width: 1400px; margin: 0 auto; padding: 8px 24px 64px; }
+  .roles h2 { font-family: Gabarito, sans-serif; font-size: 24px; margin: 24px 0 4px; }
+  .roles > p { color: var(--page-muted); margin: 0 0 16px; max-width: 80ch; }
+  .roles table { border-collapse: collapse; width: 100%; max-width: 920px; font-size: 14px; }
+  .roles th, .roles td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--page-line); vertical-align: middle; }
+  .roles th { color: var(--page-muted); font-weight: 500; }
+  .roles code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  .sw8 { display: inline-block; width: 22px; height: 22px; border-radius: 6px; vertical-align: middle; margin-right: 8px; border: 1px solid rgba(127,127,127,.35); }
+  .roles td.n { color: var(--page-muted); }
+</style>
+</head>
+<body>
+<header class="page-head">
+  <div>
+  <h1>Fenpo for Android</h1>
+  <p>Material 3 diliyle, Fenpo renklerinden üretilmiş sabit bir renk şeması (duvar kâğıdı renkleri kapalı). iPhone uygulamasıyla aynı ekranlar ve aynı ses tonu; Android’in izin verdiği yerlerde bir adım ileri: bildirimler PC’den yanıtlanır, mesajlar eşitlenir, dosyalar uygulama kapalıyken de gelir.</p>
+  </div>
+  <button class="theme-btn" id="themeBtn" type="button">Koyu temayı göster</button>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <rect x="0" y="0" width="64" height="64" fill="#E8577E"/>
+      <circle cx="32" cy="32" r="22" fill="#FFF6F0"/>
+      <g fill="#1B1F3B"><path id="seed" d="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z"/><use href="#seed" transform="rotate(72 32 32)"/><use href="#seed" transform="rotate(144 32 32)"/><use href="#seed" transform="rotate(216 32 32)"/><use href="#seed" transform="rotate(288 32 32)"/></g>
+    </symbol>
+    <symbol id="i-house" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/></symbol>
+    <symbol id="i-arrows" viewBox="0 0 24 24"><path d="M7 4v16M3.5 7.5L7 4l3.5 3.5M17 20V4M13.5 16.5L17 20l3.5-3.5"/></symbol>
+    <symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><rect x="8.5" y="3" width="7" height="3.5" rx="1"/><path d="M8.5 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5h-2"/></symbol>
+    <symbol id="i-paste" viewBox="0 0 24 24"><rect x="8.5" y="3" width="7" height="3.5" rx="1"/><path d="M8.5 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5h-2"/><path d="M12 10v7M9 14l3 3 3-3"/></symbol>
+    <symbol id="i-photo" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.5"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.5l2-2.5h6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H5M11 5l-7 7 7 7"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="5.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="18.5" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.2-.9-1.6-.9-2.6 0-.9.7-1.6 1.6-1.6H17a4 4 0 0 0 4-4C21 6.7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10" cy="7" r="1.2"/><circle cx="14.5" cy="7" r="1.2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v4l1.5 3h-15L6 14z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-bt" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 13a7.5 7.5 0 0 1 11 0M9.5 16.5a3.2 3.2 0 0 1 5 0"/><circle cx="12" cy="19.5" r=".6"/></symbol>
+    <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v15M9 6l3-3 3 3M7 10v3l5 3M17 9v3l-5 3"/><circle cx="12" cy="19.5" r="1.5"/></symbol>
+    <symbol id="i-sig" viewBox="0 0 24 24"><path d="M4 20h2v-3H4zM9 20h2v-7H9zM14 20h2V9h-2zM19 20h2V4h-2z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-dnd" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></symbol>
+    <symbol id="i-flip" viewBox="0 0 24 24"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2M20 4v4h-4M4 20v-4h4"/></symbol>
+    <symbol id="i-center" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><circle cx="12" cy="10" r="2.5"/><path d="M7.5 17a4.5 4.5 0 0 1 9 0"/></symbol>
+    <symbol id="i-dim" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/></symbol>
+    <symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v10a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/></symbol>
+    <symbol id="i-apps" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="2"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="2"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="2"/></symbol>
+    <symbol id="i-battery" viewBox="0 0 24 24"><rect x="7" y="4" width="10" height="17" rx="2"/><path d="M10 2.5h4M12 9l-2 4h4l-2 4"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6H9l2 2h8.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></symbol>
+    <symbol id="i-shot" viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 18.5v-11A1.5 1.5 0 0 1 5.5 6H10"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-7z"/><path d="M11 13l9-9"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></symbol>
+  </defs>
+</svg>
+
+<main class="gallery">
+
+  <!-- 1. Home -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>18:51</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar"><h2 class="big">Fenpo</h2><span class="ibtn on-surface"><svg class="i"><use href="#i-plus"/></svg></span></div>
+        <div class="pad">
+          <div class="card pc">
+            <div class="glow"></div>
+            <div class="pc-top"><div class="laptop"></div><div><span class="state"><i></i>Bağlı</span><b>BUGRA-PC</b><small>Windows 11, masada</small></div></div>
+            <div class="chips"><span class="chip on"><svg class="i"><use href="#i-bt"/></svg>Bluetooth</span><span class="chip on"><svg class="i"><use href="#i-wifi"/></svg>Wi‑Fi</span></div>
+          </div>
+          <div class="qa">
+            <div class="tile"><span class="ic p"><svg class="i"><use href="#i-clip"/></svg></span><span>Panoyu gönder<small>“Doğrulama kodun…”</small></span></div>
+            <div class="tile"><span class="ic t"><svg class="i"><use href="#i-paste"/></svg></span><span>PC’den yapıştır<small>docker compose -f…</small></span></div>
+            <div class="tile"><span class="ic s"><svg class="i"><use href="#i-photo"/></svg></span><span>Fotoğraf gönder<small>Son 3 fotoğraf hazır</small></span></div>
+            <div class="tile"><span class="ic n"><svg class="i"><use href="#i-cam"/></svg></span><span>Kamera ol<small>PC’de web kamerası</small></span></div>
+          </div>
+          <div class="card mirror"><span class="ic"><svg class="i"><use href="#i-bell"/></svg></span><span class="tx"><b>Bildirimler PC’ye gidiyor</b><small>12 uygulama, son: Mert, 2 dk önce</small></span><svg class="i" style="color:var(--on-surface-variant)"><use href="#i-chev"/></svg></div>
+        </div>
+        <div class="label">Son aktarılanlar</div>
+        <div class="pad"><div class="card" style="overflow:hidden">
+          <div class="li two"><span class="ft pdf">PDF</span><span class="tx"><b>Sözleşme_v3.pdf</b><small>PC’den geldi, 2 dk önce</small></span></div>
+          <div class="divider"></div>
+          <div class="li two"><span class="ft img">JPG</span><span class="tx"><b>IMG_20261015_1849.jpg</b><small>PC’ye gitti, Resimler</small></span></div>
+        </div></div>
+      </div>
+      <nav class="navbar"><span class="nav sel"><span class="pill"><svg class="i"><use href="#i-house"/></svg></span>Fenpo</span><span class="nav"><span class="pill"><svg class="i"><use href="#i-arrows"/></svg></span>Aktarımlar</span><span class="nav"><span class="pill"><svg class="i"><use href="#i-pc"/></svg></span>PC</span><span class="nav"><span class="pill"><svg class="i"><use href="#i-gear"/></svg></span>Ayarlar</span></nav>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Ana ekran</b><span>Bağlı bilgisayar, bağlantı yolları ve en sık dört iş. Alt gezinme çubuğu iPhone’daki dört sekmenin aynısı. Bildirim aynalama Android’e özel olduğu için ana ekranda kendi satırını alıyor.</span></figcaption>
+  </figure>
+
+  <!-- 2. Pairing: scanner -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen dark" data-fixed style="color:#fff">
+      <div class="cam-bg"></div>
+      <div class="monitor"><div class="mini-qr"></div></div>
+      <div class="finder"><i></i><i></i><i></i><i></i></div>
+      <div class="cutout"></div>
+      <div class="status"><span>18:52</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content"><div class="appbar sub"><span class="ibtn" style="color:#fff"><svg class="i"><use href="#i-back"/></svg></span></div></div>
+      <div class="sheet">
+        <div class="handle"></div>
+        <h3>Bilgisayardaki kodu okut</h3>
+        <p>Windows’ta Fenpo’yu aç, ekrandaki kodu kameraya göster. İkisi aynı Wi‑Fi ağında olmalı.</p>
+        <span class="btn tonal wide">Kodu elle gir</span>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Eşleştirme</b><span>QR kodun içinde bilgisayarın adresi ve tek kullanımlık bir anahtar var. Böylece Wi‑Fi bağlantısı ilk andan şifreli kuruluyor. Kamera izni ilk kez burada istenir; kamera açılmıyorsa PC’deki 6 haneli kod girilir.</span></figcaption>
+  </figure>
+
+  <!-- 3. Pairing: companion device dialog -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>18:52</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar sub"><span class="ibtn on-surface"><svg class="i"><use href="#i-back"/></svg></span><h2>Neredeyse bitti</h2></div>
+        <div class="steps">
+          <div class="step"><span class="dot done"><svg class="i"><use href="#i-check"/></svg></span><span><b>Wi‑Fi bağlantısı</b><small>BUGRA-PC ile şifreli kanal kuruldu</small></span></div>
+          <div class="step"><span class="dot now"><svg class="i"><use href="#i-pc"/></svg></span><span><b>Bu bilgisayarı tanı</b><small>Onay bekleniyor</small></span></div>
+          <div class="step"><span class="dot"><svg class="i"><use href="#i-bt"/></svg></span><span><b>Bluetooth eşleşmesi</b><small>Sırada</small></span></div>
+          <div class="step"><span class="dot"><svg class="i"><use href="#i-bell"/></svg></span><span><b>İzinler</b><small>Sırada</small></span></div>
+        </div>
+      </div>
+      <div class="dim"></div>
+      <div class="dialog sys">
+        <div class="dic"><svg width="40" height="40" style="border-radius:12px"><use href="#logo"/></svg></div>
+        <h4 class="c" style="font-size:22px;line-height:28px">Fenpo uygulamasının BUGRA-PC cihazına erişmesine izin verilsin mi?</h4>
+        <p style="text-align:center">Bu uygulama, BUGRA-PC yakındayken arka planda bağlanabilir.</p>
+        <div class="acts"><span class="btn filled">İzin ver</span><span class="btn text">İzin verme</span></div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Bilgisayarı tanıtma</b><span>Bu pencere Android’in kendi penceresi, Fenpo onu tetikliyor. Onaydan sonra Fenpo arka planda bağlı kalabilir ve bilgisayar yaklaşınca kendiliğinden uyanır. Ardından Bluetooth eşleşme penceresi gelir; aramalar ve rehber için “Kişiler ve arama geçmişi” kutusu işaretli kalmalı.</span></figcaption>
+  </figure>
+
+  <!-- 4. Permissions -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>18:53</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar sub"><span class="ibtn on-surface"><svg class="i"><use href="#i-back"/></svg></span><h2>İzinler</h2></div>
+        <div class="pad" style="padding-bottom:6px">
+          <div style="display:flex;justify-content:space-between;font-size:14px;color:var(--on-surface-variant);margin:2px 0 8px"><span>3 / 5 hazır</span><span>2 izin eksik</span></div>
+          <div class="progress"><i style="width:60%"></i></div>
+        </div>
+        <div class="li two"><span class="lead"><svg class="i"><use href="#i-bt"/></svg></span><span class="tx"><b>Yakındaki cihazlar</b><small>Bilgisayarı Bluetooth ve Wi‑Fi ile bulur</small></span><span class="ok"><svg class="i"><use href="#i-check"/></svg>Açık</span></div>
+        <div class="li two"><span class="lead"><svg class="i"><use href="#i-bell"/></svg></span><span class="tx"><b>Bildirim erişimi</b><small>Telefonun bildirimleri PC’de görünür</small></span><span class="btn filled small">Aç</span></div>
+        <div class="li two"><span class="lead"><svg class="i"><use href="#i-battery"/></svg></span><span class="tx"><b>Pil kısıtlaması</b><small>Kalkınca bağlantı gün boyu kopmaz</small></span><span class="btn filled small">Kaldır</span></div>
+        <div class="li two"><span class="lead"><svg class="i"><use href="#i-msg"/></svg></span><span class="tx"><b>SMS</b><small>Mesajlar PC’de okunur ve gönderilir</small></span><span class="ok"><svg class="i"><use href="#i-check"/></svg>Açık</span></div>
+        <div class="li two"><span class="lead"><svg class="i"><use href="#i-cam"/></svg></span><span class="tx"><b>Kamera</b><small>Eşleştirme kodu ve web kamerası</small></span><span class="ok"><svg class="i"><use href="#i-check"/></svg>Açık</span></div>
+        <div class="note"><svg class="i"><use href="#i-info"/></svg><span>“Kısıtlanmış ayar” uyarısı çıkarsa: Ayarlar &gt; Uygulamalar &gt; Fenpo &gt; ⋮ &gt; Kısıtlanmış ayarlara izin ver, sonra buraya dön. Android bunu mağaza dışından kurulan uygulamalarda istiyor.</span></div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>İzinler</b><span>Android’de her özellik ayrı bir izin istiyor ve bir kısmı sadece Ayarlar’dan açılıyor. Hepsi tek ekranda, eksik olanın yanında onu açan düğme var. Rehber ve arama geçmişi için izin istenmez; Bluetooth eşleşmesindeki kutuyla bilgisayara gider.</span></figcaption>
+  </figure>
+
+  <!-- 5. Share sheet -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="photo-full"></div>
+      <div class="cutout"></div>
+      <div class="status" style="color:#1B1F3B"><span>18:55</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="share">
+        <div class="handle"></div>
+        <div class="head"><span class="thumb"></span><span><b>1 görsel paylaşılıyor</b><small>IMG_20261015_1855.jpg</small></span></div>
+        <div class="acts"><span class="chip"><svg class="i"><use href="#i-copy"/></svg>Kopyala</span><span class="chip"><svg class="i"><use href="#i-edit"/></svg>Düzenle</span></div>
+        <div class="targets">
+          <div><span class="ring pc"><svg class="i" style="width:28px;height:28px"><use href="#i-pc"/></svg></span><span class="badge"><svg width="20" height="20"><use href="#logo"/></svg></span>BUGRA-PC</div>
+          <div><span class="ring" style="background:#F3C8D6;color:#3E0019">M</span>Mert</div>
+          <div><span class="ring" style="background:#C9F0DD;color:#00382A">A</span>Annem</div>
+          <div><span class="ring" style="background:#E0E0FF;color:#0A0E68">S</span>Selin</div>
+        </div>
+        <div class="targets">
+          <div><span class="app"><svg width="60" height="60"><use href="#logo"/></svg></span>Fenpo<span class="cap">PC’ye gönder</span></div>
+          <div><span class="app" style="background:var(--primary-container);color:var(--on-primary-container)"><svg class="i" style="width:28px;height:28px"><use href="#i-open"/></svg></span>Fenpo<span class="cap">PC’de aç</span></div>
+          <div><span class="app" style="background:#2F8F6B;color:#fff"><svg class="i" style="width:28px;height:28px"><use href="#i-msg"/></svg></span>Mesajlar</div>
+          <div><span class="app" style="background:#4E54C8;color:#fff"><svg class="i" style="width:28px;height:28px"><use href="#i-send"/></svg></span>E-posta</div>
+        </div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Paylaşım menüsü</b><span>Bilgisayar, kişilerin yanında doğrudan paylaşım hedefi olarak ilk sırada çıkar. “PC’de aç” bağlantıyı ya da belgeyi doğrudan bilgisayarda açar. Gönderim arka planda sürer, ilerlemesi bildirimde görünür.</span></figcaption>
+  </figure>
+
+  <!-- 6. Shade and Quick Settings -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="shade"></div>
+      <div class="cutout"></div>
+      <div class="status"><span style="display:flex;gap:8px;align-items:center">18:57<span class="chip"><svg class="i"><use href="#i-arrows"/></svg>%64</span></span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="shade-top"><b>18:57</b><span>Perşembe 15 Ekim</span></div>
+        <div class="qs">
+          <div class="qt on"><span class="qi"><svg class="i"><use href="#i-wifi"/></svg></span><span>Ev-5G<small>Bağlı</small></span></div>
+          <div class="qt on"><span class="qi"><svg class="i"><use href="#i-bt"/></svg></span><span>Bluetooth<small>BUGRA-PC</small></span></div>
+          <div class="qt on"><span class="qi"><svg class="i"><use href="#i-clip"/></svg></span><span>Panoyu gönder<small>Fenpo</small></span></div>
+          <div class="qt"><span class="qi"><svg class="i"><use href="#i-photo"/></svg></span><span>Fotoğraf gönder<small>Fenpo</small></span></div>
+          <div class="qt"><span class="qi"><svg class="i"><use href="#i-lock"/></svg></span><span>PC’yi kilitle<small>Fenpo</small></span></div>
+          <div class="qt"><span class="qi"><svg class="i"><use href="#i-dnd"/></svg></span><span>Rahatsız etmeyin<small>Kapalı</small></span></div>
+        </div>
+        <div class="bright"><i></i><svg class="i"><use href="#i-sun"/></svg></div>
+        <div class="notifs">
+          <div class="ntf">
+            <div class="h"><span class="ap"><svg class="i"><use href="#i-arrows"/></svg></span>Fenpo · şimdi</div>
+            <b>BUGRA-PC’ye gönderiliyor</b>
+            <p>12 fotoğraf, 3’ü kaldı · yaklaşık 20 sn</p>
+            <div class="progress"><i style="width:64%"></i></div>
+            <div class="nacts"><span>İptal</span></div>
+          </div>
+          <div class="ntf">
+            <div class="h"><span class="ap"><svg class="i"><use href="#i-paste"/></svg></span>Fenpo · 1 dk</div>
+            <b>PC’den panoya alındı</b>
+            <p class="mono">docker compose -f deploy.yml up -d --build</p>
+          </div>
+          <div class="ntf">
+            <div class="h"><span class="ap"><svg class="i"><use href="#i-pc"/></svg></span>Fenpo · Bağlantı</div>
+            <b>BUGRA-PC’ye bağlı</b>
+            <p>Bluetooth ve Wi‑Fi</p>
+            <div class="nacts"><span>Panoyu gönder</span><span>PC’yi kilitle</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Bildirimler ve Hızlı Ayarlar</b><span>Pano, fotoğraf ve kilit için Fenpo kutucukları Hızlı Ayarlar’a eklenir. PC’de kopyalanan şey telefonun panosuna kendiliğinden gelir; telefondan PC’ye göndermek tek dokunuş, çünkü Android arka planda panoyu okutmuyor. Android, arka planda bağlı kalan uygulamadan sürekli bir bildirim istiyor; Fenpo onu işe yarar kılıyor: bağlantı durumu ve iki kısayol. Büyük aktarımlar ilerleme bildiriminde ve durum çubuğundaki çipte görünür.</span></figcaption>
+  </figure>
+
+  <!-- 7. Webcam mode -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen dark" data-fixed style="color:#fff">
+      <div class="cam-live"></div>
+      <div class="cutout"></div>
+      <div class="status" style="color:#1B1F3B"><span>19:30</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="cam-top"><span class="pillx"><i class="rec"></i>Teams’te canlı</span><span class="pillx"><svg class="i"><use href="#i-wifi"/></svg>Wi‑Fi</span></div>
+      <div class="cam-bottom">
+        <div class="lens"><span>0,5</span><span class="sel">1×</span><span>2</span></div>
+        <div class="cam-row">
+          <div class="on"><span><svg class="i"><use href="#i-center"/></svg></span>Ortala</div>
+          <div><span><svg class="i"><use href="#i-mic"/></svg></span>Mikrofon</div>
+          <div><span><svg class="i"><use href="#i-flip"/></svg></span>Çevir</div>
+          <div><span><svg class="i"><use href="#i-dim"/></svg></span>Ekranı karart</div>
+        </div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Kamera modu</b><span>Telefon, bilgisayarda “Fenpo Kamera” adıyla web kamerası olur. PC kamerayı isteyince telefonda “Kamerayı başlat” bildirimi çıkar; Android kamerayı ancak bir dokunuşla açtırıyor. Ekran karartılınca pil daha az gider. Kabloyla bağlamak isteyene, telefon destekliyorsa Android’in kendi USB web kamerası modu önerilir.</span></figcaption>
+  </figure>
+
+  <!-- 8. Settings -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>19:05</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar"><h2 class="big">Ayarlar</h2></div>
+        <div class="label" style="margin-top:4px">Görünüm ve dil</div>
+        <div class="set-row" style="align-items:flex-start;padding-bottom:4px"><span class="lead" style="margin-top:2px"><svg class="i"><use href="#i-palette"/></svg></span><span class="tx"><b>Görünüm</b>
+          <div class="seg" data-seg><span class="sel"><svg class="i"><use href="#i-check"/></svg>Sistem</span><span><svg class="i"><use href="#i-check"/></svg>Açık</span><span><svg class="i"><use href="#i-check"/></svg>Koyu</span></div></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-globe"/></svg></span><span class="tx"><b>Dil</b><small>Sistem dili (Türkçe)</small></span></div>
+        <div class="label">Özellikler</div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-bell"/></svg></span><span class="tx"><b>Bildirimleri PC’ye gönder</b><small>12 uygulama seçili</small></span><span class="sw on"></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-msg"/></svg></span><span class="tx"><b>Mesajları eşitle</b><small>SMS’ler PC’de okunur ve yanıtlanır</small></span><span class="sw on"></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-clip"/></svg></span><span class="tx"><b>Pano paylaşımı</b></span><span class="sw on"></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-shot"/></svg></span><span class="tx"><b>Ekran görüntülerini gönder</b></span><span class="sw"></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-dnd"/></svg></span><span class="tx"><b>Rahatsız etmeyin’i eşitle</b><small>Açılınca PC’de Fenpo bildirimleri susar</small></span><span class="sw on"></span></div>
+        <div class="label">İzinler</div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-info"/></svg></span><span class="tx"><b>İzinler</b><small>Bildirim erişimi ve pil kısıtlaması</small></span><span class="badge-err">2</span></div>
+      </div>
+      <nav class="navbar"><span class="nav"><span class="pill"><svg class="i"><use href="#i-house"/></svg></span>Fenpo</span><span class="nav"><span class="pill"><svg class="i"><use href="#i-arrows"/></svg></span>Aktarımlar</span><span class="nav"><span class="pill"><svg class="i"><use href="#i-pc"/></svg></span>PC</span><span class="nav sel"><span class="pill"><svg class="i"><use href="#i-gear"/></svg></span>Ayarlar</span></nav>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Ayarlar</b><span>Görünüm (Sistem, Açık, Koyu) ve Dil (Sistem dili, Türkçe, English) uygulamanın içinden seçilir. Altında özellik başına açma kapama ve eksik izinler. Yanlış ayarlanmış bir izin, sessizce çalışmayan bir özellikten daha iyi görünür olmalı.</span></figcaption>
+  </figure>
+
+  <!-- 9. Language dialog -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>19:06</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar"><h2 class="big">Ayarlar</h2></div>
+        <div class="label" style="margin-top:4px">Görünüm ve dil</div>
+        <div class="set-row" style="align-items:flex-start;padding-bottom:4px"><span class="lead" style="margin-top:2px"><svg class="i"><use href="#i-palette"/></svg></span><span class="tx"><b>Görünüm</b>
+          <div class="seg"><span class="sel"><svg class="i"><use href="#i-check"/></svg>Sistem</span><span><svg class="i"><use href="#i-check"/></svg>Açık</span><span><svg class="i"><use href="#i-check"/></svg>Koyu</span></div></span></div>
+        <div class="set-row"><span class="lead"><svg class="i"><use href="#i-globe"/></svg></span><span class="tx"><b>Dil</b><small>Sistem dili (Türkçe)</small></span></div>
+      </div>
+      <div class="dim"></div>
+      <div class="dialog" data-radio>
+        <h4>Dil</h4>
+        <div class="ropt"><span class="radio on"></span>Sistem dili (Türkçe)</div>
+        <div class="ropt"><span class="radio"></span>Türkçe</div>
+        <div class="ropt"><span class="radio"></span>English</div>
+        <p style="margin-top:12px">Android’in uygulama dili ayarıyla aynı. Seçim hemen uygulanır, yeniden başlatma gerekmez.</p>
+        <div class="acts"><span class="btn text">İptal</span><span class="btn text">Uygula</span></div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Dil</b><span>Android 13 ve sonrasında seçim, sistemin uygulama başına dil ayarıyla aynı yerde saklanır; Ayarlar &gt; Uygulamalar &gt; Fenpo &gt; Dil’den yapılan değişiklik de buraya yansır. Paylaşım hedefi, kutucuklar ve bildirimler aynı dili kullanır.</span></figcaption>
+  </figure>
+
+  <!-- 10. Notification mirroring apps -->
+  <figure>
+    <div class="scaler"><div class="device"><div class="screen">
+      <div class="cutout"></div>
+      <div class="status"><span>19:08</span><span class="r"><svg class="i"><use href="#i-wifi"/></svg><svg class="i"><use href="#i-sig"/></svg><span class="bat"></span></span></div>
+      <div class="content">
+        <div class="appbar sub"><span class="ibtn on-surface"><svg class="i"><use href="#i-back"/></svg></span><h2>Bildirim gönderen uygulamalar</h2></div>
+        <div class="set-row"><span class="tx"><b>Yeni uygulamalar da gönderilsin</b><small>Sonradan kurulanlar kendiliğinden açılır</small></span><span class="sw on"></span></div>
+        <div class="divider"></div>
+        <div class="li two"><span class="avatar s">M</span><span class="tx"><b>Mesajlar</b><small>PC’den yanıtlanır</small></span><span class="sw on"></span></div>
+        <div class="li two"><span class="avatar s">W</span><span class="tx"><b>WhatsApp</b><small>PC’den yanıtlanır</small></span><span class="sw on"></span></div>
+        <div class="li two"><span class="avatar t">T</span><span class="tx"><b>Telegram</b><small>PC’den yanıtlanır</small></span><span class="sw on"></span></div>
+        <div class="li two"><span class="avatar">T</span><span class="tx"><b>Takvim</b><small>Sadece gösterilir</small></span><span class="sw on"></span></div>
+        <div class="li two"><span class="avatar t">E</span><span class="tx"><b>E-posta</b><small>Sadece gösterilir</small></span><span class="sw on"></span></div>
+        <div class="li two"><span class="avatar n">B</span><span class="tx"><b>Banka</b><small>Kapalı</small></span><span class="sw"></span></div>
+        <div class="note neutral"><svg class="i"><use href="#i-info"/></svg><span>Android, tek kullanımlık kod içeren bildirimlerin içeriğini gizleyebilir. O zaman bildirim PC’de sadece uygulama adıyla görünür; kodu telefondan oku.</span></div>
+      </div>
+      <div class="gesture"></div>
+    </div></div></div>
+    <figcaption><b>Bildirim aynalama</b><span>Android’e özel: telefonun bildirimleri PC’de Windows bildirimi olarak çıkar. Hangi uygulamanın bildirimlerinin gideceği burada seçilir. Yanıt kutusu olan bildirimler PC’den yanıtlanır, kapatılan bildirim telefonda da kapanır.</span></figcaption>
+  </figure>
+
+</main>
+
+<section class="roles">
+  <h2>Renk rolleri</h2>
+  <p>Material 3 rolleri Fenpo paletinden elle üretildi; uygulamada <code>lightColorScheme</code> ve <code>darkColorScheme</code> bu değerlerle kurulur. Duvar kâğıdı renkleri (dinamik renk) kullanılmaz. Başarı rolleri Material 3’te yok, Fenpo’nun genişletilmiş rengi olarak tanımlanır.</p>
+  <table>
+    <thead><tr><th>Rol</th><th>Açık</th><th>Koyu</th><th>Kaynak</th></tr></thead>
+    <tbody id="roleRows"></tbody>
+  </table>
+</section>
+
+<script>
+  // Light screens switch with the theme; scanner and camera stay dark.
+  const themeBtn = document.getElementById("themeBtn");
+  let dark = false;
+  function applyTheme() {
+    document.querySelectorAll(".screen:not([data-fixed])").forEach(sc => sc.classList.toggle("dark", dark));
+    themeBtn.textContent = dark ? "Açık temayı göster" : "Koyu temayı göster";
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+  }
+  themeBtn.addEventListener("click", () => { dark = !dark; applyTheme(); });
+  if (matchMedia("(prefers-color-scheme: dark)").matches) { dark = true; applyTheme(); }
+  document.querySelectorAll(".sw").forEach(s => s.addEventListener("click", () => s.classList.toggle("on")));
+  document.querySelectorAll("[data-seg] span").forEach(b => b.addEventListener("click", () => {
+    b.parentElement.querySelectorAll("span").forEach(x => x.classList.remove("sel")); b.classList.add("sel");
+  }));
+  document.querySelectorAll("[data-radio] .ropt").forEach(o => o.addEventListener("click", () => {
+    o.parentElement.querySelectorAll(".radio").forEach(r => r.classList.remove("on")); o.querySelector(".radio").classList.add("on");
+  }));
+
+  // Colour role table, same values as the .screen tokens above.
+  const roles = [
+    ["primary", "#C93A63", "#FF86A6", "Çiçek (açık zeminde metin tonu)"],
+    ["onPrimary", "#FFFFFF", "#5C1130", ""],
+    ["primaryContainer", "#FFD9E2", "#7E2545", "Çiçek"],
+    ["onPrimaryContainer", "#3E0019", "#FFD9E2", ""],
+    ["secondaryContainer", "#F7DCE4", "#5A3341", "Gezinme göstergesi, tonal düğme"],
+    ["onSecondaryContainer", "#2B151C", "#FFD9E2", ""],
+    ["tertiary", "#4E54C8", "#BEC2FF", "Alacakaranlık"],
+    ["tertiaryContainer", "#E0E0FF", "#353BAF", "Alacakaranlık"],
+    ["success (genişletilmiş)", "#2F8F6B", "#7DD8B0", "Yaprak: bağlı durumu"],
+    ["successContainer (genişletilmiş)", "#C9F0DD", "#005139", "Yaprak"],
+    ["error", "#BA1A1A", "#FFB4AB", "Sadece reddet ve hata"],
+    ["surface", "#F6F7FB", "#11132A", "Pervaz"],
+    ["surfaceContainerLowest", "#FFFFFF", "#0C0E22", "Kartlar (açık)"],
+    ["surfaceContainer", "#EAEDF5", "#1C1F3A", "Gezinme çubuğu, kartlar (koyu)"],
+    ["surfaceContainerHigh", "#E4E8F2", "#232744", "Pencereler"],
+    ["surfaceContainerHighest", "#DCE6F5", "#2A2E4D", "Cam"],
+    ["onSurface", "#1B1F3B", "#EEF0F8", "Mürekkep"],
+    ["onSurfaceVariant", "#5D6382", "#A3A8C3", ""],
+    ["outline", "#8A8FA8", "#6F7493", ""],
+    ["outlineVariant", "#D5DAE7", "#2C3152", ""],
+    ["inverseSurface", "#1B1F3B", "#EEF0F8", "Mürekkep"],
+  ];
+  document.getElementById("roleRows").innerHTML = roles.map(([n, l, d, s]) =>
+    `<tr><td><code>${n}</code></td><td><span class="sw8" style="background:${l}"></span><code>${l}</code></td><td><span class="sw8" style="background:${d}"></span><code>${d}</code></td><td class="n">${s}</td></tr>`).join("");
+</script>
+</body>
+</html>
