@@ -102,6 +102,20 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE7F8;" Style="{StaticResource RowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Startup" Style="{StaticResource RowLabelStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.StartupHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.StartWithWindows, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.StartupChangeable, Mode=OneWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_StartupToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xEA8F;" Style="{StaticResource RowIconStyle}" />
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock x:Uid="Settings_Notifications" Style="{StaticResource RowLabelStyle}" />

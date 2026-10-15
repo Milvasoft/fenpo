@@ -26,6 +26,8 @@ public sealed partial class MainWindow : Window
         ["Settings"] = typeof(SettingsPage),
     };
 
+    private bool _exiting;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
     /// </summary>
@@ -42,12 +44,22 @@ public sealed partial class MainWindow : Window
         AppWindow.Resize(new Windows.Graphics.SizeInt32(Scale(1080), Scale(720)));
 
         themeService.Register(this);
+        AppWindow.Closing += OnClosing;
         Navigation.SelectedItem = Navigation.MenuItems[0];
 
         if (!settings.Current.SetupCompleted)
         {
             ShowPairing();
         }
+    }
+
+    /// <summary>
+    /// Closes the window for good (the close button only hides it to the tray).
+    /// </summary>
+    public void CloseForExit()
+    {
+        _exiting = true;
+        Close();
     }
 
     /// <summary>
@@ -96,6 +108,15 @@ public sealed partial class MainWindow : Window
         if (args.SelectedItem is NavigationViewItem { Tag: string tag } && _pages.TryGetValue(tag, out var page) && ContentFrame.CurrentSourcePageType != page)
         {
             ContentFrame.Navigate(page, null, new EntranceNavigationTransitionInfo());
+        }
+    }
+
+    private void OnClosing(AppWindow sender, AppWindowClosingEventArgs args)
+    {
+        if (!_exiting)
+        {
+            args.Cancel = true;
+            sender.Hide();
         }
     }
 

@@ -366,6 +366,21 @@
   <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Proximity lock</value>
   </data>
+  <data name="Settings_Startup.Text" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="Settings_StartupHint" xml:space="preserve">
+    <value>Fenpo waits in the tray and connects when the iPhone is near</value>
+  </data>
+  <data name="Settings_StartupHintDisabledByUser" xml:space="preserve">
+    <value>Turned off in Task Manager; turn it on under Startup apps</value>
+  </data>
+  <data name="Settings_StartupHintPolicy" xml:space="preserve">
+    <value>Your organization manages this setting</value>
+  </data>
+  <data name="Settings_StartupToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
   <data name="Settings_Theme.Text" xml:space="preserve">
     <value>Theme</value>
   </data>
@@ -416,5 +431,56 @@
   </data>
   <data name="Time_Yesterday" xml:space="preserve">
     <value>Yesterday</value>
+  </data>
+  <data name="Tray_Clipboard.Text" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Tray_Focus.Text" xml:space="preserve">
+    <value>Focus</value>
+  </data>
+  <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Tray_HotspotText.Text" xml:space="preserve">
+    <value>Hotspot</value>
+  </data>
+  <data name="Tray_LinksBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Tray_LinksBluetoothUsb" xml:space="preserve">
+    <value>Bluetooth and USB</value>
+  </data>
+  <data name="Tray_LinksBluetoothWifi" xml:space="preserve">
+    <value>Bluetooth and Wi‑Fi</value>
+  </data>
+  <data name="Tray_MenuOpen" xml:space="preserve">
+    <value>Open Fenpo</value>
+  </data>
+  <data name="Tray_MenuQuit" xml:space="preserve">
+    <value>Quit</value>
+  </data>
+  <data name="Tray_Notifications.Text" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Tray_Open.Content" xml:space="preserve">
+    <value>Open Fenpo</value>
+  </data>
+  <data name="Tray_ProximityLock.Text" xml:space="preserve">
+    <value>Proximity lock</value>
+  </data>
+  <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone</value>
+  </data>
+  <data name="Tray_RingText.Text" xml:space="preserve">
+    <value>Ring</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Tray_Summary" xml:space="preserve">
+    <value>{0}, {1}</value>
   </data>
 </root>

@@ -31,6 +31,11 @@ public sealed class NotificationRouter(
     private readonly ILogger<NotificationRouter> _logger = logger;
     private CancellationTokenSource? _dropDetached;
 
+    /// <summary>
+    /// Raised from a background thread when a click on a Windows notification should open a Fenpo page.
+    /// </summary>
+    public event EventHandler<string>? OpenRequested;
+
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -143,6 +148,8 @@ public sealed class NotificationRouter(
     {
         if (!arguments.TryGetValue("action", out var action) || !arguments.TryGetValue("id", out var id))
         {
+            // A click on the notification itself, not on one of its buttons.
+            OpenRequested?.Invoke(this, "Notifications");
             return;
         }
 
