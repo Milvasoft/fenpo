@@ -1,19 +1,19 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "share.placeholder.title": {
+    "share.close": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sending to your PC is coming"
+            "value": "Close"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bilgisayara gönderme geliyor"
+            "value": "Kapat"
           }
         }
       }
@@ -35,19 +35,19 @@
         }
       }
     },
-    "share.close": {
+    "share.placeholder.title": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Close"
+            "value": "Sending to your PC is coming"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Kapat"
+            "value": "Bilgisayara gönderme geliyor"
           }
         }
       }
