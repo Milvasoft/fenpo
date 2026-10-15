@@ -56,6 +56,7 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 - **S1 ve S8 bitti (16 Ekim).** ANCS, AMS, Battery ve Current Time çalışıyor. Eşleşme Windows Ayarlar'dan yapılıyor; yakınlık kilidi reklam RSSI'siyle yapılacak (DECISIONS #28–30). DIS'ten model kimliği okunuyor, iOS sürümü okunmuyor. Yeniden bağlandıktan sonra abonelik yenileme ve canlı bildirim gecikmesi Aşama 1'de doğrulanacak ([README](../spikes/S1-ancs-ams/README.md)).
 - **S2 bitti (16 Ekim).** MAP ile okuma, okundu işaretleme, yeni mesaj bildirimi ve gönderme çalışıyor; OBEX Fenpo içinde yazılacak. Gelen kutusu eski SMS'leri de veriyor, `sent` klasörü boş geliyor. Yeni mesaj ANCS'den gösterilecek (DECISIONS #32–33, [README](../spikes/S2-map/README.md)).
 - **S3 bitti, olumsuz (16 Ekim).** Bu makinede (Windows 11 26H2 Insider) `RegisterApp` HFP kaydını almıyor, LAF `Unavailable`. Aramalar Aşama 2'de ANCS aksiyonlarıyla yapılacak, ses iPhone'da kalacak; HFP beklemede (DECISIONS #34, [README](../spikes/S3-hfp/README.md)).
+- **S4 Windows tarafı hazır (16 Ekim).** Sabit UUID'lerle GATT sunucusu ve reklam çalışıyor; reklama servis verisi sığmıyor. iPhone'la (nRF Connect, sonra Fenpo uygulaması) denenmedi ([README](../spikes/S4-ble-peripheral/README.md)).
 
 ### Aşama 1: Telefonun masada (MVP)
 
