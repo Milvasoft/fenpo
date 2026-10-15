@@ -48,6 +48,27 @@
   <data name="Battery_Percent" xml:space="preserve">
     <value>{0}%</value>
   </data>
+  <data name="Calls_Empty.Text" xml:space="preserve">
+    <value>Calls that ring while Fenpo is running are listed here.</value>
+  </data>
+  <data name="Calls_Incoming" xml:space="preserve">
+    <value>Incoming call</value>
+  </data>
+  <data name="Calls_Missed" xml:space="preserve">
+    <value>Missed call</value>
+  </data>
+  <data name="Calls_OnPhoneNote.Text" xml:space="preserve">
+    <value>Calling from the PC and taking the audio to the PC wait for Windows to allow it.</value>
+  </data>
+  <data name="Calls_OnPhoneText.Text" xml:space="preserve">
+    <value>Incoming calls appear at the top of the screen. Answer and Decline go to the iPhone; the call continues on the phone.</value>
+  </data>
+  <data name="Calls_OnPhoneTitle.Text" xml:space="preserve">
+    <value>Calls stay on the iPhone</value>
+  </data>
+  <data name="Calls_Recent.Text" xml:space="preserve">
+    <value>Recent calls</value>
+  </data>
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Calls</value>
   </data>
@@ -122,6 +143,24 @@
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>My iPhone</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Answer</value>
+  </data>
+  <data name="Island_CallOnPhone" xml:space="preserve">
+    <value>The call continues on the iPhone</value>
+  </data>
+  <data name="Island_CallOnPhoneWith" xml:space="preserve">
+    <value>{0} · the call continues on the iPhone</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Decline</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Decline</value>
   </data>
   <data name="Language_System" xml:space="preserve">
     <value>System language ({0})</value>

@@ -2,11 +2,60 @@
 <Page
     x:Class="Fenpo.App.Views.CallsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Fenpo.App.ViewModels">
 
     <ScrollViewer>
         <StackPanel Padding="32,28">
             <TextBlock x:Uid="CallsTitle" Style="{StaticResource FenpoPageTitleStyle}" />
+
+            <!-- Design "Aramalar": recent calls, and where calls happen. -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="300" />
+                </Grid.ColumnDefinitions>
+
+                <Border Style="{StaticResource FenpoCardStyle}" VerticalAlignment="Top">
+                    <StackPanel Padding="0,0,0,6">
+                        <TextBlock x:Uid="Calls_Recent" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" Margin="16,14,16,8" />
+                        <ItemsControl ItemsSource="{x:Bind ViewModel.Calls}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CallRowViewModel">
+                                    <Grid Padding="16,10" ColumnSpacing="12" BorderBrush="{ThemeResource FenpoStrokeBrush}" BorderThickness="0,1,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="36" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Width="36" Height="36" CornerRadius="18" Background="{x:Bind Fill}">
+                                            <TextBlock Text="{x:Bind Initial}" FontSize="13" FontWeight="SemiBold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Grid>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="{ThemeResource FenpoErrorBrush}" Visibility="{x:Bind IsMissed}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" Visibility="{x:Bind IsNotMissed}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind Detail}" Style="{StaticResource FenpoCaptionTextStyle}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Time}" Style="{StaticResource FenpoCaptionTextStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock x:Uid="Calls_Empty" Style="{StaticResource FenpoCaptionTextStyle}" Margin="16,4,16,12" TextWrapping="Wrap" Visibility="{x:Bind ViewModel.IsEmpty, Mode=OneWay}" />
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource FenpoCardStyle}" Padding="20" VerticalAlignment="Top">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Border Width="56" Height="56" CornerRadius="14" Background="{ThemeResource FenpoAccentSoftBrush}" Margin="0,8,0,0" HorizontalAlignment="Center">
+                            <FontIcon Glyph="&#xE8EA;" FontSize="26" Foreground="{ThemeResource FenpoAccentBrush}" />
+                        </Border>
+                        <TextBlock x:Uid="Calls_OnPhoneTitle" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,6" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <TextBlock x:Uid="Calls_OnPhoneText" Style="{StaticResource FenpoSecondaryTextStyle}" FontSize="13" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,14" />
+                        <TextBlock x:Uid="Calls_OnPhoneNote" Style="{StaticResource FenpoCaptionTextStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                    </StackPanel>
+                </Border>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Page>

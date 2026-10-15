@@ -48,6 +48,27 @@
   <data name="Battery_Percent" xml:space="preserve">
     <value>%{0}</value>
   </data>
+  <data name="Calls_Empty.Text" xml:space="preserve">
+    <value>Fenpo açıkken gelen aramalar burada listelenir.</value>
+  </data>
+  <data name="Calls_Incoming" xml:space="preserve">
+    <value>Gelen arama</value>
+  </data>
+  <data name="Calls_Missed" xml:space="preserve">
+    <value>Cevapsız arama</value>
+  </data>
+  <data name="Calls_OnPhoneNote.Text" xml:space="preserve">
+    <value>Bilgisayardan arama yapmak ve sesi bilgisayara almak Windows’un izin vermesini bekliyor.</value>
+  </data>
+  <data name="Calls_OnPhoneText.Text" xml:space="preserve">
+    <value>Gelen arama ekranın üstünde çıkar. Yanıtla ve Reddet iPhone’a gider, görüşme telefonda sürer.</value>
+  </data>
+  <data name="Calls_OnPhoneTitle.Text" xml:space="preserve">
+    <value>Görüşmeler iPhone’da</value>
+  </data>
+  <data name="Calls_Recent.Text" xml:space="preserve">
+    <value>Son aramalar</value>
+  </data>
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Aramalar</value>
   </data>
@@ -122,6 +143,24 @@
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>iPhone’um</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yanıtla</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yanıtla</value>
+  </data>
+  <data name="Island_CallOnPhone" xml:space="preserve">
+    <value>Görüşme iPhone’da sürer</value>
+  </data>
+  <data name="Island_CallOnPhoneWith" xml:space="preserve">
+    <value>{0} · görüşme iPhone’da sürer</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Reddet</value>
   </data>
   <data name="Language_System" xml:space="preserve">
     <value>Sistem dili ({0})</value>

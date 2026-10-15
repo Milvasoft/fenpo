@@ -63,6 +63,8 @@ public partial class App : Application
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
                 .AddHostedService<MediaBridge>()
+                .AddSingleton<CallService>()
+                .AddHostedService(sp => sp.GetRequiredService<CallService>())
                 .AddSingleton<ProximityLockService>()
                 .AddHostedService(sp => sp.GetRequiredService<ProximityLockService>())
                 .AddSingleton<MainWindow>()
@@ -72,6 +74,7 @@ public partial class App : Application
                 .AddTransient<HomeViewModel>()
                 .AddTransient<NotificationsViewModel>()
                 .AddTransient<MessagesViewModel>()
+                .AddTransient<CallsViewModel>()
                 .AddTransient<PairingViewModel>()
                 .AddTransient<SettingsViewModel>())
             .Build();
@@ -160,6 +163,8 @@ public partial class App : Application
 
         // A second "fenpo" (Start menu, taskbar) is redirected here by Program.Main.
         var dispatcher = _window.DispatcherQueue;
+        var calls = GetService<CallService>();
+        calls.AttachUi(dispatcher);
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 
@@ -171,8 +176,8 @@ public partial class App : Application
             return;
         }
 
-        // "fenpo --page Settings" opens on a given page, "fenpo --page Tray" shows only the tray panel (used by the
-        // screenshot checks in both themes and languages).
+        // "fenpo --page Settings" opens on a given page, "--page Tray" shows only the tray panel and "--page Island" a
+        // sample call on the island (used by the screenshot checks in both themes and languages).
         var arguments = Environment.GetCommandLineArgs();
         var pageIndex = Array.IndexOf(arguments, "--page");
         var page = pageIndex >= 0 && pageIndex + 1 < arguments.Length ? arguments[pageIndex + 1] : null;
@@ -180,6 +185,12 @@ public partial class App : Application
         if (page == "Tray")
         {
             _trayWindow.Toggle();
+            return;
+        }
+
+        if (page == "Island")
+        {
+            calls.ShowSample();
             return;
         }
 
