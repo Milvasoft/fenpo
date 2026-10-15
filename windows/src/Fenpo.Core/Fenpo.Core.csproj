@@ -10,4 +10,13 @@
     <InternalsVisibleTo Include="Fenpo.Core.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fenpo.Sdk\Fenpo.Sdk.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -41,7 +41,8 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
     {
         _link.ConnectionChanged += (_, connected) => Update(s => s with
         {
-            State = connected ? PhoneConnectionState.Connecting : PhoneConnectionState.Disconnected,
+            // Windows may report "connected" again after discovery already finished; that must not undo Connected.
+            State = !connected ? PhoneConnectionState.Disconnected : s.State == PhoneConnectionState.Connected ? PhoneConnectionState.Connected : PhoneConnectionState.Connecting,
             BluetoothConnected = connected,
         });
         _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
