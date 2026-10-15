@@ -64,7 +64,7 @@ struct QRCodeScanner: UIViewControllerRepresentable {
     }
 }
 
-extension QRCodeScanner.Coordinator: @preconcurrency DataScannerViewControllerDelegate {
+extension QRCodeScanner.Coordinator: DataScannerViewControllerDelegate {
     func dataScanner(_ dataScanner: DataScannerViewController, didAdd addedItems: [RecognizedItem], allItems: [RecognizedItem]) {
         handle(addedItems)
     }

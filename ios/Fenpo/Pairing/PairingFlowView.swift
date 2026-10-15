@@ -21,6 +21,12 @@ struct PairingFlowView: View {
     private let logger = Logger(subsystem: "com.fenpo.app", category: "Pairing")
 
     var body: some View {
+        content
+            .onAppear(perform: openScreenshotScene)
+    }
+
+    @ViewBuilder
+    private var content: some View {
         switch stage {
         case .scanning:
             ScannerView(
@@ -45,6 +51,21 @@ struct PairingFlowView: View {
                 }
             )
         }
+    }
+
+    private func openScreenshotScene() {
+        #if DEBUG
+        switch ScreenshotScene.current {
+        case .code:
+            isManualEntryPresented = true
+        case .steps:
+            pcName = "BUGRA-PC"
+            progress.complete(.dataChannel)
+            stage = .setup
+        default:
+            break
+        }
+        #endif
     }
 
     private func start(_ input: PairingInput) {
