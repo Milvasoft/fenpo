@@ -36,6 +36,11 @@ Elenenler:
 
 - **Rolü başka bir uygulamanın tutması.** Phone Link'te iPhone yok, `PhoneExperienceHost` kapalıydı. iPhone iki taraftan kaldırılıp yeniden eşleştirildi ve ilk iş `FenpoS3` çalıştırıldı (belgeye göre kayıt, cihaz kaldırılınca silinir). Sonuç aynı.
 - **`RequestAccessAsync` eksikliği** (klangbruecke'nin asıl hatası). Çağrılıyor, `Allowed` dönüyor.
+- **Konsol ve MTA iş parçacığından çağırmak.** `FenpoS3 ui`, kaydı görünür, ön planda ve STA UI iş parçacığındaki bir WinForms penceresinden yapıyor (`foreground=True`). Sonuç aynı.
+- **Gevşek ve imzasız kayıt.** `Build-SignedMsix.ps1` ile kendinden imzalı (`CN=Fenpo Development`, Güvenilir Kişiler'e eklendi) gerçek bir MSIX kuruldu (`SignatureKind=Developer`, `C:\Program Files\WindowsApps`). Sonuç aynı.
+- **Windows tarafında HFP'nin kapalı olması.** `Hfp\HandsFree Enabled=1` (HFP 1.7), `BTAGService` çalışıyor, "bugiphone Hands-Free HF" cihazı `OK`.
+
+Bu dört eleme ile en güçlü açıklama, Windows sürümü veya LAF oldu. Bunu kesinleştirecek ayırt edici deneme: aynı API'yi kullanan hazır bir uygulamanın (Microsoft Store'daki Thy Phone ya da Sefirah) bu makinede iPhone aramasını PC'ye alıp alamadığına bakmak. O da alamıyorsa sorun Windows'ta; alabiliyorsa bizim kodda.
 
 Kalan açıklama: bu Windows sürümünde `PhoneLineTransportDevice` kaydı LAF kilidine bağlı. Sefirah, 22000 ve üzerinde LAF'ı atlıyor ve Windows 11'de çalıştığını söylüyor; klangbruecke Windows 10'da LAF `Unavailable` iken bile kaydı alabildi. Burada ise kayıt sessizce reddediliyor. Bu makine Insider sürümünde olduğu için aynı davranışın kararlı Windows 11'de (24H2, 25H2) olup olmadığı **bilinmiyor**. Kesin cevap için ya kararlı bir Windows 11'de deneme ya da Microsoft'tan LAF token'ı gerekiyor.
 
@@ -57,6 +62,7 @@ Denenmeyen: Sefirah'ın Windows'tan çıkarılmış bir anahtarla LAF token'ı �
 
 ## Açık kalanlar
 
+- Aynı API ile çalışan hazır bir uygulamayla (Thy Phone veya Sefirah) bu makinede ayırt edici deneme.
 - Kararlı Windows 11'de (24H2/25H2) aynı paketle `RegisterApp`.
 - Microsoft'a LAF talebi (`com.microsoft.windows.applicationmodel.phonelinetransportdevice_v1`).
 - ANCS `IncomingCall` bildirimi ve olumlu/olumsuz aksiyonların gerçek bir aramada denenmesi.

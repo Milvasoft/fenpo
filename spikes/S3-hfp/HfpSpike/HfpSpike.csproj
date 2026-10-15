@@ -8,6 +8,7 @@
     <SelfContained>false</SelfContained>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Fenpo.Spikes.S3</RootNamespace>
   </PropertyGroup>
 
