@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<MAP-event-report version="1.0"><event type="MessageShift" handle="6099C3D50857492" folder="telecom/msg/sent" old_folder="telecom/msg/outbox" msg_type="SMS_GSM"/></MAP-event-report>

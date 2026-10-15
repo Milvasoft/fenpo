@@ -150,6 +150,87 @@
   <data name="Media_Previous.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Önceki</value>
   </data>
+  <data name="Messages_ConnectingText" xml:space="preserve">
+    <value>iPhone’dan mesaj listesi isteniyor.</value>
+  </data>
+  <data name="Messages_ConnectingTitle" xml:space="preserve">
+    <value>Mesajlara bağlanıyor</value>
+  </data>
+  <data name="Messages_Draft.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Messages_Draft.PlaceholderText" xml:space="preserve">
+    <value>Mesaj yaz</value>
+  </data>
+  <data name="Messages_FindingNumber" xml:space="preserve">
+    <value>Yanıt için numara iPhone’dan alınıyor.</value>
+  </data>
+  <data name="Messages_HistoryNote.Text" xml:space="preserve">
+    <value>iPhone’dan gönderdiğin mesajlar burada görünmez, Fenpo’dan gönderdiklerin görünür.</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_NewCancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="Messages_NewNumber" xml:space="preserve">
+    <value>Telefon numarası</value>
+  </data>
+  <data name="Messages_NewSend" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_NewText" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Messages_NewTitle" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_NoReply" xml:space="preserve">
+    <value>Bu gönderene yanıt yazılamıyor.</value>
+  </data>
+  <data name="Messages_PermissionText" xml:space="preserve">
+    <value>iPhone’da Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç. Fenpo birkaç saniye içinde yeniden dener.</value>
+  </data>
+  <data name="Messages_PermissionTitle" xml:space="preserve">
+    <value>iPhone mesajlara izin vermiyor</value>
+  </data>
+  <data name="Messages_PickConversation.Text" xml:space="preserve">
+    <value>Soldan bir sohbet seç</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_SendFailed" xml:space="preserve">
+    <value>Gönderilemedi. iPhone yakında ve kilidi açıkken tekrar dene.</value>
+  </data>
+  <data name="Messages_Sms" xml:space="preserve">
+    <value>SMS</value>
+  </data>
+  <data name="Messages_TodayAt" xml:space="preserve">
+    <value>Bugün {0}</value>
+  </data>
+  <data name="Messages_UnavailableText" xml:space="preserve">
+    <value>Mesajlar iPhone yakındayken ve Bluetooth ile bağlıyken görünür.</value>
+  </data>
+  <data name="Messages_UnavailableTitle" xml:space="preserve">
+    <value>iPhone bağlı değil</value>
+  </data>
+  <data name="Messages_YesterdayAt" xml:space="preserve">
+    <value>Dün {0}</value>
+  </data>
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Mesajlar</value>
   </data>

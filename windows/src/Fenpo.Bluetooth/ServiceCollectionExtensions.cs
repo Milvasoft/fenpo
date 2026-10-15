@@ -1,10 +1,12 @@
 using Fenpo.Bluetooth.Ams;
 using Fenpo.Bluetooth.Ancs;
 using Fenpo.Bluetooth.Link;
+using Fenpo.Bluetooth.Map;
 using Fenpo.Bluetooth.Proximity;
 using Fenpo.Bluetooth.Status;
 using Fenpo.Core.Devices;
 using Fenpo.Core.Media;
+using Fenpo.Core.Messages;
 using Fenpo.Core.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,6 +30,9 @@ public static class ServiceCollectionExtensions
         .AddSingleton<INotificationSource>(sp => sp.GetRequiredService<AncsClient>())
         .AddSingleton<AmsClient>()
         .AddSingleton<IMediaSource>(sp => sp.GetRequiredService<AmsClient>())
+        .AddSingleton<MnsServer>()
+        .AddSingleton<MapMessageSource>()
+        .AddSingleton<IMessageSource>(sp => sp.GetRequiredService<MapMessageSource>())
         .AddSingleton<PhoneStatusTracker>()
         .AddSingleton<IPhoneStatusSource>(sp => sp.GetRequiredService<PhoneStatusTracker>())
         .AddSingleton<AdvertisementRssiMonitor>()
