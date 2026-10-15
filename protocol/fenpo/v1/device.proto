@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// State a device shares about itself. Unset fields mean unknown.
+message DeviceState {
+  optional uint32 battery_percent = 1;
+  optional bool charging = 2;
+  optional bool focus_active = 3;        // Do Not Disturb or a Focus mode is on.
+  repeated string addresses = 4;         // Current ip:port endpoints of the data channel.
+}
+
+// Play a sound on the phone so it can be found.
+message RingDevice {
+  bool stop = 1;                         // true stops a ring in progress.
+}
+
+// Ask the PC to lock its Windows session.
+message LockPc {
+}

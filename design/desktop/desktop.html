@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fenpo Windows Tasarımı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Page chrome (outside the simulated desktop) ---------- */
+  :root {
+    --page-bg: #E9ECF4; --page-text: #1B1F3B; --page-muted: #5D6382; --page-line: #D5DAE7; --page-card: #FFFFFF;
+    --bloom: #E8577E; --leaf: #2F8F6B; --ink: #1B1F3B;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page-bg: #11132A; --page-text: #EEF0F8; --page-muted: #A3A8C3; --page-line: #2C3152; --page-card: #1B1F3B; }
+  }
+  :root[data-theme="dark"] { --page-bg: #11132A; --page-text: #EEF0F8; --page-muted: #A3A8C3; --page-line: #2C3152; --page-card: #1B1F3B; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page-bg); color: var(--page-text); font: 15px/1.5 "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, sans-serif; }
+  .page-head { max-width: 1440px; margin: 0 auto; padding: 28px 24px 16px; display: flex; gap: 24px; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; }
+  .page-head h1 { font-family: Gabarito, sans-serif; font-size: 34px; letter-spacing: -0.02em; margin: 0; line-height: 1; }
+  .page-head p { margin: 6px 0 0; color: var(--page-muted); max-width: 60ch; }
+  .demo { display: flex; gap: 8px; flex-wrap: wrap; }
+  .demo button { font: inherit; font-size: 14px; border: 1px solid var(--page-line); background: var(--page-card); color: var(--page-text); padding: 8px 14px; border-radius: 8px; cursor: pointer; }
+  .demo button:hover { border-color: var(--bloom); }
+  .demo button:focus-visible, .stage button:focus-visible { outline: 2px solid var(--bloom); outline-offset: 2px; }
+  .demo .sep { width: 1px; background: var(--page-line); margin: 0 4px; }
+
+  .stage-wrap { max-width: 1440px; margin: 0 auto; padding: 0 24px; }
+  .stage-scale { position: relative; width: 100%; }
+  .stage { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; border-radius: 14px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(27,31,59,.45); }
+
+  .notes { max-width: 1440px; margin: 0 auto; padding: 36px 24px 72px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .notes h3 { font-family: Gabarito, sans-serif; font-size: 20px; margin: 0 0 6px; }
+  .notes p { margin: 0; color: var(--page-muted); }
+  @media (max-width: 900px) { .notes { grid-template-columns: 1fr; } }
+
+  /* ---------- Simulated Windows 11 desktop ---------- */
+  .stage {
+    --w-bg: rgba(243, 244, 250, .84);
+    --w-side: transparent;
+    --w-card: rgba(255, 255, 255, .78);
+    --w-card-2: rgba(255, 255, 255, .5);
+    --w-stroke: rgba(27, 31, 59, .08);
+    --w-text: #1B1F3B;
+    --w-text-2: #5D6382;
+    --w-text-3: #8A90AC;
+    --w-accent: #C93A63;
+    --w-accent-text: #FFFFFF;
+    --w-accent-soft: rgba(232, 87, 126, .12);
+    --w-hover: rgba(27, 31, 59, .05);
+    --w-ok: #2F8F6B;
+    --w-solid: #F3F4FA;
+    --w-flyout: rgba(246, 247, 252, .9);
+    --w-task: rgba(238, 240, 247, .82);
+    --w-shadow: 0 32px 64px -16px rgba(20, 22, 50, .35), 0 0 0 1px rgba(27, 31, 59, .08);
+    --wall: radial-gradient(1200px 700px at 78% 18%, #F3C8D6 0%, transparent 60%), radial-gradient(900px 700px at 12% 92%, #BFD7F2 0%, transparent 62%), linear-gradient(160deg, #DCE6F5 0%, #E9DDEA 100%);
+    color: var(--w-text);
+    font-family: "Segoe UI Variable Text", "Segoe UI", Inter, sans-serif;
+    font-size: 14px;
+    background: var(--wall);
+  }
+  .stage.dark {
+    --w-bg: rgba(30, 32, 52, .86);
+    --w-card: rgba(255, 255, 255, .055);
+    --w-card-2: rgba(255, 255, 255, .03);
+    --w-stroke: rgba(255, 255, 255, .08);
+    --w-text: #EEF0F8;
+    --w-text-2: #B4B9D3;
+    --w-text-3: #7E84A6;
+    --w-accent: #FF86A6;
+    --w-accent-text: #1B1F3B;
+    --w-accent-soft: rgba(255, 134, 166, .14);
+    --w-hover: rgba(255, 255, 255, .06);
+    --w-ok: #5CC79A;
+    --w-solid: #1F2136;
+    --w-flyout: rgba(36, 38, 60, .92);
+    --w-task: rgba(26, 28, 46, .86);
+    --w-shadow: 0 32px 64px -16px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .07);
+    --wall: radial-gradient(1200px 700px at 78% 18%, #5B2D52 0%, transparent 60%), radial-gradient(900px 700px at 12% 92%, #1F3C6B 0%, transparent 62%), linear-gradient(160deg, #141831 0%, #1E1530 100%);
+  }
+  .stage svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .stage svg.i.f { fill: currentColor; stroke: none; }
+  .stage button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* Taskbar */
+  .taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 48px; background: var(--w-task); backdrop-filter: blur(30px); border-top: 1px solid var(--w-stroke); display: flex; align-items: center; justify-content: center; }
+  .tb-apps { display: flex; gap: 4px; }
+  .tb-app { width: 40px; height: 40px; border-radius: 6px; display: grid; place-items: center; position: relative; }
+  .tb-app:hover { background: var(--w-hover); }
+  .tb-app .glyph { width: 24px; height: 24px; border-radius: 6px; }
+  .tb-app.on::after { content: ""; position: absolute; bottom: 2px; width: 16px; height: 3px; border-radius: 2px; background: var(--w-accent); }
+  .tray { position: absolute; right: 8px; top: 4px; bottom: 4px; display: flex; align-items: center; gap: 2px; }
+  .tray-btn { height: 40px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+  .tray-btn:hover, .tray-btn.active { background: var(--w-hover); }
+  .clock { text-align: right; font-size: 12px; line-height: 1.25; }
+
+  /* App window */
+  .win { position: absolute; left: 96px; top: 56px; width: 1080px; height: 720px; background: var(--w-bg); backdrop-filter: blur(60px) saturate(1.4); border-radius: 8px; box-shadow: var(--w-shadow); display: grid; grid-template-columns: 248px 1fr; grid-template-rows: 44px 1fr; overflow: hidden; }
+  .titlebar { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding-left: 16px; font-size: 12px; }
+  .titlebar .caps { margin-left: auto; display: flex; height: 100%; }
+  .titlebar .caps span { width: 46px; display: grid; place-items: center; color: var(--w-text-2); }
+  .titlebar .caps span:hover { background: var(--w-hover); }
+
+  .nav { padding: 4px 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav .search { margin: 4px 4px 10px; height: 32px; border-radius: 6px; background: var(--w-card); border: 1px solid var(--w-stroke); border-bottom-color: rgba(27,31,59,.18); display: flex; align-items: center; gap: 8px; padding: 0 10px; color: var(--w-text-3); }
+  .nav-item { position: relative; height: 38px; border-radius: 6px; display: flex; align-items: center; gap: 12px; padding: 0 12px; color: var(--w-text); text-align: left; width: 100%; }
+  .nav-item:hover { background: var(--w-hover); }
+  .nav-item.sel { background: var(--w-hover); }
+  .nav-item.sel::before { content: ""; position: absolute; left: 0; top: 11px; bottom: 11px; width: 3px; border-radius: 2px; background: var(--w-accent); }
+  .nav-item .badge { margin-left: auto; min-width: 20px; height: 20px; border-radius: 10px; background: var(--w-accent); color: var(--w-accent-text); font-size: 11px; font-weight: 600; display: grid; place-items: center; padding: 0 6px; }
+  .nav .grow { flex: 1; }
+
+  .content { background: var(--w-card-2); border-top-left-radius: 8px; border-top: 1px solid var(--w-stroke); border-left: 1px solid var(--w-stroke); overflow: hidden; position: relative; }
+  .view { position: absolute; inset: 0; padding: 28px 32px; overflow: auto; display: none; }
+  .view.show { display: block; }
+  .view h2 { font-family: "Segoe UI Variable Display", "Segoe UI", Inter, sans-serif; font-size: 28px; font-weight: 600; margin: 0 0 20px; letter-spacing: -0.01em; }
+  .card { background: var(--w-card); border: 1px solid var(--w-stroke); border-radius: 8px; }
+  .sub { color: var(--w-text-2); }
+  .tiny { font-size: 12px; color: var(--w-text-3); }
+  .btn { height: 32px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--w-stroke) !important; background: var(--w-card) !important; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+  .btn:hover { filter: brightness(.98); }
+  .btn.primary { background: var(--w-accent) !important; color: var(--w-accent-text) !important; border-color: transparent !important; }
+  .toggle { width: 40px; height: 20px; border-radius: 10px; border: 1px solid var(--w-text-2); position: relative; flex: none; }
+  .toggle::after { content: ""; position: absolute; top: 3px; left: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--w-text-2); transition: left .15s; }
+  .toggle.on { background: var(--w-accent); border-color: var(--w-accent); }
+  .toggle.on::after { left: 22px; background: var(--w-accent-text); }
+
+  /* Overview */
+  .hero { display: grid; grid-template-columns: 170px 1fr; gap: 28px; padding: 20px 28px; align-items: center; }
+  .phone { width: 128px; height: 256px; margin: 0 auto; border-radius: 34px; padding: 7px; background: linear-gradient(145deg, #3A3F5C, #1B1F3B); box-shadow: 0 18px 30px -18px rgba(27,31,59,.7), inset 0 0 0 1.5px rgba(255,255,255,.18); }
+  .phone .scr { height: 100%; border-radius: 28px; background: radial-gradient(160px 200px at 30% 20%, #F3A3BB, transparent 70%), linear-gradient(170deg, #5B63D6, #2B2F5A); color: #fff; text-align: center; position: relative; overflow: hidden; }
+  .phone .island { width: 50px; height: 15px; border-radius: 9px; background: #000; margin: 8px auto 0; }
+  .phone .t { font-family: "Segoe UI Variable Display", Inter, sans-serif; font-size: 38px; font-weight: 600; line-height: 1; margin-top: 18px; letter-spacing: -0.02em; }
+  .phone .d { font-size: 11px; opacity: .85; margin-top: 4px; }
+  .phone .mini { position: absolute; left: 8px; right: 8px; bottom: 30px; background: rgba(255,255,255,.22); backdrop-filter: blur(8px); border-radius: 12px; padding: 6px 8px; font-size: 9px; text-align: left; }
+  .hero h3 { margin: 0; font-size: 24px; font-weight: 600; font-family: "Segoe UI Variable Display", "Segoe UI", Inter, sans-serif; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 18px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 14px; background: var(--w-card-2); border: 1px solid var(--w-stroke); font-size: 13px; }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--w-ok); }
+  .chip.off { color: var(--w-text-3); }
+  .chip.off .dot { background: var(--w-text-3); }
+  .batt { display: inline-flex; align-items: center; gap: 4px; }
+  .batt i { width: 22px; height: 11px; border-radius: 3px; border: 1.4px solid currentColor; position: relative; display: inline-block; }
+  .batt i::before { content: ""; position: absolute; left: 1.5px; top: 1.5px; bottom: 1.5px; width: calc(var(--p) * 0.17px); border-radius: 1px; background: var(--w-ok); }
+  .batt i::after { content: ""; position: absolute; right: -4px; top: 3px; width: 2px; height: 4px; border-radius: 1px; background: currentColor; }
+  .actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .action { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; padding: 12px; border-radius: 8px; background: var(--w-card-2); border: 1px solid var(--w-stroke) !important; font-size: 13px; text-align: left; }
+  .action:hover { background: var(--w-hover); }
+  .action svg.i { width: 20px; height: 20px; color: var(--w-accent); }
+  .grid2 { display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; margin-top: 16px; }
+  .sect-h { display: flex; align-items: baseline; justify-content: space-between; padding: 14px 16px 8px; font-weight: 600; }
+  .sect-h a { font-weight: 400; font-size: 13px; color: var(--w-accent); text-decoration: none; }
+  .nrow { display: grid; grid-template-columns: 32px 1fr auto; gap: 12px; padding: 10px 16px; align-items: start; }
+  .nrow + .nrow { border-top: 1px solid var(--w-stroke); }
+  .appic { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 600; font-size: 14px; }
+  .nrow b { font-weight: 600; display: block; }
+  .nrow .msg { color: var(--w-text-2); font-size: 13px; }
+  .np { padding: 16px; display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: center; }
+  .np .art { width: 72px; height: 72px; border-radius: 8px; background: conic-gradient(from 210deg, #E8577E, #4E54C8, #2F8F6B, #E8577E); }
+  .np .bar { height: 4px; border-radius: 2px; background: var(--w-stroke); margin: 10px 0 4px; position: relative; }
+  .np .bar::before { content: ""; position: absolute; inset: 0 62% 0 0; border-radius: 2px; background: var(--w-text); }
+  .np .ctl { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 6px; }
+  .np .ctl button { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; }
+  .np .ctl button:hover { background: var(--w-hover); }
+  .np .ctl .pp { background: var(--w-text) !important; color: var(--w-bg); }
+  .stack { display: grid; gap: 16px; }
+
+  /* Notifications view */
+  .filter { display: flex; gap: 6px; margin-bottom: 16px; }
+  .pill { height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid var(--w-stroke) !important; background: var(--w-card) !important; font-size: 13px; }
+  .pill.sel { background: var(--w-accent) !important; color: var(--w-accent-text) !important; }
+  .group { margin-bottom: 14px; }
+  .group-h { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--w-stroke); font-weight: 600; }
+  .group-h .appic { width: 22px; height: 22px; border-radius: 6px; font-size: 11px; }
+  .group-h .tiny { margin-left: auto; font-weight: 400; }
+  .nrow .acts { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* Messages view */
+  .view.flush { padding: 0; }
+  .msgs { display: grid; grid-template-columns: 300px 1fr; height: 100%; }
+  .convs { border-right: 1px solid var(--w-stroke); overflow: auto; padding: 16px 8px; }
+  .convs .top { display: flex; align-items: center; justify-content: space-between; padding: 0 8px 12px; }
+  .convs .top h2 { margin: 0; font-size: 22px; }
+  .conv { display: grid; grid-template-columns: 40px 1fr auto; gap: 10px; padding: 10px 8px; border-radius: 6px; align-items: center; width: 100%; text-align: left; }
+  .conv:hover, .conv.sel { background: var(--w-hover); }
+  .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 600; }
+  .conv b { display: block; font-weight: 600; }
+  .conv .msg { color: var(--w-text-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
+  .conv .unread { width: 8px; height: 8px; border-radius: 50%; background: var(--w-accent); }
+  .thread { display: grid; grid-template-rows: 60px 1fr auto; height: 100%; }
+  .thread-h { display: flex; align-items: center; gap: 12px; padding: 0 20px; border-bottom: 1px solid var(--w-stroke); }
+  .thread-h .av { width: 32px; height: 32px; font-size: 13px; }
+  .thread-h .btns { margin-left: auto; display: flex; gap: 6px; }
+  .bubbles { padding: 20px 24px; overflow: auto; display: flex; flex-direction: column; gap: 6px; }
+  .bubble { max-width: 62%; padding: 8px 12px; border-radius: 16px; line-height: 1.4; }
+  .bubble.in { background: var(--w-card); border: 1px solid var(--w-stroke); align-self: flex-start; border-bottom-left-radius: 6px; }
+  .bubble.out { background: #3B7BF6; color: #fff; align-self: flex-end; border-bottom-right-radius: 6px; }
+  .bubble.out.sms { background: #34A853; }
+  .day { align-self: center; font-size: 12px; color: var(--w-text-3); margin: 8px 0; }
+  .compose { padding: 12px 20px 16px; display: flex; gap: 8px; align-items: center; }
+  .compose .field { flex: 1; height: 38px; border-radius: 19px; background: var(--w-card); border: 1px solid var(--w-stroke); display: flex; align-items: center; padding: 0 14px; color: var(--w-text-3); }
+  .compose .send { width: 38px; height: 38px; border-radius: 50%; background: #3B7BF6 !important; color: #fff; display: grid; place-items: center; }
+
+  /* Calls view */
+  .calls { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
+  .crow { display: grid; grid-template-columns: 36px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 16px; }
+  .crow + .crow { border-top: 1px solid var(--w-stroke); }
+  .crow .av { width: 36px; height: 36px; font-size: 13px; }
+  .crow .missed { color: #D64545; }
+  .stage.dark .crow .missed { color: #FF8A8A; }
+  .pad { padding: 20px; text-align: center; }
+  .pad .num { font-size: 26px; height: 40px; letter-spacing: .04em; font-family: "Segoe UI Variable Display", Inter, sans-serif; }
+  .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
+  .key { height: 54px; border-radius: 27px; background: var(--w-card-2) !important; border: 1px solid var(--w-stroke) !important; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
+  .key small { font-size: 9px; color: var(--w-text-3); letter-spacing: .1em; margin-top: 2px; }
+  .dial { width: 56px; height: 56px; border-radius: 50%; background: #2F8F6B !important; color: #fff; display: inline-grid; place-items: center; }
+
+  /* Files view */
+  .drop { border: 1.5px dashed var(--w-text-3); border-radius: 12px; padding: 28px; display: flex; align-items: center; gap: 20px; }
+  .drop .big { width: 56px; height: 56px; border-radius: 14px; background: var(--w-accent-soft); color: var(--w-accent); display: grid; place-items: center; }
+  .drop .big svg.i { width: 26px; height: 26px; }
+  .drop.over { border-color: var(--w-accent); background: var(--w-accent-soft); }
+  .xfer { display: grid; grid-template-columns: 36px 1fr 120px auto; gap: 12px; align-items: center; padding: 12px 16px; }
+  .xfer + .xfer { border-top: 1px solid var(--w-stroke); }
+  .ficon { width: 36px; height: 36px; border-radius: 6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; }
+  .prog { height: 4px; border-radius: 2px; background: var(--w-stroke); overflow: hidden; }
+  .prog i { display: block; height: 100%; background: var(--w-accent); border-radius: 2px; }
+  .photos { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; padding: 0 16px 16px; }
+  .ph { aspect-ratio: 1; border-radius: 6px; }
+
+  /* Clipboard view */
+  .clip { display: grid; grid-template-columns: 30px 1fr auto; gap: 12px; padding: 12px 16px; align-items: start; }
+  .clip + .clip { border-top: 1px solid var(--w-stroke); }
+  .src { width: 30px; height: 30px; border-radius: 8px; background: var(--w-card-2); border: 1px solid var(--w-stroke); display: grid; place-items: center; color: var(--w-text-2); }
+  .clip .txt { font-size: 14px; }
+  .clip .txt.code { font-family: "Cascadia Code", Consolas, monospace; font-size: 13px; background: var(--w-card-2); border: 1px solid var(--w-stroke); padding: 6px 8px; border-radius: 6px; }
+  .clip .img { width: 160px; height: 90px; border-radius: 6px; background: linear-gradient(135deg, #DCE6F5, #F3C8D6); }
+
+  /* Camera view */
+  .cam { display: grid; grid-template-columns: 1fr 280px; gap: 16px; }
+  .preview { aspect-ratio: 16/9; border-radius: 10px; background: radial-gradient(64px 74px at 50% 40%, #C9A08E 0 98%, transparent 100%), radial-gradient(190px 120px at 50% 104%, #4E54C8 0 98%, transparent 100%), radial-gradient(400px 260px at 75% 20%, #F3C8D6 0%, transparent 70%), linear-gradient(180deg, #DCE6F5, #B9C3DD); position: relative; overflow: hidden; }
+  .preview .live { position: absolute; left: 12px; top: 12px; background: rgba(0,0,0,.5); color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 4px; display: flex; gap: 6px; align-items: center; }
+  .preview .live i { width: 7px; height: 7px; border-radius: 50%; background: #FF4D6A; }
+  .seg { display: flex; background: var(--w-card-2); border: 1px solid var(--w-stroke); border-radius: 8px; padding: 3px; gap: 3px; }
+  .seg button { flex: 1; height: 30px; border-radius: 6px; font-size: 13px; }
+  .seg button.sel { background: var(--w-card) !important; box-shadow: 0 1px 3px rgba(0,0,0,.12); font-weight: 600; }
+  .setrow { display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+  .setrow + .setrow { border-top: 1px solid var(--w-stroke); }
+  .setrow .lbl { flex: 1; }
+  .setrow .lbl small { display: block; color: var(--w-text-3); font-size: 12px; }
+
+  /* Settings view */
+  .set-group { margin-bottom: 16px; }
+  .set-group h4 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+  .combo { height: 32px; min-width: 200px; border-radius: 6px; border: 1px solid var(--w-stroke); border-bottom-color: rgba(127,127,127,.4); background: var(--w-card); color: var(--w-text); font: inherit; font-size: 14px; padding: 0 10px; }
+  .combo option { background: var(--w-solid); color: var(--w-text); }
+  .infobar { display: none; align-items: center; gap: 12px; padding: 10px 14px; margin-bottom: 16px; border-radius: 6px; background: var(--w-accent-soft); border: 1px solid var(--w-stroke); font-size: 13px; }
+  .infobar.show { display: flex; }
+  .infobar b { font-weight: 600; }
+  .infobar span { flex: 1; }
+  .setrow svg.i { color: var(--w-text-2); }
+
+  /* Tray flyout */
+  .flyout { position: absolute; right: 12px; bottom: 60px; width: 372px; background: var(--w-flyout); backdrop-filter: blur(40px) saturate(1.5); border-radius: 8px; box-shadow: var(--w-shadow); padding: 16px; transform: translateY(16px); opacity: 0; pointer-events: none; transition: transform .22s cubic-bezier(.2,.8,.2,1), opacity .18s; }
+  .flyout.open { transform: none; opacity: 1; pointer-events: auto; }
+  .fly-top { display: flex; gap: 12px; align-items: center; }
+  .fly-top .mini-phone { width: 34px; height: 56px; border-radius: 9px; background: linear-gradient(170deg, #5B63D6, #2B2F5A); border: 2px solid #2A2E48; }
+  .fly-top b { display: block; font-size: 15px; }
+  .qgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+  .q { height: 64px; border-radius: 6px; background: var(--w-card) !important; border: 1px solid var(--w-stroke) !important; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; font-size: 12px; }
+  .q.on { background: var(--w-accent) !important; color: var(--w-accent-text); border-color: transparent !important; }
+  .fly-np { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 10px; border-radius: 6px; background: var(--w-card); border: 1px solid var(--w-stroke); }
+  .fly-np .art { width: 44px; height: 44px; border-radius: 6px; background: conic-gradient(from 210deg, #E8577E, #4E54C8, #2F8F6B, #E8577E); }
+  .fly-clip { margin-top: 8px; padding: 10px 12px; border-radius: 6px; background: var(--w-card); border: 1px solid var(--w-stroke); display: flex; gap: 10px; align-items: center; font-size: 13px; }
+  .fly-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--w-stroke); font-size: 13px; }
+  .fly-foot a { color: var(--w-accent); text-decoration: none; }
+
+  /* Toast (native Windows notification style) */
+  .toast { position: absolute; right: 12px; bottom: 60px; width: 364px; background: var(--w-flyout); backdrop-filter: blur(40px); border-radius: 8px; box-shadow: var(--w-shadow); padding: 14px 16px 16px; transform: translateX(400px); transition: transform .32s cubic-bezier(.2,.9,.25,1); }
+  .toast.show { transform: none; }
+  .toast .hd { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--w-text-2); margin-bottom: 10px; }
+  .toast .hd .x { margin-left: auto; }
+  .toast .bd { display: grid; grid-template-columns: 44px 1fr; gap: 12px; }
+  .toast .reply { margin-top: 12px; display: flex; gap: 8px; }
+  .toast .reply .field { flex: 1; height: 32px; border-radius: 6px; background: var(--w-card); border: 1px solid var(--w-stroke); border-bottom: 1.5px solid var(--w-accent); display: flex; align-items: center; padding: 0 10px; color: var(--w-text-3); font-size: 13px; }
+
+  /* Fenpo island: calls, transfers, now playing at top-center */
+  .island { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: #0E1022; color: #fff; border-radius: 24px; height: 40px; width: 240px; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 10px; overflow: hidden; transition: width .4s cubic-bezier(.2,.9,.25,1.1), height .4s cubic-bezier(.2,.9,.25,1.1), border-radius .4s, opacity .2s; box-shadow: 0 16px 40px -12px rgba(0,0,0,.6); opacity: 0; pointer-events: none; }
+  .island.show { opacity: 1; pointer-events: auto; }
+  .island.call { width: 470px; height: 76px; border-radius: 38px; padding: 0 14px 0 14px; }
+  .island .av { width: 48px; height: 48px; font-size: 17px; flex: none; }
+  .island .who { flex: 1; min-width: 0; }
+  .island .who b { display: block; font-size: 16px; font-weight: 600; }
+  .island .who span { font-size: 12px; color: #A3A8C3; }
+  .island .cbtn { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; flex: none; }
+  .island .cbtn svg.i { width: 22px; height: 22px; }
+  .island .dec { background: #E5484D !important; }
+  .island .acc { background: #2FB36B !important; }
+  .island .phone-btn { background: rgba(255,255,255,.14) !important; }
+  .island .ring { position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1.5px rgba(47,179,107,.6); animation: ring 1.6s ease-out infinite; }
+  @keyframes ring { 0% { opacity: .9; } 100% { opacity: 0; } }
+  .island.xfer-mode { width: 360px; height: 52px; border-radius: 26px; }
+  .island .xbar { flex: 1; }
+  .island .xbar .prog { background: rgba(255,255,255,.18); margin-top: 6px; }
+  .island .xbar .prog i { background: #FF86A6; transition: width .2s linear; }
+
+  /* Pairing (first run) */
+  .pair { position: absolute; inset: 0; background: var(--w-solid); display: none; grid-template-columns: 1fr 1fr; z-index: 3; }
+  .pair.show { display: grid; }
+  .pair .l { padding: 56px 48px; display: flex; flex-direction: column; }
+  .pair .l h2 { font-size: 30px; margin: 18px 0 8px; font-family: "Segoe UI Variable Display", Inter, sans-serif; font-weight: 600; }
+  .steps { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 14px; counter-reset: s; }
+  .steps li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: start; counter-increment: s; }
+  .steps li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--w-card); border: 1px solid var(--w-stroke); font-weight: 600; font-size: 13px; }
+  .steps li.done::before { content: "✓"; background: var(--w-ok); color: #fff; border-color: transparent; }
+  .steps li.now::before { background: var(--w-accent); color: var(--w-accent-text); border-color: transparent; }
+  .pair .r { background: var(--w-card-2); border-left: 1px solid var(--w-stroke); display: grid; place-items: center; }
+  .qr { width: 260px; height: 260px; background: #fff; border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px -14px rgba(27,31,59,.4); position: relative; }
+  .qr canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+  .qr .logo { position: absolute; left: 50%; top: 50%; width: 52px; height: 52px; transform: translate(-50%,-50%); background: #fff; border-radius: 14px; padding: 4px; }
+  .code6 { margin-top: 18px; text-align: center; color: var(--w-text-2); font-size: 13px; }
+  .code6 b { display: block; font-size: 26px; letter-spacing: .3em; color: var(--w-text); font-family: "Segoe UI Variable Display", Inter, sans-serif; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage *, .stage *::before, .stage *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<header class="page-head">
+  <div>
+    <h1>Fenpo for Windows</h1>
+    <p>Ana pencere, tepsi paneli, bildirimler ve aramalar. Sol menüden ekranlar arasında gez, sağdaki düğmelerle olayları tetikle.</p>
+  </div>
+  <div class="demo" role="toolbar" aria-label="Demo olayları">
+    <button type="button" data-demo="toast">Bildirim gelsin</button>
+    <button type="button" data-demo="call">Arama gelsin</button>
+    <button type="button" data-demo="xfer">Dosya gelsin</button>
+    <button type="button" data-demo="tray">Tepsi paneli</button>
+    <button type="button" data-demo="pair">İlk kurulum</button>
+    <span class="sep"></span>
+    <button type="button" data-demo="theme">Açık / koyu</button>
+  </div>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo" viewBox="0 0 64 64">
+      <rect x="3" y="3" width="58" height="58" rx="19" fill="#E8577E"/>
+      <circle cx="32" cy="32" r="21" fill="#FFF6F0"/>
+      <g fill="#1B1F3B">
+        <path id="seed" d="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z"/>
+        <use href="#seed" transform="rotate(72 32 32)"/><use href="#seed" transform="rotate(144 32 32)"/>
+        <use href="#seed" transform="rotate(216 32 32)"/><use href="#seed" transform="rotate(288 32 32)"/>
+      </g>
+    </symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 5.5h3"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v4l1.5 3h-15L6 14z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5v9a1.5 1.5 0 0 1-1.5 1.5H9l-5 4z"/></symbol>
+    <symbol id="i-call" viewBox="0 0 24 24"><path d="M5 4h3.5l2 5-2.5 1.5a11 11 0 0 0 5.5 5.5L15 13.5l5 2V19a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><rect x="8.5" y="3" width="7" height="3.5" rx="1"/><path d="M8.5 5H6.5A1.5 1.5 0 0 0 5 6.5v13A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 17.5 5h-2"/><path d="M9 12h6M9 16h4"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2.5l2-2.5h6L17 7h2.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></symbol>
+    <symbol id="i-ring" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></symbol>
+    <symbol id="i-hotspot" viewBox="0 0 24 24"><path d="M4.5 9a11 11 0 0 1 15 0M7.5 12.5a6.5 6.5 0 0 1 9 0M10.5 16a2.2 2.2 0 0 1 3 0"/><circle cx="12" cy="19" r=".8"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z"/><path d="M11.5 13.5L20 4"/></symbol>
+    <symbol id="i-mirror" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M9 20h6M12 16v4"/></symbol>
+    <symbol id="i-bt" viewBox="0 0 24 24"><path d="M7 7l10 10-5 4V3l5 4L7 17"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M3.5 9.5a12 12 0 0 1 17 0M6.5 13a7.5 7.5 0 0 1 11 0M9.5 16.5a3.2 3.2 0 0 1 5 0"/><circle cx="12" cy="19.5" r=".6"/></symbol>
+    <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v14M9 6l3-3 3 3M12 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4M12 13l-4-2V8M12 11l4-2V7"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1"/><rect x="13.5" y="5" width="4" height="14" rx="1"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 6v12l8.5-6zM13.5 6v12l8.5-6z"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 6v12l-8.5-6zM10.5 6v12L2 12z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/></symbol>
+    <symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8"/></symbol>
+    <symbol id="i-hangup" viewBox="0 0 24 24"><path d="M3 14.5c5-5 13-5 18 0l-2.5 2.5-3.5-1.5v-3a10 10 0 0 0-6 0v3L5.5 17z"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+    <symbol id="i-square" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-focus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></symbol>
+  </defs>
+</svg>
+
+<div class="stage-wrap">
+  <div class="stage-scale" id="scaleBox">
+    <div class="stage" id="stage">
+
+      <!-- Main window -->
+      <div class="win" id="win">
+        <div class="titlebar">
+          <svg width="16" height="16"><use href="#logo"/></svg>
+          <span>Fenpo</span>
+          <div class="caps"><span><svg class="i" style="width:14px;height:14px"><use href="#i-minus"/></svg></span><span><svg class="i" style="width:12px;height:12px"><use href="#i-square"/></svg></span><span><svg class="i" style="width:14px;height:14px"><use href="#i-x"/></svg></span></div>
+        </div>
+
+        <nav class="nav" aria-label="Fenpo bölümleri">
+          <div class="search"><svg class="i" style="width:16px;height:16px"><use href="#i-search"/></svg>Mesaj, kişi veya dosya ara</div>
+          <button class="nav-item sel" data-view="home"><svg class="i"><use href="#i-phone"/></svg>iPhone’um</button>
+          <button class="nav-item" data-view="notif"><svg class="i"><use href="#i-bell"/></svg>Bildirimler<span class="badge">4</span></button>
+          <button class="nav-item" data-view="msg"><svg class="i"><use href="#i-chat"/></svg>Mesajlar<span class="badge">2</span></button>
+          <button class="nav-item" data-view="calls"><svg class="i"><use href="#i-call"/></svg>Aramalar</button>
+          <button class="nav-item" data-view="files"><svg class="i"><use href="#i-folder"/></svg>Dosyalar ve fotoğraflar</button>
+          <button class="nav-item" data-view="clip"><svg class="i"><use href="#i-clip"/></svg>Pano</button>
+          <button class="nav-item" data-view="cam"><svg class="i"><use href="#i-cam"/></svg>Kamera</button>
+          <div class="grow"></div>
+          <button class="nav-item" data-view="set"><svg class="i"><use href="#i-gear"/></svg>Ayarlar</button>
+        </nav>
+
+        <div class="content">
+          <!-- Home -->
+          <section class="view show" id="v-home">
+            <div class="card hero">
+              <div class="phone"><div class="scr"><div class="island"></div><div class="t">18:51</div><div class="d">15 Ekim Perşembe</div><div class="mini"><b>Mert</b><br>Akşam maça geliyor musun?</div></div></div>
+              <div>
+                <span class="tiny">Bağlı</span>
+                <h3>Buğra’nın iPhone’u</h3>
+                <div class="chips">
+                  <span class="chip batt" style="--p:78"><i></i>%78</span>
+                  <span class="chip"><span class="dot"></span><svg class="i" style="width:14px;height:14px"><use href="#i-bt"/></svg>Bluetooth</span>
+                  <span class="chip"><span class="dot"></span><svg class="i" style="width:14px;height:14px"><use href="#i-wifi"/></svg>Aynı Wi‑Fi ağı</span>
+                  <span class="chip off"><span class="dot"></span><svg class="i" style="width:14px;height:14px"><use href="#i-usb"/></svg>USB yok</span>
+                </div>
+                <div class="actions">
+                  <button class="action"><svg class="i"><use href="#i-ring"/></svg>Telefonu çaldır</button>
+                  <button class="action"><svg class="i"><use href="#i-hotspot"/></svg>Hotspot’a bağlan</button>
+                  <button class="action"><svg class="i"><use href="#i-send"/></svg>Dosya gönder</button>
+                  <button class="action"><svg class="i"><use href="#i-cam"/></svg>Kamera olarak kullan</button>
+                  <button class="action"><svg class="i"><use href="#i-mirror"/></svg>Ekranı yansıt</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid2">
+              <div class="card">
+                <div class="sect-h">Son bildirimler <a href="#" data-goto="notif">Tümünü gör</a></div>
+                <div class="nrow"><div class="appic" style="background:#25A35A">W</div><div><b>Selin</b><span class="msg">Sunumu attım, bakabilir misin?</span></div><span class="tiny">2 dk</span></div>
+                <div class="nrow"><div class="appic" style="background:#3B7BF6">M</div><div><b>Mert</b><span class="msg">Akşam maça geliyor musun?</span></div><span class="tiny">6 dk</span></div>
+                <div class="nrow"><div class="appic" style="background:#F2994A">T</div><div><b>Takvim</b><span class="msg">Sprint planlama, 19:30</span></div><span class="tiny">12 dk</span></div>
+              </div>
+              <div class="stack">
+                <div class="card np">
+                  <div class="art"></div>
+                  <div>
+                    <b>Gece Yolculuğu</b><div class="sub" style="font-size:13px">Kara Bulut</div>
+                    <div class="bar"></div><div class="tiny" style="display:flex;justify-content:space-between"><span>1:24</span><span>3:52</span></div>
+                    <div class="ctl"><button aria-label="Önceki"><svg class="i f"><use href="#i-prev"/></svg></button><button class="pp" aria-label="Duraklat"><svg class="i f"><use href="#i-pause"/></svg></button><button aria-label="Sonraki"><svg class="i f"><use href="#i-next"/></svg></button></div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="sect-h">Son aktarılanlar <a href="#" data-goto="files">Dosyalar</a></div>
+                  <div class="xfer" style="grid-template-columns:36px 1fr auto"><div class="ficon" style="background:#4E54C8">JPG</div><div><b style="font-weight:600">IMG_4821.HEIC</b><div class="tiny">iPhone’dan geldi, Resimler klasöründe</div></div><span class="tiny">Bugün</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Notifications -->
+          <section class="view" id="v-notif">
+            <h2>Bildirimler</h2>
+            <div class="filter"><button class="pill sel">Tümü</button><button class="pill">Mesajlar</button><button class="pill">Aramalar</button><button class="pill">Diğer</button><span style="flex:1"></span><button class="btn">Tümünü temizle</button></div>
+            <div class="card group">
+              <div class="group-h"><div class="appic" style="background:#25A35A">W</div>WhatsApp<span class="tiny">2 bildirim</span></div>
+              <div class="nrow"><div class="av" style="background:#E8577E;width:32px;height:32px;font-size:13px">S</div><div><b>Selin</b><span class="msg">Sunumu attım, bakabilir misin? Son slaytta rakamlar eksik olabilir.</span><div class="acts"><button class="btn">iPhone’da aç</button><button class="btn">Kapat</button></div></div><span class="tiny">2 dk</span></div>
+              <div class="nrow"><div class="av" style="background:#2F8F6B;width:32px;height:32px;font-size:13px">A</div><div><b>Aile</b><span class="msg">Annem: Hafta sonu geliyor musunuz?</span></div><span class="tiny">25 dk</span></div>
+            </div>
+            <div class="card group">
+              <div class="group-h"><div class="appic" style="background:#3B7BF6">M</div>Mesajlar<span class="tiny">1 bildirim</span></div>
+              <div class="nrow"><div class="av" style="background:#4E54C8;width:32px;height:32px;font-size:13px">M</div><div><b>Mert</b><span class="msg">Akşam maça geliyor musun?</span><div class="acts"><button class="btn primary">Yanıtla</button><button class="btn">Okundu</button></div></div><span class="tiny">6 dk</span></div>
+            </div>
+            <div class="card group">
+              <div class="group-h"><div class="appic" style="background:#F2994A">T</div>Takvim<span class="tiny">1 bildirim</span></div>
+              <div class="nrow"><div class="appic" style="background:transparent;color:var(--w-text-2)"><svg class="i"><use href="#i-bell"/></svg></div><div><b>Sprint planlama</b><span class="msg">Bugün 19:30, Teams</span></div><span class="tiny">12 dk</span></div>
+            </div>
+            <p class="tiny">WhatsApp gibi uygulamalarda yanıt yazılamıyor, iOS buna izin vermiyor. Mesajlar uygulamasındaki SMS ve iMessage’lar buradan yanıtlanabiliyor.</p>
+          </section>
+
+          <!-- Messages -->
+          <section class="view flush" id="v-msg">
+            <div class="msgs">
+              <div class="convs">
+                <div class="top"><h2>Mesajlar</h2><button class="btn" aria-label="Yeni mesaj"><svg class="i" style="width:16px;height:16px"><use href="#i-plus"/></svg></button></div>
+                <button class="conv sel"><div class="av" style="background:#4E54C8">M</div><div><b>Mert</b><div class="msg">Akşam maça geliyor musun?</div></div><span class="unread"></span></button>
+                <button class="conv"><div class="av" style="background:#E8577E">S</div><div><b>Selin</b><div class="msg">Tamamdır, yarın konuşuruz</div></div><span class="tiny">16:02</span></button>
+                <button class="conv"><div class="av" style="background:#2F8F6B">A</div><div><b>Annem</b><div class="msg">Fotoğrafı gördüm, çok güzel olmuş</div></div><span class="tiny">Dün</span></button>
+                <button class="conv"><div class="av" style="background:#8A90AC">K</div><div><b>Kargo</b><div class="msg">Gönderiniz dağıtıma çıktı. Takip no 4815…</div></div><span class="tiny">Dün</span></button>
+                <button class="conv"><div class="av" style="background:#F2994A">E</div><div><b>Ekip</b><div class="msg">Deniz: Deploy 20:00’de başlıyor</div></div><span class="tiny">Pzt</span></button>
+              </div>
+              <div class="thread">
+                <div class="thread-h"><div class="av" style="background:#4E54C8">M</div><div><b>Mert</b><div class="tiny">iMessage</div></div><div class="btns"><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg>Ara</button></div></div>
+                <div class="bubbles">
+                  <span class="day">Bugün 17:40</span>
+                  <div class="bubble in">Bu akşam Fenerbahçe maçı var, bizde izliyoruz</div>
+                  <div class="bubble out">Saat kaçta başlıyor?</div>
+                  <div class="bubble in">20:45. Çerez falan da alırız</div>
+                  <div class="bubble out">Tamam, işten çıkınca yazarım</div>
+                  <span class="day">18:45</span>
+                  <div class="bubble in">Akşam maça geliyor musun?</div>
+                </div>
+                <div class="compose"><div class="field">iMessage</div><button class="send" aria-label="Gönder"><svg class="i"><use href="#i-send"/></svg></button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Calls -->
+          <section class="view" id="v-calls">
+            <h2>Aramalar</h2>
+            <div class="calls">
+              <div class="card">
+                <div class="sect-h">Son aramalar</div>
+                <div class="crow"><div class="av" style="background:#2F8F6B">A</div><div><b style="font-weight:600">Annem</b><div class="tiny">Cep, gelen arama, 4 dk</div></div><span class="tiny">16:20</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
+                <div class="crow"><div class="av" style="background:#8A90AC">?</div><div><b style="font-weight:600" class="missed">0 532 *** 44 18</b><div class="tiny">Cevapsız arama</div></div><span class="tiny">14:03</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
+                <div class="crow"><div class="av" style="background:#4E54C8">M</div><div><b style="font-weight:600">Mert</b><div class="tiny">Cep, giden arama, 1 dk</div></div><span class="tiny">Dün</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
+                <div class="crow"><div class="av" style="background:#E8577E">S</div><div><b style="font-weight:600">Selin</b><div class="tiny">İş, FaceTime ses, 12 dk</div></div><span class="tiny">Pzt</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
+              </div>
+              <div class="card pad">
+                <div class="num">0 532 </div>
+                <div class="keys">
+                  <button class="key">1<small>&nbsp;</small></button><button class="key">2<small>ABC</small></button><button class="key">3<small>DEF</small></button>
+                  <button class="key">4<small>GHI</small></button><button class="key">5<small>JKL</small></button><button class="key">6<small>MNO</small></button>
+                  <button class="key">7<small>PQRS</small></button><button class="key">8<small>TUV</small></button><button class="key">9<small>WXYZ</small></button>
+                  <button class="key">*<small>&nbsp;</small></button><button class="key">0<small>+</small></button><button class="key">#<small>&nbsp;</small></button>
+                </div>
+                <button class="dial" aria-label="Ara"><svg class="i"><use href="#i-call"/></svg></button>
+                <p class="tiny" style="margin:12px 0 0">Ses bilgisayarın hoparlör ve mikrofonundan geçer.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Files -->
+          <section class="view" id="v-files">
+            <h2>Dosyalar ve fotoğraflar</h2>
+            <div class="drop" id="drop">
+              <div class="big"><svg class="i"><use href="#i-down"/></svg></div>
+              <div style="flex:1"><b style="font-size:16px;font-weight:600">Dosyaları buraya bırak, iPhone’a gitsin</b><div class="sub">Dosya Gezgini’nde sağ tık > Fenpo ile iPhone’a gönder de kullanılabilir.</div></div>
+              <button class="btn primary">Dosya seç</button>
+            </div>
+            <div class="card" style="margin-top:16px">
+              <div class="sect-h">Aktarımlar</div>
+              <div class="xfer"><div class="ficon" style="background:#E5484D">PDF</div><div><b style="font-weight:600">Sözleşme_v3.pdf</b><div class="tiny">iPhone’a gidiyor, 2,4 MB / 3,1 MB</div></div><div class="prog"><i style="width:77%"></i></div><button class="btn">İptal</button></div>
+              <div class="xfer"><div class="ficon" style="background:#4E54C8">MOV</div><div><b style="font-weight:600">IMG_4830.MOV</b><div class="tiny">iPhone’dan geldi, 184 MB, Videolar</div></div><div class="tiny">Tamamlandı</div><button class="btn">Göster</button></div>
+              <div class="xfer"><div class="ficon" style="background:#2F8F6B">XLS</div><div><b style="font-weight:600">Bütçe_Ekim.xlsx</b><div class="tiny">iPhone’a gitti, Fenpo klasörü</div></div><div class="tiny">Tamamlandı</div><button class="btn">Tekrar</button></div>
+            </div>
+            <div class="card" style="margin-top:16px">
+              <div class="sect-h">Son fotoğraflar <span class="tiny" style="font-weight:400">Sürükleyip bir klasöre bırakabilirsin</span></div>
+              <div class="photos">
+                <div class="ph" style="background:linear-gradient(135deg,#F3C8D6,#E8577E)"></div>
+                <div class="ph" style="background:linear-gradient(135deg,#BFD7F2,#4E54C8)"></div>
+                <div class="ph" style="background:linear-gradient(135deg,#CDE8D9,#2F8F6B)"></div>
+                <div class="ph" style="background:linear-gradient(135deg,#FCE3C4,#F2994A)"></div>
+                <div class="ph" style="background:linear-gradient(135deg,#E3E6F0,#8A90AC)"></div>
+                <div class="ph" style="background:linear-gradient(135deg,#DCE6F5,#1B1F3B)"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Clipboard -->
+          <section class="view" id="v-clip">
+            <h2>Pano</h2>
+            <div class="card setrow" style="margin-bottom:16px">
+              <svg class="i"><use href="#i-link"/></svg>
+              <div class="lbl">Kopyaladığın her şey iPhone’a gitsin<small>iPhone’dan gelenler için arka tarafına iki kez dokun ya da Denetim Merkezi’ndeki Fenpo düğmesini kullan.</small></div>
+              <span class="toggle on"></span>
+            </div>
+            <div class="card">
+              <div class="clip"><div class="src" title="iPhone"><svg class="i" style="width:16px;height:16px"><use href="#i-phone"/></svg></div><div><div class="txt">https://maps.apple.com/?q=Kad%C4%B1k%C3%B6y+Moda+Sahili</div><div class="tiny">iPhone’dan, 1 dk önce</div></div><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-copy"/></svg>Kopyala</button></div>
+              <div class="clip"><div class="src" title="Bu bilgisayar"><svg class="i" style="width:16px;height:16px"><use href="#i-pc"/></svg></div><div><div class="txt code">docker compose -f deploy.yml up -d --build</div><div class="tiny">Bu bilgisayardan, iPhone’a gönderildi</div></div><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-copy"/></svg>Kopyala</button></div>
+              <div class="clip"><div class="src" title="iPhone"><svg class="i" style="width:16px;height:16px"><use href="#i-phone"/></svg></div><div><div class="img"></div><div class="tiny">Ekran görüntüsü, iPhone’dan</div></div><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-copy"/></svg>Kopyala</button></div>
+              <div class="clip"><div class="src" title="iPhone"><svg class="i" style="width:16px;height:16px"><use href="#i-phone"/></svg></div><div><div class="txt">Doğrulama kodun: 482 913</div><div class="tiny">iPhone’dan, 14 dk önce</div></div><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-copy"/></svg>Kopyala</button></div>
+            </div>
+          </section>
+
+          <!-- Camera -->
+          <section class="view" id="v-cam">
+            <h2>Kamera</h2>
+            <div class="cam">
+              <div>
+                <div class="preview"><span class="live"><i></i>Teams kullanıyor</span></div>
+                <p class="tiny">Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. iPhone’da Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</p>
+              </div>
+              <div class="stack">
+                <div class="card" style="padding:14px">
+                  <div class="tiny" style="margin-bottom:8px">Lens</div>
+                  <div class="seg"><button class="sel">Geniş</button><button>Ultra geniş</button><button>Ön</button></div>
+                </div>
+                <div class="card">
+                  <div class="setrow"><div class="lbl">Kişiyi ortala<small>Hareket ettikçe kadraj seni takip eder</small></div><span class="toggle on"></span></div>
+                  <div class="setrow"><div class="lbl">Portre bulanıklığı</div><span class="toggle"></span></div>
+                  <div class="setrow"><div class="lbl">iPhone mikrofonunu kullan</div><span class="toggle on"></span></div>
+                  <div class="setrow"><div class="lbl">Bağlantı<small>USB daha az gecikme verir</small></div><span class="tiny">Wi‑Fi</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Settings -->
+          <section class="view" id="v-set">
+            <h2>Ayarlar</h2>
+            <div class="infobar" id="langBar"><svg class="i" style="color:var(--w-accent)"><use href="#i-globe"/></svg><span><b>Dil değişecek.</b> Fenpo yeniden başlayınca arayüz English olur.</span><button class="btn primary" type="button">Şimdi yeniden başlat</button><button class="btn" type="button" id="langLater">Sonra</button></div>
+            <div class="set-group">
+              <h4>Görünüm ve dil</h4>
+              <div class="card">
+                <div class="setrow"><svg class="i"><use href="#i-sun"/></svg><div class="lbl">Tema<small>Sistem seçiliyken Windows’un açık veya koyu ayarını izler</small></div><div class="seg" style="width:270px" id="themeSeg"><button type="button" data-theme-opt="system" class="sel">Sistem</button><button type="button" data-theme-opt="light">Açık</button><button type="button" data-theme-opt="dark">Koyu</button></div></div>
+                <div class="setrow"><svg class="i"><use href="#i-globe"/></svg><div class="lbl">Dil<small>Bildirimler, tepsi paneli ve ada da bu dili kullanır</small></div><select class="combo" id="langSel" aria-label="Dil"><option value="system">Sistem dili (Türkçe)</option><option value="tr">Türkçe</option><option value="en">English</option></select></div>
+              </div>
+            </div>
+            <div class="set-group">
+              <h4>Özellikler</h4>
+              <div class="card">
+                <div class="setrow"><svg class="i"><use href="#i-bell"/></svg><div class="lbl">Bildirimleri göster<small>iPhone’daki bildirimler Windows bildirimi olarak gelir</small></div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-call"/></svg><div class="lbl">Aramaları bilgisayardan yanıtla</div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-clip"/></svg><div class="lbl">Pano paylaşımı</div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-play"/></svg><div class="lbl">Medya kontrolü<small>Klavyedeki medya tuşları iPhone’u kontrol eder</small></div><span class="toggle on"></span></div>
+              </div>
+            </div>
+            <div class="set-group">
+              <h4>Yakınlık ve odak</h4>
+              <div class="card">
+                <div class="setrow"><svg class="i"><use href="#i-lock"/></svg><div class="lbl">iPhone uzaklaşınca bilgisayarı kilitle<small>Yaklaşık 3 metre, 30 saniye</small></div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-focus"/></svg><div class="lbl">iPhone ile kilit aç<small>Face ID onayıyla Windows oturumunu açar (deneysel)</small></div><span class="toggle"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-moon"/></svg><div class="lbl">Odak modunu eşitle<small>iPhone’da Rahatsız Etme açılınca Windows’ta da açılır</small></div><span class="toggle on"></span></div>
+              </div>
+            </div>
+            <div class="set-group">
+              <h4>Cihaz</h4>
+              <div class="card">
+                <div class="setrow"><svg class="i"><use href="#i-phone"/></svg><div class="lbl">Buğra’nın iPhone’u<small>iPhone 16 Pro, iOS 27.0, eşleşme 12 Ekim</small></div><button class="btn">Eşleşmeyi kaldır</button></div>
+                <div class="setrow"><svg class="i"><use href="#i-folder"/></svg><div class="lbl">Gelen dosyalar<small>C:\Users\bugra\Downloads\Fenpo</small></div><button class="btn">Değiştir</button></div>
+              </div>
+            </div>
+          </section>
+
+        </div>
+          <!-- First run pairing -->
+        <div class="pair" id="pair">
+          <div class="l">
+            <svg width="48" height="48"><use href="#logo"/></svg>
+            <h2>iPhone’unu bağla</h2>
+            <p class="sub" style="margin:0">Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</p>
+            <ol class="steps">
+              <li class="done"><div><b>iPhone’a Fenpo’yu yükle</b><div class="tiny">App Store’da “Fenpo” ara</div></div></li>
+              <li class="now"><div><b>Kodu iPhone kamerasıyla okut</b><div class="tiny">Telefon ve bilgisayar aynı Wi‑Fi ağında olmalı</div></div></li>
+              <li><div><b>Bluetooth eşleşmesini onayla</b><div class="tiny">iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</div></div></li>
+              <li><div><b>Mesajlar ve aramalar için izin ver</b><div class="tiny">Ayarlar > Bluetooth > Bu bilgisayar > Bildirimleri göster</div></div></li>
+            </ol>
+            <div style="margin-top:auto;display:flex;gap:8px"><button class="btn" data-demo="pair">Sonra yap</button></div>
+          </div>
+          <div class="r">
+            <div>
+              <div class="qr"><canvas id="qr" width="29" height="29"></canvas><div class="logo"><svg width="44" height="44"><use href="#logo"/></svg></div></div>
+              <div class="code6">Kamera açılmıyorsa iPhone’da bu kodu gir<b>482 917</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fenpo island -->
+      <div class="island" id="island" role="status" aria-live="polite"></div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast" role="status" aria-live="polite">
+        <div class="hd"><svg width="16" height="16"><use href="#logo"/></svg>Fenpo, Mesajlar<span class="x"><svg class="i" style="width:14px;height:14px"><use href="#i-x"/></svg></span></div>
+        <div class="bd">
+          <div class="av" style="background:#4E54C8;width:44px;height:44px">M</div>
+          <div><b style="font-weight:600">Mert</b><div class="sub" style="font-size:13px">Akşam maça geliyor musun? Saat 20:45’te başlıyor, çerezler bizden.</div></div>
+        </div>
+        <div class="reply"><div class="field">Yanıt yaz</div><button class="btn primary" aria-label="Gönder"><svg class="i" style="width:16px;height:16px"><use href="#i-send"/></svg></button></div>
+      </div>
+
+      <!-- Tray flyout -->
+      <div class="flyout" id="flyout">
+        <div class="fly-top">
+          <div class="mini-phone"></div>
+          <div style="flex:1"><b>Buğra’nın iPhone’u</b><span class="tiny batt" style="--p:78"><i></i> %78, Bluetooth ve Wi‑Fi</span></div>
+          <button class="btn" aria-label="Ayarlar"><svg class="i" style="width:16px;height:16px"><use href="#i-gear"/></svg></button>
+        </div>
+        <div class="qgrid">
+          <button class="q on" data-q><svg class="i"><use href="#i-bell"/></svg>Bildirimler</button>
+          <button class="q on" data-q><svg class="i"><use href="#i-clip"/></svg>Pano</button>
+          <button class="q on" data-q><svg class="i"><use href="#i-lock"/></svg>Yakınlık kilidi</button>
+          <button class="q" data-q><svg class="i"><use href="#i-moon"/></svg>Odak</button>
+          <button class="q" data-q><svg class="i"><use href="#i-hotspot"/></svg>Hotspot</button>
+          <button class="q" data-q><svg class="i"><use href="#i-ring"/></svg>Çaldır</button>
+        </div>
+        <div class="fly-np">
+          <div class="art"></div>
+          <div><b style="font-weight:600;font-size:13px">Gece Yolculuğu</b><div class="tiny">Kara Bulut</div></div>
+          <div style="display:flex;gap:2px"><button class="btn" style="padding:0 8px" aria-label="Duraklat"><svg class="i f" style="width:14px;height:14px"><use href="#i-pause"/></svg></button><button class="btn" style="padding:0 8px" aria-label="Sonraki"><svg class="i f" style="width:14px;height:14px"><use href="#i-next"/></svg></button></div>
+        </div>
+        <div class="fly-clip"><svg class="i" style="width:16px;height:16px;color:var(--w-text-2)"><use href="#i-phone"/></svg><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">maps.apple.com/?q=Kadıköy Moda Sahili</span><button class="btn" style="height:28px">Yapıştır</button></div>
+        <div class="fly-foot"><span class="tiny">Son eşitleme şimdi</span><a href="#" data-demo="tray">Fenpo’yu aç</a></div>
+      </div>
+
+      <!-- Taskbar -->
+      <div class="taskbar">
+        <div class="tb-apps">
+          <div class="tb-app"><div class="glyph" style="background:linear-gradient(135deg,#4E9BF5,#1F5FD6);border-radius:4px;transform:scale(.82)"></div></div>
+          <div class="tb-app"><div class="glyph" style="background:#F2C94C"></div></div>
+          <div class="tb-app"><div class="glyph" style="background:linear-gradient(135deg,#3B7BF6,#2F8F6B);border-radius:50%"></div></div>
+          <div class="tb-app"><div class="glyph" style="background:#4E54C8"></div></div>
+          <div class="tb-app on"><svg width="26" height="26"><use href="#logo"/></svg></div>
+        </div>
+        <div class="tray">
+          <button class="tray-btn" id="trayBtn" aria-label="Fenpo tepsi paneli"><svg width="16" height="16"><use href="#logo"/></svg></button>
+          <span class="tray-btn"><svg class="i" style="width:16px;height:16px"><use href="#i-wifi"/></svg><svg class="i" style="width:16px;height:16px"><use href="#i-ring"/></svg></span>
+          <span class="tray-btn clock"><span>18:51<br>15.10.2026</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="notes">
+  <div><h3>Windows’a ait hissetmeli</h3><p>Mica arka plan, Segoe UI Variable, WinUI 3 NavigationView ve Windows bildirimleri. Fenpo’nun kendi rengi sadece seçim çizgisinde, rozetlerde ve birincil düğmelerde.</p></div>
+  <div><h3>Ada sadece önemli anlarda</h3><p>Gelen arama ve dosya aktarımı ekranın üst ortasında, Fenpo’ya özel bir adada çıkar. Sıradan bildirimler Windows’un kendi bildirim alanına gider ve bildirim merkezinde kalır.</p></div>
+  <div><h3>Tepsi her şeyin kısayolu</h3><p>Pil, hızlı ayarlar, çalan şarkı ve iPhone’dan son kopyalanan şey tek tıkla açılan panelde. Çoğu kullanıcı ana pencereyi nadiren açar.</p></div>
+</section>
+
+<script>
+  const stage = document.getElementById("stage");
+  const box = document.getElementById("scaleBox");
+  function fit() {
+    const s = Math.min(1, box.clientWidth / 1440);
+    stage.style.transform = `scale(${s})`;
+    box.style.height = (900 * s) + "px";
+  }
+  addEventListener("resize", fit); fit();
+
+  // Navigation between views
+  function show(view) {
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("sel", n.dataset.view === view));
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("show", v.id === "v-" + view));
+  }
+  document.querySelectorAll(".nav-item").forEach(n => n.addEventListener("click", () => show(n.dataset.view)));
+  document.querySelectorAll("[data-goto]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); show(a.dataset.goto); }));
+
+  document.querySelectorAll(".toggle").forEach(t => t.addEventListener("click", () => t.classList.toggle("on")));
+  document.querySelectorAll("[data-q]").forEach(q => q.addEventListener("click", () => q.classList.toggle("on")));
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => { b.parentElement.querySelectorAll("button").forEach(x => x.classList.remove("sel")); b.classList.add("sel"); }));
+
+  const toast = document.getElementById("toast");
+  const flyout = document.getElementById("flyout");
+  const island = document.getElementById("island");
+  const pair = document.getElementById("pair");
+  let toastTimer, xferTimer;
+
+  function closeOverlays() { toast.classList.remove("show"); flyout.classList.remove("open"); }
+
+  function showToast() {
+    closeOverlays();
+    requestAnimationFrame(() => toast.classList.add("show"));
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 6000);
+  }
+  function toggleTray() { toast.classList.remove("show"); flyout.classList.toggle("open"); document.getElementById("trayBtn").classList.toggle("active", flyout.classList.contains("open")); }
+
+  function showCall() {
+    clearInterval(xferTimer);
+    island.className = "island";
+    island.innerHTML = `<span class="ring"></span><div class="av" style="background:#2F8F6B">A</div><div class="who"><b>Annem</b><span>iPhone, cep</span></div>
+      <button class="cbtn phone-btn" title="iPhone'da yanıtla" aria-label="iPhone'da yanıtla"><svg class="i"><use href="#i-phone"/></svg></button>
+      <button class="cbtn dec" aria-label="Reddet"><svg class="i"><use href="#i-hangup"/></svg></button>
+      <button class="cbtn acc" aria-label="Yanıtla"><svg class="i"><use href="#i-call"/></svg></button>`;
+    requestAnimationFrame(() => island.classList.add("show", "call"));
+    island.querySelectorAll(".cbtn").forEach(b => b.addEventListener("click", () => island.className = "island"));
+  }
+  function showXfer() {
+    clearInterval(xferTimer);
+    island.className = "island";
+    island.innerHTML = `<svg width="26" height="26" style="flex:none"><use href="#logo"/></svg><div class="xbar"><div style="font-size:13px;display:flex;justify-content:space-between"><span>IMG_4835.HEIC</span><span id="xp">0%</span></div><div class="prog"><i id="xbar" style="width:0%"></i></div></div>`;
+    requestAnimationFrame(() => island.classList.add("show", "xfer-mode"));
+    let p = 0;
+    xferTimer = setInterval(() => {
+      p = Math.min(100, p + 4);
+      const bar = document.getElementById("xbar"); if (!bar) return clearInterval(xferTimer);
+      bar.style.width = p + "%"; document.getElementById("xp").textContent = p === 100 ? "Resimler’e kaydedildi" : p + "%";
+      if (p === 100) { clearInterval(xferTimer); setTimeout(() => island.className = "island", 1800); }
+    }, 90);
+  }
+
+  document.querySelectorAll("[data-demo]").forEach(b => b.addEventListener("click", e => {
+    e.preventDefault();
+    const d = b.dataset.demo;
+    if (d === "toast") showToast();
+    if (d === "tray") toggleTray();
+    if (d === "call") showCall();
+    if (d === "xfer") showXfer();
+    if (d === "pair") pair.classList.toggle("show");
+    if (d === "theme") setTheme(stage.classList.contains("dark") ? "light" : "dark");
+  }));
+  document.getElementById("trayBtn").addEventListener("click", toggleTray);
+
+  // Theme: system follows the OS, light and dark override it. Mirrors Fenpo's Tema setting.
+  const sysDark = matchMedia("(prefers-color-scheme: dark)");
+  let themeMode = "system";
+  function setTheme(mode) {
+    themeMode = mode;
+    const dark = mode === "dark" || (mode === "system" && sysDark.matches);
+    stage.classList.toggle("dark", dark);
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    document.querySelectorAll("#themeSeg button").forEach(b => b.classList.toggle("sel", b.dataset.themeOpt === mode));
+  }
+  document.querySelectorAll("#themeSeg button").forEach(b => b.addEventListener("click", () => setTheme(b.dataset.themeOpt)));
+  sysDark.addEventListener("change", () => { if (themeMode === "system") setTheme("system"); });
+  setTheme("system");
+
+  // Language: WinUI loads resources at startup, so a change asks for a restart.
+  const langBar = document.getElementById("langBar");
+  document.getElementById("langSel").addEventListener("change", e => {
+    const v = e.target.value;
+    langBar.querySelector("span").innerHTML = v === "en"
+      ? "<b>Dil değişecek.</b> Fenpo yeniden başlayınca arayüz English olur."
+      : "<b>Dil değişecek.</b> Fenpo yeniden başlayınca arayüz Türkçe olur.";
+    langBar.classList.add("show");
+  });
+  document.getElementById("langLater").addEventListener("click", () => langBar.classList.remove("show"));
+
+  // Drop zone feedback
+  const drop = document.getElementById("drop");
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); if (ev === "drop") showXfer(); }));
+
+  // Decorative pairing code pattern (not a real QR code)
+  const c = document.getElementById("qr"), g = c.getContext("2d");
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  g.fillStyle = "#1B1F3B";
+  for (let y = 0; y < 29; y++) for (let x = 0; x < 29; x++) if (rnd() > .52) g.fillRect(x, y, 1, 1);
+  const finder = (x, y) => { g.clearRect(x - 1, y - 1, 9, 9); g.fillRect(x, y, 7, 7); g.clearRect(x + 1, y + 1, 5, 5); g.fillRect(x + 2, y + 2, 3, 3); };
+  finder(0, 0); finder(22, 0); finder(0, 22);
+  g.clearRect(10, 10, 9, 9);
+
+  // Open on the event most people will see first
+  setTimeout(showToast, 900);
+</script>
+</body>
+</html>

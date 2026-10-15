@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fenpo Tasarımları</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #F6F7FB; --text: #1B1F3B; --muted: #5D6382; --line: #E3E6F0; --card: #FFFFFF; --bloom: #E8577E; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #141730; --text: #EEF0F8; --muted: #A3A8C3; --line: #2C3152; --card: #1B1F3B; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.55 "Instrument Sans", system-ui, sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 72px 24px; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand h1 { font-family: Gabarito, sans-serif; font-weight: 800; font-size: 64px; letter-spacing: -0.04em; margin: 0; line-height: 1; }
+  .lead { color: var(--muted); max-width: 56ch; margin: 18px 0 44px; }
+  a.item { display: grid; grid-template-columns: 1fr auto; gap: 4px 24px; padding: 22px 0; border-top: 1px solid var(--line); color: inherit; text-decoration: none; }
+  a.item:last-of-type { border-bottom: 1px solid var(--line); }
+  a.item b { font-family: Gabarito, sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  a.item span { color: var(--muted); grid-column: 1; }
+  a.item i { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-style: normal; color: var(--bloom); font-weight: 600; }
+  a.item:hover b, a.item:focus-visible b { color: var(--bloom); }
+  a.item:focus-visible { outline: 2px solid var(--bloom); outline-offset: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="3" y="3" width="58" height="58" rx="19" fill="#E8577E"/>
+      <circle cx="32" cy="32" r="21" fill="#FFF6F0"/>
+      <g fill="#1B1F3B"><path id="seed" d="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z"/><use href="#seed" transform="rotate(72 32 32)"/><use href="#seed" transform="rotate(144 32 32)"/><use href="#seed" transform="rotate(216 32 32)"/><use href="#seed" transform="rotate(288 32 32)"/></g>
+    </svg>
+    <h1>fenpo</h1>
+  </div>
+  <p class="lead">iPhone ile Windows’un aynı masada çalışması için tasarımlar. Uygulamalar bu sayfalara birebir uyacak şekilde yazılır.</p>
+  <a class="item" href="logo/logos.html"><b>Logo</b><span>Altı konsept, uygulama ikonu ve tepsi boyutunda, renk ve yazı sistemi</span><i>Aç</i></a>
+  <a class="item" href="desktop/desktop.html"><b>Windows uygulaması</b><span>Ana pencere, tepsi paneli, bildirimler, gelen arama adası, eşleştirme</span><i>Aç</i></a>
+  <a class="item" href="mobile/mobile.html"><b>iPhone uygulaması</b><span>Ana ekran, eşleştirme, paylaşım menüsü, kilit ekranı, Denetim Merkezi, kamera, Dosyalar, ayarlar</span><i>Aç</i></a>
+</main>
+</body>
+</html>

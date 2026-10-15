@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+import "fenpo/v1/common.proto";
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// First message on every connection, sent by both sides.
+message Hello {
+  string device_id = 1;                  // Stable id created at first launch (UUID).
+  string device_name = 2;                // User visible name, e.g. "BUGRA-PC".
+  DevicePlatform platform = 3;
+  string app_version = 4;                // Semantic version of the sending app.
+  repeated uint32 protocol_versions = 5; // Supported protocol versions, currently [1].
+  repeated Capability capabilities = 6;
+}
+
+// Keep-alive. The receiver answers with Pong carrying the same nonce.
+message Ping {
+  uint64 nonce = 1;
+}
+
+message Pong {
+  uint64 nonce = 1;
+}
+
+// Generic failure reply to a request.
+message Error {
+  ErrorCode code = 1;
+  string message = 2;                    // Developer facing, English. Never shown to users as-is.
+}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  ERROR_CODE_UNSUPPORTED = 1;            // Message type or capability not supported.
+  ERROR_CODE_INVALID_REQUEST = 2;
+  ERROR_CODE_NOT_PAIRED = 3;
+  ERROR_CODE_DECLINED = 4;               // The user said no.
+  ERROR_CODE_BUSY = 5;
+  ERROR_CODE_INTERNAL = 6;
+}

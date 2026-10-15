@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// File transfer negotiation runs on the control connection. File bodies move on a
+// separate TLS connection that starts with TransferStreamHeader, followed by the raw
+// bytes of each file in offer order.
+
+message TransferOffer {
+  string transfer_id = 1;
+  repeated FileInfo files = 2;
+  uint64 total_bytes = 3;
+}
+
+message FileInfo {
+  string file_id = 1;
+  string name = 2;                       // File name only, no path.
+  uint64 size = 3;
+  string mime_type = 4;
+  bytes sha256 = 5;                      // Optional. Checked by the receiver when present.
+}
+
+message TransferAccept {
+  string transfer_id = 1;
+  bool accepted = 2;
+  uint32 data_port = 3;                  // Port for the data connection when the receiver listens.
+}
+
+message TransferStreamHeader {
+  string transfer_id = 1;
+}
+
+message TransferProgress {
+  string transfer_id = 1;
+  uint64 bytes_done = 2;
+  TransferState state = 3;
+}
+
+enum TransferState {
+  TRANSFER_STATE_UNSPECIFIED = 0;
+  TRANSFER_STATE_IN_PROGRESS = 1;
+  TRANSFER_STATE_COMPLETED = 2;
+  TRANSFER_STATE_CANCELLED = 3;
+  TRANSFER_STATE_FAILED = 4;
+}
+
+message TransferCancel {
+  string transfer_id = 1;
+}

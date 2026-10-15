@@ -1,0 +1,71 @@
+# Text files are normalized to LF in the repository and checked out as LF,
+# unless a Windows tool expects CRLF (listed below).
+* text=auto eol=lf
+
+# Windows: C#, MSBuild, XAML, resources
+*.cs text eol=crlf
+*.csproj text eol=crlf
+*.slnx text eol=crlf
+*.sln text eol=crlf
+*.xaml text eol=crlf
+*.resw text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+*.appxmanifest text eol=crlf
+*.manifest text eol=crlf
+
+# Windows: native (credential provider) and scripts
+*.vcxproj text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.cpp text eol=crlf
+*.h text eol=crlf
+*.idl text eol=crlf
+*.def text eol=crlf
+*.rc text eol=crlf
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# iPhone, Android, protocol, CI, docs
+*.swift text eol=lf
+*.kt text eol=lf
+*.kts text eol=lf
+*.proto text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+
+# SVG stays text so logo changes show up in diffs
+*.svg text eol=lf
+
+# Images and other binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.heic binary
+*.bmp binary
+*.pdf binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.zip binary
+*.7z binary
+*.dll binary
+*.exe binary
+*.pfx binary
+*.cer binary
+*.der binary
+*.p12 binary
+*.mp4 binary
+*.mov binary
+*.wav binary
+*.mp3 binary
+
+# Recorded Bluetooth byte sequences used as test fixtures
+*.bin binary
