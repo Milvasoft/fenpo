@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Fenpo.App.Services;
+using Fenpo.Core.Devices;
 using Fenpo.Core.Settings;
+using Microsoft.UI.Dispatching;
 using Microsoft.Windows.AppLifecycle;
 using StartupTask = Windows.ApplicationModel.StartupTask;
 using StartupTaskState = Windows.ApplicationModel.StartupTaskState;
@@ -11,7 +13,7 @@ namespace Fenpo.App.ViewModels;
 /// <summary>
 /// Settings page: appearance and language, features, proximity and focus, device.
 /// </summary>
-public sealed partial class SettingsViewModel : ObservableObject
+public sealed partial class SettingsViewModel : ObservableObject, IDisposable
 {
     private static readonly string[] _languages = [AppSettings.SystemLanguage, "tr-TR", "en-US"];
 
@@ -19,6 +21,8 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     private readonly ISettingsStore _settings;
     private readonly LocalizationService _localization;
+    private readonly IPhoneStatusSource _status;
+    private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private bool _loadingStartup;
 
     /// <summary>
@@ -26,10 +30,14 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// </summary>
     /// <param name="settings">Settings store.</param>
     /// <param name="localization">Strings and the language restart state.</param>
-    public SettingsViewModel(ISettingsStore settings, LocalizationService localization)
+    /// <param name="status">Phone status (device section).</param>
+    public SettingsViewModel(ISettingsStore settings, LocalizationService localization, IPhoneStatusSource status)
     {
         _settings = settings;
         _localization = localization;
+        _status = status;
+        _status.Changed += OnStatusChanged;
+        ApplyStatus(status.Current);
 
         var current = settings.Current;
         ThemeIndex = (int)current.Theme;
@@ -42,6 +50,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         FocusSync = current.FocusSync;
         RestartPending = localization.RestartPending;
         StartupHint = localization.GetString("Settings_StartupHint");
+        IncomingFolder = current.IncomingFolder ?? DefaultIncomingFolder;
         _ = LoadStartupAsync();
     }
 
@@ -72,6 +81,35 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RestartMessage))]
     public partial int LanguageIndex { get; set; }
+
+    /// <summary>
+    /// Gets the folder for received files when none is chosen.
+    /// </summary>
+    public static string DefaultIncomingFolder { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "Fenpo");
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a phone is paired.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsPaired { get; set; }
+
+    /// <summary>
+    /// Gets or sets the device row title (phone name, or "No iPhone paired").
+    /// </summary>
+    [ObservableProperty]
+    public partial string DeviceTitle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the device row hint (model and state, or how to pair).
+    /// </summary>
+    [ObservableProperty]
+    public partial string DeviceHint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the folder for received files.
+    /// </summary>
+    [ObservableProperty]
+    public partial string IncomingFolder { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether Fenpo starts with Windows (the packaged startup task).
@@ -201,5 +239,33 @@ public sealed partial class SettingsViewModel : ObservableObject
             _ => "Settings_StartupHint",
         });
         _loadingStartup = false;
+    }
+
+    /// <summary>
+    /// Stops following the phone status.
+    /// </summary>
+    public void Dispose() => _status.Changed -= OnStatusChanged;
+
+    /// <summary>
+    /// Saves the folder for received files.
+    /// </summary>
+    /// <param name="path">Folder path.</param>
+    public void SetIncomingFolder(string path)
+    {
+        IncomingFolder = path;
+        _settings.Update(s => s with { IncomingFolder = path });
+    }
+
+    private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => ApplyStatus(status));
+
+    private void ApplyStatus(PhoneStatus status)
+    {
+        IsPaired = status.State != PhoneConnectionState.NotPaired;
+        DeviceTitle = IsPaired ? PhoneStatusText.Name(status, _localization) : _localization.GetString("Settings_NoDevice");
+        DeviceHint = !IsPaired
+            ? _localization.GetString("Settings_NoDeviceHint")
+            : status.ModelName is { } model
+                ? _localization.Format("Settings_DeviceModelState", model, PhoneStatusText.State(status, _localization))
+                : PhoneStatusText.State(status, _localization);
     }
 }

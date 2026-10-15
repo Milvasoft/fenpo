@@ -72,6 +72,45 @@
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Calls</value>
   </data>
+  <data name="Camera_CenterStage.Text" xml:space="preserve">
+    <value>Keep me centered</value>
+  </data>
+  <data name="Camera_CenterStageHint.Text" xml:space="preserve">
+    <value>The frame follows you as you move</value>
+  </data>
+  <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Keep me centered</value>
+  </data>
+  <data name="Camera_Hint.Text" xml:space="preserve">
+    <value>Fenpo Camera shows up as a regular webcam in Teams, Zoom, Meet and OBS. Keep Fenpo open on the iPhone, ideally on a stand in landscape.</value>
+  </data>
+  <data name="Camera_Lens.Text" xml:space="preserve">
+    <value>Lens</value>
+  </data>
+  <data name="Camera_LensFront.Content" xml:space="preserve">
+    <value>Front</value>
+  </data>
+  <data name="Camera_LensUltraWide.Content" xml:space="preserve">
+    <value>Ultra wide</value>
+  </data>
+  <data name="Camera_LensWide.Content" xml:space="preserve">
+    <value>Wide</value>
+  </data>
+  <data name="Camera_Microphone.Text" xml:space="preserve">
+    <value>Use the iPhone microphone</value>
+  </data>
+  <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Use the iPhone microphone</value>
+  </data>
+  <data name="Camera_NeedsApp.Message" xml:space="preserve">
+    <value>Open the app to use the iPhone as a camera.</value>
+  </data>
+  <data name="Camera_Portrait.Text" xml:space="preserve">
+    <value>Portrait blur</value>
+  </data>
+  <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Portrait blur</value>
+  </data>
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Camera</value>
   </data>
@@ -90,8 +129,50 @@
   <data name="Chip_WifiOn" xml:space="preserve">
     <value>Same Wi‑Fi</value>
   </data>
+  <data name="Clipboard_Empty.Text" xml:space="preserve">
+    <value>What you copy on either side is listed here.</value>
+  </data>
+  <data name="Clipboard_History.Text" xml:space="preserve">
+    <value>Recently copied</value>
+  </data>
+  <data name="Clipboard_NeedsApp.Message" xml:space="preserve">
+    <value>Clipboard sharing works through the iPhone app.</value>
+  </data>
+  <data name="Clipboard_Share.Text" xml:space="preserve">
+    <value>Send everything you copy to the iPhone</value>
+  </data>
+  <data name="Clipboard_ShareHint.Text" xml:space="preserve">
+    <value>For the other way, double-tap the back of the iPhone or use the Fenpo button in Control Center.</value>
+  </data>
+  <data name="Clipboard_ShareToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Clipboard sharing</value>
+  </data>
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Clipboard</value>
+  </data>
+  <data name="Files_DropHint.Text" xml:space="preserve">
+    <value>Or pick files on this PC.</value>
+  </data>
+  <data name="Files_DropTitle.Text" xml:space="preserve">
+    <value>Drop files here to send them to the iPhone</value>
+  </data>
+  <data name="Files_NeedsApp.Message" xml:space="preserve">
+    <value>Connect the iPhone app to this PC to send files and photos.</value>
+  </data>
+  <data name="Files_NoPhotos.Text" xml:space="preserve">
+    <value>Recent photos show up here once the iPhone app is connected.</value>
+  </data>
+  <data name="Files_NoTransfers.Text" xml:space="preserve">
+    <value>No transfers yet</value>
+  </data>
+  <data name="Files_Pick.Content" xml:space="preserve">
+    <value>Pick files</value>
+  </data>
+  <data name="Files_RecentPhotos.Text" xml:space="preserve">
+    <value>Recent photos</value>
+  </data>
+  <data name="Files_Transfers.Text" xml:space="preserve">
+    <value>Transfers</value>
   </data>
   <data name="FilesTitle.Text" xml:space="preserve">
     <value>Files and photos</value>
@@ -297,6 +378,12 @@
   <data name="Nav_Settings.Content" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="NeedsApp_Connect.Content" xml:space="preserve">
+    <value>Connect the iPhone app</value>
+  </data>
+  <data name="NeedsApp_Title.Text" xml:space="preserve">
+    <value>Needs Fenpo on the iPhone.</value>
+  </data>
   <data name="Notification_Dismiss" xml:space="preserve">
     <value>Dismiss</value>
   </data>
@@ -426,6 +513,9 @@
   <data name="Settings_DeviceHeader.Text" xml:space="preserve">
     <value>Device</value>
   </data>
+  <data name="Settings_DeviceModelState" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
   <data name="Settings_FeaturesHeader.Text" xml:space="preserve">
     <value>Features</value>
   </data>
@@ -447,6 +537,9 @@
   <data name="Settings_LanguageHint.Text" xml:space="preserve">
     <value>Notifications, the tray panel and the island use it too</value>
   </data>
+  <data name="Settings_ManagePairing.Content" xml:space="preserve">
+    <value>Bluetooth settings</value>
+  </data>
   <data name="Settings_Media.Text" xml:space="preserve">
     <value>Media control</value>
   </data>
@@ -456,10 +549,10 @@
   <data name="Settings_MediaToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Media control</value>
   </data>
-  <data name="Settings_NoDevice.Text" xml:space="preserve">
+  <data name="Settings_NoDevice" xml:space="preserve">
     <value>No paired iPhone</value>
   </data>
-  <data name="Settings_NoDeviceHint.Text" xml:space="preserve">
+  <data name="Settings_NoDeviceHint" xml:space="preserve">
     <value>Pair once and Fenpo connects by itself</value>
   </data>
   <data name="Settings_Notifications.Text" xml:space="preserve">

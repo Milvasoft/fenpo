@@ -153,4 +153,15 @@
         <Setter Property="Padding" Value="16,12" />
     </Style>
 
+    <Style x:Key="FenpoRowIconStyle" TargetType="FontIcon">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{ThemeResource FenpoTextSecondaryBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="FenpoRowLabelStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{ThemeResource FenpoTextBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
 </ResourceDictionary>

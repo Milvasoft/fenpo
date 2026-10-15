@@ -87,6 +87,26 @@ public sealed record AppSettings
     public bool PauseMediaDuringCalls { get; init; } = true;
 
     /// <summary>
+    /// Gets the iPhone lens Fenpo Camera uses.
+    /// </summary>
+    public CameraLens CameraLens { get; init; } = CameraLens.Wide;
+
+    /// <summary>
+    /// Gets a value indicating whether the camera keeps the person in the frame.
+    /// </summary>
+    public bool CameraCenterStage { get; init; } = true;
+
+    /// <summary>
+    /// Gets a value indicating whether the camera blurs the background.
+    /// </summary>
+    public bool CameraPortraitBlur { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether the iPhone microphone comes with the camera.
+    /// </summary>
+    public bool CameraUseMicrophone { get; init; } = true;
+
+    /// <summary>
     /// Gets the folder for files received from the phone, or null for Downloads\Fenpo.
     /// </summary>
     public string? IncomingFolder { get; init; }
@@ -100,4 +120,19 @@ public sealed record AppSettings
     /// Gets a value indicating whether the first-run pairing wizard has been completed or skipped.
     /// </summary>
     public bool SetupCompleted { get; init; }
+}
+
+/// <summary>
+/// iPhone lenses for Fenpo Camera.
+/// </summary>
+public enum CameraLens
+{
+    /// <summary>Main (wide) lens.</summary>
+    Wide,
+
+    /// <summary>Ultra wide lens.</summary>
+    UltraWide,
+
+    /// <summary>Front camera.</summary>
+    Front,
 }
