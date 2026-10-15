@@ -366,6 +366,21 @@
   <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yakınlık kilidi</value>
   </data>
+  <data name="Settings_Startup.Text" xml:space="preserve">
+    <value>Windows açılınca başlat</value>
+  </data>
+  <data name="Settings_StartupHint" xml:space="preserve">
+    <value>Fenpo tepside bekler, iPhone yakına gelince bağlanır</value>
+  </data>
+  <data name="Settings_StartupHintDisabledByUser" xml:space="preserve">
+    <value>Görev Yöneticisi’nde kapatılmış; Başlangıç uygulamaları sekmesinden aç</value>
+  </data>
+  <data name="Settings_StartupHintPolicy" xml:space="preserve">
+    <value>Kuruluşun bu ayarı yönetiyor</value>
+  </data>
+  <data name="Settings_StartupToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Windows açılınca başlat</value>
+  </data>
   <data name="Settings_Theme.Text" xml:space="preserve">
     <value>Tema</value>
   </data>
@@ -416,5 +431,56 @@
   </data>
   <data name="Time_Yesterday" xml:space="preserve">
     <value>Dün</value>
+  </data>
+  <data name="Tray_Clipboard.Text" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="Tray_Focus.Text" xml:space="preserve">
+    <value>Odak</value>
+  </data>
+  <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Tray_HotspotText.Text" xml:space="preserve">
+    <value>Hotspot</value>
+  </data>
+  <data name="Tray_LinksBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Tray_LinksBluetoothUsb" xml:space="preserve">
+    <value>Bluetooth ve USB</value>
+  </data>
+  <data name="Tray_LinksBluetoothWifi" xml:space="preserve">
+    <value>Bluetooth ve Wi‑Fi</value>
+  </data>
+  <data name="Tray_MenuOpen" xml:space="preserve">
+    <value>Fenpo’yu aç</value>
+  </data>
+  <data name="Tray_MenuQuit" xml:space="preserve">
+    <value>Çık</value>
+  </data>
+  <data name="Tray_Notifications.Text" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Tray_Open.Content" xml:space="preserve">
+    <value>Fenpo’yu aç</value>
+  </data>
+  <data name="Tray_ProximityLock.Text" xml:space="preserve">
+    <value>Yakınlık kilidi</value>
+  </data>
+  <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Tray_RingText.Text" xml:space="preserve">
+    <value>Çaldır</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Tray_Summary" xml:space="preserve">
+    <value>{0}, {1}</value>
   </data>
 </root>

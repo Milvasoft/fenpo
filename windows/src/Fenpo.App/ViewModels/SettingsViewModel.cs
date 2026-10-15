@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.Input;
 using Fenpo.App.Services;
 using Fenpo.Core.Settings;
 using Microsoft.Windows.AppLifecycle;
+using StartupTask = Windows.ApplicationModel.StartupTask;
+using StartupTaskState = Windows.ApplicationModel.StartupTaskState;
 
 namespace Fenpo.App.ViewModels;
 
@@ -13,8 +15,11 @@ public sealed partial class SettingsViewModel : ObservableObject
 {
     private static readonly string[] _languages = [AppSettings.SystemLanguage, "tr-TR", "en-US"];
 
+    private const string _startupTaskId = "FenpoStartup";
+
     private readonly ISettingsStore _settings;
     private readonly LocalizationService _localization;
+    private bool _loadingStartup;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SettingsViewModel"/> class.
@@ -36,6 +41,8 @@ public sealed partial class SettingsViewModel : ObservableObject
         ProximityLock = current.ProximityLock;
         FocusSync = current.FocusSync;
         RestartPending = localization.RestartPending;
+        StartupHint = localization.GetString("Settings_StartupHint");
+        _ = LoadStartupAsync();
     }
 
     /// <summary>
@@ -48,7 +55,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     /// </summary>
     public string RestartMessage => _localization.Format("LanguageRestart_Message", LanguageIndex switch
     {
-        1 => "Türkçe",
+        1 => "TÃ¼rkÃ§e",
         2 => "English",
         _ => LocalizationService.SystemLanguageName,
     });
@@ -60,11 +67,30 @@ public sealed partial class SettingsViewModel : ObservableObject
     public partial int ThemeIndex { get; set; }
 
     /// <summary>
-    /// Gets or sets the selected language: 0 System, 1 Türkçe, 2 English.
+    /// Gets or sets the selected language: 0 System, 1 TÃ¼rkÃ§e, 2 English.
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RestartMessage))]
     public partial int LanguageIndex { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Fenpo starts with Windows (the packaged startup task).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool StartWithWindows { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether Fenpo may change the startup task (not when the user or a policy
+    /// turned it off in Task Manager).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool StartupChangeable { get; set; }
+
+    /// <summary>
+    /// Gets or sets the hint under the startup row.
+    /// </summary>
+    [ObservableProperty]
+    public partial string StartupHint { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets a value indicating whether the restart banner is visible.
@@ -133,4 +159,47 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [RelayCommand]
     private void DismissRestart() => RestartPending = false;
+
+    partial void OnStartWithWindowsChanged(bool value)
+    {
+        if (!_loadingStartup)
+        {
+            _ = SetStartupAsync(value);
+        }
+    }
+
+    private async Task LoadStartupAsync()
+    {
+        var task = await StartupTask.GetAsync(_startupTaskId);
+        ApplyStartup(task.State);
+    }
+
+    private async Task SetStartupAsync(bool enabled)
+    {
+        var task = await StartupTask.GetAsync(_startupTaskId);
+
+        if (enabled)
+        {
+            ApplyStartup(await task.RequestEnableAsync());
+        }
+        else
+        {
+            task.Disable();
+            ApplyStartup(task.State);
+        }
+    }
+
+    private void ApplyStartup(StartupTaskState state)
+    {
+        _loadingStartup = true;
+        StartWithWindows = state is StartupTaskState.Enabled or StartupTaskState.EnabledByPolicy;
+        StartupChangeable = state is StartupTaskState.Enabled or StartupTaskState.Disabled;
+        StartupHint = _localization.GetString(state switch
+        {
+            StartupTaskState.DisabledByUser => "Settings_StartupHintDisabledByUser",
+            StartupTaskState.DisabledByPolicy or StartupTaskState.EnabledByPolicy => "Settings_StartupHintPolicy",
+            _ => "Settings_StartupHint",
+        });
+        _loadingStartup = false;
+    }
 }

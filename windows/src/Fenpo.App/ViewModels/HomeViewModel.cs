@@ -180,16 +180,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private void ApplyStatus(PhoneStatus status)
     {
         IsPaired = status.State != PhoneConnectionState.NotPaired;
-        DeviceName = string.IsNullOrEmpty(status.Name) ? _localization.GetString("Home_NoPhone") : status.Name;
-        StatusText = _localization.GetString(status.State switch
-        {
-            PhoneConnectionState.Connected => "Status_Connected",
-            PhoneConnectionState.Connecting => "Status_Connecting",
-            PhoneConnectionState.BrokenBond => "Status_BrokenBond",
-            PhoneConnectionState.Disconnected => "Status_Disconnected",
-            _ => "Status_NotPaired",
-        });
-        BatteryText = status.BatteryPercent is { } battery ? _localization.Format("Battery_Percent", battery) : "–";
+        DeviceName = PhoneStatusText.Name(status, _localization);
+        StatusText = PhoneStatusText.State(status, _localization);
+        BatteryText = PhoneStatusText.Battery(status, _localization);
         BatteryFill = (status.BatteryPercent ?? 0) * 0.17;
         BluetoothOn = status.BluetoothConnected;
         WifiOn = status.WifiConnected;
