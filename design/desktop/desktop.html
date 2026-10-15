@@ -207,7 +207,7 @@
 
   /* Calls view */
   .calls { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
-  .crow { display: grid; grid-template-columns: 36px 1fr auto auto; gap: 12px; align-items: center; padding: 10px 16px; }
+  .crow { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center; padding: 10px 16px; }
   .crow + .crow { border-top: 1px solid var(--w-stroke); }
   .crow .av { width: 36px; height: 36px; font-size: 13px; }
   .crow .missed { color: #D64545; }
@@ -217,6 +217,8 @@
   .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
   .key { height: 54px; border-radius: 27px; background: var(--w-card-2) !important; border: 1px solid var(--w-stroke) !important; font-size: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; }
   .key small { font-size: 9px; color: var(--w-text-3); letter-spacing: .1em; margin-top: 2px; }
+  .big-ic { width: 56px; height: 56px; margin: 8px auto 0; border-radius: 14px; background: var(--w-accent-soft); color: var(--w-accent); display: grid; place-items: center; }
+  .big-ic svg.i { width: 26px; height: 26px; }
   .dial { width: 56px; height: 56px; border-radius: 50%; background: #2F8F6B !important; color: #fff; display: inline-grid; place-items: center; }
 
   /* Files view */
@@ -291,7 +293,7 @@
   /* Fenpo island: calls, transfers, now playing at top-center */
   .island { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: #0E1022; color: #fff; border-radius: 24px; height: 40px; width: 240px; display: flex; align-items: center; gap: 10px; padding: 0 8px 0 10px; overflow: hidden; transition: width .4s cubic-bezier(.2,.9,.25,1.1), height .4s cubic-bezier(.2,.9,.25,1.1), border-radius .4s, opacity .2s; box-shadow: 0 16px 40px -12px rgba(0,0,0,.6); opacity: 0; pointer-events: none; }
   .island.show { opacity: 1; pointer-events: auto; }
-  .island.call { width: 470px; height: 76px; border-radius: 38px; padding: 0 14px 0 14px; }
+  .island.call { width: 420px; height: 76px; border-radius: 38px; padding: 0 14px 0 14px; }
   .island .av { width: 48px; height: 48px; font-size: 17px; flex: none; }
   .island .who { flex: 1; min-width: 0; }
   .island .who b { display: block; font-size: 16px; font-weight: 600; }
@@ -325,6 +327,26 @@
   .code6 { margin-top: 18px; text-align: center; color: var(--w-text-2); font-size: 13px; }
   .code6 b { display: block; font-size: 26px; letter-spacing: .3em; color: var(--w-text); font-family: "Segoe UI Variable Display", Inter, sans-serif; }
 
+  /* Pairing without the iPhone app: Windows Bluetooth pairing, live checklist */
+  .check { width: 340px; }
+  .check h4 { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+  .ck { display: grid; grid-template-columns: 24px 1fr; gap: 10px; padding: 10px 12px; border-radius: 8px; background: var(--w-card); border: 1px solid var(--w-stroke); margin-bottom: 8px; }
+  .ck .mark { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--w-text-3); display: grid; place-items: center; font-size: 12px; margin-top: 1px; }
+  .ck.ok .mark { background: var(--w-ok); border-color: transparent; color: #fff; }
+  .ck.wait .mark { border-color: var(--w-accent); border-right-color: transparent; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .warn { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 8px; background: var(--w-accent-soft); border: 1px solid var(--w-stroke); font-size: 13px; margin-top: 14px; }
+  .warn span { flex: 1; }
+  .warn svg.i { color: var(--w-accent); }
+
+  /* Features that need the iPhone app: shown, with what they need (DECISIONS #36) */
+  .needs-app { display: none; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 16px; border-radius: 8px; background: var(--w-accent-soft); border: 1px solid var(--w-stroke); }
+  .needs-app svg.i { color: var(--w-accent); }
+  .needs-app span { flex: 1; font-size: 13px; }
+  .needs-app b { font-weight: 600; }
+  .stage.noapp .needs-app { display: flex; }
+  .stage.noapp :is(#v-files, #v-clip, #v-cam) > :not(h2):not(.needs-app), .stage.noapp .action.app-only { opacity: .45; pointer-events: none; }
+
   @media (prefers-reduced-motion: reduce) {
     .stage *, .stage *::before, .stage *::after { transition: none !important; animation: none !important; }
   }
@@ -341,7 +363,9 @@
     <button type="button" data-demo="call">Arama gelsin</button>
     <button type="button" data-demo="xfer">Dosya gelsin</button>
     <button type="button" data-demo="tray">Tepsi paneli</button>
-    <button type="button" data-demo="pair">İlk kurulum</button>
+    <button type="button" data-demo="pairbt">İlk kurulum</button>
+    <button type="button" data-demo="pair">Uygulamayla kurulum</button>
+    <button type="button" data-demo="noapp">iPhone uygulaması yok</button>
     <span class="sep"></span>
     <button type="button" data-demo="theme">Açık / koyu</button>
   </div>
@@ -436,11 +460,11 @@
                   <span class="chip off"><span class="dot"></span><svg class="i" style="width:14px;height:14px"><use href="#i-usb"/></svg>USB yok</span>
                 </div>
                 <div class="actions">
-                  <button class="action"><svg class="i"><use href="#i-ring"/></svg>Telefonu çaldır</button>
-                  <button class="action"><svg class="i"><use href="#i-hotspot"/></svg>Hotspot’a bağlan</button>
-                  <button class="action"><svg class="i"><use href="#i-send"/></svg>Dosya gönder</button>
-                  <button class="action"><svg class="i"><use href="#i-cam"/></svg>Kamera olarak kullan</button>
-                  <button class="action"><svg class="i"><use href="#i-mirror"/></svg>Ekranı yansıt</button>
+                  <button class="action app-only"><svg class="i"><use href="#i-ring"/></svg>Telefonu çaldır</button>
+                  <button class="action app-only"><svg class="i"><use href="#i-hotspot"/></svg>Hotspot’a bağlan</button>
+                  <button class="action app-only"><svg class="i"><use href="#i-send"/></svg>Dosya gönder</button>
+                  <button class="action app-only"><svg class="i"><use href="#i-cam"/></svg>Kamera olarak kullan</button>
+                  <button class="action app-only"><svg class="i"><use href="#i-mirror"/></svg>Ekranı yansıt</button>
                 </div>
               </div>
             </div>
@@ -475,7 +499,7 @@
             <div class="filter"><button class="pill sel">Tümü</button><button class="pill">Mesajlar</button><button class="pill">Aramalar</button><button class="pill">Diğer</button><span style="flex:1"></span><button class="btn">Tümünü temizle</button></div>
             <div class="card group">
               <div class="group-h"><div class="appic" style="background:#25A35A">W</div>WhatsApp<span class="tiny">2 bildirim</span></div>
-              <div class="nrow"><div class="av" style="background:#E8577E;width:32px;height:32px;font-size:13px">S</div><div><b>Selin</b><span class="msg">Sunumu attım, bakabilir misin? Son slaytta rakamlar eksik olabilir.</span><div class="acts"><button class="btn">iPhone’da aç</button><button class="btn">Kapat</button></div></div><span class="tiny">2 dk</span></div>
+              <div class="nrow"><div class="av" style="background:#E8577E;width:32px;height:32px;font-size:13px">S</div><div><b>Selin</b><span class="msg">Sunumu attım, bakabilir misin? Son slaytta rakamlar eksik olabilir.</span><div class="acts"><button class="btn">Kapat</button></div></div><span class="tiny">2 dk</span></div>
               <div class="nrow"><div class="av" style="background:#2F8F6B;width:32px;height:32px;font-size:13px">A</div><div><b>Aile</b><span class="msg">Annem: Hafta sonu geliyor musunuz?</span></div><span class="tiny">25 dk</span></div>
             </div>
             <div class="card group">
@@ -501,7 +525,7 @@
                 <button class="conv"><div class="av" style="background:#F2994A">E</div><div><b>Ekip</b><div class="msg">Deniz: Deploy 20:00’de başlıyor</div></div><span class="tiny">Pzt</span></button>
               </div>
               <div class="thread">
-                <div class="thread-h"><div class="av" style="background:#4E54C8">M</div><div><b>Mert</b><div class="tiny">iMessage</div></div><div class="btns"><button class="btn"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg>Ara</button></div></div>
+                <div class="thread-h"><div class="av" style="background:#4E54C8">M</div><div><b>Mert</b><div class="tiny">iMessage</div></div></div>
                 <div class="bubbles">
                   <span class="day">Bugün 17:40</span>
                   <div class="bubble in">Bu akşam Fenerbahçe maçı var, bizde izliyoruz</div>
@@ -522,21 +546,16 @@
             <div class="calls">
               <div class="card">
                 <div class="sect-h">Son aramalar</div>
-                <div class="crow"><div class="av" style="background:#2F8F6B">A</div><div><b style="font-weight:600">Annem</b><div class="tiny">Cep, gelen arama, 4 dk</div></div><span class="tiny">16:20</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
-                <div class="crow"><div class="av" style="background:#8A90AC">?</div><div><b style="font-weight:600" class="missed">0 532 *** 44 18</b><div class="tiny">Cevapsız arama</div></div><span class="tiny">14:03</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
-                <div class="crow"><div class="av" style="background:#4E54C8">M</div><div><b style="font-weight:600">Mert</b><div class="tiny">Cep, giden arama, 1 dk</div></div><span class="tiny">Dün</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
-                <div class="crow"><div class="av" style="background:#E8577E">S</div><div><b style="font-weight:600">Selin</b><div class="tiny">İş, FaceTime ses, 12 dk</div></div><span class="tiny">Pzt</span><button class="btn" aria-label="Ara"><svg class="i" style="width:16px;height:16px"><use href="#i-call"/></svg></button></div>
+                <div class="crow"><div class="av" style="background:#2F8F6B">A</div><div><b style="font-weight:600">Annem</b><div class="tiny">Cep, gelen arama, 4 dk</div></div><span class="tiny">16:20</span></div>
+                <div class="crow"><div class="av" style="background:#8A90AC">?</div><div><b style="font-weight:600" class="missed">0 532 *** 44 18</b><div class="tiny">Cevapsız arama</div></div><span class="tiny">14:03</span></div>
+                <div class="crow"><div class="av" style="background:#4E54C8">M</div><div><b style="font-weight:600">Mert</b><div class="tiny">Cep, giden arama, 1 dk</div></div><span class="tiny">Dün</span></div>
+                <div class="crow"><div class="av" style="background:#E8577E">S</div><div><b style="font-weight:600">Selin</b><div class="tiny">İş, FaceTime ses, 12 dk</div></div><span class="tiny">Pzt</span></div>
               </div>
               <div class="card pad">
-                <div class="num">0 532 </div>
-                <div class="keys">
-                  <button class="key">1<small>&nbsp;</small></button><button class="key">2<small>ABC</small></button><button class="key">3<small>DEF</small></button>
-                  <button class="key">4<small>GHI</small></button><button class="key">5<small>JKL</small></button><button class="key">6<small>MNO</small></button>
-                  <button class="key">7<small>PQRS</small></button><button class="key">8<small>TUV</small></button><button class="key">9<small>WXYZ</small></button>
-                  <button class="key">*<small>&nbsp;</small></button><button class="key">0<small>+</small></button><button class="key">#<small>&nbsp;</small></button>
-                </div>
-                <button class="dial" aria-label="Ara"><svg class="i"><use href="#i-call"/></svg></button>
-                <p class="tiny" style="margin:12px 0 0">Ses bilgisayarın hoparlör ve mikrofonundan geçer.</p>
+                <div class="big-ic"><svg class="i"><use href="#i-phone"/></svg></div>
+                <b style="font-size:16px;font-weight:600;display:block;margin:12px 0 6px">Görüşmeler iPhone’da</b>
+                <p class="sub" style="margin:0 0 14px;font-size:13px">Gelen arama ekranın üstünde çıkar. Yanıtla ve Reddet iPhone’a gider, görüşme telefonda sürer.</p>
+                <p class="tiny" style="margin:0">Bilgisayardan arama yapmak ve sesi bilgisayara almak Windows’un izin vermesini bekliyor.</p>
               </div>
             </div>
           </section>
@@ -544,6 +563,7 @@
           <!-- Files -->
           <section class="view" id="v-files">
             <h2>Dosyalar ve fotoğraflar</h2>
+            <div class="needs-app"><svg class="i"><use href="#i-phone"/></svg><span><b>iPhone’da Fenpo gerekiyor.</b> Dosya ve fotoğraf göndermek için iPhone uygulamasını bu bilgisayara bağla.</span><button class="btn primary" type="button" data-demo="pair">iPhone uygulamasını bağla</button></div>
             <div class="drop" id="drop">
               <div class="big"><svg class="i"><use href="#i-down"/></svg></div>
               <div style="flex:1"><b style="font-size:16px;font-weight:600">Dosyaları buraya bırak, iPhone’a gitsin</b><div class="sub">Dosya Gezgini’nde sağ tık > Fenpo ile iPhone’a gönder de kullanılabilir.</div></div>
@@ -571,6 +591,7 @@
           <!-- Clipboard -->
           <section class="view" id="v-clip">
             <h2>Pano</h2>
+            <div class="needs-app"><svg class="i"><use href="#i-phone"/></svg><span><b>iPhone’da Fenpo gerekiyor.</b> Pano paylaşımı iPhone uygulamasıyla çalışır.</span><button class="btn primary" type="button" data-demo="pair">iPhone uygulamasını bağla</button></div>
             <div class="card setrow" style="margin-bottom:16px">
               <svg class="i"><use href="#i-link"/></svg>
               <div class="lbl">Kopyaladığın her şey iPhone’a gitsin<small>iPhone’dan gelenler için arka tarafına iki kez dokun ya da Denetim Merkezi’ndeki Fenpo düğmesini kullan.</small></div>
@@ -587,6 +608,7 @@
           <!-- Camera -->
           <section class="view" id="v-cam">
             <h2>Kamera</h2>
+            <div class="needs-app"><svg class="i"><use href="#i-phone"/></svg><span><b>iPhone’da Fenpo gerekiyor.</b> iPhone’u kamera olarak kullanmak için uygulamayı aç.</span><button class="btn primary" type="button" data-demo="pair">iPhone uygulamasını bağla</button></div>
             <div class="cam">
               <div>
                 <div class="preview"><span class="live"><i></i>Teams kullanıyor</span></div>
@@ -622,7 +644,7 @@
               <h4>Özellikler</h4>
               <div class="card">
                 <div class="setrow"><svg class="i"><use href="#i-bell"/></svg><div class="lbl">Bildirimleri göster<small>iPhone’daki bildirimler Windows bildirimi olarak gelir</small></div><span class="toggle on"></span></div>
-                <div class="setrow"><svg class="i"><use href="#i-call"/></svg><div class="lbl">Aramaları bilgisayardan yanıtla</div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-call"/></svg><div class="lbl">Gelen aramaları ekranın üstünde göster<small>Yanıtla ve Reddet iPhone’a gider</small></div><span class="toggle on"></span></div>
                 <div class="setrow"><svg class="i"><use href="#i-clip"/></svg><div class="lbl">Pano paylaşımı</div><span class="toggle on"></span></div>
                 <div class="setrow"><svg class="i"><use href="#i-play"/></svg><div class="lbl">Medya kontrolü<small>Klavyedeki medya tuşları iPhone’u kontrol eder</small></div><span class="toggle on"></span></div>
               </div>
@@ -632,13 +654,13 @@
               <div class="card">
                 <div class="setrow"><svg class="i"><use href="#i-lock"/></svg><div class="lbl">iPhone uzaklaşınca bilgisayarı kilitle<small>Yaklaşık 3 metre, 30 saniye</small></div><span class="toggle on"></span></div>
                 <div class="setrow"><svg class="i"><use href="#i-focus"/></svg><div class="lbl">iPhone ile kilit aç<small>Face ID onayıyla Windows oturumunu açar (deneysel)</small></div><span class="toggle"></span></div>
-                <div class="setrow"><svg class="i"><use href="#i-moon"/></svg><div class="lbl">Odak modunu eşitle<small>iPhone’da Rahatsız Etme açılınca Windows’ta da açılır</small></div><span class="toggle on"></span></div>
+                <div class="setrow"><svg class="i"><use href="#i-moon"/></svg><div class="lbl">Odak modunu eşitle<small>iPhone’da Rahatsız Etme açılınca Fenpo bildirimleri susar</small></div><span class="toggle on"></span></div>
               </div>
             </div>
             <div class="set-group">
               <h4>Cihaz</h4>
               <div class="card">
-                <div class="setrow"><svg class="i"><use href="#i-phone"/></svg><div class="lbl">Buğra’nın iPhone’u<small>iPhone 16 Pro, iOS 27.0, eşleşme 12 Ekim</small></div><button class="btn">Eşleşmeyi kaldır</button></div>
+                <div class="setrow"><svg class="i"><use href="#i-phone"/></svg><div class="lbl">Buğra’nın iPhone’u<small>iPhone 16 Pro, eşleşme 12 Ekim</small></div><button class="btn">Eşleşmeyi kaldır</button></div>
                 <div class="setrow"><svg class="i"><use href="#i-folder"/></svg><div class="lbl">Gelen dosyalar<small>C:\Users\bugra\Downloads\Fenpo</small></div><button class="btn">Değiştir</button></div>
               </div>
             </div>
@@ -663,6 +685,31 @@
             <div>
               <div class="qr"><canvas id="qr" width="29" height="29"></canvas><div class="logo"><svg width="44" height="44"><use href="#logo"/></svg></div></div>
               <div class="code6">Kamera açılmıyorsa iPhone’da bu kodu gir<b>482 917</b></div>
+            </div>
+          </div>
+        </div>
+        <!-- First run pairing without the iPhone app (Windows Bluetooth pairing) -->
+        <div class="pair" id="pairBt">
+          <div class="l">
+            <svg width="48" height="48"><use href="#logo"/></svg>
+            <h2>iPhone’unu bağla</h2>
+            <p class="sub" style="margin:0">iPhone’a bir şey yüklemeden başlayabilirsin. Bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir.</p>
+            <ol class="steps">
+              <li class="done"><div><b>iPhone’da Bluetooth ayarlarını aç</b><div class="tiny">Ayarlar > Bluetooth ekranında kal, iPhone böylece görünür olur</div></div></li>
+              <li class="now"><div><b>Bu bilgisayarda eşleştir</b><div class="tiny">Cihaz ekle > Bluetooth > iPhone’unu seç, iki ekrandaki kodu onayla</div><button class="btn primary" type="button" style="margin-top:10px">Bluetooth ayarlarını aç</button></div></li>
+              <li><div><b>Bildirimleri paylaşmaya izin ver</b><div class="tiny">iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</div></div></li>
+              <li><div><b>Mesajlara izin ver</b><div class="tiny">Ayarlar > Bluetooth > bu bilgisayarın yanındaki (i) > Mesaj bildirimlerini göster</div></div></li>
+            </ol>
+            <div style="margin-top:auto;display:flex;gap:8px"><button class="btn" type="button" data-demo="pairbt">Sonra yap</button><button class="btn" type="button" data-demo="pairswap">iPhone uygulamasıyla bağla</button></div>
+          </div>
+          <div class="r">
+            <div class="check">
+              <h4>Bağlantı durumu</h4>
+              <div class="ck ok"><span class="mark">✓</span><div><b>Bluetooth açık</b><div class="tiny">Bu bilgisayar telefonla eşleşebilir</div></div></div>
+              <div class="ck wait"><span class="mark"></span><div><b>iPhone bekleniyor</b><div class="tiny">Eşleşme bitince burada görünür</div></div></div>
+              <div class="ck"><span class="mark"></span><div><b>Bildirimler</b><div class="tiny">İzin verince kendiliğinden işaretlenir</div></div></div>
+              <div class="ck"><span class="mark"></span><div><b>Mesajlar</b><div class="tiny">İsteğe bağlı, sonra da açılabilir</div></div></div>
+              <div class="warn"><svg class="i"><use href="#i-link"/></svg><span><b>Telefon Bağlantısı açık.</b> Aynı anda çalışırsa bildirimler gelmeyebilir.</span><button class="btn" type="button">Kapat</button></div>
             </div>
           </div>
         </div>
@@ -756,6 +803,7 @@
   const flyout = document.getElementById("flyout");
   const island = document.getElementById("island");
   const pair = document.getElementById("pair");
+  const pairBt = document.getElementById("pairBt");
   let toastTimer, xferTimer;
 
   function closeOverlays() { toast.classList.remove("show"); flyout.classList.remove("open"); }
@@ -770,8 +818,7 @@
   function showCall() {
     clearInterval(xferTimer);
     island.className = "island";
-    island.innerHTML = `<span class="ring"></span><div class="av" style="background:#2F8F6B">A</div><div class="who"><b>Annem</b><span>iPhone, cep</span></div>
-      <button class="cbtn phone-btn" title="iPhone'da yanıtla" aria-label="iPhone'da yanıtla"><svg class="i"><use href="#i-phone"/></svg></button>
+    island.innerHTML = `<span class="ring"></span><div class="av" style="background:#2F8F6B">A</div><div class="who"><b>Annem</b><span>Cep · görüşme iPhone’da sürer</span></div>
       <button class="cbtn dec" aria-label="Reddet"><svg class="i"><use href="#i-hangup"/></svg></button>
       <button class="cbtn acc" aria-label="Yanıtla"><svg class="i"><use href="#i-call"/></svg></button>`;
     requestAnimationFrame(() => island.classList.add("show", "call"));
@@ -798,7 +845,10 @@
     if (d === "tray") toggleTray();
     if (d === "call") showCall();
     if (d === "xfer") showXfer();
-    if (d === "pair") pair.classList.toggle("show");
+    if (d === "pair") { pairBt.classList.remove("show"); pair.classList.toggle("show"); }
+    if (d === "pairbt") { pair.classList.remove("show"); pairBt.classList.toggle("show"); }
+    if (d === "pairswap") { pairBt.classList.remove("show"); pair.classList.add("show"); }
+    if (d === "noapp") stage.classList.toggle("noapp");
     if (d === "theme") setTheme(stage.classList.contains("dark") ? "light" : "dark");
   }));
   document.getElementById("trayBtn").addEventListener("click", toggleTray);
