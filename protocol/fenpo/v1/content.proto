@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// A clipboard entry copied on one device and offered to the other.
+// Images larger than 512 KB travel as a file transfer instead.
+message ClipboardItem {
+  string item_id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  oneof content {
+    string text = 10;
+    string url = 11;
+    ClipboardImage image = 12;
+  }
+}
+
+message ClipboardImage {
+  string mime_type = 1;                  // image/png or image/jpeg.
+  bytes data = 2;
+}
+
+// Ask the other device for its latest clipboard item. Answered with ClipboardItem or Error.
+message ClipboardRequest {
+}
+
+// Open a link on the receiving device ("Open on PC" / "Open on iPhone").
+message OpenUrl {
+  string url = 1;
+}

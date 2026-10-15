@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+import "fenpo/v1/common.proto";
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Pairing starts from the QR code shown by the PC:
+//
+//   fenpo://pair?v=1&id=<pcId>&n=<url-encoded name>&a=<ip:port,ip:port>&fp=<hex sha256 of PC cert>&t=<base64url token>
+//
+// The phone opens a TLS connection to one of the addresses, verifies the server
+// certificate against `fp`, presents its own self-signed certificate and sends
+// PairingRequest as the first message instead of Hello. The 6 digit fallback code
+// shown under the QR maps to the same token on the PC side.
+
+message PairingRequest {
+  bytes token = 1;                       // One-time token from the QR code (16 bytes).
+  string device_id = 2;
+  string device_name = 3;
+  DevicePlatform platform = 4;
+  bytes certificate_sha256 = 5;          // Fingerprint of the certificate used on this TLS connection.
+}
+
+message PairingResult {
+  bool accepted = 1;
+  string pc_id = 2;
+  string pc_name = 3;
+  PairingFailure failure = 4;            // Set when accepted is false.
+  bytes ble_channel_key = 5;             // 32 bytes. AES-GCM key for the Fenpo BLE channel.
+  string ble_service_uuid = 6;           // Fenpo GATT service UUID advertised by this PC.
+}
+
+enum PairingFailure {
+  PAIRING_FAILURE_UNSPECIFIED = 0;
+  PAIRING_FAILURE_TOKEN_EXPIRED = 1;
+  PAIRING_FAILURE_TOKEN_INVALID = 2;
+  PAIRING_FAILURE_REJECTED_BY_USER = 3;
+  PAIRING_FAILURE_PROTOCOL_MISMATCH = 4;
+}

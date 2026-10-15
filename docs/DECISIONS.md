@@ -1,0 +1,51 @@
+# Kararlar
+
+Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizilmez, yeni bir madde eklenir ve eskisine "yerini aldı: #n" yazılır. Tarihler 2026.
+
+## Ürün
+
+| # | Tarih | Karar | Neden |
+|---|---|---|---|
+| 1 | 15 Ekim | Ad **Fenpo** (fenestra + pomum). Alan adı veya paket adı çakışırsa yedek **FenpoLink** | Özgün, kısa, okunuşu tek türlü |
+| 2 | 15 Ekim | Logo **Çekirdek** (`design/logo/svg/1-cekirdek.svg`). Diğer konseptler kayıt için duruyor | 16 px'te en iyi okunan işaret, Apple ve Microsoft logolarından uzak |
+| 3 | 15 Ekim | Renk sistemi: Mürekkep `#1B1F3B`, Çiçek `#E8577E`, Yaprak `#2F8F6B`, Alacakaranlık `#4E54C8`, Cam `#DCE6F5`, Pervaz `#F6F7FB` | `design/logo/logos.html` |
+| 4 | 15 Ekim | Üç uygulamada da **tema** (Sistem, Açık, Koyu) ve **dil** (Sistem dili, Türkçe, English) seçimi | İlk günden; sonradan eklemek her ekranı elden geçirmek demek |
+| 5 | 15 Ekim | Sunucu ve hesap yok. Her şey Bluetooth ve yerel ağ üzerinden, uçtan uca şifreli | Gizlilik, maliyet, basitlik |
+| 6 | 15 Ekim | Apple'ın özel protokolleri (gerçek Handoff, Universal Clipboard, iCloud) taklit edilmez | Kırılgan, App Store ve hukuk riski |
+| 7 | 15 Ekim | Lisans MIT. GPL bileşenler (UxPlay) sadece ayrı çalıştırılabilir olarak | Açık kaynak, ticari kullanıma açık |
+
+## Platformlar
+
+| # | Tarih | Karar | Neden |
+|---|---|---|---|
+| 8 | 15 Ekim | **Windows:** .NET 10 LTS, WinUI 3 (Windows App SDK 2.5), MSIX, Windows 11 22H2+ | `docs/TECH-STACK.md` |
+| 9 | 15 Ekim | **iPhone:** Swift 6.4, SwiftUI, iOS 18+, XcodeGen | Widget, Denetim Merkezi ve uzantılar sadece Swift ile; AccessorySetupKit iOS 18 |
+| 10 | 15 Ekim | **Android de yapılacak**, iPhone ile paralel ayrı bir iş kolu olarak. Yerel **Kotlin + Jetpack Compose + Material 3**. Ayrıntılı teknoloji seçimleri Android oturumunun ilk aşamasında araştırılıp `docs/ANDROID.md`'ye yazılır | Expo/React Native elendi: işin çoğu (arka plan Bluetooth, servisler, sistem entegrasyonları) yine yerel modül olarak yazılacaktı; üç dil, iki dilden pahalı |
+| 11 | 15 Ekim | Üç uygulama tek protokol konuşur: `protocol/fenpo/v1/*.proto`. İlk mesaj `Hello` ile platform ve yetenek pazarlığı | Windows tarafında platforma özel dal açmadan yeni istemci eklenebilsin |
+| 12 | 15 Ekim | TLS sertifikaları ECDSA P-256 | Schannel, Network.framework ve Android'de sorunsuz |
+
+## Geliştirme ortamı ve test
+
+| # | Tarih | Karar | Neden |
+|---|---|---|---|
+| 13 | 15 Ekim | **Mac yok.** iOS kodu Windows'ta yazılır; derleme ve birim testleri **GitHub Actions macOS runner'ında** koşar. Cihaz testleri ortağın Mac'i ve bir iPhone ile yapılır | Mac almadan ilerlemek |
+| 14 | 15 Ekim | iOS cihaz testi geliştirme bitince değil, **kilometre taşlarında** yapılır: (1) S4 ve S6 spike'ları, (2) eşleşme + dosya aktarımı, (3) pano ve paylaşım menüsü | En büyük iOS riskleri (arka plan Bluetooth, AccessorySetupKit) cihaz görmeden doğrulanamaz; geç fark edilirse mimari değişir |
+| 15 | 15 Ekim | Gerçek uçtan uca test ortamı Buğra'nın PC'si ve iPhone'u. Ortak Mac'te derleyip **TestFlight** ile gönderir. Bunun için Apple Developer Program (yıllık 99$) gerekli | Windows ↔ iPhone akışı ancak ikisi bir aradayken test edilebilir |
+| 16 | 15 Ekim | Android tamamen Windows'ta geliştirilir ve test edilir (Android Studio). Bluetooth için **gerçek bir Android telefon** gerekli, emülatör yetmez | |
+| 17 | 15 Ekim | Repo GitHub'da. iOS CI için macOS runner gerekiyor: açık repoda ücretsiz, özel repoda dakikalar 10 kat sayılıyor | Açık kaynak planıyla uyumlu |
+
+## Çalışma düzeni
+
+| # | Tarih | Karar | Neden |
+|---|---|---|---|
+| 18 | 15 Ekim | **Üç ayrı Claude Code oturumu**, üç iş kolu: Windows (ana, protokolün sahibi), iPhone, Android | Her biri kendi klasöründe, birbirinin işini ezmeden |
+| 19 | 15 Ekim | Git düzeni: Windows oturumu `fenpo` klasöründe `main` dalında. iPhone `..\fenpo-ios` (`ios` dalı), Android `..\fenpo-android` (`android` dalı) worktree'lerinde. Mobil oturumlar her iş bloğunun başında `git merge main` yapar; Buğra kilometre taşlarında dalları `main`'e birleştirir | Aynı klasörde üç oturum birbirinin git index'ine karışır |
+| 20 | 15 Ekim | Protokol değişikliği her zaman ayrı bir commit (`protocol: ...`), `protocol/` ve `docs/ARCHITECTURE.md` birlikte. Mobil oturumlar değişiklik gerekirse kendi dallarında yapar ve Buğra'ya söyler; Buğra hemen `main`'e alır | Üç uygulamanın sözleşmesi tek yerde, sapmadan |
+| 21 | 15 Ekim | Başlatma promptları `docs/KICKOFF.md` içinde | |
+
+## Açık konular
+
+- Repo açık mı özel mi olacak, hangi hesap altında (kişisel mi Milvasoft mı) -> https://github.com/Milvasoft/fenpo.git 
+- Test için Android telefon -> var en son adb ile bağlanabileceksin usb üzerinden 
+- Apple Developer hesabı kimin adına açılacak (Buğra mı ortak mı) -> var zaten milva 
+- Android'in en düşük sürümü (Android oturumunun ilk aşamasında önerilecek) -> öner ne diyim amk---

@@ -1,0 +1,45 @@
+# .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.rsuser
+TestResults/
+AppPackages/
+BundleArtifacts/
+*.appx
+*.msix
+*.msixbundle
+*.pfx
+
+# Native (C++)
+x64/
+ARM64/
+Debug/
+Release/
+*.ipch
+*.VC.db
+
+# Xcode / Swift
+ios/*.xcodeproj/
+ios/*.xcworkspace/
+xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Generated protocol code
+**/Generated/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local secrets and raw Bluetooth captures (curated fixtures live under tests/**/Fixtures)
+*.local.json
+captures/

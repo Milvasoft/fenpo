@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Platform of the device on the other end of a connection.
+enum DevicePlatform {
+  DEVICE_PLATFORM_UNSPECIFIED = 0;
+  DEVICE_PLATFORM_WINDOWS = 1;
+  DEVICE_PLATFORM_IOS = 2;
+  DEVICE_PLATFORM_ANDROID = 3;
+}
+
+// Features a device can offer. Both sides enable only the intersection.
+enum Capability {
+  CAPABILITY_UNSPECIFIED = 0;
+  CAPABILITY_CLIPBOARD = 1;          // Send and receive clipboard items.
+  CAPABILITY_FILE_TRANSFER = 2;      // Send and receive files.
+  CAPABILITY_OPEN_URL = 3;           // Open a link on the other device.
+  CAPABILITY_RING = 4;               // Play a sound to find the phone.
+  CAPABILITY_LOCK_PC = 5;            // Ask the PC to lock its session.
+  CAPABILITY_DEVICE_STATE = 6;       // Battery, charging, network, focus.
+  CAPABILITY_CAMERA = 7;             // Phone as webcam (reserved, phase 4).
+  CAPABILITY_FILE_PROVIDER = 8;      // Browse PC folders from the phone (reserved, phase 4).
+  CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC (reserved, phase 4).
+  CAPABILITY_NOTIFICATION_MIRROR = 10; // Phone notifications over the Fenpo channel (Android).
+  CAPABILITY_MESSAGES = 11;          // SMS over the Fenpo channel (Android).
+}

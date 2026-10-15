@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+import "fenpo/v1/hello.proto";
+import "fenpo/v1/pairing.proto";
+import "fenpo/v1/content.proto";
+import "fenpo/v1/transfer.proto";
+import "fenpo/v1/device.proto";
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Every message on the control connection and the BLE channel is an Envelope.
+// Framing on TLS: [uint32 big-endian length][Envelope bytes].
+// Field number ranges are reserved per feature group; keep new fields inside their range.
+message Envelope {
+  uint32 version = 1;                    // Protocol version, currently 1.
+  uint64 id = 2;                         // Sender-unique, used to match replies.
+  uint64 reply_to = 3;                   // Id of the request this message answers, 0 if none.
+
+  oneof body {
+    // 10-19: session
+    Hello hello = 10;
+    Ping ping = 11;
+    Pong pong = 12;
+    Error error = 13;
+    PairingRequest pairing_request = 14;
+    PairingResult pairing_result = 15;
+
+    // 20-29: content
+    ClipboardItem clipboard = 20;
+    ClipboardRequest clipboard_request = 21;
+    OpenUrl open_url = 22;
+
+    // 30-39: file transfer
+    TransferOffer transfer_offer = 30;
+    TransferAccept transfer_accept = 31;
+    TransferProgress transfer_progress = 32;
+    TransferCancel transfer_cancel = 33;
+
+    // 40-49: device control
+    RingDevice ring = 40;
+    LockPc lock_pc = 41;
+
+    // 50-59: device state
+    DeviceState device_state = 50;
+  }
+
+  // 60-69 camera, 70-79 file provider, 80-89 screen mirror,
+  // 90-99 notification mirror (Android), 100-109 messages (Android).
+  // Defined in later phases.
+  reserved 60 to 109;
+}
