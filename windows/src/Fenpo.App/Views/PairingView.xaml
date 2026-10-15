@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Fenpo.App.Views.PairingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Fenpo.App.Controls"
+    xmlns:helpers="using:Fenpo.App.Helpers">
+
+    <!-- First run without the iPhone app: design "İlk kurulum" (DECISIONS #28, #38). -->
+    <Grid Background="{ThemeResource FenpoSolidBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Padding="48,40,48,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <Image Source="ms-appx:///Assets/AppLogo.png" Width="48" Height="48" HorizontalAlignment="Left" />
+                <TextBlock x:Uid="Pair_Title" FontSize="30" FontWeight="SemiBold" Margin="0,18,0,8" Foreground="{ThemeResource FenpoTextBrush}" />
+                <TextBlock x:Uid="Pair_Intro" Style="{StaticResource FenpoSecondaryTextStyle}" FontSize="14" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0,24,0,16" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <controls:WizardStep Number="1" x:Uid="Pair_Step1" State="{x:Bind ViewModel.OpenBluetoothStep, Mode=OneWay}" />
+                    <controls:WizardStep Number="2" x:Uid="Pair_Step2" State="{x:Bind ViewModel.PairStep, Mode=OneWay}">
+                        <controls:WizardStep.Extra>
+                            <Button x:Uid="Pair_OpenSettings" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.OpenBluetoothSettingsCommand}" />
+                        </controls:WizardStep.Extra>
+                    </controls:WizardStep>
+                    <controls:WizardStep Number="3" x:Uid="Pair_Step3" State="{x:Bind ViewModel.NotificationsStep, Mode=OneWay}" />
+                    <controls:WizardStep Number="4" x:Uid="Pair_Step4" State="{x:Bind ViewModel.MessagesStep, Mode=OneWay}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Uid="Pair_Later" Command="{x:Bind ViewModel.LaterCommand}" />
+                <Button x:Uid="Pair_WithApp" IsEnabled="False" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Column="1" Background="{ThemeResource FenpoCardSecondaryBrush}" BorderBrush="{ThemeResource FenpoStrokeBrush}" BorderThickness="1,0,0,0">
+            <StackPanel Width="340" VerticalAlignment="Center">
+                <TextBlock x:Uid="Pair_StatusHeader" FontWeight="SemiBold" Margin="0,0,0,12" Foreground="{ThemeResource FenpoTextBrush}" />
+                <controls:CheckRow x:Uid="Pair_CheckBluetooth" IsOk="{x:Bind ViewModel.BluetoothOn, Mode=OneWay}" />
+                <controls:CheckRow x:Uid="Pair_CheckPhone" IsOk="{x:Bind ViewModel.PhoneFound, Mode=OneWay}" IsWaiting="{x:Bind helpers:BindHelpers.WaitingFor(ViewModel.BluetoothOn, ViewModel.PhoneFound), Mode=OneWay}" />
+                <controls:CheckRow x:Uid="Pair_CheckNotifications" IsOk="{x:Bind ViewModel.NotificationsOk, Mode=OneWay}" IsWaiting="{x:Bind helpers:BindHelpers.WaitingFor(ViewModel.PhoneFound, ViewModel.NotificationsOk), Mode=OneWay}" />
+                <controls:CheckRow x:Uid="Pair_CheckMessages" IsOk="{x:Bind ViewModel.MessagesOk, Mode=OneWay}" />
+
+                <Border Style="{StaticResource FenpoNoticeStyle}" Padding="12,10" Margin="0,14,0,0" Visibility="{x:Bind ViewModel.PhoneLinkRunning, Mode=OneWay}">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Glyph="&#xE71B;" FontSize="16" Foreground="{ThemeResource FenpoAccentBrush}" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" Foreground="{ThemeResource FenpoTextBrush}">
+                            <Run x:Uid="Pair_PhoneLinkTitle" FontWeight="SemiBold" />
+                            <Run x:Uid="Pair_PhoneLinkText" />
+                        </TextBlock>
+                        <Button Grid.Column="2" x:Uid="Pair_PhoneLinkClose" Command="{x:Bind ViewModel.ClosePhoneLinkCommand}" />
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource FenpoNoticeStyle}" Padding="12,10" Margin="0,14,0,0" Visibility="{x:Bind ViewModel.BrokenBond, Mode=OneWay}">
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{ThemeResource FenpoTextBrush}">
+                        <Run x:Uid="Pair_BrokenTitle" FontWeight="SemiBold" />
+                        <Run x:Uid="Pair_BrokenText" />
+                    </TextBlock>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

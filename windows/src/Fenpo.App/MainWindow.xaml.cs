@@ -1,5 +1,7 @@
 using Fenpo.App.Services;
+using Fenpo.App.ViewModels;
 using Fenpo.App.Views;
+using Fenpo.Core.Settings;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -28,7 +30,8 @@ public sealed partial class MainWindow : Window
     /// Initializes a new instance of the <see cref="MainWindow"/> class.
     /// </summary>
     /// <param name="themeService">Applies the Theme setting to this window.</param>
-    public MainWindow(ThemeService themeService)
+    /// <param name="settings">Settings store (first-run wizard).</param>
+    public MainWindow(ThemeService themeService, ISettingsStore settings)
     {
         InitializeComponent();
 
@@ -40,14 +43,46 @@ public sealed partial class MainWindow : Window
 
         themeService.Register(this);
         Navigation.SelectedItem = Navigation.MenuItems[0];
+
+        if (!settings.Current.SetupCompleted)
+        {
+            ShowPairing();
+        }
+    }
+
+    /// <summary>
+    /// Shows the pairing wizard over the content until it is finished or postponed.
+    /// </summary>
+    public void ShowPairing()
+    {
+        if (PairingHost.Content is not null)
+        {
+            return;
+        }
+
+        var viewModel = App.GetService<PairingViewModel>();
+        viewModel.Closed += (_, _) => DispatcherQueue.TryEnqueue(() =>
+        {
+            viewModel.Dispose();
+            PairingHost.Content = null;
+            PairingHost.Visibility = Visibility.Collapsed;
+        });
+        PairingHost.Content = new PairingView(viewModel);
+        PairingHost.Visibility = Visibility.Visible;
     }
 
     /// <summary>
     /// Shows the page registered under <paramref name="tag"/> and selects its menu item.
     /// </summary>
-    /// <param name="tag">Page tag, e.g. "Notifications".</param>
+    /// <param name="tag">Page tag, e.g. "Notifications", or "Pairing" for the pairing wizard.</param>
     public void Navigate(string tag)
     {
+        if (tag == "Pairing")
+        {
+            ShowPairing();
+            return;
+        }
+
         var item = Navigation.MenuItems.Concat(Navigation.FooterMenuItems).OfType<NavigationViewItem>().FirstOrDefault(i => (string)i.Tag == tag);
 
         if (item is not null)

@@ -44,7 +44,7 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
             State = connected ? PhoneConnectionState.Connecting : PhoneConnectionState.Disconnected,
             BluetoothConnected = connected,
         });
-        _link.ServicesReady += (_, services) => _ = ReadServicesAsync(services);
+        _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
         _link.BrokenBondDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
         _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available });
     }

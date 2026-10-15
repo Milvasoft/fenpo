@@ -38,7 +38,7 @@ public sealed class AmsClient(IphoneLink link, ILogger<AmsClient> logger) : IMed
     /// </summary>
     public void Attach()
     {
-        _link.ServicesReady += (_, services) => _ = StartAsync(services);
+        _link.ServicesReady += (sender, services) => _ = StartAsync(services);
         _link.ServicesLost += (_, _) =>
         {
             _remoteCommand = null;

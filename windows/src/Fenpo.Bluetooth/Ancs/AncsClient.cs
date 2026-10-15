@@ -52,7 +52,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     /// </summary>
     public void Attach()
     {
-        _link.ServicesReady += (_, services) => _ = StartAsync(services);
+        _link.ServicesReady += (sender, services) => _ = StartAsync(services);
         _link.ServicesLost += (_, _) => Stop();
     }
 

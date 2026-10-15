@@ -1,5 +1,7 @@
 using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
+using Fenpo.Bluetooth;
+using Fenpo.Core.Notifications;
 using Fenpo.Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,7 +30,8 @@ public partial class App : Application
         var settings = new JsonSettingsStore(Path.Combine(localFolder, "settings.json"));
 
         // Resources load with the first XAML, so the language override has to come before InitializeComponent.
-        LocalizationService.ApplyAtStartup(settings.Current.Language);        _crashLog = Path.Combine(localFolder, "crash.log");
+        LocalizationService.ApplyAtStartup(settings.Current.Language);
+        _crashLog = Path.Combine(localFolder, "crash.log");
 
         try
         {
@@ -48,7 +51,18 @@ public partial class App : Application
                 .AddSingleton<ISettingsStore>(settings)
                 .AddSingleton<ThemeService>()
                 .AddSingleton<LocalizationService>()
+                .AddFenpoBluetooth()
+                .AddSingleton<NotificationStore>()
+                .AddSingleton<AppIconService>()
+                .AddSingleton<NotificationRouter>()
+                .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
+                .AddHostedService<MediaBridge>()
+                .AddSingleton<ProximityLockService>()
+                .AddHostedService(sp => sp.GetRequiredService<ProximityLockService>())
                 .AddSingleton<MainWindow>()
+                .AddTransient<HomeViewModel>()
+                .AddTransient<NotificationsViewModel>()
+                .AddTransient<PairingViewModel>()
                 .AddTransient<SettingsViewModel>())
             .Build();
 
