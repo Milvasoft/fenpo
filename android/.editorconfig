@@ -1,0 +1,20 @@
+# Kotlin style for the Android app (docs/ANDROID.md §16). The repository root .editorconfig
+# only covers C#; this file adds Kotlin without touching it.
+
+[*.{kt,kts}]
+charset = utf-8
+end_of_line = lf
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+max_line_length = 120
+ktlint_code_style = ktlint_official
+ktlint_function_naming_ignore_when_annotated_with = Composable
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+compose_allowed_composition_locals = LocalFenpoExtendedColors
+
+[*.xml]
+indent_size = 4
+indent_style = space
+insert_final_newline = true

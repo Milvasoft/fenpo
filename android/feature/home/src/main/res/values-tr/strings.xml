@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_add_pc">Bilgisayar ekle</string>
+
+    <string name="pc_connected">Bağlı</string>
+    <string name="pc_not_connected">Bağlı değil</string>
+    <string name="pc_os_at_desk">%1$s, masada</string>
+    <string name="pc_waiting_for_connection">Bilgisayar bekleniyor</string>
+    <string name="link_bluetooth">Bluetooth</string>
+    <string name="link_wifi">Wi‑Fi</string>
+
+    <string name="not_paired_title">Henüz bir bilgisayar eşleşmedi</string>
+    <string name="not_paired_body">Windows’ta Fenpo’yu aç ve ekrandaki kodu okut.</string>
+    <string name="not_paired_action">Bilgisayarı eşleştir</string>
+
+    <string name="action_send_clipboard">Panoyu gönder</string>
+    <string name="action_send_clipboard_empty">Önce bir şey kopyala</string>
+    <string name="action_paste_from_pc">PC’den yapıştır</string>
+    <string name="action_paste_from_pc_empty">PC’de kopyalanan yok</string>
+    <string name="action_send_photos">Fotoğraf gönder</string>
+    <plurals name="action_send_photos_ready">
+        <item quantity="one">Son fotoğraf hazır</item>
+        <item quantity="other">Son %1$d fotoğraf hazır</item>
+    </plurals>
+    <string name="action_send_photos_empty">Galeriden seç</string>
+    <string name="action_camera">Kamera ol</string>
+    <string name="action_camera_summary">PC’de web kamerası</string>
+
+    <string name="mirroring_title">Bildirimler PC’ye gidiyor</string>
+    <plurals name="mirroring_apps">
+        <item quantity="one">%1$d uygulama</item>
+        <item quantity="other">%1$d uygulama</item>
+    </plurals>
+    <string name="mirroring_apps_last">%1$s, son: %2$s, %3$s</string>
+
+    <string name="recent_transfers">Son aktarılanlar</string>
+    <string name="transfer_from_pc">PC’den geldi, %1$s</string>
+    <string name="transfer_to_pc">PC’ye gitti, %1$s</string>
+
+    <string name="pc_title">PC</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="scanner_title">Scan the code on your computer</string>
+    <string name="scanner_body">Open Fenpo on Windows and show the code on the screen to the camera. Both must be on the same Wi‑Fi network.</string>
+    <string name="scanner_enter_code">Enter the code manually</string>
+
+    <string name="steps_title">Almost done</string>
+    <string name="step_wifi">Wi‑Fi connection</string>
+    <string name="step_wifi_done">Encrypted channel to %1$s is ready</string>
+    <string name="step_device">Recognize this computer</string>
+    <string name="step_bluetooth">Bluetooth pairing</string>
+    <string name="step_permissions">Permissions</string>
+    <string name="step_waiting">Waiting for approval</string>
+    <string name="step_queued">Up next</string>
+    <string name="step_done">Done</string>
+
+    <string name="permissions_title">Permissions</string>
+    <!-- "4 / 6": a ratio, not a count of things. -->
+    <string name="permissions_ready" tools:ignore="PluralsCandidate">%1$d / %2$d ready</string>
+    <plurals name="permissions_missing">
+        <item quantity="one">%1$d permission missing</item>
+        <item quantity="other">%1$d permissions missing</item>
+    </plurals>
+    <string name="permissions_all_granted">All set</string>
+    <string name="permission_granted">On</string>
+    <string name="permission_allow">Allow</string>
+    <string name="permission_turn_on">Turn on</string>
+    <string name="permission_remove">Remove</string>
+
+    <string name="permission_nearby">Nearby devices</string>
+    <string name="permission_nearby_summary">Finds your computer over Bluetooth and Wi‑Fi</string>
+    <string name="permission_notifications">Notifications</string>
+    <string name="permission_notifications_summary">Transfers and clipboard from your PC</string>
+    <string name="permission_notification_access">Notification access</string>
+    <string name="permission_notification_access_summary">Your phone’s notifications show up on your PC</string>
+    <string name="permission_battery">Battery restriction</string>
+    <string name="permission_battery_summary">Without it the connection stays up all day</string>
+    <string name="permission_sms">SMS</string>
+    <string name="permission_sms_summary">Messages are read and sent from your PC</string>
+    <string name="permission_camera">Camera</string>
+    <string name="permission_camera_summary">Pairing code and webcam</string>
+
+    <string name="permissions_restricted_hint">If you see “Restricted setting”: Settings &gt; Apps &gt; Fenpo &gt; ⋮ &gt; Allow restricted settings, then come back here. Android asks for this when an app is installed outside a store.</string>
+</resources>

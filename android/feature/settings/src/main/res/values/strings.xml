@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+
+    <string name="section_appearance_language">Appearance and language</string>
+    <string name="appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="language">Language</string>
+    <string name="language_system">System language (%1$s)</string>
+    <string name="language_turkish" translatable="false">Türkçe</string>
+    <string name="language_english" translatable="false">English</string>
+    <string name="language_dialog_note">Same as Android’s app language setting. The choice applies right away, no restart needed.</string>
+    <string name="cancel">Cancel</string>
+    <string name="apply">Apply</string>
+
+    <string name="section_features">Features</string>
+    <string name="feature_notifications">Send notifications to PC</string>
+    <string name="feature_messages">Sync messages</string>
+    <string name="feature_messages_summary">Read and reply to SMS on your PC</string>
+    <string name="feature_clipboard">Clipboard sharing</string>
+    <string name="feature_screenshots">Send screenshots</string>
+    <string name="feature_dnd">Sync Do Not Disturb</string>
+    <string name="feature_dnd_summary">While it’s on, Fenpo notifications on your PC stay quiet</string>
+
+    <string name="section_permissions">Permissions</string>
+    <string name="permissions">Permissions</string>
+    <string name="permissions_all_granted">All permissions granted</string>
+    <plurals name="permissions_missing">
+        <item quantity="one">%1$d permission missing</item>
+        <item quantity="other">%1$d permissions missing</item>
+    </plurals>
+</resources>

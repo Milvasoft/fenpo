@@ -1,0 +1,61 @@
+name: Android
+
+on:
+  push:
+    branches: [main, android]
+    paths:
+      - "android/**"
+      - "protocol/**"
+      - ".github/workflows/android.yml"
+  pull_request:
+    paths:
+      - "android/**"
+      - "protocol/**"
+      - ".github/workflows/android.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # The default caching component is closed source; "basic" is the open source one.
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-provider: basic
+
+      # Formatting, lint, unit tests (JVM and Robolectric), screenshot comparison in both themes
+      # and both languages, and a debug APK. AGP 9 runs Android unit tests for debug only.
+      - name: Check and build
+        run: ./gradlew spotlessCheck lintDebug test verifyRoborazziDebug assembleDebug
+
+      - name: Upload screenshot diffs
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: roborazzi-diffs
+          path: android/**/build/outputs/roborazzi/
+          if-no-files-found: ignore
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: fenpo-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk

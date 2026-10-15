@@ -144,7 +144,7 @@ Kaynaklar: [KeyGenParameterSpec](https://raw.githubusercontent.com/aosp-mirror/p
 | Konu | Seçim | Neden |
 |---|---|---|
 | Kotlin | 2.4.21 | Güncel kararlı (8 Ekim 2026) |
-| Derleme | AGP 9.4.0, Gradle 9.7.1, JDK 21 (hedef 17) | AGP 9 Kotlin'i kendi içinde getiriyor: `org.jetbrains.kotlin.android` ve kapt yok, KSP var. KGP 2.4.21 Gradle 9.7'ye kadar tam destekli |
+| Derleme | AGP 9.4.1, Gradle 9.7.1, JDK 21 (hedef 17) | AGP 9 Kotlin'i kendi içinde getiriyor: `org.jetbrains.kotlin.android` ve kapt yok, KSP var. KGP 2.4.21 Gradle 9.7'ye kadar tam destekli |
 | UI | Compose BOM 2026.09.00, Material 3 1.4.0 | Material 3 Expressive (1.5.0) henüz beta; kararlı olunca geçilir |
 | Gezinme | Navigation 3 1.2.0 | Kararlı; ekran yığını uygulamanın kendi durumu, Compose ile doğal |
 | Eşzamanlılık | kotlinx.coroutines 1.11.0, Flow | Standart |
@@ -224,7 +224,7 @@ Kaynaklar: [Kotlin coding conventions](https://kotlinlang.org/docs/coding-conven
 ## 17. Tema ve dil
 **Karar: Görünüm (Sistem, Açık, Koyu) DataStore'da; Dil (Sistem dili, Türkçe, English) AppCompat'ın uygulama dili API'siyle, yeniden başlatmasız. Dinamik renk (duvar kâğıdı) kapalı.**
 - Renk şemaları `design/android/android.html`'deki "Renk rolleri" tablosundan; `lightColorScheme`/`darkColorScheme` + başarı (Yaprak) için genişletilmiş renk. Sistem çubukları `enableEdgeToEdge`.
-- Tema: `theme_mode` DataStore'da, ilk kare doğru temayla çizilsin diye açılış ekranı değer gelene kadar tutulur. Compose dışı yüzeyler (sistem pencereleri, bildirim rengi) için `AppCompatDelegate.setDefaultNightMode`.
+- Tema: `theme_mode` DataStore'da, ilk kare doğru temayla çizilsin diye açılış ekranı değer gelene kadar tutulur. Seçim Compose'da uygulanır (`FenpoTheme(darkTheme = …)`), sistem çubuklarının simge rengi `enableEdgeToEdge` ile aynı değerden gelir. `AppCompatDelegate.setDefaultNightMode` kullanılmıyor: her değişiklikte aktiviteyi yeniden oluşturuyor, Compose ise anında geçiyor.
 - Dil: `androidResources { generateLocaleConfig = true }`, `res/resources.properties` içinde `unqualifiedResLocale=en-US`; `AppLocalesMetadataHolderService` + `autoStoreLocales=true`. API 33+'te seçim sistemin Ayarlar > Uygulamalar > Fenpo > Dil ayarıyla aynı yerde; paylaşım hedefleri, kutucuklar ve bildirimler de aynı dili kullanır. iOS'taki gibi sistem ayarına yönlendirmek yerine uygulama içinde seçim, çünkü Android bunu tutarlı biçimde destekliyor.
 
 Kaynaklar: [Uygulama başına dil](https://developer.android.com/guide/topics/resources/app-languages)
@@ -232,7 +232,8 @@ Kaynaklar: [Uygulama başına dil](https://developer.android.com/guide/topics/re
 ## 18. CI
 **Karar: `.github/workflows/android.yml`, `ubuntu-latest`, sadece `android/**` ve `protocol/**` değişince.**
 - `actions/checkout@v7`, `actions/setup-java@v6` (Temurin 21), `gradle/actions/setup-gradle@v6` ve `cache-provider: basic` (varsayılan önbellek bileşeni kapalı kaynak).
-- `./gradlew spotlessCheck lintDebug testDebugUnitTest verifyRoborazziDebug assembleDebug`.
+- `./gradlew spotlessCheck lintDebug test verifyRoborazziDebug assembleDebug` (AGP 9 Android birim testlerini sadece debug için oluşturuyor). Ekran görüntüleri `src/test/screenshots/` altında repoda; Windows'ta kaydedilenlerin Linux runner'da %0,5 eşik içinde kaldığı ilk CI koşusunda görülecek.
+- Yerel derleme: [android/README.md](../android/README.md).
 - Sürüm imzalı APK'yı etiketle GitHub Releases'a koyan ikinci iş Aşama B'den sonra; imza anahtarı repo sırrında.
 
 Kaynaklar: [setup-gradle](https://github.com/gradle/actions/blob/main/docs/setup-gradle.md), [setup-java](https://github.com/actions/setup-java/releases), [checkout](https://github.com/actions/checkout/releases)

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Fenpo</string>
+
+    <string name="nav_home" translatable="false">Fenpo</string>
+    <string name="nav_transfers">Transfers</string>
+    <string name="nav_pc">PC</string>
+    <string name="nav_settings">Settings</string>
+</resources>

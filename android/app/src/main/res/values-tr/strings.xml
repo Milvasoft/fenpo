@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_transfers">Aktarımlar</string>
+    <string name="nav_pc">PC</string>
+    <string name="nav_settings">Ayarlar</string>
+</resources>

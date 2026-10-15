@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Ayarlar</string>
+
+    <string name="section_appearance_language">Görünüm ve dil</string>
+    <string name="appearance">Görünüm</string>
+    <string name="theme_system">Sistem</string>
+    <string name="theme_light">Açık</string>
+    <string name="theme_dark">Koyu</string>
+    <string name="language">Dil</string>
+    <string name="language_system">Sistem dili (%1$s)</string>
+    <string name="language_dialog_note">Android’in uygulama dili ayarıyla aynı. Seçim hemen uygulanır, yeniden başlatma gerekmez.</string>
+    <string name="cancel">İptal</string>
+    <string name="apply">Uygula</string>
+
+    <string name="section_features">Özellikler</string>
+    <string name="feature_notifications">Bildirimleri PC’ye gönder</string>
+    <string name="feature_messages">Mesajları eşitle</string>
+    <string name="feature_messages_summary">SMS’ler PC’de okunur ve yanıtlanır</string>
+    <string name="feature_clipboard">Pano paylaşımı</string>
+    <string name="feature_screenshots">Ekran görüntülerini gönder</string>
+    <string name="feature_dnd">Rahatsız etmeyin’i eşitle</string>
+    <string name="feature_dnd_summary">Açılınca PC’de Fenpo bildirimleri susar</string>
+
+    <string name="section_permissions">İzinler</string>
+    <string name="permissions">İzinler</string>
+    <string name="permissions_all_granted">Bütün izinler verildi</string>
+    <plurals name="permissions_missing">
+        <item quantity="one">%1$d izin eksik</item>
+        <item quantity="other">%1$d izin eksik</item>
+    </plurals>
+</resources>

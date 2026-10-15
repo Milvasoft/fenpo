@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws everything; this theme only covers the window behind it. -->
+    <style name="Theme.Fenpo" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/fenpo_surface</item>
+    </style>
+
+    <style name="Theme.Fenpo.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/fenpo_surface</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.Fenpo</item>
+    </style>
+</resources>

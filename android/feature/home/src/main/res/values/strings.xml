@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title" translatable="false">Fenpo</string>
+    <string name="home_add_pc">Add a computer</string>
+
+    <string name="pc_connected">Connected</string>
+    <string name="pc_not_connected">Not connected</string>
+    <string name="pc_os_at_desk">%1$s, at your desk</string>
+    <string name="pc_waiting_for_connection">Waiting for the computer</string>
+    <string name="link_bluetooth">Bluetooth</string>
+    <string name="link_wifi">Wi‑Fi</string>
+
+    <string name="not_paired_title">No computer paired yet</string>
+    <string name="not_paired_body">Open Fenpo on Windows and scan the code on the screen.</string>
+    <string name="not_paired_action">Pair a computer</string>
+
+    <string name="action_send_clipboard">Send clipboard</string>
+    <string name="action_send_clipboard_empty">Copy something first</string>
+    <string name="action_paste_from_pc">Paste from PC</string>
+    <string name="action_paste_from_pc_empty">Nothing copied on the PC</string>
+    <string name="action_send_photos">Send photos</string>
+    <plurals name="action_send_photos_ready">
+        <item quantity="one">Latest photo ready</item>
+        <item quantity="other">Latest %1$d photos ready</item>
+    </plurals>
+    <string name="action_send_photos_empty">Choose from the gallery</string>
+    <string name="action_camera">Use as webcam</string>
+    <string name="action_camera_summary">Webcam on your PC</string>
+
+    <string name="mirroring_title">Notifications go to your PC</string>
+    <plurals name="mirroring_apps">
+        <item quantity="one">%1$d app</item>
+        <item quantity="other">%1$d apps</item>
+    </plurals>
+    <string name="mirroring_apps_last">%1$s, last: %2$s, %3$s</string>
+
+    <string name="recent_transfers">Recent transfers</string>
+    <string name="transfer_from_pc">From the PC, %1$s</string>
+    <string name="transfer_to_pc">Sent to the PC, %1$s</string>
+
+    <string name="pc_title">PC</string>
+</resources>

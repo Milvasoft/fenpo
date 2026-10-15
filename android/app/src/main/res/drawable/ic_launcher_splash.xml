@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash screen icon: the seed circle on the window background. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFE8577E"
+        android:pathData="M24,54a30,30 0 1,0 60,0a30,30 0 1,0 -60,0z" />
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:scaleX="1.43"
+        android:scaleY="1.43"
+        android:translateX="22"
+        android:translateY="22">
+        <group
+            android:pivotX="32"
+            android:pivotY="32"
+            android:rotation="0">
+            <path
+                android:fillColor="#FFFFF6F0"
+                android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+        </group>
+        <group
+            android:pivotX="32"
+            android:pivotY="32"
+            android:rotation="72">
+            <path
+                android:fillColor="#FFFFF6F0"
+                android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+        </group>
+        <group
+            android:pivotX="32"
+            android:pivotY="32"
+            android:rotation="144">
+            <path
+                android:fillColor="#FFFFF6F0"
+                android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+        </group>
+        <group
+            android:pivotX="32"
+            android:pivotY="32"
+            android:rotation="216">
+            <path
+                android:fillColor="#FFFFF6F0"
+                android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+        </group>
+        <group
+            android:pivotX="32"
+            android:pivotY="32"
+            android:rotation="288">
+            <path
+                android:fillColor="#FFFFF6F0"
+                android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+        </group>
+    </group>
+</vector>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Çekirdek logo (design/logo/svg/1-cekirdek.svg). Brand colours are fixed and do not follow the theme. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="64"
+    android:viewportHeight="64">
+    <path
+        android:fillColor="#FFE8577E"
+        android:pathData="M22,3h20a19,19 0 0,1 19,19v20a19,19 0 0,1 -19,19h-20a19,19 0 0,1 -19,-19v-20a19,19 0 0,1 19,-19z" />
+    <path
+        android:fillColor="#FFFFF6F0"
+        android:pathData="M11,32a21,21 0 1,0 42,0a21,21 0 1,0 -42,0z" />
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:rotation="0">
+        <path
+            android:fillColor="#FF1B1F3B"
+            android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+    </group>
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:rotation="72">
+        <path
+            android:fillColor="#FF1B1F3B"
+            android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+    </group>
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:rotation="144">
+        <path
+            android:fillColor="#FF1B1F3B"
+            android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+    </group>
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:rotation="216">
+        <path
+            android:fillColor="#FF1B1F3B"
+            android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+    </group>
+    <group
+        android:pivotX="32"
+        android:pivotY="32"
+        android:rotation="288">
+        <path
+            android:fillColor="#FF1B1F3B"
+            android:pathData="M32 15.5c3.4 4.2 3.7 9 0 11.6c-3.7-2.6-3.4-7.4 0-11.6z" />
+    </group>
+</vector>

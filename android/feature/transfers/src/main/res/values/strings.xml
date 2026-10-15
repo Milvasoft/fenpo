@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transfers_title">Transfers</string>
+    <string name="transfers_empty_title">Nothing transferred yet</string>
+    <string name="transfers_empty_body">Files and photos you send to your PC or receive from it show up here.</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transfers_title">Aktarımlar</string>
+    <string name="transfers_empty_title">Henüz aktarım yok</string>
+    <string name="transfers_empty_body">PC’ye gönderdiğin ve PC’den gelen dosyalar burada görünür.</string>
+</resources>

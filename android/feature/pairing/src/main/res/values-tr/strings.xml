@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="scanner_title">Bilgisayardaki kodu okut</string>
+    <string name="scanner_body">Windows’ta Fenpo’yu aç, ekrandaki kodu kameraya göster. İkisi aynı Wi‑Fi ağında olmalı.</string>
+    <string name="scanner_enter_code">Kodu elle gir</string>
+
+    <string name="steps_title">Neredeyse bitti</string>
+    <string name="step_wifi">Wi‑Fi bağlantısı</string>
+    <string name="step_wifi_done">%1$s ile şifreli kanal kuruldu</string>
+    <string name="step_device">Bu bilgisayarı tanı</string>
+    <string name="step_bluetooth">Bluetooth eşleşmesi</string>
+    <string name="step_permissions">İzinler</string>
+    <string name="step_waiting">Onay bekleniyor</string>
+    <string name="step_queued">Sırada</string>
+    <string name="step_done">Tamam</string>
+
+    <string name="permissions_title">İzinler</string>
+    <!-- "4 / 6": a ratio, not a count of things. -->
+    <string name="permissions_ready" tools:ignore="PluralsCandidate">%1$d / %2$d hazır</string>
+    <plurals name="permissions_missing">
+        <item quantity="one">%1$d izin eksik</item>
+        <item quantity="other">%1$d izin eksik</item>
+    </plurals>
+    <string name="permissions_all_granted">Hepsi tamam</string>
+    <string name="permission_granted">Açık</string>
+    <string name="permission_allow">İzin ver</string>
+    <string name="permission_turn_on">Aç</string>
+    <string name="permission_remove">Kaldır</string>
+
+    <string name="permission_nearby">Yakındaki cihazlar</string>
+    <string name="permission_nearby_summary">Bilgisayarı Bluetooth ve Wi‑Fi ile bulur</string>
+    <string name="permission_notifications">Bildirimler</string>
+    <string name="permission_notifications_summary">Aktarımlar ve PC’den gelen pano</string>
+    <string name="permission_notification_access">Bildirim erişimi</string>
+    <string name="permission_notification_access_summary">Telefonun bildirimleri PC’de görünür</string>
+    <string name="permission_battery">Pil kısıtlaması</string>
+    <string name="permission_battery_summary">Kalkınca bağlantı gün boyu kopmaz</string>
+    <string name="permission_sms">SMS</string>
+    <string name="permission_sms_summary">Mesajlar PC’de okunur ve gönderilir</string>
+    <string name="permission_camera">Kamera</string>
+    <string name="permission_camera_summary">Eşleştirme kodu ve web kamerası</string>
+
+    <string name="permissions_restricted_hint">“Kısıtlanmış ayar” uyarısı çıkarsa: Ayarlar &gt; Uygulamalar &gt; Fenpo &gt; ⋮ &gt; Kısıtlanmış ayarlara izin ver, sonra buraya dön. Android bunu mağaza dışından kurulan uygulamalarda istiyor.</string>
+</resources>
