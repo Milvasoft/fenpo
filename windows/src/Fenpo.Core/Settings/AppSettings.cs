@@ -92,6 +92,11 @@ public sealed record AppSettings
     public string? IncomingFolder { get; init; }
 
     /// <summary>
+    /// Gets the Bluetooth LE device id of the phone Fenpo uses, or null to pick the paired iPhone by itself.
+    /// </summary>
+    public string? PhoneDeviceId { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether the first-run pairing wizard has been completed or skipped.
     /// </summary>
     public bool SetupCompleted { get; init; }
