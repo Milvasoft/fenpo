@@ -45,6 +45,18 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Your phone and Windows, at the same desk.</value>
   </data>
+  <data name="AppPair_AudioDone.Content" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="AppPair_AudioSettings.Content" xml:space="preserve">
+    <value>Open Bluetooth settings</value>
+  </data>
+  <data name="AppPair_AudioText.Text" xml:space="preserve">
+    <value>After Bluetooth pairing, Android can send music and calls to the PC. If you do not want that, turn off Audio under Settings &gt; Bluetooth &amp; devices &gt; your phone.</value>
+  </data>
+  <data name="AppPair_AudioTitle.Text" xml:space="preserve">
+    <value>The phone's sound may come to this PC.</value>
+  </data>
   <data name="AppPair_Intro.Text" xml:space="preserve">
     <value>Pair once and Fenpo connects whenever the phone is near.</value>
   </data>
@@ -58,31 +70,31 @@
     <value>The code is valid for 5 minutes, then renews itself</value>
   </data>
   <data name="AppPair_Step1.Hint" xml:space="preserve">
-    <value>Search for “Fenpo” in the App Store</value>
+    <value>Search for “Fenpo” in the App Store on iPhone, in F-Droid on Android</value>
   </data>
   <data name="AppPair_Step1.Title" xml:space="preserve">
-    <value>Install Fenpo on the iPhone</value>
+    <value>Install Fenpo on the phone</value>
   </data>
   <data name="AppPair_Step2.Hint" xml:space="preserve">
     <value>The phone and this PC need to be on the same Wi‑Fi</value>
   </data>
   <data name="AppPair_Step2.Title" xml:space="preserve">
-    <value>Scan the code with the iPhone camera</value>
+    <value>Scan the code with Fenpo on the phone</value>
   </data>
   <data name="AppPair_Step3.Hint" xml:space="preserve">
-    <value>The iPhone asks to share notifications, tap Allow</value>
+    <value>The phone asks to pair and to share notifications, allow both</value>
   </data>
   <data name="AppPair_Step3.Title" xml:space="preserve">
     <value>Confirm the Bluetooth pairing</value>
   </data>
   <data name="AppPair_Step4.Hint" xml:space="preserve">
-    <value>Settings &gt; Bluetooth &gt; this PC &gt; Show Notifications</value>
+    <value>Allow access to messages and calls if the phone asks</value>
   </data>
   <data name="AppPair_Step4.Title" xml:space="preserve">
     <value>Allow messages and calls</value>
   </data>
   <data name="AppPair_Title.Text" xml:space="preserve">
-    <value>Connect your iPhone</value>
+    <value>Connect your phone</value>
   </data>
   <data name="Battery_Percent" xml:space="preserve">
     <value>{0}%</value>
@@ -523,7 +535,7 @@
     <value>Connect your iPhone</value>
   </data>
   <data name="Pair_WithApp.Content" xml:space="preserve">
-    <value>Connect with the iPhone app</value>
+    <value>Connect with Fenpo on the phone</value>
   </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>

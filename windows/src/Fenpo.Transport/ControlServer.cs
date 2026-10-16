@@ -36,9 +36,9 @@ public sealed class ControlServer(
     private CancellationTokenSource? _stop;
 
     /// <summary>
-    /// Raised after a phone paired.
+    /// Raised after a phone paired, with the platform it reported.
     /// </summary>
-    public event EventHandler<PairedAppDevice>? Paired;
+    public event EventHandler<(PairedAppDevice Device, DevicePlatform Platform)>? Paired;
 
     /// <summary>
     /// Raised when a paired phone's session opens (true) or closes (false).
@@ -289,7 +289,7 @@ public sealed class ControlServer(
             },
             cancellationToken);
         _logger.LogInformation("Paired with {Name} ({Platform})", pairing.DeviceName, pairing.Platform);
-        Paired?.Invoke(this, device);
+        Paired?.Invoke(this, (device, pairing.Platform));
         return device;
     }
 

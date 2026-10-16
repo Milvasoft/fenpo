@@ -31,7 +31,18 @@ public sealed class PbapClientRecord(ILogger<PbapClientRecord> logger) : IDispos
         {
             var provider = await RfcommServiceProvider.CreateAsync(RfcommServiceId.FromShortId(0x112E));
             _listener = new StreamSocketListener();
-            _listener.ConnectionReceived += (sender, args) => args.Socket.Dispose();
+            _listener.ConnectionReceived += (sender, args) =>
+            {
+                // Nothing is served here; a peer that connects anyway is closed. Reading Socket throws when the peer
+                // already gave up (0x800703E3), and an exception escaping this WinRT event reaches the app.
+                try
+                {
+                    args.Socket.Dispose();
+                }
+                catch (System.Runtime.InteropServices.COMException)
+                {
+                }
+            };
             await _listener.BindServiceNameAsync(provider.ServiceId.AsString(), SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
 
             // ServiceName "Phonebook Access PCE", profile PBAP (0x1130) version 1.2.

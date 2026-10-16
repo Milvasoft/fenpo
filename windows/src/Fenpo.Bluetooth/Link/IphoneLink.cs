@@ -105,6 +105,18 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
         return true;
     }
 
+    /// <summary>
+    /// Lets go of the device, for example when it turned out not to be an iPhone; listeners see the services and the
+    /// connection go away.
+    /// </summary>
+    /// <returns>A task that completes when stopped.</returns>
+    public async Task StopAsync()
+    {
+        await DisposeAsync();
+        ServicesLost?.Invoke(this, EventArgs.Empty);
+        ConnectionChanged?.Invoke(this, false);
+    }
+
     /// <inheritdoc/>
     public ValueTask DisposeAsync()
     {
