@@ -30,6 +30,7 @@ public sealed class ControlServer(
     ILogger<ControlServer> logger) : IAsyncDisposable
 {
     private static readonly TimeSpan _firstMessageTimeout = TimeSpan.FromSeconds(15);
+    private static readonly string[] _virtualAdapters = ["Hyper-V", "vEthernet", "WSL", "VirtualBox", "VMware", "Virtual Adapter", "Wi-Fi Direct"];
 
     private readonly PcCertificate _certificate = certificate;
     private readonly PairingTokens _tokens = tokens;
@@ -141,16 +142,25 @@ public sealed class ControlServer(
     public bool IsConnected(string deviceId) => _sessions.ContainsKey(deviceId);
 
     /// <summary>
-    /// Gets the LAN IPv4 addresses phones can reach (up, not loopback).
+    /// Gets the LAN IPv4 addresses phones can reach: adapters that are up, not loopback, tunnels or virtual switches
+    /// (Hyper-V, WSL), no link-local addresses; the adapter with a default gateway first, Wi‑Fi before Ethernet.
     /// </summary>
     /// <returns>Addresses.</returns>
     public static IReadOnlyList<IPAddress> LanAddresses() => [.. NetworkInterface.GetAllNetworkInterfaces()
-        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel))
-        .OrderByDescending(n => n.GetIPProperties().GatewayAddresses.Count > 0)
+        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel) && !IsVirtual(n))
+        .OrderByDescending(HasIpv4Gateway)
+        .ThenByDescending(n => n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
         .SelectMany(n => n.GetIPProperties().UnicastAddresses)
         .Select(a => a.Address)
-        .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a))
+        .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a) && !IsLinkLocal(a))
         .Distinct()];
+
+    private static bool IsLinkLocal(IPAddress address) => address.GetAddressBytes() is [169, 254, ..];
+
+    private static bool HasIpv4Gateway(NetworkInterface adapter) => adapter.GetIPProperties().GatewayAddresses.Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork && !g.Address.Equals(IPAddress.Any));
+
+    // Virtual switches and VM adapters have addresses a phone on the Wi‑Fi cannot reach.
+    private static bool IsVirtual(NetworkInterface adapter) => _virtualAdapters.Any(name => adapter.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || adapter.Description.Contains(name, StringComparison.OrdinalIgnoreCase));
 
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()

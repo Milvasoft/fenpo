@@ -276,6 +276,7 @@ public sealed class FenpoGattServer(
     {
         // Chunks fit the largest notification: ATT MTU minus the ATT and chunk headers.
         var payload = BleChunks.PayloadLength(Math.Max(23, (int)gattSession.MaxPduSize));
+        _logger.LogInformation("Fenpo BLE channel opened by {Device} (PDU {Pdu})", id, gattSession.MaxPduSize);
         var session = new BleChannelSession(_devices, _counters, _identity, CurrentPcStatus, payload);
         var connection = new Connection(id, session, Channel.CreateUnbounded<byte[]>());
         session.ChunkReady += (sender, chunk) => connection.Outgoing.Writer.TryWrite(chunk);
