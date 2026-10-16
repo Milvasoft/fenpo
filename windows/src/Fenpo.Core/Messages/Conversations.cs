@@ -36,13 +36,20 @@ public static class Conversations
     /// </summary>
     /// <param name="messages">Messages from all folders.</param>
     /// <param name="contacts">Known contacts: name to phone number, learned from full messages.</param>
+    /// <param name="phoneBook">Names by normalized number from the phone's contacts, if read.</param>
     /// <returns>Conversations.</returns>
-    public static IReadOnlyList<Conversation> Build(IEnumerable<PhoneMessage> messages, IReadOnlyDictionary<string, string> contacts)
+    public static IReadOnlyList<Conversation> Build(IEnumerable<PhoneMessage> messages, IReadOnlyDictionary<string, string> contacts, IReadOnlyDictionary<string, string>? phoneBook = null)
     {
         var nameByNumber = contacts
             .Where(c => PhoneNumbers.IsDialable(c.Value))
             .GroupBy(c => PhoneNumbers.Normalize(c.Value))
             .ToDictionary(g => g.Key, g => g.First().Key);
+
+        // The phone book is the better source: it has every contact, not only the ones seen in full messages.
+        foreach (var (number, name) in phoneBook ?? new Dictionary<string, string>())
+        {
+            nameByNumber[number] = name;
+        }
 
         return [.. messages
             .GroupBy(m => KeyOf(m, contacts))
