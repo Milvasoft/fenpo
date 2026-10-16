@@ -2309,23 +2309,6 @@
         }
       }
     },
-    "permission.ask": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ask"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sor"
-          }
-        }
-      }
-    },
     "permission.denied": {
       "extractionState": "manual",
       "localizations": {
@@ -2356,6 +2339,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sorulmadı"
+          }
+        }
+      }
+    },
+    "permission.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Settings"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayarlar’da"
           }
         }
       }
@@ -2649,19 +2649,19 @@
         }
       }
     },
-    "settings.permission.paste.hint": {
+    "settings.permission.paste.note": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "With paste set to “Ask”, iOS asks every time. Choose “Allow” in Settings and Fenpo won’t ask again."
+            "value": "iOS doesn’t show apps the paste setting. If iOS asks every time you send the clipboard, open Settings › Fenpo and set Paste from Other Apps to Allow."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Yapıştırma izni “Sor” olunca her seferinde onay penceresi çıkar. Ayarlar’da “İzin Ver” seçersen Fenpo bir daha sormaz."
+            "value": "iOS yapıştırma ayarını uygulamalara göstermez. Panoyu her gönderişinde onay soruyorsa Ayarlar › Fenpo’da Diğer Uygulamalardan Yapıştır’ı İzin Ver yap."
           }
         }
       }
