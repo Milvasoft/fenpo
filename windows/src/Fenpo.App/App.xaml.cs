@@ -2,7 +2,10 @@ using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
 using Fenpo.Core.Api;
+using Fenpo.Bluetooth.Ams;
+using Fenpo.Bluetooth.Ancs;
 using Fenpo.Core.Channel;
+using Fenpo.Core.Media;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Pairing;
 using Fenpo.Core.Settings;
@@ -70,6 +73,14 @@ public partial class App : Application
                 .AddSingleton<PhoneChannel>()
                 .AddHostedService(sp => sp.GetRequiredService<PhoneChannel>())
                 .AddFenpoBluetooth()
+
+                // The iPhone (ANCS, AMS) and an Android phone (Fenpo channel) behind one notification and media source.
+                .AddSingleton<AndroidNotificationSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidNotificationSource>())
+                .AddSingleton<AndroidMediaSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidMediaSource>())
+                .AddSingleton<INotificationSource>(sp => new CombinedNotificationSource([("i:", sp.GetRequiredService<AncsClient>()), ("a:", sp.GetRequiredService<AndroidNotificationSource>())]))
+                .AddSingleton<IMediaSource>(sp => new CombinedMediaSource([sp.GetRequiredService<AmsClient>(), sp.GetRequiredService<AndroidMediaSource>()]))
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()

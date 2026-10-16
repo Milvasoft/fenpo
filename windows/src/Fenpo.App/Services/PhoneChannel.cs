@@ -52,6 +52,11 @@ public sealed class PhoneChannel(
     public event EventHandler? Changed;
 
     /// <summary>
+    /// Raised after a phone's Hello on either channel (a notification snapshot follows on that channel).
+    /// </summary>
+    public event EventHandler<ChannelMessage>? HelloReceived;
+
+    /// <summary>
     /// Gets the phone Fenpo talks to: the one that said Hello last.
     /// </summary>
     public PairedAppDevice? Phone => Volatile.Read(ref _phone);
@@ -183,6 +188,7 @@ public sealed class PhoneChannel(
             SendAddresses(device);
         }
 
+        HelloReceived?.Invoke(this, new ChannelMessage(device, new Envelope { Hello = hello }, overWifi));
         Changed?.Invoke(this, EventArgs.Empty);
     }
 

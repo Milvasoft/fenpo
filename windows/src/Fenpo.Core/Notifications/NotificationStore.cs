@@ -131,15 +131,19 @@ public sealed class NotificationStore
     }
 
     /// <summary>
-    /// Marks every key as stale after a disconnect; items stay until the phone re-sends or drops them.
+    /// Marks keys as stale after a disconnect; items stay until the phone re-sends or drops them.
     /// </summary>
-    public void Detach()
+    /// <param name="keyPrefix">Only keys with this prefix (one source's); empty for all.</param>
+    public void Detach(string keyPrefix = "")
     {
         lock (_lock)
         {
             for (var i = 0; i < _items.Count; i++)
             {
-                _items[i] = _items[i] with { Key = null };
+                if (_items[i].Key?.StartsWith(keyPrefix, StringComparison.Ordinal) ?? false)
+                {
+                    _items[i] = _items[i] with { Key = null };
+                }
             }
         }
 

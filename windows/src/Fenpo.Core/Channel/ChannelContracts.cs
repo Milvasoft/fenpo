@@ -92,6 +92,8 @@ public static class PcHello
             Capability.Ring,
             Capability.LockPc,
             Capability.FileTransfer,
+            Capability.NotificationMirror,
+            Capability.Media,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
