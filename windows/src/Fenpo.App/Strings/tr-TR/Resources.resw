@@ -19,7 +19,7 @@
     <value>Kamera olarak kullan</value>
   </data>
   <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefonun hotspot'una bağlan; ad ve şifre telefondaki Fenpo'dan gelir</value>
   </data>
   <data name="Action_HotspotText.Text" xml:space="preserve">
     <value>Hotspot’a bağlan</value>
@@ -392,6 +392,24 @@
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>Telefonum</value>
+  </data>
+  <data name="Hotspot_Connected" xml:space="preserve">
+    <value>Hotspot'a bağlı</value>
+  </data>
+  <data name="Hotspot_Failed" xml:space="preserve">
+    <value>Hotspot'a bağlanılamadı. Telefondaki Fenpo'da kayıtlı şifrenin hotspot şifresiyle aynı olduğuna bak.</value>
+  </data>
+  <data name="Hotspot_Join" xml:space="preserve">
+    <value>Hotspot’a bağlan</value>
+  </data>
+  <data name="Hotspot_Joining" xml:space="preserve">
+    <value>Hotspot'a bağlanılıyor…</value>
+  </data>
+  <data name="Hotspot_NotFound" xml:space="preserve">
+    <value>Hotspot bulunamadı. Telefonda hotspot'u aç (iPhone'da Ayarlar › Kişisel Erişim Noktası › Başkalarının Katılmasına İzin Ver), sonra yeniden dene.</value>
+  </data>
+  <data name="Hotspot_NotSetUp" xml:space="preserve">
+    <value>Telefonda hotspot adı ve şifresi kayıtlı değil. iPhone'da Fenpo › Ayarlar › Kişisel Erişim Noktası'na, Android'de Fenpo › Ayarlar › Hotspot'a bir kez gir, sonra yeniden dene.</value>
   </data>
   <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yanıtla</value>
@@ -1045,7 +1063,7 @@
     <value>Odak</value>
   </data>
   <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefonun hotspot'una bağlan</value>
   </data>
   <data name="Tray_HotspotText.Text" xml:space="preserve">
     <value>Hotspot</value>

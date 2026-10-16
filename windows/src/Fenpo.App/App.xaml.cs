@@ -91,6 +91,8 @@ public partial class App : Application
                 .AddSingleton<PcNotificationForwarder>()
                 .AddHostedService<SharedFolderService>()
                 .AddSingleton<PhotoLibraryService>()
+                .AddSingleton<HotspotService>()
+                .AddHostedService(sp => sp.GetRequiredService<HotspotService>())
                 .AddHostedService(sp => sp.GetRequiredService<PhotoLibraryService>())
                 .AddSingleton<Fenpo.Transport.LocalSend.LocalSendServer>()
                 .AddHostedService<LocalSendBridge>()

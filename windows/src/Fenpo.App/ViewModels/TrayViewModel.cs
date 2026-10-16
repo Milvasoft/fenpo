@@ -18,6 +18,7 @@ public sealed partial class TrayViewModel : ObservableObject
     private readonly ISettingsStore _settings;
     private readonly LocalizationService _localization;
     private readonly PhoneActions _actions;
+    private readonly HotspotService _hotspot;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private bool _applyingSettings;
 
@@ -29,8 +30,12 @@ public sealed partial class TrayViewModel : ObservableObject
     /// <param name="settings">Settings store (quick toggles).</param>
     /// <param name="localization">Strings.</param>
     /// <param name="actions">Ring the phone.</param>
-    public TrayViewModel(IPhoneStatusSource status, IMediaSource media, ISettingsStore settings, LocalizationService localization, PhoneActions actions)
+    /// <param name="hotspot">The phone's hotspot.</param>
+    public TrayViewModel(IPhoneStatusSource status, IMediaSource media, ISettingsStore settings, LocalizationService localization, PhoneActions actions, HotspotService hotspot)
     {
+        _hotspot = hotspot;
+        _hotspot.Changed += (sender, e) => _dispatcher.TryEnqueue(ApplyHotspot);
+        ApplyHotspot();
         _actions = actions;
         _status = status;
         _media = media;
@@ -119,6 +124,23 @@ public sealed partial class TrayViewModel : ObservableObject
     public bool NotRinging => !IsRinging;
 
     // The command stays busy (button disabled) while the button says the phone is ringing, so it is not pressed twice.
+    /// <summary>Gets or sets a value indicating whether the phone can share its hotspot.</summary>
+    [ObservableProperty]
+    public partial bool CanHotspot { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the PC is on the phone's hotspot.</summary>
+    [ObservableProperty]
+    public partial bool HotspotOn { get; set; }
+
+    [RelayCommand]
+    private Task JoinHotspotAsync() => _hotspot.JoinAsync();
+
+    private void ApplyHotspot()
+    {
+        CanHotspot = _hotspot.Available && _hotspot.State != HotspotJoinState.Joining;
+        HotspotOn = _hotspot.State == HotspotJoinState.Connected;
+    }
+
     [RelayCommand]
     private async Task RingAsync()
     {
