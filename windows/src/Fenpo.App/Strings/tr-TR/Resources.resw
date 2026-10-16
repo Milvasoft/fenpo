@@ -13,31 +13,31 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Action_Camera.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Action_CameraText.Text" xml:space="preserve">
     <value>Kamera olarak kullan</value>
   </data>
   <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Action_HotspotText.Text" xml:space="preserve">
     <value>Hotspot’a bağlan</value>
   </data>
   <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Action_MirrorText.Text" xml:space="preserve">
     <value>Ekranı yansıt</value>
   </data>
   <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Action_RingText.Text" xml:space="preserve">
     <value>Telefonu çaldır</value>
   </data>
   <data name="Action_SendFile.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Action_SendFileText.Text" xml:space="preserve">
     <value>Dosya gönder</value>
@@ -112,10 +112,10 @@
     <value>Bilgisayardan arama yapmak ve sesi bilgisayara almak Windows’un izin vermesini bekliyor.</value>
   </data>
   <data name="Calls_OnPhoneText.Text" xml:space="preserve">
-    <value>Gelen arama ekranın üstünde çıkar. Yanıtla ve Reddet iPhone’a gider, görüşme telefonda sürer.</value>
+    <value>Gelen arama ekranın üstünde çıkar. Yanıtla ve Reddet telefona gider, görüşme telefonda sürer.</value>
   </data>
   <data name="Calls_OnPhoneTitle.Text" xml:space="preserve">
-    <value>Görüşmeler iPhone’da</value>
+    <value>Görüşmeler telefonda</value>
   </data>
   <data name="Calls_Recent.Text" xml:space="preserve">
     <value>Son aramalar</value>
@@ -133,7 +133,7 @@
     <value>Kişiyi ortala</value>
   </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. iPhone’da Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</value>
+    <value>Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -148,13 +148,13 @@
     <value>Geniş</value>
   </data>
   <data name="Camera_Microphone.Text" xml:space="preserve">
-    <value>iPhone mikrofonunu kullan</value>
+    <value>Telefonun mikrofonunu kullan</value>
   </data>
   <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>iPhone mikrofonunu kullan</value>
+    <value>Telefonun mikrofonunu kullan</value>
   </data>
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
-    <value>iPhone’u kamera olarak kullanmak için uygulamayı aç.</value>
+    <value>Telefonu kamera olarak kullanmak için uygulamayı aç.</value>
   </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portre bulanıklığı</value>
@@ -187,13 +187,13 @@
     <value>Son kopyalananlar</value>
   </data>
   <data name="Clipboard_NeedsApp.Message" xml:space="preserve">
-    <value>Pano paylaşımı iPhone uygulamasıyla çalışır.</value>
+    <value>Pano paylaşımı telefondaki Fenpo ile çalışır.</value>
   </data>
   <data name="Clipboard_Share.Text" xml:space="preserve">
-    <value>Kopyaladığın her şey iPhone’a gitsin</value>
+    <value>Kopyaladığın her şey telefona gitsin</value>
   </data>
   <data name="Clipboard_ShareHint.Text" xml:space="preserve">
-    <value>iPhone’dan gelenler için arka tarafına iki kez dokun ya da Denetim Merkezi’ndeki Fenpo düğmesini kullan.</value>
+    <value>Telefondan göndermek için Fenpo’nun pano düğmesini kullan: iPhone’da Denetim Merkezi ya da arkaya iki dokunuş, Android’de Hızlı Ayarlar kutucuğu.</value>
   </data>
   <data name="Clipboard_ShareToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Pano paylaşımı</value>
@@ -205,13 +205,13 @@
     <value>Ya da bilgisayardan dosya seç.</value>
   </data>
   <data name="Files_DropTitle.Text" xml:space="preserve">
-    <value>Dosyaları buraya bırak, iPhone’a gitsin</value>
+    <value>Dosyaları buraya bırak, telefona gitsin</value>
   </data>
   <data name="Files_NeedsApp.Message" xml:space="preserve">
-    <value>Dosya ve fotoğraf göndermek için iPhone uygulamasını bu bilgisayara bağla.</value>
+    <value>Dosya ve fotoğraf göndermek için telefondaki Fenpo’yu bu bilgisayara bağla.</value>
   </data>
   <data name="Files_NoPhotos.Text" xml:space="preserve">
-    <value>iPhone uygulaması bağlanınca son fotoğraflar burada görünür.</value>
+    <value>Telefondaki Fenpo bağlanınca son fotoğraflar burada görünür.</value>
   </data>
   <data name="Files_NoTransfers.Text" xml:space="preserve">
     <value>Henüz aktarım yok</value>
@@ -247,19 +247,19 @@
     <value>Henüz bildirim yok</value>
   </data>
   <data name="Home_NoPhone" xml:space="preserve">
-    <value>iPhone bağlı değil</value>
+    <value>Telefon bağlı değil</value>
   </data>
   <data name="Home_NothingPlaying.Text" xml:space="preserve">
     <value>Şu an bir şey çalmıyor</value>
   </data>
   <data name="Home_NothingPlayingHint.Text" xml:space="preserve">
-    <value>iPhone’da müzik başlayınca burada görünür</value>
+    <value>Telefonda müzik başlayınca burada görünür</value>
   </data>
   <data name="Home_NoTransfers.Text" xml:space="preserve">
     <value>Henüz aktarım yok</value>
   </data>
   <data name="Home_PairButton.Content" xml:space="preserve">
-    <value>iPhone’unu bağla</value>
+    <value>Telefonunu bağla</value>
   </data>
   <data name="Home_PairHint.Text" xml:space="preserve">
     <value>Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</value>
@@ -274,7 +274,7 @@
     <value>Tümünü gör</value>
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
-    <value>iPhone’um</value>
+    <value>Telefonum</value>
   </data>
   <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yanıtla</value>
@@ -283,10 +283,10 @@
     <value>Yanıtla</value>
   </data>
   <data name="Island_CallOnPhone" xml:space="preserve">
-    <value>Görüşme iPhone’da sürer</value>
+    <value>Görüşme telefonda sürer</value>
   </data>
   <data name="Island_CallOnPhoneWith" xml:space="preserve">
-    <value>{0} · görüşme iPhone’da sürer</value>
+    <value>{0} · görüşme telefonda sürer</value>
   </data>
   <data name="Island_Decline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Reddet</value>
@@ -322,7 +322,7 @@
     <value>Önceki</value>
   </data>
   <data name="Messages_ConnectingText" xml:space="preserve">
-    <value>iPhone’dan mesaj listesi isteniyor.</value>
+    <value>Telefondan mesaj listesi isteniyor.</value>
   </data>
   <data name="Messages_ConnectingTitle" xml:space="preserve">
     <value>Mesajlara bağlanıyor</value>
@@ -334,10 +334,10 @@
     <value>Mesaj yaz</value>
   </data>
   <data name="Messages_FindingNumber" xml:space="preserve">
-    <value>Yanıt için numara iPhone’dan alınıyor.</value>
+    <value>Yanıt için numara telefondan alınıyor.</value>
   </data>
   <data name="Messages_HistoryNote.Text" xml:space="preserve">
-    <value>iPhone’dan gönderdiğin mesajlar burada görünmez, Fenpo’dan gönderdiklerin görünür.</value>
+    <value>Telefondan gönderdiğin mesajlar burada görünmeyebilir, Fenpo’dan gönderdiklerin görünür.</value>
   </data>
   <data name="Messages_New.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yeni mesaj</value>
@@ -364,10 +364,10 @@
     <value>Bu gönderene yanıt yazılamıyor.</value>
   </data>
   <data name="Messages_PermissionText" xml:space="preserve">
-    <value>iPhone’da Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç. Açıksa iPhone’da Bluetooth’u kapatıp aç. Fenpo birkaç saniye içinde yeniden dener.</value>
+    <value>iPhone’da: Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç; açıksa Bluetooth’u kapatıp aç. Android’de: telefon sorduğunda mesajlara erişime izin ver. Fenpo birkaç saniye içinde yeniden dener.</value>
   </data>
   <data name="Messages_PermissionTitle" xml:space="preserve">
-    <value>iPhone mesajlara izin vermiyor</value>
+    <value>Telefon mesajlara izin vermiyor</value>
   </data>
   <data name="Messages_PickConversation.Text" xml:space="preserve">
     <value>Soldan bir sohbet seç</value>
@@ -385,7 +385,7 @@
     <value>Gönder</value>
   </data>
   <data name="Messages_SendFailed" xml:space="preserve">
-    <value>Gönderilemedi. iPhone yakında ve kilidi açıkken tekrar dene.</value>
+    <value>Gönderilemedi. Telefon yakında ve kilidi açıkken tekrar dene.</value>
   </data>
   <data name="Messages_Sms" xml:space="preserve">
     <value>SMS</value>
@@ -394,10 +394,10 @@
     <value>Bugün {0}</value>
   </data>
   <data name="Messages_UnavailableText" xml:space="preserve">
-    <value>Mesajlar iPhone yakındayken ve Bluetooth ile bağlıyken görünür.</value>
+    <value>Mesajlar telefon yakındayken ve Bluetooth ile bağlıyken görünür.</value>
   </data>
   <data name="Messages_UnavailableTitle" xml:space="preserve">
-    <value>iPhone bağlı değil</value>
+    <value>Telefon bağlı değil</value>
   </data>
   <data name="Messages_YesterdayAt" xml:space="preserve">
     <value>Dün {0}</value>
@@ -418,7 +418,7 @@
     <value>Dosyalar ve fotoğraflar</value>
   </data>
   <data name="Nav_Home.Content" xml:space="preserve">
-    <value>iPhone’um</value>
+    <value>Telefonum</value>
   </data>
   <data name="Nav_Messages.Content" xml:space="preserve">
     <value>Mesajlar</value>
@@ -430,10 +430,10 @@
     <value>Ayarlar</value>
   </data>
   <data name="NeedsApp_Connect.Content" xml:space="preserve">
-    <value>iPhone uygulamasını bağla</value>
+    <value>Telefondaki Fenpo ile bağla</value>
   </data>
   <data name="NeedsApp_Title.Text" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor.</value>
+    <value>Telefonda Fenpo gerekiyor.</value>
   </data>
   <data name="Notification_Dismiss" xml:space="preserve">
     <value>Kapat</value>
@@ -448,10 +448,10 @@
     <value>{0} bildirim</value>
   </data>
   <data name="Notifications_Empty.Text" xml:space="preserve">
-    <value>iPhone’da bildirim yok</value>
+    <value>Telefonda bildirim yok</value>
   </data>
   <data name="Notifications_Footnote.Text" xml:space="preserve">
-    <value>WhatsApp gibi uygulamalarda yanıt yazılamıyor, iOS buna izin vermiyor. Mesajlar uygulamasındaki SMS ve iMessage’lar buradan yanıtlanabiliyor.</value>
+    <value>iPhone’da WhatsApp gibi uygulamalara buradan yanıt yazılamıyor, iOS buna izin vermiyor. SMS ve iMessage’lar Mesajlar sayfasından yanıtlanabiliyor.</value>
   </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Bildirimler</value>
@@ -487,7 +487,7 @@
     <value>iPhone</value>
   </data>
   <data name="Pair_Intro.Text" xml:space="preserve">
-    <value>iPhone’a bir şey yüklemeden başlayabilirsin. Bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir.</value>
+    <value>iPhone’a bir şey yüklemeden başlayabilirsin: bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir. Android telefonun varsa aşağıdaki “Telefondaki Fenpo ile bağla”yı kullan.</value>
   </data>
   <data name="Pair_Later.Content" xml:space="preserve">
     <value>Sonra yap</value>
@@ -547,7 +547,7 @@
     <value>Gelen aramaları ekranın üstünde göster</value>
   </data>
   <data name="Settings_CallsHint.Text" xml:space="preserve">
-    <value>Yanıtla ve Reddet iPhone’a gider</value>
+    <value>Yanıtla ve Reddet telefona gider</value>
   </data>
   <data name="Settings_CallsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Gelen aramaları göster</value>
@@ -574,7 +574,7 @@
     <value>Odak modunu eşitle</value>
   </data>
   <data name="Settings_FocusHint.Text" xml:space="preserve">
-    <value>iPhone’da Rahatsız Etme açılınca Fenpo bildirimleri susar</value>
+    <value>Telefonda Rahatsız Etme açılınca Fenpo bildirimleri susar</value>
   </data>
   <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Odak modunu eşitle</value>
@@ -595,22 +595,22 @@
     <value>Medya kontrolü</value>
   </data>
   <data name="Settings_MediaHint.Text" xml:space="preserve">
-    <value>Klavyedeki medya tuşları iPhone’u kontrol eder</value>
+    <value>Klavyedeki medya tuşları telefonu kontrol eder</value>
   </data>
   <data name="Settings_MediaToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Medya kontrolü</value>
   </data>
   <data name="Settings_NoDevice" xml:space="preserve">
-    <value>Eşleşmiş iPhone yok</value>
+    <value>Eşleşmiş telefon yok</value>
   </data>
   <data name="Settings_NoDeviceHint" xml:space="preserve">
-    <value>iPhone’u bir kere eşleştir, sonra Fenpo kendiliğinden bağlanır</value>
+    <value>Telefonu bir kere eşleştir, sonra Fenpo kendiliğinden bağlanır</value>
   </data>
   <data name="Settings_Notifications.Text" xml:space="preserve">
     <value>Bildirimleri göster</value>
   </data>
   <data name="Settings_NotificationsHint.Text" xml:space="preserve">
-    <value>iPhone’daki bildirimler Windows bildirimi olarak gelir</value>
+    <value>Telefondaki bildirimler Windows bildirimi olarak gelir</value>
   </data>
   <data name="Settings_NotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Bildirimleri göster</value>
@@ -622,7 +622,7 @@
     <value>Yakınlık ve odak</value>
   </data>
   <data name="Settings_ProximityLock.Text" xml:space="preserve">
-    <value>iPhone uzaklaşınca bilgisayarı kilitle</value>
+    <value>Telefon uzaklaşınca bilgisayarı kilitle</value>
   </data>
   <data name="Settings_ProximityLockHint.Text" xml:space="preserve">
     <value>Yaklaşık 3 metre, 30 saniye</value>
@@ -634,7 +634,7 @@
     <value>Windows açılınca başlat</value>
   </data>
   <data name="Settings_StartupHint" xml:space="preserve">
-    <value>Fenpo tepside bekler, iPhone yakına gelince bağlanır</value>
+    <value>Fenpo tepside bekler, telefon yakına gelince bağlanır</value>
   </data>
   <data name="Settings_StartupHintDisabledByUser" xml:space="preserve">
     <value>Görev Yöneticisi’nde kapatılmış; Başlangıç uygulamaları sekmesinden aç</value>
@@ -652,13 +652,13 @@
     <value>Sistem seçiliyken Windows’un açık veya koyu ayarını izler</value>
   </data>
   <data name="Settings_Unlock.Text" xml:space="preserve">
-    <value>iPhone ile kilit aç</value>
+    <value>Telefonla kilit aç</value>
   </data>
   <data name="Settings_UnlockHint.Text" xml:space="preserve">
     <value>Face ID onayıyla Windows oturumunu açar. Ayrı bir bileşen gerektirir (deneysel)</value>
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>iPhone ile kilit aç</value>
+    <value>Telefonla kilit aç</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
@@ -676,7 +676,7 @@
     <value>Bağlı değil</value>
   </data>
   <data name="Status_NotPaired" xml:space="preserve">
-    <value>Eşleşmiş iPhone yok</value>
+    <value>Eşleşmiş telefon yok</value>
   </data>
   <data name="Theme_Dark.Content" xml:space="preserve">
     <value>Koyu</value>
@@ -703,7 +703,7 @@
     <value>Odak</value>
   </data>
   <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Tray_HotspotText.Text" xml:space="preserve">
     <value>Hotspot</value>
@@ -733,7 +733,7 @@
     <value>Yakınlık kilidi</value>
   </data>
   <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>iPhone’da Fenpo gerekiyor</value>
+    <value>Telefonda Fenpo gerekiyor</value>
   </data>
   <data name="Tray_RingText.Text" xml:space="preserve">
     <value>Çaldır</value>
