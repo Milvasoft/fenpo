@@ -37,7 +37,11 @@ public sealed class FenpoGattServer(
     private readonly PcIdentity _identity = identity;
     private readonly PhoneStatusTracker _status = status;
     private readonly ILogger<FenpoGattServer> _logger = logger;
+    private static readonly TimeSpan _advertisingCheck = TimeSpan.FromSeconds(30);
+
     private readonly ConcurrentDictionary<string, Connection> _connections = new();
+    private readonly GattServiceProviderAdvertisingParameters _advertising = new() { IsConnectable = true, IsDiscoverable = true };
+    private Timer? _advertisingWatch;
     private GattServiceProvider? _provider;
     private GattLocalCharacteristic? _tx;
     private PcStatus _lastPcStatus = new();
@@ -109,10 +113,12 @@ public sealed class FenpoGattServer(
         rx.Characteristic.WriteRequested += OnWriteRequested;
         _tx.SubscribedClientsChanged += OnSubscribedClientsChanged;
 
-        // The first status after StartAdvertising is a short Aborted, then the real one (S4).
+        // The first status after StartAdvertising is a short Aborted, then the real one (S4). The advertisement can also
+        // stay Aborted or stop later (seen from Android, A1), which hides the PC; a check restarts it.
         provider.AdvertisementStatusChanged += (sender, args) => _logger.LogDebug("Fenpo advertisement {Status} ({Error})", args.Status, args.Error);
-        provider.StartAdvertising(new GattServiceProviderAdvertisingParameters { IsConnectable = true, IsDiscoverable = true });
+        provider.StartAdvertising(_advertising);
         _provider = provider;
+        _advertisingWatch = new Timer(_ => KeepAdvertising(), null, _advertisingCheck, _advertisingCheck);
         _status.Changed += OnPhoneStatusChanged;
         _logger.LogInformation("Fenpo BLE channel advertised");
         return true;
@@ -122,6 +128,8 @@ public sealed class FenpoGattServer(
     public ValueTask DisposeAsync()
     {
         _status.Changed -= OnPhoneStatusChanged;
+        _advertisingWatch?.Dispose();
+        _advertisingWatch = null;
         _provider?.StopAdvertising();
         _provider = null;
 
@@ -132,6 +140,31 @@ public sealed class FenpoGattServer(
 
         _connections.Clear();
         return ValueTask.CompletedTask;
+    }
+
+    private void KeepAdvertising()
+    {
+        if (_provider is not { } provider || provider.AdvertisementStatus is GattServiceProviderAdvertisementStatus.Started or GattServiceProviderAdvertisementStatus.StartedWithoutAllAdvertisementData)
+        {
+            return;
+        }
+
+        try
+        {
+            _logger.LogInformation("Fenpo advertisement was {Status}; starting it again", provider.AdvertisementStatus);
+
+            if (provider.AdvertisementStatus != GattServiceProviderAdvertisementStatus.Stopped)
+            {
+                provider.StopAdvertising();
+            }
+
+            provider.StartAdvertising(_advertising);
+        }
+        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or ObjectDisposedException)
+        {
+            // Bluetooth is off or the adapter is gone; the next check tries again.
+            _logger.LogDebug(exception, "Restarting the Fenpo advertisement failed");
+        }
     }
 
     private async void OnWriteRequested(GattLocalCharacteristic sender, GattWriteRequestedEventArgs args)
@@ -171,7 +204,8 @@ public sealed class FenpoGattServer(
 
         foreach (var client in sender.SubscribedClients)
         {
-            ConnectionFor(client.Session);
+            // The notification size is the true limit per phone (Android: MTU 517, 514 per notification).
+            ConnectionFor(client.Session).Session.PayloadLength = Math.Max(1, client.MaxNotificationSize - BleChunks.HeaderLength);
         }
 
         foreach (var gone in _connections.Keys.Where(id => !subscribed.Contains(id)).ToList())

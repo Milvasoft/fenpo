@@ -108,6 +108,24 @@ public sealed class ControlServerTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task AndroidKeystoreStyleCertificatePairs()
+    {
+        // Android Keystore's default certificate (ANDROID.md A3): CN=fake, serial 1, 1970–2048, no SAN, no EKU.
+        using var key = ECDsa.Create(ECCurve.NamedCurves.nistP256);
+        var request = new CertificateRequest("CN=fake", key, HashAlgorithmName.SHA256);
+        using var created = request.Create(request.SubjectName, X509SignatureGenerator.CreateForECDsa(key), new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), new DateTimeOffset(2048, 1, 1, 0, 0, 0, TimeSpan.Zero), [1]);
+        using var keystoreCertificate = X509CertificateLoader.LoadPkcs12(created.CopyWithPrivateKey(key).Export(X509ContentType.Pfx), null, X509KeyStorageFlags.UserKeySet);
+        var uri = _server.PairingUri();
+
+        await using var phone = await ConnectAsync(keystoreCertificate, uri.Fingerprint);
+        var result = await RequestAsync(phone, new Envelope { Id = 1, PairingRequest = Request(uri.Token) });
+        var hello = await RequestAsync(phone, new Envelope { Id = 2, Hello = new Hello { DeviceId = "phone-1", Platform = DevicePlatform.Android, OsVersion = "Android 17" } });
+
+        Assert.True(result.PairingResult.Accepted);
+        Assert.Equal(DevicePlatform.Windows, hello.Hello.Platform);
+    }
+
+    [Fact]
     public async Task Tls12IsRefused()
     {
         using var phoneCertificate = PhoneCertificate();
