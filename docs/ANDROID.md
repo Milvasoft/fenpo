@@ -266,12 +266,12 @@ Her protokol değişikliği ayrı bir `protocol: ...` commit'i olur ve Buğra'ya
 
 | Konu | Gereken | Ne zaman |
 |---|---|---|
-| Medya kontrolü | Android'de AMS yok. Şu an çalan ve medya komutları için bir `Capability` ve Envelope aralığı yok; `CAPABILITY_NOTIFICATION_MIRROR` bunu kapsamıyor | Aşama D, ayrı yetenek önerilecek |
+| Medya kontrolü | **Önerildi:** `media.proto`, `faf81f1`. Android'de AMS yok. Şu an çalan ve medya komutları için bir `Capability` ve Envelope aralığı yok; `CAPABILITY_NOTIFICATION_MIRROR` bunu kapsamıyor | Aşama D, ayrı yetenek önerilecek |
 | Bildirim aynalama | 90–96: bildirim, kaldırma, anlık görüntü sonu, kapat, eylem ve yazılı yanıt, uygulama simgesi | **Yapıldı:** `aedd2c0`, `bfd7921` (§22), `main`'e onayla |
 | Mesajlar | 100–109: sadece MAP'i olmayan telefonlar için (§5) | Aşama D, MAP sonucuna göre |
 | `Hello` | İşletim sistemi sürümü ve model adı (DECISIONS #30, S5 commit'i); Android'de "Android 17, Pixel 9" | **Yapıldı:** `e185f5d` |
-| Hassas pano | `ClipboardItem`'da "hassas" işareti (şifre yöneticisinden kopyalanan) | Açık: pano yapıldı (§22), işaret henüz yok |
-| Yakınlık | Telefonun ölçtüğü RSSI (`DeviceState` içinde veya ayrı mesaj, §4) | Açık: telefon RSSI'yi ölçüyor, protokolde alanı yok |
+| Hassas pano | `ClipboardItem`'da "hassas" işareti (şifre yöneticisinden kopyalanan) | **Önerildi:** `faf81f1` (§22) |
+| Yakınlık | Telefonun ölçtüğü RSSI (`DeviceState` içinde veya ayrı mesaj, §4) | **Önerildi:** `DeviceState.ble_rssi_dbm`, `faf81f1` |
 | Kamera isteği | PC kamerayı isteyince telefon "dokunuş bekleniyor" durumunu bildirebilmeli (§10) | Aşama 4 |
 
 Windows tarafı için notlar:
@@ -339,5 +339,8 @@ Hepsi protokole göre yazıldı ve birim testleriyle doğrulandı. **Windows tar
 | Dosya aktarımı (§9) | Veri bağlantısını her iki yönde telefon açar (protokol `c5e2cde`). Gönderme: paylaşım menüsü "PC'ye gönder" (tek ve çoklu), doğrudan paylaşım kısayolu (PC'nin adı kişilerin yanında), ana ekran "Fotoğraf gönder" (fotoğraf seçici). Alma: Wi‑Fi açık ve yer varsa kabul, `Download/Fenpo`'ya MediaStore ile (izinsiz), varsa SHA-256 denetimi, yarım dosyalar silinir. İlerleme bildirimi ve İptal; Aktarımlar sekmesinde süren aktarımlar ve geçmiş. | Tasarımda Aktarımlar ekranı yok; ana ekrandaki "Son aktarılanlar" satırları kullanıldı. Live Update ve `ProgressStyle` (API 36) henüz yok, standart ilerleme çubuğu. |
 | Bildirim aynalama (§6) | `NotificationListenerService` → her `Hello`'dan sonra anlık görüntü (`pre_existing`, `NotificationSnapshotDone`; Wi‑Fi açıkken BLE'de atlanır), sonra ekleme, güncelleme, kaldırma; `seq` zamana dayalı (µs), süreç yeniden başlasa da geri gitmez. Kapatma, eylem ve yazılı yanıt (`RemoteInput`), uygulama simgesi isteği. BLE'de büyük simge düşer, metin kısalır. Ayarlar'da uygulama başına seçim ("PC'den yanıtlanır", "Sadece gösterilir", "Kapalı") ve "Yeni uygulamalar da gönderilsin". | Protokol önerisi `aedd2c0` + `bfd7921` (Windows incelemesiyle kategori, anlık görüntü sınırı, `seq`); `main`'e Buğra'nın onayıyla girer. Android 15'in OTP sansürünü tespit edemiyoruz: `content_hidden` şimdilik hep `false`, A5'te bakılacak. |
 | Rahatsız Etmeyin | "Rahatsız etmeyin'i eşitle" kapalıysa `DeviceState.focus_active` gönderilmez. | |
+| Şu an çalıyor | `MediaBridge`: bildirim erişimi sayesinde `MediaSessionManager` ile etkin medya oturumu okunur; parça, çalma durumu ya da ses düzeyi değişince `MediaState`, kapak sadece Wi‑Fi'de. PC'nin `MediaCommand`'ı (çal, duraklat, sonraki, önceki, sar, ses) uygulanır. | Protokol `faf81f1`, Windows incelemesi ve Buğra'nın onayı bekleniyor. |
+| Yakınlık kilidi | Telefon PC'yi BLE bağlantısında ölçer, `DeviceState.ble_rssi_dbm` 4 dB değişince ya da 30 saniyede bir gider. | Aynı protokol commit'i. Eşik ve kilit kararı PC'de. |
+| Hassas pano | Şifre yöneticisinin `IS_SENSITIVE` işaretli kopyası `sensitive` gider; PC'den gelen hassas içerik panoya işaretli yazılır, bildirimde ve ana ekranda "Gizli içerik" görünür. | Aynı protokol commit'i. |
 
 **Cihazda denenebilenler (PC'siz):** paylaşım hedefleri ve Hızlı Ayarlar kutucukları sisteme kayıtlı (`query-activities`, `query-services`). Wi‑Fi yolu 17 dakika kesintisiz kaldı, pil değiştikçe `DeviceState` gitti.
