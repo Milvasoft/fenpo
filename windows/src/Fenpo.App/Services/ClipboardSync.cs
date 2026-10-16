@@ -32,6 +32,13 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
     private const int _maxImageBytes = 512 * 1024;
     private const int _historyLength = 20;
 
+    // Apps often set the clipboard twice in a row (a preview, then the final image); the last one wins.
+    private static readonly TimeSpan _settle = TimeSpan.FromMilliseconds(300);
+
+    // Windows re-encodes an image Fenpo puts on the clipboard, so its bytes no longer match what the phone sent;
+    // changes right after Fenpo's own are Fenpo's.
+    private static readonly TimeSpan _ownChangeWindow = TimeSpan.FromSeconds(2);
+
     // Set by password managers and other apps that do not want the content watched or synced.
     private static readonly string[] _privateFormats = ["ExcludeClipboardContentFromMonitorProcessing", "Clipboard Viewer Ignore"];
 
@@ -42,6 +49,8 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
     private readonly List<ClipboardEntry> _history = [];
     private DispatcherQueue? _dispatcher;
     private string? _lastFingerprint;
+    private DateTimeOffset _ownChangeUntil;
+    private int _changeGeneration;
 
     /// <summary>
     /// Raised from any thread when the list changed.
@@ -182,6 +191,19 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
     {
         try
         {
+            if (DateTimeOffset.Now < _ownChangeUntil)
+            {
+                return;
+            }
+
+            var generation = ++_changeGeneration;
+            await Task.Delay(_settle);
+
+            if (generation != _changeGeneration || DateTimeOffset.Now < _ownChangeUntil)
+            {
+                return;
+            }
+
             if (!_settings.Current.ShareClipboard || !_channel.IsConnected || !_channel.Supports(Capability.Clipboard))
             {
                 return;
@@ -326,6 +348,7 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
             }
 
             _lastFingerprint = Fingerprint(text, image);
+            _ownChangeUntil = DateTimeOffset.Now + _ownChangeWindow;
             Clipboard.SetContent(package);
 
             // Stays on the clipboard after Fenpo quits.
