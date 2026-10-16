@@ -120,18 +120,22 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 
 - Video and audio never travel on the control connection. The phone opens a separate TLS connection to the PC's control server port, with the same pinned certificates, when it reports `STARTING` with a `stream_id`.
 - First frame: `[uint32 length][Envelope]` whose body is `media_stream_open` (so the PC tells it from `Hello` and from `TransferStreamHeader`). Then every frame is `[uint32 length][StreamPacket]` until the phone closes the connection.
-- H.264 is the default; HEVC only when the PC asks for it. `codec_config` comes before the first key frame and again before every later key frame, so the PC can join after a loss. When the connection falls behind, the phone drops video frames instead of queueing them; audio is never dropped.
+- The PC lists what it can decode in `accepted` (`CameraStart`, `ScreenStart`), in its order of preference; the phone takes the first it can encode. H.264 (Annex-B, Baseline or Main, no B-frames, so presentation and decode order match) is the default; HEVC only when listed, because many PCs lack its decoder. For audio the PC prefers `PCM_S16LE` 48 kHz on a LAN, `AAC` (raw access units, config in `codec_config`) otherwise.
+- Key frames about every 2 seconds, and at once when the PC sends `RequestKeyFrame` (after a decode error or a resize). Camera 1080p30 aims at 6 Mbps with a 1.5 Mbps floor; the screen 4 to 8 Mbps, at most 1920 px on the long side. The phone lowers the bitrate when the connection falls behind.
+- `codec_config` comes before the first key frame and again before every later key frame, so the PC can join after a loss. When the connection falls behind, the phone drops video frames instead of queueing them; audio is never dropped.
 - Timestamps are the phone's monotonic microseconds; the PC uses them only relative to each other.
 
 ## Camera
 
 - The PC sends `CameraStart` when an app opens Fenpo Kamera (`consumer` is shown on the phone, e.g. "Teams'te canlı").
 - Android opens the camera only after a tap on the phone: the phone answers `CameraStatus` `WAITING_FOR_TAP` and shows a "Start camera" notification, then reports `STARTING` with `stream_id`, opens the media connection and reports `STREAMING`.
+- The camera's microphone needs a virtual microphone on the PC, which Windows offers only through an audio driver; until the PC has one it does not ask for audio in `accepted`.
 - `CameraSettingsChange` goes both ways for facing, zoom, microphone and center stage; the phone confirms what it applied with `CameraStatus`. Either side may send `CameraStop`; the phone then reports `STOPPED` and closes the media connection.
 
 ## Screen mirroring (Android)
 
 - The PC sends `ScreenStart`. Android asks for consent on the phone every time: `ScreenStatus` `WAITING_FOR_CONSENT`, then `STREAMING` with `stream_id` and the media connection. A rotation changes `video` and starts with a new key frame on the same connection.
+- With `audio`, the phone also sends its own sound (Android's playback capture; apps that forbid capture stay silent), played on the PC.
 - When the phone locks, Android ends the capture: `PAUSED_LOCKED`. Mirroring resumes only with a new consent on the phone.
 - `ScreenInput` points are fractions of the streamed frame (0..1 from the top left). Control needs Fenpo's accessibility service on the phone; `control_available` says whether it is on, and input without it is answered with `Error` `UNSUPPORTED`. Windows that protect their content (`FLAG_SECURE`, banking apps) arrive black.
 

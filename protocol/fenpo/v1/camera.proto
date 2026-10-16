@@ -25,7 +25,7 @@ enum CameraFacing {
 message CameraSettings {
   CameraFacing facing = 1;
   float zoom = 2;                        // Zoom ratio, e.g. 0.5, 1, 2; 0 keeps the current one.
-  bool microphone = 3;                   // Send the phone's microphone as the camera's audio.
+  bool microphone = 3;                   // Send the phone's microphone as the camera's audio (the PC needs a virtual microphone for it).
   bool center_stage = 4;                 // Keep the face in the middle by cropping ("Ortala").
 }
 
@@ -34,6 +34,7 @@ message CameraStart {
   CameraSettings settings = 1;
   VideoFormat video = 2;                 // What the PC asks for; the phone may pick less.
   string consumer = 3;                   // App using the camera, e.g. "Teams", shown on the phone.
+  AcceptedFormats accepted = 4;
 }
 
 // Either side.
