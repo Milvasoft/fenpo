@@ -20,6 +20,8 @@ import "fenpo/v1/video.proto";
 message ScreenStart {
   VideoFormat max = 1;                   // Largest size, frame rate and bitrate the PC wants.
   bool control = 2;                      // The PC wants to send ScreenInput.
+  AcceptedFormats accepted = 3;
+  bool audio = 4;                        // Also the phone's sound, played on the PC (apps may forbid capture).
 }
 
 // Either side.
