@@ -308,7 +308,15 @@ jobs:
           OFFSETS: ${{ inputs.symbolicate }}
         run: |
           dwarf="$RUNNER_TEMP/Fenpo.xcarchive/dSYMs/Fenpo.app.dSYM/Contents/Resources/DWARF/Fenpo"
+          # Compare with the crash report's Binary Images line for Fenpo: a different UUID means
+          # the rebuild is not the same binary and the names below may be off.
+          xcrun dwarfdump --uuid "$dwarf" | tee -a "$GITHUB_STEP_SUMMARY"
           for offset in $OFFSETS; do
             address="$(printf '0x%x' $((0x100000000 + offset)))"
-            echo "$offset: $(xcrun atos -arch arm64 -o "$dwarf" -l 0x100000000 "$address")"
+            echo "$offset atos: $(xcrun atos -arch arm64 -o "$dwarf" -l 0x100000000 "$address")"
+            # The closest symbol at or below the address, for code atos cannot name (thunks,
+            # outlined copies, closure contexts).
+            nearest="$(xcrun nm -n --defined-only "$dwarf" | python3 -c 'import sys; a = int(sys.argv[1], 16); print(max((l for l in sys.stdin if l[:16].strip() and int(l[:16], 16) <= a), key=lambda l: int(l[:16], 16), default=""), end="")' "$address")"
+            echo "$offset nearest: $(echo "$nearest" | xcrun swift-demangle --simplified)"
+            xcrun dwarfdump --lookup "$address" "$dwarf" | grep -E "DW_AT_(linkage_)?name|Line info" | head -6
           done | tee -a "$GITHUB_STEP_SUMMARY"
