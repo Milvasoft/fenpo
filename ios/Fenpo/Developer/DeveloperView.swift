@@ -17,7 +17,7 @@ struct DeveloperView: View {
                 CardRows(separatorInset: 16) {
                     InfoRow(title: "developer.bluetooth", value: diagnostics?.bluetoothState ?? "…")
                     InfoRow(title: "developer.peer", value: diagnostics?.peerName ?? "—")
-                    InfoRow(title: "developer.capabilities", value: diagnostics.map { $0.capabilities.joined(separator: " ") } ?? "—")
+                    InfoRow(title: "developer.capabilities", value: capabilitiesText)
                     InfoRow(title: "developer.pc", value: pcText)
                     InfoRow(title: "developer.accessory", value: diagnostics?.bluetoothIdentifier ?? "—")
                     InfoRow(title: "developer.counters", value: countersText)
@@ -88,6 +88,13 @@ struct DeveloperView: View {
             return "—"
         }
         return "\(name) · \(diagnostics?.pcID ?? "")"
+    }
+
+    private var capabilitiesText: String {
+        guard let capabilities = diagnostics?.capabilities, !capabilities.isEmpty else {
+            return "—"
+        }
+        return capabilities.joined(separator: " ")
     }
 
     private var countersText: String {
