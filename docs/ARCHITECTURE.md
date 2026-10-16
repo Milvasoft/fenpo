@@ -131,7 +131,7 @@ Android'de iOS'tan farklı olarak bildirimlere yazılı yanıt (`RemoteInput`), 
 
 ## Protokol
 
-Tek kaynak: `protocol/fenpo/v1/*.proto`. C# (`Grpc.Tools`, sadece mesaj üretimi) ve Swift (`swift-protobuf`) tipleri buradan üretilir. gRPC kullanılmıyor; kendi çerçevelememiz var.
+Tek kaynak: `protocol/fenpo/v1/*.proto`. C# (`Grpc.Tools`, sadece mesaj üretimi) ve Swift (`swift-protobuf`, `ios/scripts/generate-proto.sh` ile) tipleri buradan üretilir. gRPC kullanılmıyor; kendi çerçevelememiz var.
 
 ### Mesajlar
 
@@ -141,7 +141,7 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 |---|---|
 | `common.proto` | `DevicePlatform` (WINDOWS, IOS, ANDROID), `Capability` |
 | `hello.proto` | `Hello`, `Ping`, `Pong`, `Error` |
-| `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı ve servis UUID'si dahil) |
+| `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı dahil) |
 | `content.proto` | `ClipboardItem`, `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
 | `device.proto` | `DeviceState`, `RingDevice`, `LockPc` |
@@ -156,7 +156,7 @@ Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler 
 ### Çerçeveleme
 
 - **④ TLS kanalı:** `[uint32 uzunluk, big-endian][Envelope bayt]`. Kontrol mesajları tek uzun ömürlü bağlantıda. Dosya gövdeleri ve video ayrı TLS bağlantılarında akar; kontrol kanalı tıkanmaz.
-- **③ BLE kanalı:** İki karakteristik: `rx` (iPhone yazar, yanıtsız yazma) ve `tx` (PC bildirir). MTU'ya göre parçalama: `[1 bayt bayrak: ilk/son][2 bayt sıra][parça]`. Sadece 4 KB'tan küçük mesajlar; büyükler için ③ "Wi‑Fi'ye geç" sinyali verir.
+- **③ BLE kanalı:** Sabit bir Fenpo servisi ve iki karakteristik: `rx` (iPhone yazar, yanıtsız yazma) ve `tx` (PC bildirir), ikisi de şifreli bağlantı ister. UUID'ler her PC için aynı (`protocol/README.md`), çünkü AccessorySetupKit servis UUID'sinin iPhone uygulamasının Info.plist'inde önceden bildirilmesini istiyor. Yakında birden fazla Fenpo PC'si varsa ASK seçicisinde hangisinin hangisi olduğu S4'te netleşecek. MTU'ya göre parçalama: `[1 bayt bayrak: ilk/son][2 bayt sıra][parça]`. Sadece 4 KB'tan küçük mesajlar; büyükler için ③ "Wi‑Fi'ye geç" sinyali verir.
 
 ### Eşleşme ve güvenlik
 

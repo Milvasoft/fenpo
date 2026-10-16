@@ -31,7 +31,11 @@ message PairingResult {
   string pc_name = 3;
   PairingFailure failure = 4;            // Set when accepted is false.
   bytes ble_channel_key = 5;             // 32 bytes. AES-GCM key for the Fenpo BLE channel.
-  string ble_service_uuid = 6;           // Fenpo GATT service UUID advertised by this PC.
+
+  // The Fenpo GATT service UUID is the same for every PC (see protocol/README.md),
+  // because AccessorySetupKit needs it declared in the iPhone app's Info.plist.
+  reserved 6;
+  reserved "ble_service_uuid";
 }
 
 enum PairingFailure {
