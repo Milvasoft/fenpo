@@ -79,7 +79,7 @@ struct PCView: View {
                 }
             }
             .fenpoScreenBackground()
-            .navigationTitle("tab.pc")
+            .tabHeader("tab.pc")
             .navigationDestination(for: AppModel.PCScreen.self) { screen in
                 switch screen {
                 case .touchpad:
