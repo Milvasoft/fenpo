@@ -17,6 +17,7 @@ public sealed partial class SettingsPage : Page
     public SettingsPage()
     {
         ViewModel = App.GetService<SettingsViewModel>();
+        Sharing = App.GetService<SharingSettingsViewModel>();
         InitializeComponent();
 
         RadioButton[] themes = [ThemeSystem, ThemeLight, ThemeDark];
@@ -28,11 +29,17 @@ public sealed partial class SettingsPage : Page
     /// </summary>
     public SettingsViewModel ViewModel { get; }
 
+    /// <summary>
+    /// Gets the sharing section's view model.
+    /// </summary>
+    public SharingSettingsViewModel Sharing { get; }
+
     /// <inheritdoc/>
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         base.OnNavigatedFrom(e);
         ViewModel.Dispose();
+        Sharing.Dispose();
     }
 
     private void OnPairClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowPairing();
@@ -68,6 +75,26 @@ public sealed partial class SettingsPage : Page
         if (await picker.PickSingleFolderAsync() is { } folder)
         {
             ViewModel.SetIncomingFolder(folder.Path);
+        }
+    }
+
+    private async void OnAddSharedFolderClick(object sender, RoutedEventArgs e)
+    {
+        var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.DocumentsLibrary };
+        picker.FileTypeFilter.Add("*");
+        WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(App.GetService<MainWindow>()));
+
+        if (await picker.PickSingleFolderAsync() is { } folder)
+        {
+            Sharing.AddFolder(folder.Path);
+        }
+    }
+
+    private void OnRemoveSharedFolderClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { Tag: SharedFolderItem folder })
+        {
+            Sharing.RemoveFolderCommand.Execute(folder);
         }
     }
 

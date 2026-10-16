@@ -135,6 +135,26 @@ public sealed record AppSettings
     public IReadOnlyList<string> NonApplePhoneIds { get; init; } = [];
 
     /// <summary>
+    /// Gets a value indicating whether the PC's notifications from the picked apps go to the phone.
+    /// </summary>
+    public bool PcNotificationsToPhone { get; init; }
+
+    /// <summary>
+    /// Gets the apps that showed notifications on the PC, and whether each one's go to the phone.
+    /// </summary>
+    public IReadOnlyList<PcNotificationApp> PcNotificationApps { get; init; } = [];
+
+    /// <summary>
+    /// Gets the PC folders the phone can browse (its Files app, Android's file picker).
+    /// </summary>
+    public IReadOnlyList<SharedFolder> SharedFolders { get; init; } = [];
+
+    /// <summary>
+    /// Gets a value indicating whether LocalSend apps on the network see this PC and can send it files.
+    /// </summary>
+    public bool LocalSendVisible { get; init; } = true;
+
+    /// <summary>
     /// Gets the TLS port of the Fenpo control server, kept so paired phones find it again; 0 until first start.
     /// </summary>
     public int ControlPort { get; init; }

@@ -828,6 +828,9 @@
   <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yakınlık kilidi</value>
   </data>
+  <data name="Settings_SharingHeader.Text" xml:space="preserve">
+    <value>Telefonla paylaşım</value>
+  </data>
   <data name="Settings_Startup.Text" xml:space="preserve">
     <value>Windows açılınca başlat</value>
   </data>
@@ -863,6 +866,51 @@
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
+  </data>
+  <data name="Sharing_AddFolder.Content" xml:space="preserve">
+    <value>Klasör ekle</value>
+  </data>
+  <data name="Sharing_Folders.Text" xml:space="preserve">
+    <value>Telefonla paylaşılan klasörler</value>
+  </data>
+  <data name="Sharing_FoldersHint.Text" xml:space="preserve">
+    <value>iPhone'da Dosyalar uygulamasında, Android'de dosya seçicide görünür. Başka klasörlere erişilemez.</value>
+  </data>
+  <data name="Sharing_LocalSend.Text" xml:space="preserve">
+    <value>LocalSend ile görün</value>
+  </data>
+  <data name="Sharing_LocalSendHint.Text" xml:space="preserve">
+    <value>LocalSend kullanan cihazlar bu bilgisayarı görür ve dosya gönderebilir; her gönderim önce sorulur</value>
+  </data>
+  <data name="Sharing_LocalSendToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>LocalSend ile görün</value>
+  </data>
+  <data name="Sharing_NoApps.Text" xml:space="preserve">
+    <value>Henüz bildirim gösteren bir uygulama yok. Bir uygulama bu bilgisayarda bildirim gösterince burada çıkar.</value>
+  </data>
+  <data name="Sharing_NoFolders.Text" xml:space="preserve">
+    <value>Henüz paylaşılan klasör yok.</value>
+  </data>
+  <data name="Sharing_NotificationsDenied" xml:space="preserve">
+    <value>Windows, Fenpo'nun bildirimleri okumasına izin vermedi. Ayarlar › Gizlilik ve güvenlik › Bildirimler'de Fenpo'ya izin ver, sonra yeniden aç.</value>
+  </data>
+  <data name="Sharing_PcNotifications.Text" xml:space="preserve">
+    <value>PC bildirimlerini telefona gönder</value>
+  </data>
+  <data name="Sharing_PcNotificationsHint.Text" xml:space="preserve">
+    <value>Seçtiğin uygulamaların bildirimleri telefonda da görünür</value>
+  </data>
+  <data name="Sharing_PcNotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>PC bildirimlerini telefona gönder</value>
+  </data>
+  <data name="Sharing_PickApps.Content" xml:space="preserve">
+    <value>Uygulamaları seç</value>
+  </data>
+  <data name="Sharing_PickAppsTitle.Text" xml:space="preserve">
+    <value>Bildirimleri telefona gidecek uygulamalar</value>
+  </data>
+  <data name="Sharing_RemoveFolder.Content" xml:space="preserve">
+    <value>Kaldır</value>
   </data>
   <data name="Shell_SendToPhone" xml:space="preserve">
     <value>Fenpo ile telefona gönder</value>

@@ -105,6 +105,7 @@ public static class PcHello
             Capability.Camera,
             Capability.PcInput,
             Capability.Messages,
+            Capability.PcNotifications,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
