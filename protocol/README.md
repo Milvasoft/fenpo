@@ -10,6 +10,7 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/content.proto` | Clipboard, open URL |
 | `fenpo/v1/transfer.proto` | File transfer negotiation and progress |
 | `fenpo/v1/device.proto` | Device state, PC status, ring, lock |
+| `fenpo/v1/media.proto` | Now playing and media control |
 | `fenpo/v1/notification.proto` | Notification mirroring from Android phones |
 | `fenpo/v1/envelope.proto` | `Envelope`, field ranges per feature group |
 
@@ -88,6 +89,17 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 - `content_hidden` means Android withheld the content (one-time codes, lock screen privacy); the PC says so instead of showing an empty notification.
 - App icons are not repeated in every notification: the PC sends `AppIconRequest` for an `app_id` it has not cached and the phone answers with `AppIcon` (64x64 PNG).
 - On the BLE channel a `PhoneNotification` must fit the 4096-byte sealed limit: the phone drops `large_icon_png` first, then shortens `text` and `messages`. An `AppIcon` that does not fit waits for Wi‑Fi.
+
+## Media (Android and PC)
+
+- `CAPABILITY_MEDIA`: each side may report its own `MediaState` and control the other with `MediaCommand`. The iPhone's media still comes through AMS.
+- `MediaState` goes after `Hello` and on every change of track, play state or volume, on the best open channel. Position is not streamed; the receiver advances `position_ms` from `position_at` while `playing`.
+- `artwork_jpeg` is left out on BLE; the same state is sent again with artwork once Wi‑Fi is up.
+- A `MediaCommand` with nothing to control is answered with `Error` `UNSUPPORTED`.
+
+## Proximity
+
+- An Android phone does not advertise by itself, so the PC cannot measure it the way it measures an iPhone (DECISIONS #29). The phone reads the RSSI of its BLE link to the PC and sends it as `DeviceState.ble_rssi_dbm`, at most every 5 seconds and only when it moved by 4 dB or more, or every 30 seconds.
 
 ## Rules
 

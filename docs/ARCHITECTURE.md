@@ -142,9 +142,10 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | `common.proto` | `DevicePlatform` (WINDOWS, IOS, ANDROID), `Capability` |
 | `hello.proto` | `Hello` (işletim sistemi sürümü ve model dahil), `Ping`, `Pong`, `Error` |
 | `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı dahil) |
-| `content.proto` | `ClipboardItem`, `ClipboardRequest`, `OpenUrl` |
+| `content.proto` | `ClipboardItem` (hassas işaretiyle), `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
-| `device.proto` | `DeviceState`, `PcStatus`, `RingDevice`, `LockPc` |
+| `device.proto` | `DeviceState` (Android'in ölçtüğü BLE RSSI dahil), `PcStatus`, `RingDevice`, `LockPc` |
+| `media.proto` | `MediaState`, `MediaCommand`: Android'in ve PC'nin şu an çalanı ve kontrolü |
 | `notification.proto` | Android bildirim aynalama: `PhoneNotification` (kategori ve sıra numarasıyla), `NotificationRemoved`, `NotificationSnapshotDone`, `DismissNotification`, `RunNotificationAction`, `AppIconRequest`, `AppIcon` |
 | `envelope.proto` | `Envelope` ve özellik gruplarına ayrılmış alan numarası aralıkları |
 
@@ -154,7 +155,7 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 
 Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler üzerinden beslenir (`INotificationSource`, `IMessageSource`, `IMediaSource`). iPhone için kaynak ANCS, MAP ve AMS; Android kendi kaynağını Fenpo kanalı üzerinden ekler.
 
-**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz ve PC durumu, 90–96 bildirim aynalama (Android). Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 97–99 bildirim aynalama eklemeleri, 100–109 mesajlar (Android).
+**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü (medya komutu dahil), 50–59 cihaz, PC ve medya durumu, 90–96 bildirim aynalama (Android). Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 97–99 bildirim aynalama eklemeleri, 100–109 mesajlar (Android).
 
 **Android bildirimleri:** Android telefon bildirimlerini `NotificationListenerService` ile okur ve Fenpo kanalından gönderir (`CAPABILITY_NOTIFICATION_MIRROR`): `Hello`'dan sonra o kanalda mevcut bildirimlerin hepsi (`pre_existing`, sonunda `NotificationSnapshotDone`), sonra her yeni, güncellenen ve kalkan bildirim. İki kanal arasında sırayı `seq` korur; gelen arama `INCOMING_CALL` kategorisiyle Ada'ya gider. PC kapatma ve eylem (yazılı yanıt dahil) isteğini geri yollar; uygulama simgesini sadece önbelleğinde yoksa ister. Windows'ta bu kaynak `INotificationSource` arayüzüne ANCS'nin yanına bağlanır. Ayrıntı `protocol/README.md`.
 

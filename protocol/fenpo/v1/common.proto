@@ -28,4 +28,5 @@ enum Capability {
   CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC (reserved, phase 4).
   CAPABILITY_NOTIFICATION_MIRROR = 10; // Phone notifications over the Fenpo channel (Android).
   CAPABILITY_MESSAGES = 11;          // SMS over the Fenpo channel (Android).
+  CAPABILITY_MEDIA = 12;             // Now playing and media control (Android, PC).
 }
