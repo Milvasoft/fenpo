@@ -53,7 +53,8 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
     }
 
     /// <inheritdoc/>
-    Task IHostedService.StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    // Closing Fenpo is a stop, not a lost connection.
+    Task IHostedService.StopAsync(CancellationToken cancellationToken) => StopMirroringAsync().WaitAsync(TimeSpan.FromSeconds(1), cancellationToken);
 
     /// <summary>
     /// Asks the phone to share its screen; it asks its user first.

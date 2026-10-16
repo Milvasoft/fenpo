@@ -14,6 +14,10 @@ import "fenpo/v1/camera.proto";
 import "fenpo/v1/screen.proto";
 import "fenpo/v1/video.proto";
 import "fenpo/v1/notification.proto";
+import "fenpo/v1/pc_notification.proto";
+import "fenpo/v1/files.proto";
+import "fenpo/v1/photos.proto";
+import "fenpo/v1/hotspot.proto";
 
 option csharp_namespace = "Fenpo.Protocol.V1";
 option java_package = "com.fenpo.protocol.v1";
@@ -67,6 +71,16 @@ message Envelope {
     MediaStreamOpen media_stream_open = 64;
     RequestKeyFrame request_key_frame = 65;
 
+    // 70-79: the PC's shared folders on the phone
+    FolderListRequest folder_list_request = 70;
+    FolderListing folder_listing = 71;
+    FileFetch file_fetch = 72;
+    FileThumbnailRequest file_thumbnail_request = 73;
+    FileThumbnail file_thumbnail = 74;
+    FileChange file_change = 75;
+    FileChangeResult file_change_result = 76;
+    FolderChanged folder_changed = 77;
+
     // 80-89: screen mirroring (Android)
     ScreenStart screen_start = 80;
     ScreenStop screen_stop = 81;
@@ -82,6 +96,10 @@ message Envelope {
     AppIcon app_icon = 95;
     NotificationSnapshotDone notification_snapshot_done = 96;
 
+    // 97-99: the PC's notifications on the phone
+    PcNotification pc_notification = 97;
+    PcNotificationRemoved pc_notification_removed = 98;
+
     // 100-109: messages (Android, phones without MAP)
     SmsSyncRequest sms_sync_request = 100;
     SmsConversations sms_conversations = 101;
@@ -90,13 +108,28 @@ message Envelope {
     SmsMessage sms_message = 104;
     SmsSend sms_send = 105;
     SmsSendResult sms_send_result = 106;
+
+    // 110-119: the phone's photo library from the PC
+    PhotoListRequest photo_list_request = 110;
+    PhotoList photo_list = 111;
+    PhotoThumbnailRequest photo_thumbnail_request = 112;
+    PhotoThumbnail photo_thumbnail = 113;
+    PhotoFetch photo_fetch = 114;
+
+    // 120-129: the phone's hotspot
+    HotspotInfo hotspot_info = 120;
+    HotspotRequest hotspot_request = 121;
+    HotspotStatus hotspot_status = 122;
   }
 
-  // 66-69 camera additions, 70-79 file provider, 84-89 screen mirror additions,
-  // 97-99 notification additions, 107-109 message additions.
+  // 66-69 camera additions, 78-79 folder additions, 84-89 screen mirror additions, 99 notification additions,
+  // 107-109 message additions, 115-119 photo additions, 123-129 hotspot additions.
   // Defined in later phases.
-  reserved 66 to 79;
+  reserved 66 to 69;
+  reserved 78 to 79;
   reserved 84 to 89;
-  reserved 97 to 99;
+  reserved 99;
   reserved 107 to 109;
+  reserved 115 to 119;
+  reserved 123 to 129;
 }

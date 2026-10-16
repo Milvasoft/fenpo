@@ -24,10 +24,13 @@ enum Capability {
   CAPABILITY_LOCK_PC = 5;            // Ask the PC to lock its session.
   CAPABILITY_DEVICE_STATE = 6;       // Battery, charging, network, focus.
   CAPABILITY_CAMERA = 7;             // Phone as webcam (camera.proto).
-  CAPABILITY_FILE_PROVIDER = 8;      // Browse PC folders from the phone (reserved, phase 4).
-  CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC with control (screen.proto, Android).
+  CAPABILITY_FILE_PROVIDER = 8;      // The PC's shared folders on the phone (files.proto).
+  CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC (screen.proto); with control on Android.
   CAPABILITY_NOTIFICATION_MIRROR = 10; // Phone notifications over the Fenpo channel (Android).
   CAPABILITY_MESSAGES = 11;          // SMS over the Fenpo channel (Android).
   CAPABILITY_MEDIA = 12;             // Now playing and media control (Android, PC).
   CAPABILITY_PC_INPUT = 13;          // The phone as the PC's touchpad, keyboard and presentation remote.
+  CAPABILITY_PC_NOTIFICATIONS = 14;  // The PC's notifications on the phone (pc_notification.proto).
+  CAPABILITY_PHOTOS = 15;            // The phone's photo library browsed from the PC (photos.proto).
+  CAPABILITY_HOTSPOT = 16;           // Joining the phone's hotspot from the PC (hotspot.proto).
 }

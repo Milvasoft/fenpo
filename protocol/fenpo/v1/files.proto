@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// The PC's shared folders on the phone (CAPABILITY_FILE_PROVIDER): the iPhone's Files app through a File Provider
+// extension, Android's file picker through a DocumentsProvider.
+//
+// The PC shares only the folders its user picked in Fenpo. Every path is relative to them, with "/" between parts:
+// "" is the list of shared folders, "Documents/Taxes" a folder inside the shared folder "Documents". The PC rejects
+// absolute paths, "..", and anything that leaves a shared folder (links included) with Error INVALID_REQUEST.
+// Requests go on the control connection and are answered with the same reply_to.
+// File contents move as ordinary file transfers (transfer.proto): FileFetch makes the PC offer the file with the
+// phone's transfer_id; uploading is a TransferOffer from the phone with destination_path set.
+
+// Phone → PC: what is in a folder.
+message FolderListRequest {
+  string path = 1;                       // "" for the shared folders.
+}
+
+// PC → phone.
+message FolderListing {
+  string path = 1;
+  repeated FolderEntry entries = 2;
+}
+
+message FolderEntry {
+  string name = 1;                       // Shown name; for a shared folder the name its user gave it.
+  string path = 2;                       // Path to use in later requests.
+  bool is_folder = 3;
+  uint64 size = 4;                       // Bytes; 0 for folders.
+  google.protobuf.Timestamp modified_at = 5;
+  string mime_type = 6;                  // Empty for folders.
+  bool read_only = 7;                    // The phone may not change, delete or upload into it.
+}
+
+// Phone → PC: send this file. The PC answers with a TransferOffer whose transfer_id is the one given here, so the phone
+// knows it as the answer and accepts it without asking its user.
+message FileFetch {
+  string path = 1;
+  string transfer_id = 2;                // Chosen by the phone, unique.
+}
+
+// Phone → PC: a small preview of an image, video or document the PC can render.
+message FileThumbnailRequest {
+  string path = 1;
+  uint32 max_px = 2;                     // Longest side; the PC caps it at 512.
+}
+
+// PC → phone. Empty jpeg when the PC has no preview for it.
+message FileThumbnail {
+  string path = 1;
+  bytes jpeg = 2;
+}
+
+enum FileChangeKind {
+  FILE_CHANGE_KIND_UNSPECIFIED = 0;
+  FILE_CHANGE_KIND_DELETE = 1;           // The PC moves it to the Recycle Bin.
+  FILE_CHANGE_KIND_RENAME = 2;
+  FILE_CHANGE_KIND_CREATE_FOLDER = 3;    // path is the parent folder, new_name the folder's name.
+}
+
+// Phone → PC: change something in a shared folder.
+message FileChange {
+  FileChangeKind kind = 1;
+  string path = 2;
+  string new_name = 3;                   // For RENAME and CREATE_FOLDER; a name, not a path.
+}
+
+// PC → phone.
+message FileChangeResult {
+  bool ok = 1;
+  FolderEntry entry = 2;                 // The renamed or created item; empty for DELETE or when not ok.
+}
+
+// PC → phone: the contents of a folder the phone listed in this session changed on the PC, so it should list it again.
+message FolderChanged {
+  string path = 1;
+}

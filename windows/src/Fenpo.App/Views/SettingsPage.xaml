@@ -132,6 +132,20 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE995;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_CallRing" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_CallRingHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.RingForCalls, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_CallRingToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <FontIcon Glyph="&#xF0E3;" Style="{StaticResource FenpoRowIconStyle}" />
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock x:Uid="Settings_Clipboard" Style="{StaticResource FenpoRowLabelStyle}" />

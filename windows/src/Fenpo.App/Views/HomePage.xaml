@@ -48,6 +48,7 @@
 
     <ScrollViewer>
         <StackPanel Padding="32,28" Spacing="16">
+            <InfoBar x:Uid="Notifications_Refused" IsOpen="{x:Bind ViewModel.NotificationsRefused, Mode=OneWay}" Severity="Warning" IsClosable="False" />
 
             <!-- Hero: phone illustration, status, actions -->
             <Border Style="{StaticResource FenpoCardStyle}" Padding="28,20">

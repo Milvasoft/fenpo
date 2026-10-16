@@ -618,6 +618,12 @@
   <data name="Notifications_Footnote.Text" xml:space="preserve">
     <value>On iPhone, apps like WhatsApp cannot be answered from here; iOS does not allow it. SMS and iMessage can be answered on the Messages page.</value>
   </data>
+  <data name="Notifications_Refused.Message" xml:space="preserve">
+    <value>So notifications and incoming calls don't arrive. On the iPhone, open Settings › Bluetooth, tap (i) next to this PC and turn on Share System Notifications. Fenpo connects again by itself within a few seconds.</value>
+  </data>
+  <data name="Notifications_Refused.Title" xml:space="preserve">
+    <value>The iPhone isn't sharing notifications with this PC</value>
+  </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Notifications</value>
   </data>
@@ -719,6 +725,15 @@
   </data>
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Appearance and language</value>
+  </data>
+  <data name="Settings_CallRing.Text" xml:space="preserve">
+    <value>Ring on the PC for calls</value>
+  </data>
+  <data name="Settings_CallRingHint.Text" xml:space="preserve">
+    <value>While the phone rings, the PC plays the Windows call sound</value>
+  </data>
+  <data name="Settings_CallRingToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ring on the PC for calls</value>
   </data>
   <data name="Settings_Calls.Text" xml:space="preserve">
     <value>Show incoming calls at the top of the screen</value>

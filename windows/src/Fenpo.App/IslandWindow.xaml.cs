@@ -76,12 +76,18 @@ public sealed partial class IslandWindow : Window
 
         // No DWM border or corners: the transparent window shows only the XAML pill.
         NativeMethods.RemoveFrame(hwnd);
+        AppearStoryboard.Begin();
+        RingStoryboard.Begin();
     }
 
     /// <summary>
     /// Hides the island.
     /// </summary>
-    public void Hide() => AppWindow.Hide();
+    public void Hide()
+    {
+        RingStoryboard.Stop();
+        AppWindow.Hide();
+    }
 
     private void OnDeclineClick(object sender, RoutedEventArgs e) => Respond(false);
 

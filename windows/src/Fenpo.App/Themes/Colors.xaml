@@ -36,6 +36,8 @@
             <SolidColorBrush x:Key="FenpoIslandTextSecondaryBrush" Color="#A3A8C3" />
             <SolidColorBrush x:Key="FenpoDeclineBrush" Color="#E5484D" />
             <SolidColorBrush x:Key="FenpoAcceptBrush" Color="#2FB36B" />
+            <!-- Design: the island's ringing outline, the answer green at 60 %. -->
+            <SolidColorBrush x:Key="FenpoIslandRingBrush" Color="#992FB36B" />
         </ResourceDictionary>
 
         <ResourceDictionary x:Key="Dark">
@@ -67,6 +69,8 @@
             <SolidColorBrush x:Key="FenpoIslandTextSecondaryBrush" Color="#A3A8C3" />
             <SolidColorBrush x:Key="FenpoDeclineBrush" Color="#E5484D" />
             <SolidColorBrush x:Key="FenpoAcceptBrush" Color="#2FB36B" />
+            <!-- Design: the island's ringing outline, the answer green at 60 %. -->
+            <SolidColorBrush x:Key="FenpoIslandRingBrush" Color="#992FB36B" />
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 

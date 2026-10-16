@@ -8,7 +8,12 @@ option java_multiple_files = true;
 
 import "fenpo/v1/video.proto";
 
-// The phone's screen on the PC, with control from the PC (CAPABILITY_SCREEN_MIRROR, Android).
+// The phone's screen on the PC (CAPABILITY_SCREEN_MIRROR), with control from the PC on Android.
+//
+// iPhone: only its user can start a screen broadcast (ReplayKit), from Fenpo or Control Center. The iPhone answers a
+// ScreenStart with WAITING_FOR_CONSENT and shows how to start it; when its user starts the broadcast, Fenpo's broadcast
+// extension opens the media connection and the iPhone reports STREAMING without a ScreenStart. control_available is
+// always false on the iPhone, and ScreenInput is answered with Error UNSUPPORTED.
 //
 // The PC sends ScreenStart. Android asks the user on the phone every time (screen capture
 // consent), so the phone answers ScreenStatus WAITING_FOR_CONSENT; after consent it opens the
