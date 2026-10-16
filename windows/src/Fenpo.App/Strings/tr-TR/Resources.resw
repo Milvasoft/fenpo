@@ -276,6 +276,15 @@
   <data name="Files_OpenFolder.Content" xml:space="preserve">
     <value>Klasörü aç</value>
   </data>
+  <data name="Files_PhotosDragHint.Text" xml:space="preserve">
+    <value>Sürükleyip bir klasöre bırakabilirsin</value>
+  </data>
+  <data name="Files_PhotosMore.Content" xml:space="preserve">
+    <value>Daha fazla göster</value>
+  </data>
+  <data name="Files_PhotosRefresh.Content" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
   <data name="Files_Pick.Content" xml:space="preserve">
     <value>Dosya seç</value>
   </data>
@@ -734,6 +743,30 @@
   </data>
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>{0} telefonuna geç</value>
+  </data>
+  <data name="Photos_Denied" xml:space="preserve">
+    <value>Fenpo telefonda fotoğraflara erişemiyor. Telefonun ayarlarında Fenpo'ya fotoğraf izni ver.</value>
+  </data>
+  <data name="Photos_Empty" xml:space="preserve">
+    <value>Telefonda fotoğraf yok.</value>
+  </data>
+  <data name="Photos_FetchFailed" xml:space="preserve">
+    <value>Fotoğraf telefondan alınamadı. Telefonun Wi‑Fi'ye bağlı olduğuna bak ve yeniden dene.</value>
+  </data>
+  <data name="Photos_Limited" xml:space="preserve">
+    <value>Sadece telefonda Fenpo için seçtiğin fotoğraflar görünüyor.</value>
+  </data>
+  <data name="Photos_NeedsWifi" xml:space="preserve">
+    <value>Fotoğraflar Wi‑Fi ile gelir. Telefonu bu bilgisayarla aynı Wi‑Fi'ye bağla.</value>
+  </data>
+  <data name="Photos_NoAnswer" xml:space="preserve">
+    <value>Telefon cevap vermedi. Telefonda Fenpo'yu aç, sonra Yenile'ye bas.</value>
+  </data>
+  <data name="Photos_NotConnected" xml:space="preserve">
+    <value>Telefondaki Fenpo bağlı değil. Fotoğraflar telefon bağlanınca burada görünür.</value>
+  </data>
+  <data name="Photos_Unsupported" xml:space="preserve">
+    <value>Telefondaki Fenpo fotoğraflarını paylaşmıyor. Telefonda Fenpo'yu güncelle ve Ayarlar'da fotoğraf paylaşımını aç.</value>
   </data>
   <data name="Ring_PcStop" xml:space="preserve">
     <value>Durdur</value>

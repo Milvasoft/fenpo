@@ -72,10 +72,33 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Design "Son fotoğraflar": the phone's library, newest first; drag one to a folder. -->
                 <Border Style="{StaticResource FenpoCardStyle}">
-                    <StackPanel Padding="16,14">
-                        <TextBlock x:Uid="Files_RecentPhotos" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
-                        <TextBlock x:Uid="Files_NoPhotos" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                    <StackPanel Padding="16,14" Spacing="8">
+                        <Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock x:Uid="Files_RecentPhotos" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" VerticalAlignment="Center" />
+                                <TextBlock x:Uid="Files_PhotosDragHint" Style="{StaticResource FenpoCaptionTextStyle}" VerticalAlignment="Center" Visibility="{x:Bind Photos.HasItems, Mode=OneWay}" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                <ProgressRing IsActive="{x:Bind Photos.IsLoading, Mode=OneWay}" Width="16" Height="16" />
+                                <HyperlinkButton x:Uid="Files_PhotosRefresh" Padding="4,0" Command="{x:Bind Photos.RefreshCommand}" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{x:Bind Photos.Notice, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" Visibility="{x:Bind Photos.HasNotice, Mode=OneWay}" />
+                        <GridView ItemsSource="{x:Bind Photos.Items}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="OnPhotoClick" CanDragItems="True" DragItemsStarting="OnPhotosDragStarting" Visibility="{x:Bind Photos.HasItems, Mode=OneWay}">
+                            <GridView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PhotoItemViewModel">
+                                    <Grid Width="104" Height="104" CornerRadius="8" Background="{ThemeResource FenpoCardSecondaryBrush}" ToolTipService.ToolTip="{x:Bind Name}" AutomationProperties.Name="{x:Bind Name}">
+                                        <Image Source="{x:Bind Thumbnail, Mode=OneWay}" Stretch="UniformToFill" />
+                                        <Border Visibility="{x:Bind IsVideo}" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="6" Padding="4,2" CornerRadius="4" Background="{ThemeResource FenpoIslandBrush}">
+                                            <FontIcon Glyph="&#xE714;" FontSize="12" Foreground="White" />
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </GridView.ItemTemplate>
+                        </GridView>
+                        <Button x:Uid="Files_PhotosMore" HorizontalAlignment="Center" Command="{x:Bind Photos.LoadMoreCommand}" Visibility="{x:Bind Photos.HasMore, Mode=OneWay}" />
                     </StackPanel>
                 </Border>
             </StackPanel>

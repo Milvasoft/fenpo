@@ -276,6 +276,15 @@
   <data name="Files_OpenFolder.Content" xml:space="preserve">
     <value>Open folder</value>
   </data>
+  <data name="Files_PhotosDragHint.Text" xml:space="preserve">
+    <value>Drag one to a folder to copy it</value>
+  </data>
+  <data name="Files_PhotosMore.Content" xml:space="preserve">
+    <value>Show more</value>
+  </data>
+  <data name="Files_PhotosRefresh.Content" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
   <data name="Files_Pick.Content" xml:space="preserve">
     <value>Pick files</value>
   </data>
@@ -734,6 +743,30 @@
   </data>
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>Switch to {0}</value>
+  </data>
+  <data name="Photos_Denied" xml:space="preserve">
+    <value>Fenpo cannot reach the photos on the phone. Allow photo access for Fenpo in the phone's settings.</value>
+  </data>
+  <data name="Photos_Empty" xml:space="preserve">
+    <value>There are no photos on the phone.</value>
+  </data>
+  <data name="Photos_FetchFailed" xml:space="preserve">
+    <value>The photo could not be copied from the phone. Check that the phone is on Wi‑Fi and try again.</value>
+  </data>
+  <data name="Photos_Limited" xml:space="preserve">
+    <value>Only the photos you picked for Fenpo on the phone show.</value>
+  </data>
+  <data name="Photos_NeedsWifi" xml:space="preserve">
+    <value>Photos come over Wi‑Fi. Connect the phone to the same Wi‑Fi as this PC.</value>
+  </data>
+  <data name="Photos_NoAnswer" xml:space="preserve">
+    <value>The phone did not answer. Open Fenpo on the phone, then press Refresh.</value>
+  </data>
+  <data name="Photos_NotConnected" xml:space="preserve">
+    <value>Fenpo on the phone is not connected. Photos show here once the phone connects.</value>
+  </data>
+  <data name="Photos_Unsupported" xml:space="preserve">
+    <value>Fenpo on the phone does not share its photos. Update Fenpo on the phone and turn on photo sharing in its Settings.</value>
   </data>
   <data name="Ring_PcStop" xml:space="preserve">
     <value>Stop</value>

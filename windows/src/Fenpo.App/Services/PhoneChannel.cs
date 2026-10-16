@@ -34,6 +34,7 @@ public sealed class PhoneChannel(
     IPairedAppDevices devices,
     ILogger<PhoneChannel> logger) : IHostedService
 {
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Envelope, TaskCompletionSource<Envelope>> _requests = new(ReferenceEqualityComparer.Instance);
     private readonly ControlServer _wifi = wifi;
     private readonly FenpoGattServer _ble = ble;
     private readonly PhoneStatusTracker _status = status;
@@ -312,8 +313,45 @@ public sealed class PhoneChannel(
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Sends a request over Wi‑Fi and waits for the first message that answers it (its <c>reply_to</c>).
+    /// </summary>
+    /// <param name="request">Request.</param>
+    /// <param name="timeout">How long to wait for the answer.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The answer, or null when it could not be sent or none came in time.</returns>
+    public async Task<Envelope?> RequestOverWifiAsync(Envelope request, TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        // Waiting before sending: the id is set while the message is written, and the answer may come at once.
+        var answer = new TaskCompletionSource<Envelope>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _requests[request] = answer;
+
+        try
+        {
+            if (!await SendOverWifiAsync(request, cancellationToken))
+            {
+                return null;
+            }
+
+            return await answer.Task.WaitAsync(timeout, cancellationToken);
+        }
+        catch (TimeoutException)
+        {
+            return null;
+        }
+        finally
+        {
+            _requests.TryRemove(request, out _);
+        }
+    }
+
     private void OnMessage(ChannelMessage message)
     {
+        if (message.Envelope.ReplyTo != 0 && _requests.Keys.FirstOrDefault(r => r.Id == message.Envelope.ReplyTo) is { } request && _requests.TryRemove(request, out var answer))
+        {
+            answer.TrySetResult(message.Envelope);
+        }
+
         if (message.Envelope.BodyCase == Envelope.BodyOneofCase.DeviceState)
         {
             OnDeviceState(message);
