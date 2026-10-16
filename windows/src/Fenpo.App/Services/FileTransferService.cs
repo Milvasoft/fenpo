@@ -60,6 +60,7 @@ public sealed class FileTransferService(
     private readonly LocalizationService _localization = localization;
     private readonly ILogger<FileTransferService> _logger = logger;
     private readonly ConcurrentDictionary<string, FileTransfer> _active = new();
+    private readonly ConcurrentDictionary<string, Expected> _expected = new();
     private readonly Lock _lock = new();
     private readonly List<FileTransfer> _transfers = [];
 
@@ -104,6 +105,71 @@ public sealed class FileTransferService(
         }
 
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Gets or sets how an upload's destination_path (a folder in the shared folders, files.proto) becomes a folder on
+    /// the PC; null, or a null answer, declines the upload.
+    /// </summary>
+    public Func<string, string?>? ResolveDestination { get; set; }
+
+    /// <summary>
+    /// Offers one file to the phone under the transfer id the phone chose (files.proto FileFetch), without listing it.
+    /// </summary>
+    /// <param name="path">File on the PC.</param>
+    /// <param name="transferId">The phone's transfer id.</param>
+    /// <returns>False when the offer could not go out.</returns>
+    public async Task<bool> OfferRequestedAsync(string path, string transferId)
+    {
+        if (_channel.Phone is not { } phone || !_channel.WifiConnected || !File.Exists(path) || _active.ContainsKey(transferId))
+        {
+            return false;
+        }
+
+        TransferFile file = new()
+        {
+            FileId = Guid.NewGuid().ToString(),
+            Name = Path.GetFileName(path),
+            Size = (ulong)new System.IO.FileInfo(path).Length,
+            MimeType = MimeTypes.Of(path),
+        };
+        var transfer = new FileTransfer(transferId, phone.DeviceId, incoming: false, [file], [path]) { Quiet = true };
+        Track(transfer);
+        var offer = new TransferOffer { TransferId = transferId, TotalBytes = file.Size };
+        offer.Files.Add(file);
+
+        if (!await _channel.SendOverWifiAsync(new Envelope { TransferOffer = offer }))
+        {
+            Finish(transfer, FileTransferState.Failed);
+            return false;
+        }
+
+        _ = RunOutgoingAsync(transfer);
+        return true;
+    }
+
+    /// <summary>
+    /// Expects the phone to offer files under <paramref name="transferId"/> (an answer to the PC's own request, such as
+    /// photos.proto PhotoFetch): that offer is accepted without asking and saved to <paramref name="folder"/>.
+    /// </summary>
+    /// <param name="transferId">The PC's transfer id.</param>
+    /// <param name="folder">Where the files go.</param>
+    /// <param name="listed">Whether the transfer shows in the Files list.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The saved files once every byte arrived; throws when the transfer fails.</returns>
+    public async Task<IReadOnlyList<string>> ExpectAsync(string transferId, string folder, bool listed, CancellationToken cancellationToken = default)
+    {
+        var expected = new Expected(folder, listed, new TaskCompletionSource<IReadOnlyList<string>>(TaskCreationOptions.RunContinuationsAsynchronously));
+        _expected[transferId] = expected;
+
+        try
+        {
+            return await expected.Done.Task.WaitAsync(cancellationToken);
+        }
+        finally
+        {
+            _expected.TryRemove(transferId, out _);
+        }
     }
 
     /// <summary>
@@ -358,7 +424,19 @@ public sealed class FileTransferService(
             return;
         }
 
-        var transfer = new FileTransfer(offer.TransferId, message.Device.DeviceId, incoming: true, [.. offer.Files], []);
+        // An answer to the PC's own request goes where that request said; an upload into a shared folder goes there
+        // when the folder exists and may be written; anything else to the incoming folder.
+        _expected.TryGetValue(offer.TransferId, out var expected);
+        var folder = expected?.Folder ?? (offer.DestinationPath.Length > 0 ? ResolveDestination?.Invoke(offer.DestinationPath) : IncomingFolder);
+
+        if (folder is null)
+        {
+            _logger.LogInformation("Declined transfer {Id} from {Phone}: no shared folder may take it", offer.TransferId, message.Device.Name);
+            await _channel.ReplyAsync(message, new Envelope { TransferAccept = accept });
+            return;
+        }
+
+        var transfer = new FileTransfer(offer.TransferId, message.Device.DeviceId, incoming: true, [.. offer.Files], []) { Folder = folder, Quiet = expected is { Listed: false } };
         Track(transfer);
         accept.Accepted = true;
         accept.DataPort = 0;
@@ -369,7 +447,12 @@ public sealed class FileTransferService(
         {
             await WaitForDataAsync(transfer, transfer.Cancellation.Token);
             Finish(transfer, FileTransferState.Completed);
-            ShowReceived(transfer);
+            expected?.Done.TrySetResult(transfer.SavedPaths);
+
+            if (expected is null)
+            {
+                ShowReceived(transfer);
+            }
         }
         catch (Exception exception) when (exception is TimeoutException or OperationCanceledException or IOException or InvalidDataException or UnauthorizedAccessException or ObjectDisposedException)
         {
@@ -380,6 +463,7 @@ public sealed class FileTransferService(
             }
 
             Finish(transfer, transfer.Cancellation.IsCancellationRequested ? FileTransferState.Cancelled : FileTransferState.Failed);
+            expected?.Done.TrySetException(exception);
         }
     }
 
@@ -398,15 +482,22 @@ public sealed class FileTransferService(
             }
         }
 
-        var saved = await TransferStreams.ReceiveAsync(stream, transfer.Files, IncomingFolder, Progress, cancellationToken);
+        var folder = transfer.Folder ?? IncomingFolder;
+        Directory.CreateDirectory(folder);
+        var saved = await TransferStreams.ReceiveAsync(stream, transfer.Files, folder, Progress, cancellationToken);
         transfer.SetSaved(saved);
         await _channel.SendOverWifiAsync(new Envelope { TransferProgress = new TransferProgress { TransferId = transfer.Id, BytesDone = transfer.TotalBytes, State = TransferState.Completed } }, CancellationToken.None);
-        _logger.LogInformation("Received {Count} files ({Bytes} bytes) into {Folder}", saved.Count, transfer.TotalBytes, IncomingFolder);
+        _logger.LogInformation("Received {Count} files ({Bytes} bytes) into {Folder}", saved.Count, transfer.TotalBytes, folder);
     }
 
     private void Track(FileTransfer transfer)
     {
         _active[transfer.Id] = transfer;
+        if (transfer.Quiet)
+        {
+            return;
+        }
+
         transfer.Changed += (sender, e) => Changed?.Invoke(this, EventArgs.Empty);
 
         lock (_lock)
@@ -429,6 +520,8 @@ public sealed class FileTransferService(
         _logger.LogInformation("Transfer {Id} ended: {State}", transfer.Id, transfer.State);
     }
 
+    private sealed record Expected(string Folder, bool Listed, TaskCompletionSource<IReadOnlyList<string>> Done);
+
     private void ShowReceived(FileTransfer transfer)
     {
         if (transfer.SavedPaths.Count == 0)
@@ -444,7 +537,7 @@ public sealed class FileTransferService(
                 : _localization.Format("Toast_FilesReceived", transfer.SavedPaths.Count);
             var notification = new AppNotificationBuilder()
                 .AddText(title)
-                .AddText(IncomingFolder)
+                .AddText(transfer.Folder ?? IncomingFolder)
                 .AddArgument("page", "Files")
                 .AddButton(new AppNotificationButton(_localization.GetString("Toast_ShowFile")).AddArgument("reveal", first))
                 .BuildNotification();

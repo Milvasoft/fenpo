@@ -89,6 +89,7 @@ public partial class App : Application
                 .AddHostedService<ActivePhoneSync>()
                 .AddHostedService<PcMediaShare>()
                 .AddSingleton<PcNotificationForwarder>()
+                .AddHostedService<SharedFolderService>()
                 .AddHostedService(sp => sp.GetRequiredService<PcNotificationForwarder>())
                 .AddSingleton<PcInputService>()
                 .AddHostedService(sp => sp.GetRequiredService<PcInputService>())
