@@ -228,6 +228,7 @@
   .drop.over { border-color: var(--w-accent); background: var(--w-accent-soft); }
   .xfer { display: grid; grid-template-columns: 36px 1fr 120px auto; gap: 12px; align-items: center; padding: 12px 16px; }
   .xfer + .xfer { border-top: 1px solid var(--w-stroke); }
+.xfer .done { color: var(--w-ok); font-weight: 600; } .xfer .done::before { content: "✓ "; }
   .ficon { width: 36px; height: 36px; border-radius: 6px; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #fff; }
   .prog { height: 4px; border-radius: 2px; background: var(--w-stroke); overflow: hidden; }
   .prog i { display: block; height: 100%; background: var(--w-accent); border-radius: 2px; }
@@ -572,8 +573,8 @@
             <div class="card" style="margin-top:16px">
               <div class="sect-h">Aktarımlar</div>
               <div class="xfer"><div class="ficon" style="background:#E5484D">PDF</div><div><b style="font-weight:600">Sözleşme_v3.pdf</b><div class="tiny">iPhone’a gidiyor, 2,4 MB / 3,1 MB</div></div><div class="prog"><i style="width:77%"></i></div><button class="btn">İptal</button></div>
-              <div class="xfer"><div class="ficon" style="background:#4E54C8">MOV</div><div><b style="font-weight:600">IMG_4830.MOV</b><div class="tiny">iPhone’dan geldi, 184 MB, Videolar</div></div><div class="tiny">Tamamlandı</div><button class="btn">Göster</button></div>
-              <div class="xfer"><div class="ficon" style="background:#2F8F6B">XLS</div><div><b style="font-weight:600">Bütçe_Ekim.xlsx</b><div class="tiny">iPhone’a gitti, Fenpo klasörü</div></div><div class="tiny">Tamamlandı</div><button class="btn">Tekrar</button></div>
+              <div class="xfer"><div class="ficon" style="background:#4E54C8">MOV</div><div><b style="font-weight:600">IMG_4830.MOV</b><div class="tiny">iPhone’dan geldi, 184 MB, Videolar</div></div><div class="tiny done">Tamamlandı</div><button class="btn">Göster</button></div>
+              <div class="xfer"><div class="ficon" style="background:#2F8F6B">XLS</div><div><b style="font-weight:600">Bütçe_Ekim.xlsx</b><div class="tiny">iPhone’a gitti, Fenpo klasörü</div></div><div class="tiny done">Tamamlandı</div><span></span></div>
             </div>
             <div class="card" style="margin-top:16px">
               <div class="sect-h">Son fotoğraflar <span class="tiny" style="font-weight:400">Sürükleyip bir klasöre bırakabilirsin</span></div>
