@@ -85,6 +85,8 @@ public partial class App : Application
                 .AddSingleton<IMediaSource>(sp => sp.GetRequiredService<CombinedMediaSource>())
                 .AddHostedService<ActivePhoneSync>()
                 .AddHostedService<PcMediaShare>()
+                .AddSingleton<PcInputService>()
+                .AddHostedService(sp => sp.GetRequiredService<PcInputService>())
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
@@ -235,6 +237,7 @@ public partial class App : Application
         var calls = GetService<CallService>();
         calls.AttachUi(dispatcher);
         GetService<ClipboardSync>().AttachUi(dispatcher);
+        GetService<PcInputService>().AttachUi(dispatcher);
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 
