@@ -409,6 +409,7 @@ class ConnectionService : Service() {
 
     private suspend fun lockPc() {
         val sent = messenger.send(Envelope.Body.LockPc(LockPc()), Capability.CAPABILITY_LOCK_PC)
+        Log.i(TAG, "Lock PC: ${if (sent) "sent" else "not sent"}")
         val message =
             when {
                 sent -> R.string.lock_pc_sent

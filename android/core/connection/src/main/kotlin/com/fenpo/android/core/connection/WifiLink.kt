@@ -164,7 +164,15 @@ internal class WifiLink(
                 .first()
                 ?.addresses
                 .orEmpty()
-        val known = stored.mapNotNull(Endpoint::parse)
+        // The PC lists every adapter; the one on the phone's own subnet answers, virtual and link-local ones time out.
+        val local =
+            connectivity
+                .getLinkProperties(
+                    network,
+                )?.linkAddresses
+                .orEmpty()
+                .mapNotNull { it.address.hostAddress }
+        val known = AddressOrder.forNetwork(stored.mapNotNull(Endpoint::parse), local)
         tryEach(known, network)?.let { opened ->
             remember(opened.first, stored)
             return opened
@@ -254,5 +262,29 @@ internal object AddressOrder {
         candidates: List<String>,
     ): List<String> = (listOf(working) + candidates).distinct().take(MAX)
 
+    /**
+     * [endpoints] in the order worth trying from a network where the phone has [phoneAddresses]:
+     * the phone's own /24 first, other private IPv4, then IPv6, link-local (169.254, fe80) last.
+     */
+    fun forNetwork(
+        endpoints: List<Endpoint>,
+        phoneAddresses: List<String>,
+    ): List<Endpoint> {
+        val subnets = phoneAddresses.filter { '.' in it && ':' !in it }.map { it.substringBeforeLast('.') }.toSet()
+        return endpoints.sortedBy { endpoint ->
+            val host = endpoint.host
+            when {
+                host.startsWith("169.254.") || host.lowercase().startsWith("fe80") -> LINK_LOCAL
+                ':' in host -> IPV6
+                host.substringBeforeLast('.') in subnets -> SAME_SUBNET
+                else -> OTHER_IPV4
+            }
+        }
+    }
+
     private const val MAX = 8
+    private const val SAME_SUBNET = 0
+    private const val OTHER_IPV4 = 1
+    private const val IPV6 = 2
+    private const val LINK_LOCAL = 3
 }

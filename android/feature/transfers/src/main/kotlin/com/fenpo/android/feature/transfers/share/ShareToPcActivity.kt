@@ -3,6 +3,7 @@ package com.fenpo.android.feature.transfers.share
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.content.IntentCompat
@@ -47,6 +48,12 @@ class ShareToPcActivity : ComponentActivity() {
                     files.isNotEmpty() -> sendFiles(files)
                     else -> sendToPc(text)
                 }
+            Log.i(
+                TAG,
+                "Share ${if (open) "to open" else "to send"} (${files.size} file(s)): ${resources.getResourceEntryName(
+                    message,
+                )}",
+            )
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
             finish()
         }
@@ -107,5 +114,6 @@ class ShareToPcActivity : ComponentActivity() {
 
     private companion object {
         const val OPEN_ALIAS = ".OpenOnPc"
+        const val TAG = "FenpoShare"
     }
 }

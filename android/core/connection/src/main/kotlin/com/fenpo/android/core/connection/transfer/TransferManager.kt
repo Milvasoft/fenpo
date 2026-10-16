@@ -41,9 +41,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import okio.HashingSink
+import okio.blackholeSink
 import okio.buffer
 import okio.sink
 import okio.source
+import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.time.Instant
@@ -146,25 +148,34 @@ class TransferManager
         private class Outgoing(
             val info: FileInfo,
             val descriptor: ParcelFileDescriptor,
+            val temp: File? = null,
         )
 
         private fun openOutgoing(uri: Uri): Outgoing? {
             val resolver = context.contentResolver
-            val descriptor = runCatching { resolver.openFileDescriptor(uri, "r") }.getOrNull() ?: return null
+            var descriptor = runCatching { resolver.openFileDescriptor(uri, "r") }.getOrNull() ?: return null
             var name: String? = null
-            var size = descriptor.statSize
-            val columns = arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE)
-            resolver.query(uri, columns, null, null, null)?.use { c ->
-                if (c.moveToFirst()) {
-                    name = c.getString(0)
-                    if (size < 0 && !c.isNull(1)) size = c.getLong(1)
+            resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
+                if (c.moveToFirst()) name = c.getString(0)
+            }
+            var temp: File? = null
+            if (descriptor.statSize < 0) {
+                // A pipe (Samsung Gallery's share provider): its length is unknown and the provider's SIZE
+                // column may describe a different file, so copy it first and offer the real size.
+                temp = File(File(context.cacheDir, OUTGOING_FOLDER).apply { mkdirs() }, UUID.randomUUID().toString())
+                val copied =
+                    runCatching {
+                        ParcelFileDescriptor.AutoCloseInputStream(descriptor).use { input ->
+                            temp.outputStream().use { input.copyTo(it) }
+                        }
+                    }
+                if (copied.isFailure) {
+                    temp.delete()
+                    return null
                 }
+                descriptor = ParcelFileDescriptor.open(temp, ParcelFileDescriptor.MODE_READ_ONLY)
             }
-            if (size < 0) {
-                // A stream without a known length cannot be announced in the offer.
-                descriptor.close()
-                return null
-            }
+            val size = descriptor.statSize
             val info =
                 FileInfo(
                     file_id = UUID.randomUUID().toString(),
@@ -172,7 +183,7 @@ class TransferManager
                     size = size,
                     mime_type = resolver.getType(uri) ?: "application/octet-stream",
                 )
-            return Outgoing(info, descriptor)
+            return Outgoing(info, descriptor, temp)
         }
 
         private suspend fun sendFiles(
@@ -188,14 +199,21 @@ class TransferManager
                 val accepted = CompletableDeferred<TransferAccept>().also { accepts[id] = it }
                 val done = CompletableDeferred<TransferState>().also { outcomes[id] = it }
                 val offer = TransferOffer(transfer_id = id, files = files.map { it.info }, total_bytes = total)
-                if (!messenger.send(Envelope.Body.TransferOffer(offer), Capability.CAPABILITY_FILE_TRANSFER)) return
+                if (!messenger.send(Envelope.Body.TransferOffer(offer), Capability.CAPABILITY_FILE_TRANSFER)) {
+                    Log.w(TAG, "Offer $id not sent")
+                    return
+                }
                 // The PC may ask its user first.
                 val accept = withTimeout(ACCEPT_TIMEOUT) { accepted.await() }
                 if (!accept.accepted) {
                     outcome = TransferOutcome.DECLINED
                     return
                 }
-                data = messenger.openDataConnection(accept.data_port) ?: return
+                data =
+                    messenger.openDataConnection(accept.data_port) ?: run {
+                        Log.w(TAG, "No Wi-Fi for the data connection of $id")
+                        return
+                    }
                 TransferStream.writeHeader(data.sink, TransferStreamHeader(transfer_id = id))
                 var sent = 0L
                 for (file in files) {
@@ -205,14 +223,24 @@ class TransferManager
                         sent += file.info.size
                     }
                 }
-                // The writer closes after the last byte; the receiver confirms on the control channel.
-                data.close()
+                // Close only after the PC confirmed. Closing a socket with unread input sends a TCP reset,
+                // which made the PC lose the last bytes of larger files (device test, 16 October): the
+                // PC's TLS 1.3 session tickets arrive on this connection and are never read. Drain them.
+                val connection = data
+                val drain = scope.launch { runCatching { connection.source.readAll(blackholeSink()) } }
+                val state =
+                    try {
+                        withTimeout(CONFIRM_TIMEOUT) { done.await() }
+                    } finally {
+                        drain.cancel()
+                    }
                 outcome =
-                    when (withTimeout(CONFIRM_TIMEOUT) { done.await() }) {
+                    when (state) {
                         TransferState.TRANSFER_STATE_COMPLETED -> TransferOutcome.COMPLETED
                         TransferState.TRANSFER_STATE_CANCELLED -> TransferOutcome.CANCELLED
                         else -> TransferOutcome.FAILED
                     }
+                if (outcome != TransferOutcome.COMPLETED) Log.w(TAG, "The PC reported $state for $id after $sent bytes")
             } catch (e: CancellationException) {
                 outcome = TransferOutcome.CANCELLED
                 throw e
@@ -220,7 +248,10 @@ class TransferManager
                 Log.w(TAG, "Sending $id failed: ${e.message}")
             } finally {
                 data?.close()
-                files.forEach { runCatching { it.descriptor.close() } }
+                files.forEach {
+                    runCatching { it.descriptor.close() }
+                    it.temp?.delete()
+                }
                 accepts.remove(id)
                 outcomes.remove(id)
                 finish(TransferRecord(id, first, files.size, incoming = false, Instant.now(), total, outcome))
@@ -398,6 +429,7 @@ class TransferManager
         private companion object {
             const val TAG = "FenpoTransfer"
             const val FOLDER = "Fenpo"
+            const val OUTGOING_FOLDER = "outgoing"
             const val PROGRESS_INTERVAL_MS = 500L
             const val FREE_SPACE_MARGIN = 200L * 1024 * 1024
             val ACCEPT_TIMEOUT = 120.seconds

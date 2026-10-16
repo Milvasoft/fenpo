@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.util.Log
 import android.widget.Toast
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.connection.R
@@ -66,6 +67,7 @@ class LockPcTileService : FenpoTileService() {
     override fun onClick() {
         scope.launch {
             val sent = messenger.send(Envelope.Body.LockPc(LockPc()), Capability.CAPABILITY_LOCK_PC)
+            Log.i("FenpoConnection", "Lock PC from the tile: ${if (sent) "sent" else "not sent"}")
             val message =
                 when {
                     sent -> R.string.lock_pc_sent

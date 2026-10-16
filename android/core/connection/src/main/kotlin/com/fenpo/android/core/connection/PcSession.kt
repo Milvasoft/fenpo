@@ -51,7 +51,8 @@ internal class PcSession(
     suspend fun onEnvelope(envelope: Envelope) {
         when (val body = envelope.body) {
             is Envelope.Body.Hello -> {
-                Log.i(TAG, "Hello from the PC on $path: ${body.value.os_version}")
+                val offered = body.value.capabilities.joinToString { it.name.removePrefix("CAPABILITY_") }
+                Log.i(TAG, "Hello from the PC on $path: ${body.value.os_version}, offers $offered")
                 hello.complete(body.value)
                 status.update { it.copy(remote = body.value) }
             }
