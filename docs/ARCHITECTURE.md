@@ -145,6 +145,7 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | `content.proto` | `ClipboardItem`, `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
 | `device.proto` | `DeviceState`, `PcStatus`, `RingDevice`, `LockPc` |
+| `notification.proto` | Android bildirim aynalama: `PhoneNotification`, `NotificationRemoved`, `DismissNotification`, `RunNotificationAction`, `AppIconRequest`, `AppIcon` |
 | `envelope.proto` | `Envelope` ve özellik gruplarına ayrılmış alan numarası aralıkları |
 
 **El sıkışma:** Her bağlantının ilk mesajı `Hello` (eşleşme bağlantısında `PairingRequest`). Cihaz türünü, işletim sistemi sürümünü, modeli ve yetenek listesini taşır; iki taraf sadece ikisinin de desteklediği özellikleri açar. Böylece Android veya başka bir istemci, Windows tarafında özel durum açmadan eklenebilir. iPhone'daki cihaz satırının iOS sürümü `Hello.os_version`'dan gelir (DECISIONS #30).
@@ -153,7 +154,9 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 
 Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler üzerinden beslenir (`INotificationSource`, `IMessageSource`, `IMediaSource`). iPhone için kaynak ANCS, MAP ve AMS; Android kendi kaynağını Fenpo kanalı üzerinden ekler.
 
-**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz ve PC durumu. Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 90–99 bildirim aynalama (Android), 100–109 mesajlar (Android).
+**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz ve PC durumu, 90–95 bildirim aynalama (Android). Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 96–99 bildirim aynalama eklemeleri, 100–109 mesajlar (Android).
+
+**Android bildirimleri:** Android telefon bildirimlerini `NotificationListenerService` ile okur ve Fenpo kanalından gönderir (`CAPABILITY_NOTIFICATION_MIRROR`): `Hello`'dan sonra mevcut bildirimlerin hepsi, sonra her yeni, güncellenen ve kalkan bildirim. PC kapatma ve eylem (yazılı yanıt dahil) isteğini geri yollar; uygulama simgesini sadece önbelleğinde yoksa ister. Windows'ta bu kaynak `INotificationSource` arayüzüne ANCS'nin yanına bağlanır. Ayrıntı `protocol/README.md`.
 
 ### Çerçeveleme
 
