@@ -2,8 +2,10 @@ using Fenpo.Bluetooth.Ams;
 using Fenpo.Bluetooth.Ancs;
 using Fenpo.Bluetooth.Link;
 using Fenpo.Bluetooth.Map;
+using Fenpo.Bluetooth.Pbap;
 using Fenpo.Bluetooth.Proximity;
 using Fenpo.Bluetooth.Status;
+using Fenpo.Core.Contacts;
 using Fenpo.Core.Devices;
 using Fenpo.Core.Media;
 using Fenpo.Core.Messages;
@@ -33,6 +35,9 @@ public static class ServiceCollectionExtensions
         .AddSingleton<MnsServer>()
         .AddSingleton<MapMessageSource>()
         .AddSingleton<IMessageSource>(sp => sp.GetRequiredService<MapMessageSource>())
+        .AddSingleton<PbapClientRecord>()
+        .AddSingleton<PhonebookSource>()
+        .AddSingleton<IContactSource>(sp => sp.GetRequiredService<PhonebookSource>())
         .AddSingleton<PhoneStatusTracker>()
         .AddSingleton<IPhoneStatusSource>(sp => sp.GetRequiredService<PhoneStatusTracker>())
         .AddSingleton<AdvertisementRssiMonitor>()

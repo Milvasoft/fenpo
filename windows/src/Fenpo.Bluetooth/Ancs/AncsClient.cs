@@ -23,6 +23,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     private readonly Lock _readerLock = new();
     private readonly ConcurrentDictionary<string, string> _appNames = new();
     private Session? _session;
+    private GattSubscription[] _subscriptions = [];
     private TaskCompletionSource<AncsResponse>? _pending;
 
     /// <inheritdoc/>
@@ -106,12 +107,19 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
 
             // Data Source first so no response is lost; the Notification Source subscription starts the flow,
             // including every notification already on the phone (PreExisting).
-            if (!await dataSource.SubscribeAsync(OnDataSource) || !await notificationSource.SubscribeAsync(data => OnNotificationSource(session, data)))
+            var dataSubscription = await dataSource.SubscribeAsync(OnDataSource);
+            var sourceSubscription = dataSubscription is null ? null : await notificationSource.SubscribeAsync(data => OnNotificationSource(session, data));
+
+            if (dataSubscription is null || sourceSubscription is null)
             {
+                dataSubscription?.Dispose();
                 _logger.LogWarning("ANCS subscription failed (generation {Generation})", services.Generation);
                 Stop();
                 return;
             }
+
+            // Held for the session: an unreferenced characteristic is collected and its notifications stop.
+            ReplaceSubscriptions([dataSubscription, sourceSubscription]);
 
             _logger.LogInformation("ANCS started (generation {Generation})", services.Generation);
             AvailabilityChanged?.Invoke(this, true);
@@ -132,6 +140,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
         }
 
         session.Events.Writer.TryComplete();
+        ReplaceSubscriptions([]);
 
         lock (_readerLock)
         {
@@ -147,8 +156,11 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     {
         if (!AncsNotificationEvent.TryParse(data, out var notificationEvent))
         {
+            _logger.LogWarning("Unreadable ANCS event ({Length} bytes)", data.Length);
             return;
         }
+
+        _logger.LogDebug("ANCS {Event} uid {Uid} {Category}", notificationEvent.EventId, notificationEvent.Uid, notificationEvent.Category);
 
         if (notificationEvent.EventId == AncsEventId.Removed)
         {
@@ -172,14 +184,19 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
 
     private async Task ProcessAsync(Session session)
     {
+        _logger.LogDebug("ANCS processing started (generation {Generation})", session.Generation);
+
         await foreach (var notificationEvent in session.Events.Reader.ReadAllAsync())
         {
+            _logger.LogDebug("ANCS requesting attributes for uid {Uid}", notificationEvent.Uid);
+
             try
             {
                 var response = await RequestAsync(session, AncsCommands.GetNotificationAttributes(notificationEvent.Uid), AncsCommands.GetNotificationAttributesId, AncsCommands.NotificationAttributes.Count);
 
                 if (response is null)
                 {
+                    _logger.LogWarning("No attributes for ANCS uid {Uid}", notificationEvent.Uid);
                     continue;
                 }
 
@@ -203,7 +220,12 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             }
             catch (Exception exception) when (exception is ObjectDisposedException or System.Runtime.InteropServices.COMException or OperationCanceledException)
             {
-                _logger.LogDebug(exception, "ANCS request for uid {Uid} abandoned", notificationEvent.Uid);
+                _logger.LogWarning(exception, "ANCS request for uid {Uid} abandoned", notificationEvent.Uid);
+            }
+            catch (Exception exception)
+            {
+                // Runs fire-and-forget: anything that escapes here would silently stop every later notification.
+                _logger.LogError(exception, "Handling ANCS uid {Uid} failed", notificationEvent.Uid);
             }
         }
     }
@@ -230,6 +252,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     private async Task<AncsResponse?> RequestAsync(Session session, byte[] command, byte commandId, int attributeCount)
     {
         await _controlPointGate.WaitAsync();
+        _logger.LogDebug("ANCS Control Point write 0x{Command:X2}", commandId);
 
         try
         {
@@ -242,10 +265,11 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             }
 
             var result = await session.ControlPoint.WriteAsync(command);
+            _logger.LogDebug("ANCS Control Point write done: {Result}", result.Describe());
 
             if (result.Status != GattCommunicationStatus.Success)
             {
-                _logger.LogDebug("Control Point write failed: {Result}", result.Describe());
+                _logger.LogWarning("Control Point write failed: {Result}", result.Describe());
                 return null;
             }
 
@@ -268,6 +292,14 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             }
 
             _controlPointGate.Release();
+        }
+    }
+
+    private void ReplaceSubscriptions(GattSubscription[] subscriptions)
+    {
+        foreach (var old in Interlocked.Exchange(ref _subscriptions, subscriptions))
+        {
+            old.Dispose();
         }
     }
 

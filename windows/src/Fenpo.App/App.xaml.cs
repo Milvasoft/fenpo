@@ -61,6 +61,7 @@ public partial class App : Application
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
+                .AddSingleton<SentMessages>()
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
                 .AddHostedService<MediaBridge>()

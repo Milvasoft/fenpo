@@ -313,7 +313,7 @@
     <value>This sender cannot be answered.</value>
   </data>
   <data name="Messages_PermissionText" xml:space="preserve">
-    <value>On the iPhone, open Settings &gt; Bluetooth &gt; (i) next to this PC and turn on Show Message Notifications. Fenpo tries again in a few seconds.</value>
+    <value>On the iPhone, open Settings &gt; Bluetooth &gt; (i) next to this PC and turn on Show Message Notifications. If it is already on, turn Bluetooth off and on on the iPhone. Fenpo tries again in a few seconds.</value>
   </data>
   <data name="Messages_PermissionTitle" xml:space="preserve">
     <value>The iPhone does not allow messages</value>

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using Fenpo.App.ViewModels;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -11,7 +10,7 @@ namespace Fenpo.App;
 /// <summary>
 /// The island: a dark pill at the top center of the screen for an incoming call. Shown without taking the focus.
 /// </summary>
-public sealed partial class IslandWindow : Window, INotifyPropertyChanged
+public sealed partial class IslandWindow : Window
 {
     private const int _width = 420;
     private const int _height = 76;
@@ -30,9 +29,6 @@ public sealed partial class IslandWindow : Window, INotifyPropertyChanged
         AppWindow.SetPresenter(presenter);
         NativeMethods.HideFromSwitchers(WindowNative.GetWindowHandle(this));
     }
-
-    /// <inheritdoc/>
-    public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
     /// Raised when the user answers (true) or declines (false) the shown call.
@@ -67,15 +63,19 @@ public sealed partial class IslandWindow : Window, INotifyPropertyChanged
         CallerInitial = Avatar.Initial(name);
         CallerFill = Avatar.Fill(name);
         CanAnswer = canAnswer;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+
+        // x:Bind on a Window does not refresh from a PropertyChanged with an empty name after the first render.
+        Bindings.Update();
 
         var hwnd = WindowNative.GetWindowHandle(this);
         var scale = NativeMethods.GetDpiForWindow(hwnd) / 96d;
         var size = new SizeInt32((int)(_width * scale), (int)(_height * scale));
         var area = DisplayArea.Primary.WorkArea;
         AppWindow.MoveAndResize(new RectInt32(area.X + ((area.Width - size.Width) / 2), area.Y + (int)(_top * scale), size.Width, size.Height));
-        NativeMethods.ClipToPill(hwnd, size.Width, size.Height);
         AppWindow.Show(activateWindow: false);
+
+        // No DWM border or corners: the transparent window shows only the XAML pill.
+        NativeMethods.RemoveFrame(hwnd);
     }
 
     /// <summary>
