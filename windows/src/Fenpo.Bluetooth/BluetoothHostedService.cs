@@ -47,6 +47,41 @@ public sealed class BluetoothHostedService(
     /// </summary>
     public PairedPhone? Phone { get; private set; }
 
+    /// <summary>
+    /// Removes the iPhone's Bluetooth pairing from Windows (its LE and classic records) and stops using it; the search
+    /// starts over, so a phone paired again afterwards is found.
+    /// </summary>
+    /// <returns>A task that completes when Windows removed the pairing.</returns>
+    public async Task ForgetIphoneAsync()
+    {
+        var phone = Phone;
+        _logger.LogInformation("Forgetting the iPhone {Name}", phone?.Name);
+        await _link.StopAsync();
+        Phone = null;
+        _settings.Update(s => s with { PhoneDeviceId = null });
+
+        foreach (var id in new[] { phone?.LeDeviceId, phone?.ClassicDeviceId }.OfType<string>())
+        {
+            try
+            {
+                var device = await Windows.Devices.Enumeration.DeviceInformation.CreateFromIdAsync(id);
+                var result = await device.Pairing.UnpairAsync();
+                _logger.LogInformation("Unpairing {Id}: {Status}", id, result.Status);
+            }
+            catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or ArgumentException)
+            {
+                _logger.LogWarning(exception, "Unpairing {Id} failed", id);
+            }
+        }
+
+        _status.Update(s => s with { State = PhoneConnectionState.NotPaired });
+
+        if (_relocate.CurrentCount == 0)
+        {
+            _relocate.Release();
+        }
+    }
+
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

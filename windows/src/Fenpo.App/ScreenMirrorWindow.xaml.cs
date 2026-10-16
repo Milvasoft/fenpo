@@ -25,7 +25,9 @@ public sealed partial class ScreenMirrorWindow : Window
     private readonly ILogger _logger;
     private readonly DispatcherQueue _dispatcher;
     private LiveH264Player? _player;
+    private LivePcmPlayer? _sound;
     private MediaFeed? _stream;
+    private MediaFeed? _soundStream;
     private Point _pressedAt;
     private DateTimeOffset _pressedTime;
 
@@ -53,6 +55,12 @@ public sealed partial class ScreenMirrorWindow : Window
         _mirror.StreamOpened += OnStreamOpened;
         Closed += (sender, e) => OnClosed();
         ApplyState();
+
+        // An iPhone broadcast started on the phone opens this window while its stream already runs.
+        if (_mirror.State == ScreenState.Streaming && _mirror.Feed is { } feed)
+        {
+            Play(feed);
+        }
     }
 
     /// <summary>
@@ -64,6 +72,11 @@ public sealed partial class ScreenMirrorWindow : Window
         _ = _mirror.StartMirroringAsync();
     }
 
+    /// <summary>
+    /// Shows the window for a stream the phone started by itself.
+    /// </summary>
+    public void Show() => Activate();
+
     private static Envelope Global(ScreenGlobalAction action) => new() { ScreenInput = new ScreenInput { Global = action } };
 
     private int Scale(int pixels) => (int)(pixels * (Content?.XamlRoot?.RasterizationScale ?? NativeMethods.GetDpiForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this)) / 96.0));
@@ -74,6 +87,8 @@ public sealed partial class ScreenMirrorWindow : Window
         _mirror.StreamOpened -= OnStreamOpened;
         _player?.Dispose();
         _player = null;
+        _sound?.Dispose();
+        _sound = null;
         _ = _mirror.StopMirroringAsync();
     }
 
@@ -99,12 +114,19 @@ public sealed partial class ScreenMirrorWindow : Window
         RestartButton.Visibility = state is ScreenState.PausedLocked or ScreenState.Stopped or ScreenState.Failed ? Visibility.Visible : Visibility.Collapsed;
         StateText.Text = _localization.GetString(state switch
         {
+            ScreenState.WaitingForConsent when _mirror.FromIphone => "Mirror_WaitingIphone",
             ScreenState.WaitingForConsent => "Mirror_WaitingConsent",
             ScreenState.PausedLocked => "Mirror_Locked",
             ScreenState.Failed => "Mirror_Failed",
             _ => "Mirror_Stopped",
         });
-        NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable;
+        NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable && !_mirror.FromIphone;
+
+        // The iPhone cannot be controlled from the PC: only Stop stays.
+        foreach (var control in Controls.Children.OfType<FrameworkElement>().Where(c => c != StopButton))
+        {
+            control.Visibility = _mirror.FromIphone ? Visibility.Collapsed : Visibility.Visible;
+        }
     }
 
     private void OnStreamOpened(object? sender, MediaFeed stream) => _dispatcher.TryEnqueue(() => Play(stream));
@@ -116,6 +138,14 @@ public sealed partial class ScreenMirrorWindow : Window
         _player?.Dispose();
         _player = new LiveH264Player(stream.Packets, video?.Width ?? 0, video?.Height ?? 0, _logger, () => _ = _mirror.RequestKeyFrameAsync());
         Player.SetMediaPlayer(_player.Player);
+
+        // A resize restarts only the picture; the sound of the same stream keeps playing.
+        if (_sound is null || !ReferenceEquals(_soundStream, stream))
+        {
+            _sound?.Dispose();
+            _sound = stream.Open.Audio == AudioCodec.PcmS16Le ? new LivePcmPlayer(stream.Audio, stream.Open.AudioSampleRate, stream.Open.AudioChannels, _logger) : null;
+            _soundStream = stream;
+        }
     }
 
     // Where the frame is inside the element (letterboxed, Uniform) and a point on it as 0..1.

@@ -34,6 +34,7 @@ public sealed class PhoneChannel(
     IPairedAppDevices devices,
     ILogger<PhoneChannel> logger) : IHostedService
 {
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Envelope, TaskCompletionSource<Envelope>> _requests = new(ReferenceEqualityComparer.Instance);
     private readonly ControlServer _wifi = wifi;
     private readonly FenpoGattServer _ble = ble;
     private readonly PhoneStatusTracker _status = status;
@@ -167,9 +168,19 @@ public sealed class PhoneChannel(
     /// again takes the QR code.
     /// </summary>
     /// <returns>A task that completes when done.</returns>
-    public async Task ForgetAndroidAsync()
+    public Task ForgetAndroidAsync() => ForgetAsync(PhoneKind.Android);
+
+    /// <summary>
+    /// Forgets Fenpo on the phone of <paramref name="kind"/>: its pairing record and its connections. Bluetooth pairings
+    /// are removed by the caller.
+    /// </summary>
+    /// <param name="kind">Which phone.</param>
+    /// <returns>A task that completes when its connections are closed.</returns>
+    public async Task ForgetAsync(PhoneKind kind)
     {
-        foreach (var device in _devices.All.Where(d => d.Platform == DevicePlatform.Android || KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android).ToList())
+        var platform = kind == PhoneKind.Android ? DevicePlatform.Android : DevicePlatform.Ios;
+
+        foreach (var device in _devices.All.Where(d => d.Platform == platform || KindOf(HelloOf(d.DeviceId)) == kind).ToList())
         {
             _logger.LogInformation("Forgetting {Phone}", device.Name);
             _devices.Remove(device.DeviceId);
@@ -180,7 +191,7 @@ public sealed class PhoneChannel(
             _bleHellos.TryRemove(device.DeviceId, out _);
         }
 
-        _status.Update(PhoneKind.Android, s => PhoneStatus.Unknown);
+        _status.Update(kind, s => kind == PhoneKind.Android ? PhoneStatus.Unknown : s with { AppConnected = false, HasAppPhone = false });
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -302,8 +313,45 @@ public sealed class PhoneChannel(
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
+    /// <summary>
+    /// Sends a request over Wi‑Fi and waits for the first message that answers it (its <c>reply_to</c>).
+    /// </summary>
+    /// <param name="request">Request.</param>
+    /// <param name="timeout">How long to wait for the answer.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The answer, or null when it could not be sent or none came in time.</returns>
+    public async Task<Envelope?> RequestOverWifiAsync(Envelope request, TimeSpan timeout, CancellationToken cancellationToken = default)
+    {
+        // Waiting before sending: the id is set while the message is written, and the answer may come at once.
+        var answer = new TaskCompletionSource<Envelope>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _requests[request] = answer;
+
+        try
+        {
+            if (!await SendOverWifiAsync(request, cancellationToken))
+            {
+                return null;
+            }
+
+            return await answer.Task.WaitAsync(timeout, cancellationToken);
+        }
+        catch (TimeoutException)
+        {
+            return null;
+        }
+        finally
+        {
+            _requests.TryRemove(request, out _);
+        }
+    }
+
     private void OnMessage(ChannelMessage message)
     {
+        if (message.Envelope.ReplyTo != 0 && _requests.Keys.FirstOrDefault(r => r.Id == message.Envelope.ReplyTo) is { } request && _requests.TryRemove(request, out var answer))
+        {
+            answer.TrySetResult(message.Envelope);
+        }
+
         if (message.Envelope.BodyCase == Envelope.BodyOneofCase.DeviceState)
         {
             OnDeviceState(message);

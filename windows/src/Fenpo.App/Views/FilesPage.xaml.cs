@@ -20,8 +20,14 @@ public sealed partial class FilesPage : Page
     {
         ViewModel = App.GetService<AppFeatureViewModel>();
         Files = App.GetService<FilesViewModel>();
+        Photos = App.GetService<PhotosViewModel>();
         InitializeComponent();
     }
+
+    /// <summary>
+    /// Gets the phone's photos.
+    /// </summary>
+    public PhotosViewModel Photos { get; }
 
     /// <summary>
     /// Gets the view model (is the phone app connected).
@@ -56,6 +62,51 @@ public sealed partial class FilesPage : Page
         base.OnNavigatedFrom(e);
         ViewModel.Dispose();
         Files.Dispose();
+        Photos.Dispose();
+    }
+
+    private void OnPhotoClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is PhotoItemViewModel item)
+        {
+            _ = Photos.OpenAsync(item);
+        }
+    }
+
+    // A photo dragged to File Explorer or the desktop: the original comes from the phone once it is dropped.
+    private void OnPhotosDragStarting(object sender, DragItemsStartingEventArgs e)
+    {
+        var items = e.Items.OfType<PhotoItemViewModel>().ToList();
+
+        if (items.Count == 0)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        e.Data.RequestedOperation = DataPackageOperation.Copy;
+        e.Data.SetDataProvider(StandardDataFormats.StorageItems, async request =>
+        {
+            var deferral = request.GetDeferral();
+
+            try
+            {
+                var folder = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, "photos", Guid.NewGuid().ToString("N"));
+                var saved = await Photos.CopyAsync(items, folder, listed: false);
+                var files = new List<IStorageItem>();
+
+                foreach (var path in saved)
+                {
+                    files.Add(await StorageFile.GetFileFromPathAsync(path));
+                }
+
+                request.SetData(files);
+            }
+            finally
+            {
+                deferral.Complete();
+            }
+        });
     }
 
     private void OnPickClick(object sender, RoutedEventArgs e) => _ = PickAndSendAsync();

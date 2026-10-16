@@ -5,12 +5,14 @@
   xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3"
   xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
   xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap uap3 uap10 desktop com rescap">
+  IgnorableNamespaces="uap uap3 uap10 desktop desktop4 desktop5 com rescap">
 
   <!-- Development builds are signed with the self-signed "CN=Fenpo Development" certificate (DECISIONS #37). -->
-  <Identity Name="Milvasoft.Fenpo" Publisher="CN=Fenpo Development" Version="0.1.0.0" />
+  <Identity Name="Milvasoft.Fenpo" Publisher="CN=Fenpo Development" Version="0.1.1.0" />
 
   <Properties>
     <DisplayName>Fenpo</DisplayName>
@@ -55,6 +57,21 @@
         <desktop:Extension Category="windows.toastNotificationActivation">
           <desktop:ToastNotificationActivation ToastActivatorCLSID="E1812019-F81A-4392-8929-AE501A00824F" />
         </desktop:Extension>
+        <!-- "Send to phone with Fenpo" in File Explorer's right-click menu (Fenpo.ShellExtension.dll, Native AOT). -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="Fenpo File Explorer command">
+              <com:Class Id="6E1C4C2A-6F2B-4E43-9B8C-0C3F1E9E5A11" Path="Fenpo.ShellExtension.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="*">
+              <desktop5:Verb Id="FenpoSendToPhone" Clsid="6E1C4C2A-6F2B-4E43-9B8C-0C3F1E9E5A11" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
         <desktop:Extension Category="windows.startupTask">
           <desktop:StartupTask TaskId="FenpoStartup" Enabled="false" DisplayName="Fenpo" />
         </desktop:Extension>
@@ -66,7 +83,11 @@
     <rescap:Capability Name="runFullTrust" />
     <Capability Name="internetClient" />
     <Capability Name="privateNetworkClientServer" />
+    <!-- The PC's own notifications, for the apps its user picks, go to the phone (pc_notification.proto). -->
+    <uap3:Capability Name="userNotificationListener" />
     <DeviceCapability Name="bluetooth" />
+    <!-- Joining the phone's hotspot (hotspot.proto). -->
+    <DeviceCapability Name="wiFiControl" />
   </Capabilities>
 
 </Package>

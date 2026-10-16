@@ -9,7 +9,9 @@
     <Project Path="src/Fenpo.Core/Fenpo.Core.csproj" />
     <Project Path="src/Fenpo.Protocol/Fenpo.Protocol.csproj" />
     <Project Path="src/Fenpo.Sdk/Fenpo.Sdk.csproj" />
+    <Project Path="src/Fenpo.ShellExtension/Fenpo.ShellExtension.csproj" />
     <Project Path="src/Fenpo.Transport/Fenpo.Transport.csproj" />
+    <Project Path="src/Fenpo.VirtualCamera/Fenpo.VirtualCamera.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Fenpo.Bluetooth.Tests/Fenpo.Bluetooth.Tests.csproj" />
