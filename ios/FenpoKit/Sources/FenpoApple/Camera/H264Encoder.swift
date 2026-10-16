@@ -69,12 +69,10 @@ final class H264Encoder: @unchecked Sendable {
     }
 
     /// Encodes one camera frame.
-    /// - Parameter sampleBuffer: Frame from the capture output.
-    func encode(_ sampleBuffer: CMSampleBuffer) {
-        guard let image = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-        let presentationTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+    /// - Parameters:
+    ///   - image: Frame at the encoder's size.
+    ///   - presentationTime: When it was captured.
+    func encode(_ image: CVPixelBuffer, at presentationTime: CMTime) {
         let key = forceKeyFrame.withLock { value in
             defer { value = false }
             return value

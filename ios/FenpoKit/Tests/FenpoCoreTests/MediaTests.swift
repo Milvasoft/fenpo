@@ -71,3 +71,25 @@ struct MediaPacketQueueTests {
         #expect(queue.droppedVideoFrames == 2)
     }
 }
+
+struct FrameCropTests {
+    @Test
+    func portraitLosesTopAndBottom() {
+        let crop = FrameCrop.centered(width: 1080, height: 1920, targetWidth: 1920, targetHeight: 1080)
+        #expect(crop.x == 0)
+        #expect(crop.width == 1080)
+        #expect(abs(crop.height - 607.5) < 0.001)
+        #expect(abs(crop.y - 656.25) < 0.001)
+    }
+
+    @Test
+    func matchingLandscapeIsKept() {
+        #expect(FrameCrop.centered(width: 1920, height: 1080, targetWidth: 1920, targetHeight: 1080) == .init(x: 0, y: 0, width: 1920, height: 1080))
+    }
+
+    @Test
+    func widerFrameLosesItsSides() {
+        let crop = FrameCrop.centered(width: 2000, height: 1000, targetWidth: 1600, targetHeight: 1000)
+        #expect(crop == .init(x: 200, y: 0, width: 1600, height: 1000))
+    }
+}

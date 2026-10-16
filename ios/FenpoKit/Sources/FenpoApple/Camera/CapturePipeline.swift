@@ -5,15 +5,23 @@ import Foundation
 import Synchronization
 
 /// The camera side of Fenpo Kamera: an `AVCaptureSession` that hands every frame to a handler on
-/// its own queue. Landscape output, like a webcam.
+/// its own queue. Frames are turned upright for however the phone is held (the rotation
+/// coordinator's horizon-level angle) and always leave as the same landscape size, like a webcam:
+/// a portrait picture is cropped to its centered 16:9 part (`FrameFitter`).
 final class CapturePipeline: NSObject, @unchecked Sendable {
+    /// Receives each frame at the output size, with its presentation time.
+    typealias FrameHandler = @Sendable (CVPixelBuffer, CMTime) -> Void
+
     /// The session, for the preview layer.
     let session = AVCaptureSession()
 
     private let queue = DispatchQueue(label: "com.fenpo.camera")
     private let output = AVCaptureVideoDataOutput()
     private var input: AVCaptureDeviceInput?
-    private let handler = Mutex<(@Sendable (CMSampleBuffer) -> Void)?>(nil)
+    private let handler = Mutex<FrameHandler?>(nil)
+    private let fitter = Mutex<FrameFitter?>(nil)
+    private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
+    private var rotationObservation: NSKeyValueObservation?
 
     /// What the current camera can do.
     struct Capabilities: Sendable {
@@ -24,7 +32,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
 
     /// Sets who receives frames.
     /// - Parameter frameHandler: Called on the capture queue.
-    func setFrameHandler(_ frameHandler: (@Sendable (CMSampleBuffer) -> Void)?) {
+    func setFrameHandler(_ frameHandler: FrameHandler?) {
         handler.withLock { $0 = frameHandler }
     }
 
@@ -32,6 +40,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     /// - Parameters:
     ///   - facing: Back or front.
     ///   - fullHD: 1920 x 1080 when true, 1280 x 720 otherwise.
+    @MainActor
     func configure(facing: Fenpo_V1_CameraFacing, fullHD: Bool) throws -> Capabilities {
         guard let device = Self.device(facing: facing) else {
             throw CameraError.noCamera
@@ -59,14 +68,14 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
             session.addOutput(output)
         }
         if let connection = output.connection(with: .video) {
-            if connection.isVideoRotationAngleSupported(0) {
-                connection.videoRotationAngle = 0
-            }
             if connection.isVideoMirroringSupported {
                 connection.automaticallyAdjustsVideoMirroring = false
                 connection.isVideoMirrored = false
             }
         }
+        let size = dimensions
+        fitter.withLock { $0 = FrameFitter(width: size.width, height: size.height) }
+        followRotation(of: device)
 
         let ultraWide = [.builtInTripleCamera, .builtInDualWideCamera].contains(device.deviceType)
         let presets: [Float] = facing == .front ? [1] : (ultraWide ? [0.5, 1, 2] : [1, 2])
@@ -110,6 +119,32 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         AVCaptureDevice.isCenterStageEnabled = isOn
     }
 
+    /// Keeps the output upright: the coordinator reports the angle that levels the picture with the
+    /// horizon, for the back and the front camera, as the phone turns.
+    @MainActor
+    private func followRotation(of device: AVCaptureDevice) {
+        rotationObservation = nil
+        let coordinator = AVCaptureDevice.RotationCoordinator(device: device, previewLayer: nil)
+        rotationCoordinator = coordinator
+        apply(rotationAngle: coordinator.videoRotationAngleForHorizonLevelCapture)
+        rotationObservation = coordinator.observe(\.videoRotationAngleForHorizonLevelCapture, options: [.new]) { [weak self] _, change in
+            guard let angle = change.newValue else {
+                return
+            }
+            self?.apply(rotationAngle: angle)
+        }
+    }
+
+    private func apply(rotationAngle angle: CGFloat) {
+        let output = output
+        queue.async {
+            guard let connection = output.connection(with: .video), connection.isVideoRotationAngleSupported(angle) else {
+                return
+            }
+            connection.videoRotationAngle = angle
+        }
+    }
+
     /// Starts capturing (off the main thread).
     func start() {
         let session = session
@@ -138,7 +173,14 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
 
 extension CapturePipeline: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        handler.withLock { $0 }?(sampleBuffer)
+        guard
+            let handler = handler.withLock({ $0 }),
+            let image = CMSampleBufferGetImageBuffer(sampleBuffer),
+            let fitted = fitter.withLock({ $0 })?.fit(image)
+        else {
+            return
+        }
+        handler(fitted, CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
     }
 }
 #endif
