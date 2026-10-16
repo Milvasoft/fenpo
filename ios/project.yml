@@ -52,6 +52,7 @@ targets:
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Fenpo keeps the connection to your PC over Bluetooth, so it can receive what the PC sends even when the app is closed.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
         INFOPLIST_KEY_NSCameraUsageDescription: Fenpo uses the camera to scan the pairing code and to be your PC’s webcam.
+        INFOPLIST_KEY_NSFaceIDUsageDescription: Fenpo uses Face ID before it unlocks your PC.
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: Fenpo shows your photos on your PC when you browse them there, and sends new screenshots if you turn that on.
     dependencies:
       - package: FenpoKit

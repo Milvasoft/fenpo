@@ -3193,6 +3193,23 @@
         }
       }
     },
+    "settings.faceIDUnlock.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlocking with Face ID is turned on in Fenpo on your PC, under Settings. Turning it off here removes the key from this iPhone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID ile kilit açma, bilgisayardaki Fenpo’nun Ayarlar’ından açılır. Buradan kapatınca anahtar bu iPhone’dan silinir."
+          }
+        }
+      }
+    },
     "settings.features.comingLater": {
       "extractionState": "manual",
       "localizations": {
@@ -3854,6 +3871,176 @@
           "stringUnit": {
             "state": "translated",
             "value": "Biten"
+          }
+        }
+      }
+    },
+    "unlock.approve": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approve with Face ID"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Face ID ile onayla"
+          }
+        }
+      }
+    },
+    "unlock.decline": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not now"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şimdi değil"
+          }
+        }
+      }
+    },
+    "unlock.enroll.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC sets up unlocking with this iPhone. Fenpo keeps a key that only opens after Face ID."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın bu iPhone ile kilit açmayı ayarlıyor. Fenpo, sadece Face ID ile açılan bir anahtar saklar."
+          }
+        }
+      }
+    },
+    "unlock.enroll.title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock %@ with Face ID"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilidini Face ID ile aç"
+          }
+        }
+      }
+    },
+    "unlock.message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC is locked and asks for Face ID. Only approve if you are at your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın kilitli ve Face ID istiyor. Sadece bilgisayarının başındaysan onayla."
+          }
+        }
+      }
+    },
+    "unlock.notification.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo asks for Face ID. Your PC waits a minute."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo Face ID isteyecek. Bilgisayarın bir dakika bekler."
+          }
+        }
+      }
+    },
+    "unlock.notification.enroll.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC wants to set up unlocking"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın kilit açmayı ayarlamak istiyor"
+          }
+        }
+      }
+    },
+    "unlock.notification.title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to unlock %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilidini açmak için dokun"
+          }
+        }
+      }
+    },
+    "unlock.reason %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilidini aç"
+          }
+        }
+      }
+    },
+    "unlock.title %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock %@?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ kilidi açılsın mı?"
           }
         }
       }

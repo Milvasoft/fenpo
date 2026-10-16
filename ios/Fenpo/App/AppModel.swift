@@ -48,6 +48,15 @@ final class AppModel {
     /// Sends new screenshots to the PC; `nil` in previews.
     let screenshots: ScreenshotSender?
 
+    /// Unlocking the PC with Face ID; `nil` in previews.
+    let unlock: UnlockService?
+
+    /// The PC waits for Face ID.
+    var unlockPrompt: UnlockService.Prompt?
+
+    /// A key for unlocking the paired PC exists.
+    var isUnlockSetUp = false
+
     /// Runs the pairing steps.
     let pairing: any PairingProviding
     private let log = FenpoLog("AppModel")
@@ -90,6 +99,7 @@ final class AppModel {
     ///   - pcInput: Touchpad and presentation remote; `nil` in previews.
     ///   - hotspot: Personal Hotspot details; `nil` in previews.
     ///   - screenshots: Screenshot sending; `nil` in previews.
+    ///   - unlock: Unlocking the PC with Face ID; `nil` in previews.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
@@ -100,7 +110,8 @@ final class AppModel {
         readsPermissions: Bool = false,
         pcInput: PcInputService? = nil,
         hotspot: HotspotService? = nil,
-        screenshots: ScreenshotSender? = nil
+        screenshots: ScreenshotSender? = nil,
+        unlock: UnlockService? = nil
     ) {
         self.session = session
         self.pairing = pairing
@@ -112,6 +123,7 @@ final class AppModel {
         self.pcInput = pcInput
         self.hotspot = hotspot
         self.screenshots = screenshots
+        self.unlock = unlock
     }
 
     /// The camera's live picture.
@@ -170,6 +182,10 @@ final class AppModel {
             cameraState = camera.state
         }
         transferActivities?.update(snapshot.activeTransfers, pcName: snapshot.pc?.name ?? "")
+        if let unlock {
+            unlockPrompt = unlock.prompt
+            isUnlockSetUp = unlock.isSetUp
+        }
         if readsPermissions {
             permissions = PermissionsSnapshot(
                 bluetooth: Self.bluetoothPermission,
@@ -236,6 +252,24 @@ final class AppModel {
         } catch {
             log.info("Focus state not delivered now: \(String(describing: error))")
         }
+    }
+
+    /// Face ID, then the key goes to the PC.
+    func approveUnlock() async {
+        await unlock?.approve()
+        await refresh()
+    }
+
+    /// The user does not want the PC unlocked now.
+    func declineUnlock() {
+        unlock?.decline()
+        unlockPrompt = nil
+    }
+
+    /// Forgets the key; the PC asks for its password again.
+    func removeUnlock() {
+        unlock?.removeKey()
+        isUnlockSetUp = false
     }
 
     /// Asks the PC to lock.

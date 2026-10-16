@@ -245,6 +245,12 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | E3 | Windows'tan ekran yansıtmayı başlat (Fenpo kapalıyken de) | iPhone'da "Bilgisayarın ekranını göstermek istiyor" bildirimi; PC "onay bekleniyor" gösterir |
 | E4 | Yansıtma sürerken PC'den durdur; iPhone'da kırmızı durum çubuğundan durdur | İkisinde de yayın biter; PC'den durdurunca iPhone "Bilgisayar ekranı göstermeyi durdurdu" der |
 | E5 | 10 dakika yansıt | Yayın kendi kendine kesilmez (uzantı bellek sınırı) |
+| U1 | Windows'ta Fenpo Ayarlar'da Face ID ile kilit açmayı aç, Windows parolasını gir; iPhone'da Fenpo açık | iPhone'da "<PC> kilidini Face ID ile aç" sayfası; **Face ID ile onayla** → Face ID; PC kurulumu tamamlar. Fenpo Ayarlar'da **Face ID ile PC kilidini aç** açık görünür |
+| U2 | PC'yi kilitle (Win+L), kilit ekranında "Fenpo ile aç"; iPhone kilitli ve Fenpo kapalı | iPhone'da "<PC> kilidini açmak için dokun" bildirimi; dokun → Fenpo açılır, onay sayfası → Face ID → PC açılır |
+| U3 | U2'yi tekrarla, bu sefer **Şimdi değil** | PC açılmaz, "reddedildi" der |
+| U4 | Bildirime 1 dakikadan sonra dokun | Onay sayfası çıkmaz (PC vazgeçti) |
+| U5 | Fenpo Ayarlar'da **Face ID ile PC kilidini aç**'ı kapat, sonra U2 | PC "anahtar yok" der ve parolayı ister |
+| U6 | iOS'ta Face ID'ye yeni bir görünüm ekle (ya da sıfırla), sonra U2 | Anahtar geçersiz: PC parolayı yeniden ister |
 
 Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`, `[Input]`, `[PcNotifications]`, `[Hotspot]`, `[Photos]`, `[Screenshots]`, `[Files]`, `[Screen]`. Uzantılar (Dosyalar, ekran yayını) da aynı kayda yazar. Uygulama ya da bir uzantı çökerse iOS Ayarlar → Gizlilik ve Güvenlik → Analiz ve İyileştirmeler → Analiz Verileri'nden `Fenpo` ile başlayan raporu gönderin.
 

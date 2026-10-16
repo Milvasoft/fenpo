@@ -73,11 +73,15 @@ struct SettingsView: View {
                             .onChange(of: sendsScreenshots) { _, isOn in
                                 model.screenshots?.setEnabled(isOn)
                             }
-                        // Phase 5: shown as in the design, not available yet.
-                        Group {
-                            ToggleRow(icon: .lock, color: .leaf, title: "settings.faceIDUnlock", isOn: .constant(false))
-                        }
-                        .disabled(true)
+                        ToggleRow(icon: .lock, color: .leaf, title: "settings.faceIDUnlock", isOn: Binding(
+                            get: { model.isUnlockSetUp },
+                            set: { isOn in
+                                if !isOn {
+                                    model.removeUnlock()
+                                }
+                            }
+                        ))
+                        .disabled(!model.isUnlockSetUp)
                     }
                     Text("settings.focus.hint")
                         .font(.footnote)
@@ -85,7 +89,7 @@ struct SettingsView: View {
                         .padding(.horizontal, 16)
                         .padding(.top, 6)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text("settings.features.comingLater")
+                    Text("settings.faceIDUnlock.hint")
                         .font(.footnote)
                         .foregroundStyle(.textSecondary)
                         .padding(.horizontal, 16)
