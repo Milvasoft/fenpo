@@ -1,0 +1,14 @@
+#pragma once
+
+#define IDB_TILE 101
+
+#define IDS_TITLE 1001
+#define IDS_WAITING 1002
+#define IDS_DECLINED 1003
+#define IDS_NOT_CONNECTED 1004
+#define IDS_NOT_PAIRED 1005
+#define IDS_TIMEOUT 1006
+#define IDS_FAILED 1007
+#define IDS_RETRY 1008
+#define IDS_READY 1009
+#define IDS_IDLE 1010

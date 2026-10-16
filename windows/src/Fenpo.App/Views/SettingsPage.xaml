@@ -288,9 +288,10 @@
                             <FontIcon Glyph="&#xE928;" Style="{StaticResource FenpoRowIconStyle}" />
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                 <TextBlock x:Uid="Settings_Unlock" Style="{StaticResource FenpoRowLabelStyle}" />
-                                <TextBlock x:Uid="Settings_UnlockHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                                <TextBlock x:Uid="Settings_UnlockHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                                <TextBlock x:Name="UnlockStatus" Style="{StaticResource FenpoCaptionTextStyle}" Foreground="{ThemeResource FenpoAccentBrush}" TextWrapping="Wrap" Visibility="Collapsed" />
                             </StackPanel>
-                            <ToggleSwitch Grid.Column="2" IsEnabled="False" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_UnlockToggle" />
+                            <ToggleSwitch x:Name="UnlockToggle" Grid.Column="2" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_UnlockToggle" Toggled="OnUnlockToggled" />
                         </Grid>
                         <Border Style="{StaticResource FenpoRowDividerStyle}" />
                         <Grid Style="{StaticResource FenpoSettingRowStyle}">
