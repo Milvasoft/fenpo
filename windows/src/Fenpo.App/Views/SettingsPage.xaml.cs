@@ -44,16 +44,21 @@ public sealed partial class SettingsPage : Page
 
     private void OnPairClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowPairing();
 
-    private async void OnManagePairingClick(object sender, RoutedEventArgs e) => await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
+    private void OnConnectAppClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowAppPairing();
 
+    // "Active" is the phone in use, "Other" the second paired phone.
     private async void OnForgetClick(object sender, RoutedEventArgs e)
     {
+        var status = App.GetService<Fenpo.Core.Devices.IPhoneStatusSource>();
+        var kind = sender is FrameworkElement { Tag: "Other" }
+            ? status.Active == Fenpo.Core.Devices.PhoneKind.Iphone ? Fenpo.Core.Devices.PhoneKind.Android : Fenpo.Core.Devices.PhoneKind.Iphone
+            : status.Active;
         var localization = App.GetService<Services.LocalizationService>();
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = localization.Format("Forget_Title", ViewModel.AndroidName),
-            Content = localization.GetString("Forget_Text"),
+            Title = localization.Format("Forget_Title", PhoneStatusText.Name(status.StatusOf(kind), localization)),
+            Content = localization.GetString(kind == Fenpo.Core.Devices.PhoneKind.Iphone ? "Forget_TextIphone" : "Forget_Text"),
             PrimaryButtonText = localization.GetString("Forget_Confirm"),
             CloseButtonText = localization.GetString("Forget_Cancel"),
             DefaultButton = ContentDialogButton.Close,
@@ -62,7 +67,13 @@ public sealed partial class SettingsPage : Page
 
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)
         {
-            await App.GetService<Services.PhoneChannel>().ForgetAndroidAsync();
+            // The iPhone's Bluetooth pairing goes too; the Android phone's is part of Fenpo's own record.
+            if (kind == Fenpo.Core.Devices.PhoneKind.Iphone)
+            {
+                await App.GetService<Fenpo.Bluetooth.BluetoothHostedService>().ForgetIphoneAsync();
+            }
+
+            await App.GetService<Services.PhoneChannel>().ForgetAsync(kind);
         }
     }
 

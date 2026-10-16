@@ -342,6 +342,9 @@
   <data name="Forget_Text" xml:space="preserve">
     <value>This PC will no longer know the phone. To connect again, scan the QR code with Fenpo on the phone.</value>
   </data>
+  <data name="Forget_TextIphone" xml:space="preserve">
+    <value>This PC no longer knows the iPhone, and its Bluetooth pairing in Windows is removed too. To connect again, use Settings › Add a phone. On the iPhone you can also forget this PC in Settings › Bluetooth.</value>
+  </data>
   <data name="Forget_Title" xml:space="preserve">
     <value>Remove {0}?</value>
   </data>
@@ -723,6 +726,15 @@
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>
   </data>
+  <data name="Settings_AddPhone.Text" xml:space="preserve">
+    <value>Add a phone</value>
+  </data>
+  <data name="Settings_AddPhoneButton.Content" xml:space="preserve">
+    <value>Add a phone</value>
+  </data>
+  <data name="Settings_AddPhoneHint.Text" xml:space="preserve">
+    <value>Pair another phone, or connect Fenpo on the phone again with the QR code</value>
+  </data>
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Appearance and language</value>
   </data>
@@ -752,6 +764,9 @@
   </data>
   <data name="Settings_ClipboardToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Clipboard sharing</value>
+  </data>
+  <data name="Settings_ConnectApp.Content" xml:space="preserve">
+    <value>Connect with QR code</value>
   </data>
   <data name="Settings_DeviceHeader.Text" xml:space="preserve">
     <value>Device</value>

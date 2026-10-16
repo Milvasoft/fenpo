@@ -342,6 +342,9 @@
   <data name="Forget_Text" xml:space="preserve">
     <value>Bu bilgisayar telefonu artık tanımaz. Yeniden bağlamak için telefondaki Fenpo ile QR kodu okut.</value>
   </data>
+  <data name="Forget_TextIphone" xml:space="preserve">
+    <value>Bu bilgisayar iPhone'u artık tanımaz; Windows'taki Bluetooth eşleşmesi de kaldırılır. Yeniden bağlamak için Ayarlar › Telefon ekle'yi kullan. iPhone'da da Ayarlar › Bluetooth'tan bu bilgisayarı unutabilirsin.</value>
+  </data>
   <data name="Forget_Title" xml:space="preserve">
     <value>{0} eşleşmesi kaldırılsın mı?</value>
   </data>
@@ -723,6 +726,15 @@
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
   </data>
+  <data name="Settings_AddPhone.Text" xml:space="preserve">
+    <value>Telefon ekle</value>
+  </data>
+  <data name="Settings_AddPhoneButton.Content" xml:space="preserve">
+    <value>Telefon ekle</value>
+  </data>
+  <data name="Settings_AddPhoneHint.Text" xml:space="preserve">
+    <value>Başka bir telefonu eşleştir ya da telefondaki Fenpo'yu QR koduyla yeniden bağla</value>
+  </data>
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Görünüm ve dil</value>
   </data>
@@ -752,6 +764,9 @@
   </data>
   <data name="Settings_ClipboardToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Pano paylaşımı</value>
+  </data>
+  <data name="Settings_ConnectApp.Content" xml:space="preserve">
+    <value>QR koduyla bağla</value>
   </data>
   <data name="Settings_DeviceHeader.Text" xml:space="preserve">
     <value>Cihaz</value>
