@@ -13,37 +13,49 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Action_Camera.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Action_CameraText.Text" xml:space="preserve">
     <value>Use as camera</value>
   </data>
   <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Action_HotspotText.Text" xml:space="preserve">
     <value>Join hotspot</value>
   </data>
   <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Action_MirrorText.Text" xml:space="preserve">
     <value>Mirror screen</value>
   </data>
   <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Action_RingText.Text" xml:space="preserve">
     <value>Ring phone</value>
   </data>
   <data name="Action_SendFile.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Action_SendFileText.Text" xml:space="preserve">
     <value>Send file</value>
   </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Your phone and Windows, at the same desk.</value>
+  </data>
+  <data name="AppPair_AudioDone.Content" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="AppPair_AudioSettings.Content" xml:space="preserve">
+    <value>Open Bluetooth settings</value>
+  </data>
+  <data name="AppPair_AudioText.Text" xml:space="preserve">
+    <value>After Bluetooth pairing, Android can send music and calls to the PC. If you do not want that, turn off Audio under Settings &gt; Bluetooth &amp; devices &gt; your phone.</value>
+  </data>
+  <data name="AppPair_AudioTitle.Text" xml:space="preserve">
+    <value>The phone's sound may come to this PC.</value>
   </data>
   <data name="AppPair_Intro.Text" xml:space="preserve">
     <value>Pair once and Fenpo connects whenever the phone is near.</value>
@@ -58,31 +70,31 @@
     <value>The code is valid for 5 minutes, then renews itself</value>
   </data>
   <data name="AppPair_Step1.Hint" xml:space="preserve">
-    <value>Search for “Fenpo” in the App Store</value>
+    <value>Search for “Fenpo” in the App Store on iPhone, in F-Droid on Android</value>
   </data>
   <data name="AppPair_Step1.Title" xml:space="preserve">
-    <value>Install Fenpo on the iPhone</value>
+    <value>Install Fenpo on the phone</value>
   </data>
   <data name="AppPair_Step2.Hint" xml:space="preserve">
     <value>The phone and this PC need to be on the same Wi‑Fi</value>
   </data>
   <data name="AppPair_Step2.Title" xml:space="preserve">
-    <value>Scan the code with the iPhone camera</value>
+    <value>Scan the code with Fenpo on the phone</value>
   </data>
   <data name="AppPair_Step3.Hint" xml:space="preserve">
-    <value>The iPhone asks to share notifications, tap Allow</value>
+    <value>The phone asks to pair and to share notifications, allow both</value>
   </data>
   <data name="AppPair_Step3.Title" xml:space="preserve">
     <value>Confirm the Bluetooth pairing</value>
   </data>
   <data name="AppPair_Step4.Hint" xml:space="preserve">
-    <value>Settings &gt; Bluetooth &gt; this PC &gt; Show Notifications</value>
+    <value>Allow access to messages and calls if the phone asks</value>
   </data>
   <data name="AppPair_Step4.Title" xml:space="preserve">
     <value>Allow messages and calls</value>
   </data>
   <data name="AppPair_Title.Text" xml:space="preserve">
-    <value>Connect your iPhone</value>
+    <value>Connect your phone</value>
   </data>
   <data name="Battery_Percent" xml:space="preserve">
     <value>{0}%</value>
@@ -100,10 +112,10 @@
     <value>Calling from the PC and taking the audio to the PC wait for Windows to allow it.</value>
   </data>
   <data name="Calls_OnPhoneText.Text" xml:space="preserve">
-    <value>Incoming calls appear at the top of the screen. Answer and Decline go to the iPhone; the call continues on the phone.</value>
+    <value>Incoming calls appear at the top of the screen. Answer and Decline go to the phone; the call continues on the phone.</value>
   </data>
   <data name="Calls_OnPhoneTitle.Text" xml:space="preserve">
-    <value>Calls stay on the iPhone</value>
+    <value>Calls stay on the phone</value>
   </data>
   <data name="Calls_Recent.Text" xml:space="preserve">
     <value>Recent calls</value>
@@ -121,7 +133,7 @@
     <value>Keep me centered</value>
   </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Camera shows up as a regular webcam in Teams, Zoom, Meet and OBS. Keep Fenpo open on the iPhone, ideally on a stand in landscape.</value>
+    <value>Fenpo Camera shows up as a regular webcam in Teams, Zoom, Meet and OBS. Keep Fenpo open on the phone, ideally on a stand in landscape.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -136,13 +148,13 @@
     <value>Wide</value>
   </data>
   <data name="Camera_Microphone.Text" xml:space="preserve">
-    <value>Use the iPhone microphone</value>
+    <value>Use the phone’s microphone</value>
   </data>
   <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Use the iPhone microphone</value>
+    <value>Use the phone’s microphone</value>
   </data>
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
-    <value>Open the app to use the iPhone as a camera.</value>
+    <value>Open the app to use the phone as a camera.</value>
   </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portrait blur</value>
@@ -175,13 +187,13 @@
     <value>Recently copied</value>
   </data>
   <data name="Clipboard_NeedsApp.Message" xml:space="preserve">
-    <value>Clipboard sharing works through the iPhone app.</value>
+    <value>Clipboard sharing works through Fenpo on the phone.</value>
   </data>
   <data name="Clipboard_Share.Text" xml:space="preserve">
-    <value>Send everything you copy to the iPhone</value>
+    <value>Send everything you copy to the phone</value>
   </data>
   <data name="Clipboard_ShareHint.Text" xml:space="preserve">
-    <value>For the other way, double-tap the back of the iPhone or use the Fenpo button in Control Center.</value>
+    <value>To send from the phone, use Fenpo’s clipboard button: Control Center or Back Tap on iPhone, the Quick Settings tile on Android.</value>
   </data>
   <data name="Clipboard_ShareToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Clipboard sharing</value>
@@ -193,13 +205,13 @@
     <value>Or pick files on this PC.</value>
   </data>
   <data name="Files_DropTitle.Text" xml:space="preserve">
-    <value>Drop files here to send them to the iPhone</value>
+    <value>Drop files here to send them to the phone</value>
   </data>
   <data name="Files_NeedsApp.Message" xml:space="preserve">
-    <value>Connect the iPhone app to this PC to send files and photos.</value>
+    <value>Connect Fenpo on the phone to this PC to send files and photos.</value>
   </data>
   <data name="Files_NoPhotos.Text" xml:space="preserve">
-    <value>Recent photos show up here once the iPhone app is connected.</value>
+    <value>Recent photos show up here once Fenpo on the phone is connected.</value>
   </data>
   <data name="Files_NoTransfers.Text" xml:space="preserve">
     <value>No transfers yet</value>
@@ -235,19 +247,19 @@
     <value>No notifications yet</value>
   </data>
   <data name="Home_NoPhone" xml:space="preserve">
-    <value>No iPhone connected</value>
+    <value>No phone connected</value>
   </data>
   <data name="Home_NothingPlaying.Text" xml:space="preserve">
     <value>Nothing playing</value>
   </data>
   <data name="Home_NothingPlayingHint.Text" xml:space="preserve">
-    <value>Shows up when music starts on the iPhone</value>
+    <value>Shows up when music starts on the phone</value>
   </data>
   <data name="Home_NoTransfers.Text" xml:space="preserve">
     <value>No transfers yet</value>
   </data>
   <data name="Home_PairButton.Content" xml:space="preserve">
-    <value>Connect your iPhone</value>
+    <value>Connect your phone</value>
   </data>
   <data name="Home_PairHint.Text" xml:space="preserve">
     <value>Pair once and Fenpo connects whenever the phone is near.</value>
@@ -262,7 +274,7 @@
     <value>See all</value>
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
-    <value>My iPhone</value>
+    <value>My phone</value>
   </data>
   <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Answer</value>
@@ -271,10 +283,10 @@
     <value>Answer</value>
   </data>
   <data name="Island_CallOnPhone" xml:space="preserve">
-    <value>The call continues on the iPhone</value>
+    <value>The call continues on the phone</value>
   </data>
   <data name="Island_CallOnPhoneWith" xml:space="preserve">
-    <value>{0} · the call continues on the iPhone</value>
+    <value>{0} · the call continues on the phone</value>
   </data>
   <data name="Island_Decline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Decline</value>
@@ -310,7 +322,7 @@
     <value>Previous</value>
   </data>
   <data name="Messages_ConnectingText" xml:space="preserve">
-    <value>Asking the iPhone for the message list.</value>
+    <value>Asking the phone for the message list.</value>
   </data>
   <data name="Messages_ConnectingTitle" xml:space="preserve">
     <value>Connecting to messages</value>
@@ -322,10 +334,10 @@
     <value>Write a message</value>
   </data>
   <data name="Messages_FindingNumber" xml:space="preserve">
-    <value>Getting the number from the iPhone for a reply.</value>
+    <value>Getting the number from the phone for a reply.</value>
   </data>
   <data name="Messages_HistoryNote.Text" xml:space="preserve">
-    <value>Messages you sent from the iPhone do not show here; the ones sent from Fenpo do.</value>
+    <value>Messages you sent from the phone may not show here; the ones sent from Fenpo do.</value>
   </data>
   <data name="Messages_New.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>New message</value>
@@ -352,10 +364,10 @@
     <value>This sender cannot be answered.</value>
   </data>
   <data name="Messages_PermissionText" xml:space="preserve">
-    <value>On the iPhone, open Settings &gt; Bluetooth &gt; (i) next to this PC and turn on Show Message Notifications. If it is already on, turn Bluetooth off and on on the iPhone. Fenpo tries again in a few seconds.</value>
+    <value>On iPhone: Settings &gt; Bluetooth &gt; (i) next to this PC, turn on Show Message Notifications; if it is on, turn Bluetooth off and on. On Android: allow access to messages when the phone asks. Fenpo tries again in a few seconds.</value>
   </data>
   <data name="Messages_PermissionTitle" xml:space="preserve">
-    <value>The iPhone does not allow messages</value>
+    <value>The phone does not allow messages</value>
   </data>
   <data name="Messages_PickConversation.Text" xml:space="preserve">
     <value>Pick a conversation on the left</value>
@@ -373,7 +385,7 @@
     <value>Send</value>
   </data>
   <data name="Messages_SendFailed" xml:space="preserve">
-    <value>Not sent. Try again with the iPhone near and unlocked.</value>
+    <value>Not sent. Try again with the phone near and unlocked.</value>
   </data>
   <data name="Messages_Sms" xml:space="preserve">
     <value>SMS</value>
@@ -382,10 +394,10 @@
     <value>Today {0}</value>
   </data>
   <data name="Messages_UnavailableText" xml:space="preserve">
-    <value>Messages show up while the iPhone is near and connected over Bluetooth.</value>
+    <value>Messages show up while the phone is near and connected over Bluetooth.</value>
   </data>
   <data name="Messages_UnavailableTitle" xml:space="preserve">
-    <value>iPhone not connected</value>
+    <value>Phone not connected</value>
   </data>
   <data name="Messages_YesterdayAt" xml:space="preserve">
     <value>Yesterday {0}</value>
@@ -406,7 +418,7 @@
     <value>Files and photos</value>
   </data>
   <data name="Nav_Home.Content" xml:space="preserve">
-    <value>My iPhone</value>
+    <value>My phone</value>
   </data>
   <data name="Nav_Messages.Content" xml:space="preserve">
     <value>Messages</value>
@@ -418,10 +430,10 @@
     <value>Settings</value>
   </data>
   <data name="NeedsApp_Connect.Content" xml:space="preserve">
-    <value>Connect the iPhone app</value>
+    <value>Connect with Fenpo on the phone</value>
   </data>
   <data name="NeedsApp_Title.Text" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone.</value>
+    <value>Needs Fenpo on the phone.</value>
   </data>
   <data name="Notification_Dismiss" xml:space="preserve">
     <value>Dismiss</value>
@@ -436,10 +448,10 @@
     <value>{0} notifications</value>
   </data>
   <data name="Notifications_Empty.Text" xml:space="preserve">
-    <value>No notifications on the iPhone</value>
+    <value>No notifications on the phone</value>
   </data>
   <data name="Notifications_Footnote.Text" xml:space="preserve">
-    <value>Apps like WhatsApp cannot be answered from here; iOS does not allow it. SMS and iMessage from the Messages app can be.</value>
+    <value>On iPhone, apps like WhatsApp cannot be answered from here; iOS does not allow it. SMS and iMessage can be answered on the Messages page.</value>
   </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Notifications</value>
@@ -475,7 +487,7 @@
     <value>iPhone</value>
   </data>
   <data name="Pair_Intro.Text" xml:space="preserve">
-    <value>Start without installing anything on the iPhone. Notifications, messages and music come over Bluetooth.</value>
+    <value>Start without installing anything on the iPhone: notifications, messages and music come over Bluetooth. For an Android phone, use “Connect with Fenpo on the phone” below.</value>
   </data>
   <data name="Pair_Later.Content" xml:space="preserve">
     <value>Do it later</value>
@@ -523,7 +535,7 @@
     <value>Connect your iPhone</value>
   </data>
   <data name="Pair_WithApp.Content" xml:space="preserve">
-    <value>Connect with the iPhone app</value>
+    <value>Connect with Fenpo on the phone</value>
   </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>
@@ -535,7 +547,7 @@
     <value>Show incoming calls at the top of the screen</value>
   </data>
   <data name="Settings_CallsHint.Text" xml:space="preserve">
-    <value>Answer and Decline go to the iPhone</value>
+    <value>Answer and Decline go to the phone</value>
   </data>
   <data name="Settings_CallsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Show incoming calls</value>
@@ -583,13 +595,13 @@
     <value>Media control</value>
   </data>
   <data name="Settings_MediaHint.Text" xml:space="preserve">
-    <value>Keyboard media keys control the iPhone</value>
+    <value>Keyboard media keys control the phone</value>
   </data>
   <data name="Settings_MediaToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Media control</value>
   </data>
   <data name="Settings_NoDevice" xml:space="preserve">
-    <value>No paired iPhone</value>
+    <value>No paired phone</value>
   </data>
   <data name="Settings_NoDeviceHint" xml:space="preserve">
     <value>Pair once and Fenpo connects by itself</value>
@@ -598,7 +610,7 @@
     <value>Show notifications</value>
   </data>
   <data name="Settings_NotificationsHint.Text" xml:space="preserve">
-    <value>iPhone notifications arrive as Windows notifications</value>
+    <value>Phone notifications arrive as Windows notifications</value>
   </data>
   <data name="Settings_NotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Show notifications</value>
@@ -610,7 +622,7 @@
     <value>Proximity and focus</value>
   </data>
   <data name="Settings_ProximityLock.Text" xml:space="preserve">
-    <value>Lock the PC when the iPhone moves away</value>
+    <value>Lock the PC when the phone moves away</value>
   </data>
   <data name="Settings_ProximityLockHint.Text" xml:space="preserve">
     <value>About 3 meters, 30 seconds</value>
@@ -622,7 +634,7 @@
     <value>Start with Windows</value>
   </data>
   <data name="Settings_StartupHint" xml:space="preserve">
-    <value>Fenpo waits in the tray and connects when the iPhone is near</value>
+    <value>Fenpo waits in the tray and connects when the phone is near</value>
   </data>
   <data name="Settings_StartupHintDisabledByUser" xml:space="preserve">
     <value>Turned off in Task Manager; turn it on under Startup apps</value>
@@ -640,13 +652,13 @@
     <value>With System, follows the Windows light or dark setting</value>
   </data>
   <data name="Settings_Unlock.Text" xml:space="preserve">
-    <value>Unlock with iPhone</value>
+    <value>Unlock with the phone</value>
   </data>
   <data name="Settings_UnlockHint.Text" xml:space="preserve">
     <value>Unlocks Windows after Face ID approval. Needs a separate component (experimental)</value>
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Unlock with iPhone</value>
+    <value>Unlock with the phone</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
@@ -664,7 +676,7 @@
     <value>Not connected</value>
   </data>
   <data name="Status_NotPaired" xml:space="preserve">
-    <value>No paired iPhone</value>
+    <value>No paired phone</value>
   </data>
   <data name="Theme_Dark.Content" xml:space="preserve">
     <value>Dark</value>
@@ -691,7 +703,7 @@
     <value>Focus</value>
   </data>
   <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Tray_HotspotText.Text" xml:space="preserve">
     <value>Hotspot</value>
@@ -721,7 +733,7 @@
     <value>Proximity lock</value>
   </data>
   <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the iPhone</value>
+    <value>Needs Fenpo on the phone</value>
   </data>
   <data name="Tray_RingText.Text" xml:space="preserve">
     <value>Ring</value>

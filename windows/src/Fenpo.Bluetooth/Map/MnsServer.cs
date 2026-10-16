@@ -42,7 +42,19 @@ public sealed class MnsServer(ILogger<MnsServer> logger) : IDisposable
 
         var provider = await RfcommServiceProvider.CreateAsync(RfcommServiceId.FromShortId(0x1133));
         _listener = new StreamSocketListener();
-        _listener.ConnectionReceived += (sender, args) => _ = Task.Run(() => ServeAsync(args.Socket));
+        _listener.ConnectionReceived += (sender, args) =>
+        {
+            // Socket throws when the phone already gave up (0x800703E3).
+            try
+            {
+                var socket = args.Socket;
+                _ = Task.Run(() => ServeAsync(socket));
+            }
+            catch (System.Runtime.InteropServices.COMException exception)
+            {
+                _logger.LogDebug(exception, "Message notification connection was gone before it was accepted");
+            }
+        };
         await _listener.BindServiceNameAsync(provider.ServiceId.AsString(), SocketProtectionLevel.BluetoothEncryptionAllowNullAuthentication);
 
         // ServiceName "MNS", profile MAP 1.4, MapSupportedFeatures (S2 record).

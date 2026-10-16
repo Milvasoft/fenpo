@@ -117,6 +117,12 @@ public sealed record AppSettings
     public string? PhoneDeviceId { get; init; }
 
     /// <summary>
+    /// Gets the Bluetooth LE ids of phones that said Hello as Android on the Fenpo channel. The iPhone link (ANCS, AMS)
+    /// never picks them, even though they are paired phones too.
+    /// </summary>
+    public IReadOnlyList<string> NonApplePhoneIds { get; init; } = [];
+
+    /// <summary>
     /// Gets the TLS port of the Fenpo control server, kept so paired phones find it again; 0 until first start.
     /// </summary>
     public int ControlPort { get; init; }
