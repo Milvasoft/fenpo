@@ -15,6 +15,7 @@ final class TestPeripheralServer: NSObject {
       clip <text>            Send a clipboard text (S6)
       clip-in <seconds> <text>  Send a clipboard text after a delay, to lock or background the phone first
       ring                   Send RingDevice
+      pc-clip <text>         Set the text the "PC clipboard" returns to Paste from PC
       notifications on|off   Change PcStatus.notifications_subscribed and send it
       stop                   Stop ping-every
       help                   This text
@@ -43,6 +44,7 @@ final class TestPeripheralServer: NSObject {
     private var subscriber: CBCentral?
     private var outbox: [Data] = []
     private var notificationsSubscribed = true
+    private var pcClipboard = "Fenpo test PC clipboard"
     private var repeatingPing: Task<Void, Never>?
     private let countersURL: URL
 
@@ -98,6 +100,9 @@ final class TestPeripheralServer: NSObject {
             }
         case "ring":
             send(.ring(Fenpo_V1_RingDevice()))
+        case "pc-clip":
+            pcClipboard = parts.dropFirst().joined(separator: " ")
+            say("PC clipboard is now \"\(pcClipboard)\"")
         case "notifications":
             notificationsSubscribed = parts.dropFirst().first != "off"
             sendStatus()
@@ -192,6 +197,16 @@ final class TestPeripheralServer: NSObject {
             sendStatus()
         case .pong(let pong):
             say("   pong nonce \(pong.nonce)")
+        case .clipboard(let item):
+            // Test tool only: show what arrived, as the PC would put it on its clipboard.
+            say("   clipboard from phone: \"\(item.text)\" (\(item.text.count) characters)")
+        case .clipboardRequest:
+            var item = Fenpo_V1_ClipboardItem()
+            item.itemID = UUID().uuidString
+            item.text = pcClipboard
+            send(envelope: sequencer.envelope(.clipboard(item), replyTo: envelope.id))
+        case .lockPc:
+            say("   the phone asked to lock the PC")
         default:
             if let reply = Handshake.automaticReply(to: envelope, sequencer: &sequencer) {
                 send(envelope: reply)

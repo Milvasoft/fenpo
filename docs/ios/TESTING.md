@@ -92,6 +92,17 @@ Panoyu kontrol etmek için Notlar'da yeni bir not açıp yapıştırın.
 | T13 | `clip-in 20 Merhaba kilit`, iPhone'u kilitleyin, 30 saniye sonra kilidi açın, Notlar'a yapıştırın | Aynı soru, kilitliyken |
 | T14 | T5'te zorla kapatılan uygulama geri geldiyse: Fenpo'yu zorla kapatın, `clip Merhaba kapalı`, 1 dakika sonra yapıştırın | Yapışan metni ve kayıttaki `Launch` satırını yazın |
 
+### Pano kısayolları (Aşama 3'ün erken denemesi, isteğe bağlı)
+
+Önce Denetim Merkezi'ni düzenleyip **Kontrol Ekle**'den Fenpo'nun üç düğmesini ekleyin: Panoyu gönder, PC'den yapıştır, PC'yi kilitle. Her testten sonra iPhone kaydındaki `... runs in the app process` ya da `... runs in the widget extension process` satırını not edin. Düğmenin işi hangi süreçte yaptığı henüz bilinmiyor, bu testlerin asıl sorusu bu.
+
+| # | Adım | Beklenen |
+|---|---|---|
+| T15 | Notlar'da bir kelime kopyalayın, Denetim Merkezi'nden **Panoyu gönder** | Fenpo kısa bir an açılır; Mac'te `clipboard from phone: "..."` |
+| T16 | Mac'te `pc-clip Merhaba PC`, iPhone'da Denetim Merkezi'nden **PC'den yapıştır**, sonra Notlar'a yapıştırın | "Merhaba PC" yapışır. Fenpo açık değilken ve kilit ekranından da deneyin |
+| T17 | Denetim Merkezi'nden **PC'yi kilitle** | Mac'te `the phone asked to lock the PC` |
+| T18 | Kısayollar'da yeni bir kısayol yapın: **Panoyu Al** → Fenpo **Metni PC'ye gönder**. Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokun'a bağlayın. Başka bir uygulamada bir şey kopyalayıp telefonun arkasına iki kez dokunun | Fenpo açılmadan Mac'te `clipboard from phone` |
+
 ## 5. Geri bildirim
 
 Buğra'ya şunları gönderin:
@@ -103,7 +114,7 @@ Buğra'ya şunları gönderin:
    |---|---|---|
    | T1 | | |
    | … | | |
-   | T14 | | |
+   | T18 | | |
 
 3. Uygulama kaydı: Geliştirici → Kayıt → **Dışa aktar** (Mac'e gönderin, `fenpo-log.txt`).
 4. Mac aracının kaydı: `~/fenpo-peripheral.log`.
