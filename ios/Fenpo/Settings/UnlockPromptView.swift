@@ -13,10 +13,10 @@ struct UnlockPromptView: View {
                 .font(.system(size: 44))
                 .foregroundStyle(.accent)
                 .padding(.top, 28)
-            title
+            Text(title)
                 .font(.title3.weight(.semibold))
                 .multilineTextAlignment(.center)
-            message
+            Text(message)
                 .font(.subheadline)
                 .foregroundStyle(.textSecondary)
                 .multilineTextAlignment(.center)
