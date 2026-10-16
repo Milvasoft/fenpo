@@ -420,6 +420,24 @@
   <data name="LanguageRestart_Title.Text" xml:space="preserve">
     <value>Dil değişecek.</value>
   </data>
+  <data name="LocalSend_Accept" xml:space="preserve">
+    <value>Kabul et</value>
+  </data>
+  <data name="LocalSend_AskText" xml:space="preserve">
+    <value>{0}, {1}. LocalSend ile, Gelen dosyalar klasörüne</value>
+  </data>
+  <data name="LocalSend_AskTitle" xml:space="preserve">
+    <value>{0} sana dosya göndermek istiyor</value>
+  </data>
+  <data name="LocalSend_Decline" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="LocalSend_Files" xml:space="preserve">
+    <value>{0} dosya</value>
+  </data>
+  <data name="LocalSend_From" xml:space="preserve">
+    <value>LocalSend ile {0} cihazından</value>
+  </data>
   <data name="Media_Next.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Sonraki</value>
   </data>

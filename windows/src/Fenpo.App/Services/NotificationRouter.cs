@@ -41,6 +41,11 @@ public sealed class NotificationRouter(
     /// </summary>
     public event EventHandler<string>? OpenRequested;
 
+    /// <summary>
+    /// Raised when Accept or Decline is pressed on a LocalSend offer's notification, with its session.
+    /// </summary>
+    public event EventHandler<(string Session, bool Accept)>? LocalSendAnswered;
+
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -211,6 +216,12 @@ public sealed class NotificationRouter(
 
     private async Task OnInvokedAsync(IDictionary<string, string> arguments, IDictionary<string, string> userInput)
     {
+        if (arguments.TryGetValue(LocalSendBridge.Argument, out var session))
+        {
+            LocalSendAnswered?.Invoke(this, (session, arguments.TryGetValue("answer", out var answer) && answer == "accept"));
+            return;
+        }
+
         // The phone rang the PC: "Stop" takes the ringing notification away, and with it the sound.
         if (arguments.TryGetValue("ring", out _))
         {
