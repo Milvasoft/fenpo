@@ -165,6 +165,9 @@
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Telefonu kamera olarak kullanmak için uygulamayı aç.</value>
   </data>
+  <data name="Camera_NotOffered" xml:space="preserve">
+    <value>Telefondaki Fenpo kamerayı paylaşmıyor. Telefonda Fenpo'yu güncelle ve açık tut.</value>
+  </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portre bulanıklığı</value>
   </data>

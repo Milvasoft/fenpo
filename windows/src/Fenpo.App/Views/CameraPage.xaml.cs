@@ -85,6 +85,7 @@ public sealed partial class CameraPage : Page
         {
             CameraState.WaitingForTap => "Camera_WaitingTap",
             CameraState.Starting => "Camera_Starting",
+            CameraState.Failed when _camera.Unsupported => "Camera_NotOffered",
             CameraState.Failed => "Camera_Failed",
             _ => "Camera_Idle",
         });

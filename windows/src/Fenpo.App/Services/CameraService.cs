@@ -39,6 +39,12 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     public VideoFormat? Video { get; private set; }
 
     /// <summary>
+    /// Gets a value indicating whether the last start failed because Fenpo on the phone does not offer the camera
+    /// (an older version).
+    /// </summary>
+    public bool Unsupported { get; private set; }
+
+    /// <summary>
     /// Gets a value indicating whether the phone in use has a camera Fenpo can use.
     /// </summary>
     public bool CanUseCamera => _channel.IsConnected && _channel.Supports(Capability.Camera);
@@ -63,9 +69,13 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     {
         if (!CanUseCamera)
         {
+            _logger.LogInformation("Camera not asked: phone connected {Connected}, offers the camera {Offers}", _channel.IsConnected, _channel.Supports(Capability.Camera));
+            SetState(CameraState.Failed);
+            Unsupported = _channel.IsConnected;
             return false;
         }
 
+        Unsupported = false;
         _sent = ToWire(_settings.Current);
         var start = new CameraStart
         {
