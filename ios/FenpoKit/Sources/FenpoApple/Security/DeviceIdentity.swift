@@ -84,15 +84,16 @@ public enum CertificateFactory {
 
 /// Keeps the identity in the shared keychain group so the share extension can use it too.
 public struct DeviceIdentityStore: Sendable {
-    static let label = "com.fenpo.identity"
-    static let keyTag = Data("com.fenpo.identity.key".utf8)
-
     private let keychain: Keychain
+    private let label: String
 
     /// Creates a store.
-    /// - Parameter keychain: Keychain group to use.
-    public init(keychain: Keychain = .shared) {
+    /// - Parameters:
+    ///   - keychain: Keychain group to use.
+    ///   - label: Keychain label of the key and certificate; tests use their own.
+    public init(keychain: Keychain = .shared, label: String = "com.fenpo.identity") {
         self.keychain = keychain
+        self.label = label
     }
 
     /// Returns the stored identity, creating it on first use.
@@ -111,7 +112,7 @@ public struct DeviceIdentityStore: Sendable {
     /// Removes the key and certificate.
     public func delete() throws {
         for itemClass in [kSecClassCertificate, kSecClassKey] {
-            let query = keychain.scoped([kSecClass as String: itemClass, kSecAttrLabel as String: Self.label])
+            let query = keychain.scoped([kSecClass as String: itemClass, kSecAttrLabel as String: label])
             let status = SecItemDelete(query as CFDictionary)
             guard status == errSecSuccess || status == errSecItemNotFound else {
                 throw DeviceIdentityError.keychain(status)
@@ -122,7 +123,7 @@ public struct DeviceIdentityStore: Sendable {
     private func load() throws -> DeviceIdentity? {
         let query = keychain.scoped([
             kSecClass as String: kSecClassIdentity,
-            kSecAttrLabel as String: Self.label,
+            kSecAttrLabel as String: label,
             kSecReturnRef as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne,
         ])
@@ -148,8 +149,8 @@ public struct DeviceIdentityStore: Sendable {
 
         let keyAttributes: [String: Any] = keychain.scoped([
             kSecAttrIsPermanent as String: true,
-            kSecAttrApplicationTag as String: Self.keyTag,
-            kSecAttrLabel as String: Self.label,
+            kSecAttrApplicationTag as String: Data((label + ".key").utf8),
+            kSecAttrLabel as String: label,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ])
         let attributes: [String: Any] = [
@@ -166,7 +167,7 @@ public struct DeviceIdentityStore: Sendable {
         let item = keychain.scoped([
             kSecClass as String: kSecClassCertificate,
             kSecValueRef as String: certificate,
-            kSecAttrLabel as String: Self.label,
+            kSecAttrLabel as String: label,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
         ])
         let status = SecItemAdd(item as CFDictionary, nil)
