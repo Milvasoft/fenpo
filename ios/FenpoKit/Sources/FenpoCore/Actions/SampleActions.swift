@@ -1,3 +1,5 @@
+import Foundation
+
 /// Actions that succeed with sample data, for previews and screenshot scenes.
 public struct SampleActions: FenpoActions {
     /// Creates sample actions.
@@ -15,5 +17,8 @@ public struct SampleActions: FenpoActions {
     }
 
     public func lockPC() async throws {
+    }
+
+    public func openOnPC(_ url: URL) async throws {
     }
 }

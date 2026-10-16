@@ -1,3 +1,4 @@
+import Foundation
 import Synchronization
 
 /// What App Intents, controls and the home screen ask of the PC.
@@ -15,6 +16,10 @@ public protocol FenpoActions: Sendable {
 
     /// Asks the PC to lock its Windows session.
     func lockPC() async throws
+
+    /// Opens a link in the PC's default browser or app ("Open on PC").
+    /// - Parameter url: Link to open.
+    func openOnPC(_ url: URL) async throws
 }
 
 /// Why an action could not be done. Each case has a user-facing message in the app.

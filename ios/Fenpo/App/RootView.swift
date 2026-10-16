@@ -29,6 +29,11 @@ struct RootView: View {
             }
         }
         .animation(.snappy, value: model.toast?.id)
+        .fullScreenCover(isPresented: $model.isRinging) {
+            RingingView(pcName: model.snapshot.pc?.name) {
+                model.stopRinging()
+            }
+        }
         .fullScreenCover(isPresented: $model.isPairingPresented) {
             PairingFlowView()
         }

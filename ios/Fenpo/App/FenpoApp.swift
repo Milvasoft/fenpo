@@ -24,7 +24,7 @@ struct FenpoApp: App {
         .onChange(of: scenePhase) { _, phase in
             log.info("Scene \(String(describing: phase))")
             if phase == .active {
-                Task { await model.refresh() }
+                Task { await model.becameActive() }
             }
         }
     }
@@ -37,9 +37,12 @@ struct FenpoApp: App {
         }
         #endif
         let services = FenpoServices.shared
-        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions)
-        services.central.onStateChange = { _ in
+        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer)
+        services.onChange = {
             Task { await model.refresh() }
+        }
+        services.ringer.onChange = { isRinging in
+            model.isRinging = isRinging
         }
         services.start()
         return model

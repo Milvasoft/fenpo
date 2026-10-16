@@ -185,13 +185,7 @@ public final class LivePairing: PairingProviding {
     }
 
     private func makeHello() -> Fenpo_V1_Hello {
-        Handshake.makeHello(
-            deviceID: LocalDevice.deviceID,
-            deviceName: UIDevice.current.name,
-            appVersion: LocalDevice.appVersion,
-            osVersion: LocalDevice.osVersion,
-            model: LocalDevice.model
-        )
+        LocalDevice.makeHello()
     }
 }
 #endif

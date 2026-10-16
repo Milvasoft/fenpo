@@ -29,6 +29,10 @@ public final class LiveFenpoActions: FenpoActions {
         try await performLockPC()
     }
 
+    public nonisolated func openOnPC(_ url: URL) async throws {
+        try await performOpenOnPC(url)
+    }
+
     private func performSendText(_ text: String) async throws {
         guard !text.isEmpty else {
             throw FenpoActionError.emptyText
@@ -71,6 +75,18 @@ public final class LiveFenpoActions: FenpoActions {
         try await waitForChannel()
         try central.send(.lockPc(Fenpo_V1_LockPc()))
         log.info("Sent LockPc")
+    }
+
+    private func performOpenOnPC(_ url: URL) async throws {
+        try await waitForChannel()
+        var message = Fenpo_V1_OpenUrl()
+        message.url = url.absoluteString
+        do {
+            try central.send(.openURL(message))
+        } catch BLEChunking.Error.messageTooLarge {
+            throw FenpoActionError.tooLargeForBluetooth
+        }
+        log.info("Sent OpenUrl (\(url.scheme ?? "?"))")
     }
 
     /// Gives a just-launched app a few seconds to reconnect before giving up.

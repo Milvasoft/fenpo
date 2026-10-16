@@ -12,6 +12,7 @@ enum ScreenshotScene: String {
     case scan
     case developer
     case steps
+    case ringing
 
     /// The scene requested by the launch arguments, if any.
     static var current: ScreenshotScene? {
@@ -33,6 +34,8 @@ enum ScreenshotScene: String {
             model.selectedTab = .settings
         case .scan, .steps:
             model.isPairingPresented = true
+        case .ringing:
+            model.isRinging = true
         }
         return model
     }

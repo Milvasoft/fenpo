@@ -25,6 +25,7 @@ final class AppModel {
 
     private let session: any SessionProviding
     private let actions: any FenpoActions
+    private let ringer: PhoneRinger?
 
     /// Runs the pairing steps.
     let pairing: any PairingProviding
@@ -45,15 +46,42 @@ final class AppModel {
     /// Result of the last action, if it is still on screen.
     var toast: Toast?
 
+    /// The PC is ringing this iPhone and Fenpo is in front.
+    var isRinging = false
+
     /// Creates the model.
     /// - Parameters:
     ///   - session: Source of the session state.
     ///   - pairing: Runs the pairing steps.
     ///   - actions: Clipboard and PC actions.
-    init(session: any SessionProviding, pairing: any PairingProviding = SamplePairing(), actions: any FenpoActions = SampleActions()) {
+    ///   - ringer: Plays the ring the PC asks for; `nil` in previews.
+    init(
+        session: any SessionProviding,
+        pairing: any PairingProviding = SamplePairing(),
+        actions: any FenpoActions = SampleActions(),
+        ringer: PhoneRinger? = nil
+    ) {
         self.session = session
         self.pairing = pairing
         self.actions = actions
+        self.ringer = ringer
+    }
+
+    /// Fenpo came to the front: refresh, stop a background ring, ask for notifications once paired.
+    func becameActive() async {
+        await refresh()
+        if !isRinging {
+            ringer?.stop()
+        }
+        if snapshot.pc != nil {
+            await ringer?.requestPermissionIfNeeded()
+        }
+    }
+
+    /// Stops the ring.
+    func stopRinging() {
+        ringer?.stop()
+        isRinging = false
     }
 
     /// Reloads the session state.

@@ -1,6 +1,7 @@
 import FenpoApple
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 /// Entry point of the share extension. Hosts the SwiftUI share view.
 final class ShareViewController: UIViewController {
@@ -8,7 +9,8 @@ final class ShareViewController: UIViewController {
         super.viewDidLoad()
         overrideUserInterfaceStyle = AppearanceStore().preference.userInterfaceStyle
 
-        let host = UIHostingController(rootView: ShareView { [weak self] in
+        let model = ShareModel(items: extensionContext?.inputItems as? [NSExtensionItem] ?? [])
+        let host = UIHostingController(rootView: ShareView(model: model) { [weak self] in
             self?.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
         })
         addChild(host)
