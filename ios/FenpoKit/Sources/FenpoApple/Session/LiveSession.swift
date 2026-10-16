@@ -79,6 +79,7 @@ public final class FenpoServices {
     public let pairing: LivePairing
     public let session: LiveSession
     public let clipboard: PCClipboardReceiver
+    public let actions: LiveFenpoActions
 
     private let log = FenpoLog("Services")
 
@@ -90,6 +91,7 @@ public final class FenpoServices {
         pairing = LivePairing(identityStore: identityStore, store: pairedStore, central: central, accessories: accessories)
         session = LiveSession(store: pairedStore, central: central, accessories: accessories)
         clipboard = PCClipboardReceiver()
+        actions = LiveFenpoActions(store: pairedStore, central: central)
 
         let clipboard = clipboard
         central.onEnvelope = { envelope in
@@ -101,6 +103,7 @@ public final class FenpoServices {
 
     /// Activates AccessorySetupKit and reconnects to the paired PC.
     public func start() {
+        FenpoActionsRegistry.shared.register(actions)
         accessories.activate()
         pairing.resumeChannel()
     }
