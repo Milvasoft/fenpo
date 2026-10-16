@@ -137,6 +137,448 @@
         }
       }
     },
+    "developer.accessory": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessory"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aksesuar"
+          }
+        }
+      }
+    },
+    "developer.bluetooth": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth"
+          }
+        }
+      }
+    },
+    "developer.capabilities": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Features"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özellikler"
+          }
+        }
+      }
+    },
+    "developer.counters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AES-GCM counters"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AES-GCM sayaçları"
+          }
+        }
+      }
+    },
+    "developer.deviceID": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device id"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cihaz kimliği"
+          }
+        }
+      }
+    },
+    "developer.logs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt"
+          }
+        }
+      }
+    },
+    "developer.logs.clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temizle"
+          }
+        }
+      }
+    },
+    "developer.logs.clear.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The log is deleted on this iPhone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt bu iPhone’dan silinir."
+          }
+        }
+      }
+    },
+    "developer.logs.empty": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The log is empty"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt boş"
+          }
+        }
+      }
+    },
+    "developer.logs.export": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Export"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dışa aktar"
+          }
+        }
+      }
+    },
+    "developer.pairTest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair with the test Mac"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Mac’iyle eşleş"
+          }
+        }
+      }
+    },
+    "developer.pc": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paired PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşleşmiş PC"
+          }
+        }
+      }
+    },
+    "developer.peer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC on Bluetooth"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth’taki PC"
+          }
+        }
+      }
+    },
+    "developer.ping": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send Ping"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ping gönder"
+          }
+        }
+      }
+    },
+    "developer.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forget pairing and identity"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşleşmeyi ve kimliği sil"
+          }
+        }
+      }
+    },
+    "developer.reset.confirm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo forgets the PC and its own certificate. Pair again afterwards."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo bilgisayarı ve kendi sertifikasını unutur. Sonra yeniden eşleştir."
+          }
+        }
+      }
+    },
+    "developer.result.failed %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Didn’t work: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olmadı: %@"
+          }
+        }
+      }
+    },
+    "developer.result.paired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paired with the test Mac."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Mac’iyle eşleşildi."
+          }
+        }
+      }
+    },
+    "developer.result.pingSent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ping sent. The Pong shows in the log."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ping gönderildi. Pong kayıtta görünür."
+          }
+        }
+      }
+    },
+    "developer.result.reset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pairing and identity deleted."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşleşme ve kimlik silindi."
+          }
+        }
+      }
+    },
+    "developer.result.working": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalışıyor…"
+          }
+        }
+      }
+    },
+    "developer.section.logs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Log"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kayıt"
+          }
+        }
+      }
+    },
+    "developer.section.status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Durum"
+          }
+        }
+      }
+    },
+    "developer.section.tests": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device tests"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cihaz testleri"
+          }
+        }
+      }
+    },
+    "developer.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Developer"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geliştirici"
+          }
+        }
+      }
+    },
+    "developer.version": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sürüm"
+          }
+        }
+      }
+    },
     "home.addPC.accessibility": {
       "extractionState": "manual",
       "localizations": {
@@ -490,57 +932,6 @@
         }
       }
     },
-    "pairing.code.connect": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Connect"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bağlan"
-          }
-        }
-      }
-    },
-    "pairing.code.message": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Type the 6‑digit code under the QR code in Fenpo on Windows."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Windows’taki Fenpo’da QR kodun altındaki 6 haneli kodu yaz."
-          }
-        }
-      }
-    },
-    "pairing.code.placeholder": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "6‑digit code"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "6 haneli kod"
-          }
-        }
-      }
-    },
     "pairing.connectBluetooth": {
       "extractionState": "manual",
       "localizations": {
@@ -575,23 +966,6 @@
         }
       }
     },
-    "pairing.manualEntry": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enter code manually"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kodu elle gir"
-          }
-        }
-      }
-    },
     "pairing.notifications.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -605,6 +979,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Açılan pencerede “İzin Ver”e dokun."
+          }
+        }
+      }
+    },
+    "pairing.scan.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If the code won’t scan, show it again in Fenpo on Windows."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kod okunmuyorsa Windows’taki Fenpo’da kodu yeniden göster."
           }
         }
       }

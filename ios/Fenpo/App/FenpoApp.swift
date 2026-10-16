@@ -4,8 +4,12 @@ import SwiftUI
 
 @main
 struct FenpoApp: App {
+    @UIApplicationDelegateAdaptor(FenpoAppDelegate.self) private var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @State private var appearance = AppearanceStore()
     @State private var model = FenpoApp.makeModel()
+
+    private let log = FenpoLog("App")
 
     var body: some Scene {
         WindowGroup {
@@ -16,6 +20,12 @@ struct FenpoApp: App {
                 .task {
                     await model.refresh()
                 }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            log.info("Scene \(String(describing: phase))")
+            if phase == .active {
+                Task { await model.refresh() }
+            }
         }
     }
 

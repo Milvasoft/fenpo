@@ -12,6 +12,11 @@ struct SettingsView: View {
     @AppStorage("feature.clipboard", store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var clipboardSharing = true
 
+    @AppStorage("developer.unlocked")
+    private var isDeveloperUnlocked = false
+    @State private var isDeveloperPresented = false
+    @State private var versionTaps = 0
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -65,13 +70,54 @@ struct SettingsView: View {
                             .padding(.top, 10)
                             .padding(.horizontal, 4)
                     }
+
+                    if isDeveloperUnlocked {
+                        SectionCaption(title: "developer.title")
+                        CardRows {
+                            DisclosureRow(icon: .symbol("hammer"), color: .ink, title: "developer.title", value: Text(verbatim: "")) {
+                                isDeveloperPresented = true
+                            }
+                        }
+                    }
+
+                    versionFooter
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
             }
             .fenpoScreenBackground()
             .navigationTitle("tab.settings")
+            .navigationDestination(isPresented: $isDeveloperPresented) {
+                DeveloperView()
+            }
+            .onAppear(perform: openScreenshotScene)
         }
+    }
+
+    /// App version; seven taps open the hidden Developer menu.
+    private var versionFooter: some View {
+        Text(verbatim: "Fenpo \(LocalDevice.appVersion) (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"))")
+            .font(.footnote)
+            .foregroundStyle(.textTertiary)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 28)
+            .contentShape(.rect)
+            .onTapGesture {
+                versionTaps += 1
+                if versionTaps >= 7 {
+                    versionTaps = 0
+                    isDeveloperUnlocked = true
+                    isDeveloperPresented = true
+                }
+            }
+    }
+
+    private func openScreenshotScene() {
+        #if DEBUG
+        if ScreenshotScene.current == .developer {
+            isDeveloperPresented = true
+        }
+        #endif
     }
 
     private var chevron: some View {

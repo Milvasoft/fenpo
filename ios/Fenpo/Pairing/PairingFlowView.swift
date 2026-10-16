@@ -13,10 +13,9 @@ struct PairingFlowView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var stage: Stage = .scanning
-    @State private var isManualEntryPresented = false
     @State private var progress = PairingProgress()
     @State private var pcName = ""
-    @State private var input: PairingInput?
+    @State private var scannedCode: String?
 
     private let log = FenpoLog("Pairing")
 
@@ -30,16 +29,9 @@ struct PairingFlowView: View {
         switch stage {
         case .scanning:
             ScannerView(
-                onCode: { start(.qrCode($0)) },
-                onManualEntry: { isManualEntryPresented = true },
+                onCode: { start(scannedCode: $0) },
                 onClose: { dismiss() }
             )
-            .sheet(isPresented: $isManualEntryPresented) {
-                ManualCodeView { code in
-                    isManualEntryPresented = false
-                    start(.manualCode(code))
-                }
-            }
         case .setup:
             SetupStepsView(
                 pcName: pcName,
@@ -56,8 +48,6 @@ struct PairingFlowView: View {
     private func openScreenshotScene() {
         #if DEBUG
         switch ScreenshotScene.current {
-        case .code:
-            isManualEntryPresented = true
         case .steps:
             pcName = "BUGRA-PC"
             progress.complete(.dataChannel)
@@ -68,19 +58,19 @@ struct PairingFlowView: View {
         #endif
     }
 
-    private func start(_ input: PairingInput) {
-        self.input = input
+    private func start(scannedCode: String) {
+        self.scannedCode = scannedCode
         stage = .setup
         runDataChannel()
     }
 
     private func runDataChannel() {
-        guard let input else {
+        guard let scannedCode else {
             return
         }
         Task {
             do {
-                let pc = try await model.pairing.startDataChannel(input)
+                let pc = try await model.pairing.startDataChannel(scannedCode: scannedCode)
                 pcName = pc.name
                 progress.complete(.dataChannel)
             } catch {

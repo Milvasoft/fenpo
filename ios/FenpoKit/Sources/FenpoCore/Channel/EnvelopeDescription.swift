@@ -36,6 +36,8 @@ extension Fenpo_V1_Envelope {
             "LockPc"
         case .deviceState:
             "DeviceState"
+        case .pcStatus:
+            "PcStatus"
         case nil:
             "empty"
         }
