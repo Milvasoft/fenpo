@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "fenpo/v1/video.proto";
+
+// The phone's screen on the PC, with control from the PC (CAPABILITY_SCREEN_MIRROR, Android).
+//
+// The PC sends ScreenStart. Android asks the user on the phone every time (screen capture
+// consent), so the phone answers ScreenStatus WAITING_FOR_CONSENT; after consent it opens the
+// media connection and reports STREAMING. When the phone locks, Android stops capture: the phone
+// reports PAUSED_LOCKED and starts again after unlock only with a new consent. Control works only
+// when the user turned on Fenpo's accessibility service; control_available says so.
+
+// PC → phone.
+message ScreenStart {
+  VideoFormat max = 1;                   // Largest size, frame rate and bitrate the PC wants.
+  bool control = 2;                      // The PC wants to send ScreenInput.
+}
+
+// Either side.
+message ScreenStop {
+}
+
+enum ScreenState {
+  SCREEN_STATE_UNSPECIFIED = 0;
+  SCREEN_STATE_WAITING_FOR_CONSENT = 1;
+  SCREEN_STATE_STREAMING = 2;
+  SCREEN_STATE_PAUSED_LOCKED = 3;
+  SCREEN_STATE_STOPPED = 4;
+  SCREEN_STATE_FAILED = 5;
+}
+
+// Phone → PC.
+message ScreenStatus {
+  ScreenState state = 1;
+  string stream_id = 2;
+  VideoFormat video = 3;                 // As encoded; changes when the phone rotates.
+  bool control_available = 4;
+  string reason = 5;
+}
+
+// A point on the streamed frame, 0..1 from the top left, so it survives scaling and rotation.
+message ScreenPoint {
+  float x = 1;
+  float y = 2;
+}
+
+enum ScreenGlobalAction {
+  SCREEN_GLOBAL_ACTION_UNSPECIFIED = 0;
+  SCREEN_GLOBAL_ACTION_BACK = 1;
+  SCREEN_GLOBAL_ACTION_HOME = 2;
+  SCREEN_GLOBAL_ACTION_RECENTS = 3;
+  SCREEN_GLOBAL_ACTION_NOTIFICATIONS = 4;
+  SCREEN_GLOBAL_ACTION_QUICK_SETTINGS = 5;
+}
+
+message ScreenSwipe {
+  ScreenPoint from = 1;
+  ScreenPoint to = 2;
+  uint32 duration_ms = 3;
+}
+
+// PC → phone. Answered with Error UNSUPPORTED while control is not available.
+message ScreenInput {
+  oneof action {
+    ScreenPoint tap = 1;
+    ScreenPoint long_press = 2;
+    ScreenSwipe swipe = 3;               // Also scrolling: a short swipe.
+    ScreenGlobalAction global = 4;
+    string text = 5;                     // Typed into the focused field.
+  }
+}
