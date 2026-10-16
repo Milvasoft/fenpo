@@ -44,35 +44,39 @@ public sealed class CombinedSourcesTests
     }
 
     [Fact]
-    public void TheSourceThatStartsPlayingShows()
+    public void OnlyThePhoneInUseShowsAndTakesCommands()
     {
         var iphone = new FakeMedia();
         var android = new FakeMedia();
         var combined = new CombinedMediaSource([iphone, android]);
-
-        iphone.Publish(new NowPlaying { Title = "iPhone song", State = PlaybackState.Playing });
-        Assert.Equal("iPhone song", combined.Current.Title);
+        var shown = new List<string>();
+        combined.Changed += (sender, n) => shown.Add(n.Title);
 
         iphone.Publish(new NowPlaying { Title = "iPhone song", State = PlaybackState.Paused });
         android.Publish(new NowPlaying { Title = "Android song", State = PlaybackState.Playing });
-        Assert.Equal("Android song", combined.Current.Title);
-
-        // The shown one stops; the other still has a track.
-        android.Publish(NowPlaying.Empty);
         Assert.Equal("iPhone song", combined.Current.Title);
+
+        combined.Use(1);
+        Assert.Equal("Android song", combined.Current.Title);
+        Assert.Equal(["iPhone song", "Android song"], shown);
     }
 
     [Fact]
-    public void APausedSourceDoesNotTakeOverFromAPlayingOne()
+    public void StoreShowsOnlyTheSourceInUseButKeepsTheOther()
     {
-        var iphone = new FakeMedia();
-        var android = new FakeMedia();
-        var combined = new CombinedMediaSource([iphone, android]);
+        var store = new NotificationStore();
+        var arrived = new List<string>();
+        store.Arrived += (sender, n) => arrived.Add(n.Key!);
+        store.ActiveSource = "i:";
 
-        iphone.Publish(new NowPlaying { Title = "iPhone song", State = PlaybackState.Playing });
-        android.Publish(new NowPlaying { Title = "Android song", State = PlaybackState.Paused });
+        store.Add(new PhoneNotification { Key = "i:1:5", AppId = "a", AppName = "A", Message = "iPhone" });
+        store.Add(new PhoneNotification { Key = "a:k", AppId = "a", AppName = "A", Message = "Android" });
 
-        Assert.Equal("iPhone song", combined.Current.Title);
+        Assert.Equal(["i:1:5"], arrived);
+        Assert.Equal("i:1:5", Assert.Single(store.Items).Key);
+
+        store.ActiveSource = "a:";
+        Assert.Equal("a:k", Assert.Single(store.Items).Key);
     }
 
     private sealed class FakeNotifications : INotificationSource

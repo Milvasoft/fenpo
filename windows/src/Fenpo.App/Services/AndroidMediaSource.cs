@@ -35,7 +35,7 @@ public sealed class AndroidMediaSource(PhoneChannel channel, ILogger<AndroidMedi
         _channel.MessageReceived += (sender, message) => OnMessage(message);
         _channel.Changed += (sender, e) =>
         {
-            if (!_channel.IsConnected && Current.HasTrack)
+            if (!_channel.AndroidConnected && Current.HasTrack)
             {
                 Publish(NowPlaying.Empty);
             }
@@ -61,12 +61,12 @@ public sealed class AndroidMediaSource(PhoneChannel channel, ILogger<AndroidMedi
             _ => null,
         };
 
-        if (wire is null || !_channel.Supports(Capability.Media))
+        if (wire is null)
         {
             return false;
         }
 
-        return await _channel.SendAsync(new Envelope { MediaCommand = wire }, cancellationToken);
+        return await _channel.SendToAndroidAsync(new Envelope { MediaCommand = wire }, cancellationToken);
     }
 
     /// <summary>

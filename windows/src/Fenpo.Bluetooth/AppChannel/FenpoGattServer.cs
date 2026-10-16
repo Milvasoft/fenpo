@@ -342,8 +342,9 @@ public sealed class FenpoGattServer(
 
     private PcStatus CurrentPcStatus() => new()
     {
-        NotificationsSubscribed = _status.Current.NotificationsAvailable,
-        MessagesAvailable = _status.Current.MessagesAvailable,
+        // What the PC gets over Bluetooth is the iPhone's (ANCS, MAP); Fenpo on the iPhone is who asks.
+        NotificationsSubscribed = _status.StatusOf(PhoneKind.Iphone).NotificationsAvailable,
+        MessagesAvailable = _status.StatusOf(PhoneKind.Iphone).MessagesAvailable,
     };
 
     private void OnPhoneStatusChanged(object? sender, PhoneStatus phoneStatus)

@@ -1,6 +1,7 @@
 using Fenpo.Bluetooth.Link;
 using Fenpo.Bluetooth.Obex;
 using Fenpo.Bluetooth.Status;
+using Fenpo.Core.Devices;
 using Fenpo.Core.Messages;
 using Microsoft.Extensions.Logging;
 using Windows.Devices.Bluetooth;
@@ -10,7 +11,9 @@ namespace Fenpo.Bluetooth.Map;
 /// <summary>
 /// The iPhone's messages over MAP: connects to the Message Access Server while the phone is in reach, keeps the
 /// notification server registered and reconnects after a failure. New messages are first shown from ANCS; this source
-/// is for the conversation history, read status and replies (S2).
+/// is for the conversation history, read status and replies (S2). An Android phone in use has its own message access
+/// server (Samsung: S10+); it is reached over its classic record whenever Fenpo on it is connected, not by the
+/// iPhone's link.
 /// </summary>
 public sealed class MapMessageSource(
     IphoneLink link,
@@ -29,6 +32,7 @@ public sealed class MapMessageSource(
     private readonly ILogger<MapMessageSource> _logger = logger;
     private readonly SemaphoreSlim _sessionGate = new(1, 1);
     private string? _classicDeviceId;
+    private PhoneKind _kind = PhoneKind.Iphone;
     private MasClient? _session;
     private CancellationTokenSource? _retry;
 
@@ -46,10 +50,16 @@ public sealed class MapMessageSource(
     /// </summary>
     public void Attach()
     {
-        _link.ServicesReady += (sender, services) => _ = ConnectAsync();
+        _link.ServicesReady += (sender, services) =>
+        {
+            if (_kind == PhoneKind.Iphone)
+            {
+                _ = ConnectAsync();
+            }
+        };
         _link.ConnectionChanged += (sender, connected) =>
         {
-            if (!connected)
+            if (!connected && _kind == PhoneKind.Iphone)
             {
                 _ = DropAsync(MessagesAvailability.Unavailable);
             }
@@ -61,14 +71,15 @@ public sealed class MapMessageSource(
     /// Sets the phone's classic Bluetooth record (MAP runs over classic RFCOMM, the link over LE).
     /// </summary>
     /// <param name="classicDeviceId">BluetoothDevice id, or null when the phone has none.</param>
-    public void UsePhone(string? classicDeviceId)
+    /// <param name="kind">Which phone it is: the iPhone connects with its link, an Android phone right away.</param>
+    public void UsePhone(string? classicDeviceId, PhoneKind kind = PhoneKind.Iphone)
     {
-        _classicDeviceId = classicDeviceId;
-
-        if (_link.IsConnected)
+        if (classicDeviceId == _classicDeviceId && kind == _kind)
         {
-            _ = ConnectAsync();
+            return;
         }
+
+        _ = SwitchAsync(classicDeviceId, kind);
     }
 
     /// <inheritdoc/>
@@ -159,6 +170,21 @@ public sealed class MapMessageSource(
         }
     }
 
+    private bool Reachable => _kind == PhoneKind.Android || _link.IsConnected;
+
+    private async Task SwitchAsync(string? classicDeviceId, PhoneKind kind)
+    {
+        // The other phone's session and its "messages available" end first.
+        await DropAsync(MessagesAvailability.Unavailable);
+        _classicDeviceId = classicDeviceId;
+        _kind = kind;
+
+        if (Reachable)
+        {
+            await ConnectAsync();
+        }
+    }
+
     private void ScheduleRetry()
     {
         _retry?.Cancel();
@@ -167,7 +193,7 @@ public sealed class MapMessageSource(
         _ = Task.Delay(_permissionRetry, token).ContinueWith(
             _ =>
             {
-                if (_link.IsConnected)
+                if (Reachable)
                 {
                     _ = ConnectAsync();
                 }
@@ -240,7 +266,7 @@ public sealed class MapMessageSource(
         }
 
         Availability = availability;
-        _status.Update(s => s with { MessagesAvailable = availability == MessagesAvailability.Ready });
+        _status.Update(_kind, s => s with { MessagesAvailable = availability == MessagesAvailability.Ready });
         AvailabilityChanged?.Invoke(this, availability);
     }
 }

@@ -66,4 +66,16 @@ public sealed class PairedPhoneLocator(ILogger<PairedPhoneLocator> logger)
         _logger.LogInformation("Using {Name} (classic record {Classic})", chosen.Name, classic is null ? "missing" : "present");
         return new PairedPhone(chosen.Id, classic?.Id, chosen.Name);
     }
+
+    /// <summary>
+    /// Finds the classic Bluetooth record of a phone by name (an Android phone gets one with its LE bond, CTKD).
+    /// </summary>
+    /// <param name="name">Phone name as Fenpo on it reported it.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The BluetoothDevice id, or null.</returns>
+    public async Task<string?> FindClassicAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var classicDevices = await DeviceInformation.FindAllAsync(BluetoothDevice.GetDeviceSelectorFromPairingState(true)).AsTask(cancellationToken);
+        return classicDevices.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase))?.Id;
+    }
 }

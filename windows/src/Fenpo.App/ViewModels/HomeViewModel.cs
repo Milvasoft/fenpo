@@ -127,6 +127,14 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool CanRing { get; set; }
 
+    /// <summary>Gets or sets the other paired phone's name, or empty when there is only one.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOtherPhone))]
+    public partial string OtherPhoneText { get; set; } = string.Empty;
+
+    /// <summary>Gets a value indicating whether a second phone is paired (the switch link shows).</summary>
+    public bool HasOtherPhone => OtherPhoneText.Length > 0;
+
     /// <summary>Gets or sets the clock on the phone illustration.</summary>
     [ObservableProperty]
     public partial string ClockText { get; set; } = string.Empty;
@@ -211,6 +219,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    private void UseOtherPhone() => _status.Use(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+
+    [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);
 
     [RelayCommand]
@@ -259,6 +270,8 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         UsbText = _localization.GetString(status.UsbConnected ? "Chip_UsbOn" : "Chip_UsbOff");
         AppConnected = status.AppConnected;
         CanRing = _actions.CanRing;
+        var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+        OtherPhoneText = other.State == PhoneConnectionState.NotPaired ? string.Empty : _localization.Format("Phone_SwitchTo", PhoneStatusText.Name(other, _localization));
     }
 
     private void ApplyNotifications()

@@ -59,6 +59,7 @@ public sealed class BluetoothHostedService(
         await _channel.StartAsync();
         _channel.AndroidPhoneSeen += (sender, id) => OnAndroidPhoneSeen(id);
         _link.ServicesReady += (sender, services) => OnServicesReady(services);
+        _status.ActiveChanged += (sender, kind) => _ = UseMessagesOfAsync(kind);
         _status.Attach();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -72,8 +73,7 @@ public sealed class BluetoothHostedService(
                 if (phone is not null && await _link.StartAsync(phone.LeDeviceId, stoppingToken))
                 {
                     Phone = phone;
-                    _messages.UsePhone(phone.ClassicDeviceId);
-                    _contacts.UsePhone(phone.ClassicDeviceId);
+                    await UseMessagesOfAsync(_status.Active);
                     _settings.Update(s => s with { PhoneDeviceId = phone.LeDeviceId });
                     _status.Update(s => s with { Name = phone.Name, State = _link.IsConnected ? PhoneConnectionState.Connecting : PhoneConnectionState.Disconnected });
 
@@ -82,16 +82,11 @@ public sealed class BluetoothHostedService(
                     _logger.LogInformation("{Name} is not an iPhone; looking for the paired iPhone again", phone.Name);
                     Phone = null;
                     await _link.StopAsync();
-                    _messages.UsePhone(null);
-                    _contacts.UsePhone(null);
+                    await UseMessagesOfAsync(_status.Active);
                     continue;
                 }
 
-                // A phone paired only through Fenpo on it (Android) has no Bluetooth link here but is still paired.
-                _status.Update(s => s with
-                {
-                    State = !s.HasAppPhone ? PhoneConnectionState.NotPaired : s.AppConnected ? PhoneConnectionState.Connected : PhoneConnectionState.Disconnected,
-                });
+                _status.Update(s => s with { State = PhoneConnectionState.NotPaired });
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -99,6 +94,31 @@ public sealed class BluetoothHostedService(
             }
 
             await Task.Delay(_searchInterval, stoppingToken);
+        }
+    }
+
+    // MAP and PBAP run against the phone in use: the iPhone's classic record, or the Android phone's, found by the name
+    // Fenpo on it reported. The iPhone link keeps running either way (ANCS for later, proximity).
+    private async Task UseMessagesOfAsync(PhoneKind kind)
+    {
+        try
+        {
+            if (kind == PhoneKind.Iphone)
+            {
+                _messages.UsePhone(Phone?.ClassicDeviceId);
+                _contacts.UsePhone(Phone?.ClassicDeviceId);
+                return;
+            }
+
+            var name = _status.StatusOf(PhoneKind.Android).Name;
+            var classic = name.Length > 0 ? await _locator.FindClassicAsync(name) : null;
+            _logger.LogInformation("Messages from the Android phone (classic record {Classic})", classic is null ? "missing" : "present");
+            _messages.UsePhone(classic, PhoneKind.Android);
+            _contacts.UsePhone(null);
+        }
+        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or OperationCanceledException)
+        {
+            _logger.LogWarning(exception, "Switching messages to the {Phone} failed", kind);
         }
     }
 

@@ -1,9 +1,8 @@
 namespace Fenpo.Core.Media;
 
 /// <summary>
-/// Several phone players as one (the iPhone through AMS, an Android phone through the Fenpo channel): what shows is
-/// the source that started playing last, or the one that still has a track when the other has none. Commands go to
-/// the source that shows.
+/// The players of several phones (the iPhone through AMS, an Android phone through the Fenpo channel) as one: what
+/// shows and takes commands is the player of the phone in use (<see cref="Use"/>).
 /// </summary>
 public sealed class CombinedMediaSource : IMediaSource
 {
@@ -14,7 +13,7 @@ public sealed class CombinedMediaSource : IMediaSource
     /// <summary>
     /// Initializes a new instance of the <see cref="CombinedMediaSource"/> class.
     /// </summary>
-    /// <param name="sources">Sources, the default first.</param>
+    /// <param name="sources">Sources, the one in use first.</param>
     public CombinedMediaSource(IReadOnlyList<IMediaSource> sources)
     {
         _sources = sources;
@@ -41,6 +40,28 @@ public sealed class CombinedMediaSource : IMediaSource
         }
     }
 
+    /// <summary>
+    /// Shows and controls one source's player.
+    /// </summary>
+    /// <param name="index">Index in the list given to the constructor.</param>
+    public void Use(int index)
+    {
+        NowPlaying shown;
+
+        lock (_lock)
+        {
+            if (_active == _sources[index])
+            {
+                return;
+            }
+
+            _active = _sources[index];
+            shown = _active.Current;
+        }
+
+        Changed?.Invoke(this, shown);
+    }
+
     /// <inheritdoc/>
     public Task<bool> SendAsync(MediaCommand command, CancellationToken cancellationToken = default)
     {
@@ -56,30 +77,14 @@ public sealed class CombinedMediaSource : IMediaSource
 
     private void OnChanged(IMediaSource source, NowPlaying nowPlaying)
     {
-        NowPlaying shown;
-
         lock (_lock)
         {
-            var startedPlaying = nowPlaying.State == PlaybackState.Playing && _active.Current.State != PlaybackState.Playing;
-            var activeIsEmpty = !_active.Current.HasTrack && nowPlaying.HasTrack;
-
-            if (source != _active && (startedPlaying || activeIsEmpty))
-            {
-                _active = source;
-            }
-            else if (source == _active && !nowPlaying.HasTrack && _sources.FirstOrDefault(s => s != source && s.Current.HasTrack) is { } other)
-            {
-                // The shown player stopped; another one still has something.
-                _active = other;
-            }
-            else if (source != _active)
+            if (source != _active)
             {
                 return;
             }
-
-            shown = _active.Current;
         }
 
-        Changed?.Invoke(this, shown);
+        Changed?.Invoke(this, nowPlaying);
     }
 }
