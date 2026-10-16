@@ -10,6 +10,12 @@ import UIKit
 @MainActor
 @Observable
 final class AppModel {
+    /// Screens pushed on the PC tab.
+    enum PCScreen: Hashable {
+        case touchpad
+        case presenter
+    }
+
     /// Tabs of the root tab bar.
     enum Tab: Hashable {
         case home
@@ -32,6 +38,9 @@ final class AppModel {
     private let transferActivities: TransferActivities?
     private let readsPermissions: Bool
 
+    /// Touchpad, keyboard and presentation remote; `nil` in previews.
+    let pcInput: PcInputService?
+
     /// Runs the pairing steps.
     let pairing: any PairingProviding
     private let log = FenpoLog("AppModel")
@@ -44,6 +53,9 @@ final class AppModel {
 
     /// Selected tab.
     var selectedTab: Tab = .home
+
+    /// Screens pushed on the PC tab.
+    var pcPath: [PCScreen] = []
 
     /// The pairing flow is on screen.
     var isPairingPresented = false
@@ -66,6 +78,7 @@ final class AppModel {
     ///   - camera: Fenpo Kamera; `nil` in previews.
     ///   - transferActivities: Live Activities of large transfers; `nil` in previews.
     ///   - readsPermissions: Reads the real permissions; previews keep the sample.
+    ///   - pcInput: Touchpad and presentation remote; `nil` in previews.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
@@ -73,7 +86,8 @@ final class AppModel {
         ringer: PhoneRinger? = nil,
         camera: CameraService? = nil,
         transferActivities: TransferActivities? = nil,
-        readsPermissions: Bool = false
+        readsPermissions: Bool = false,
+        pcInput: PcInputService? = nil
     ) {
         self.session = session
         self.pairing = pairing
@@ -82,6 +96,7 @@ final class AppModel {
         self.camera = camera
         self.transferActivities = transferActivities
         self.readsPermissions = readsPermissions
+        self.pcInput = pcInput
     }
 
     /// The camera's live picture.
@@ -148,6 +163,18 @@ final class AppModel {
         @unknown default:
             .unknown
         }
+    }
+
+    /// Why the touchpad and the presentation remote do nothing now, with what to do; `nil` when
+    /// they work (and in previews).
+    var remoteProblem: LocalizedStringResource? {
+        guard let pcInput else {
+            return nil
+        }
+        if !snapshot.isConnected {
+            return "action.error.notConnected"
+        }
+        return pcInput.isAvailable ? nil : "action.error.unsupportedByPC"
     }
 
     /// The Focus switch in Settings changed: tells the PC the state that now applies.

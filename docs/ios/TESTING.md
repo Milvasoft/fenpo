@@ -185,7 +185,7 @@ Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşm
 
 ## Gerçek PC ile özellikler
 
-Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `RingDevice`, `OpenUrl`, `DeviceState` ve odak, dosya aktarımı, Kamera sayfasındaki önizleme). M1–M4 bittikten sonra, iPhone ile PC aynı Wi‑Fi'dayken:
+Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `RingDevice`, `OpenUrl`, `DeviceState` ve odak, dosya aktarımı, Kamera sayfasındaki önizleme, fare, klavye ve sunum kumandası). M1–M4 bittikten sonra, iPhone ile PC aynı Wi‑Fi'dayken:
 
 | # | Adım | Beklenen |
 |---|---|---|
@@ -212,7 +212,20 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | F21 | Fenpo Ayarlar → **Odak modunu eşitle** kapalıyken F20 | PC susmaz |
 | F22 | Rahatsız Etme açıkken iPhone'da Fenpo'yu uygulama değiştiriciden kapatın, sonra yeniden açın | Bağlantı kopunca PC susmayı bırakır; Fenpo yeniden bağlanınca (Hello) odak durumu tekrar gönderilir ve PC yine susar. Kayıtta `Sent Focus state` |
 
-Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`.
+| F23 | Kamera açıkken telefonu dik, yatay sola ve yatay sağa çevirin | PC'deki görüntü her durumda düz; dikte üstü ve altı kırpılmış 16:9 resim, boyut değişmez |
+| F24 | Kamera açıkken iPhone'da sol üstteki **X** | Kamera iPhone'da hemen kapanır, PC "durdu" gösterir; kayıtta `Camera stopped: close button`. PC kamerayı kendiliğinden yeniden açıyorsa bunu yazın |
+| R1 | PC sekmesi → **Fare ve klavye**. Tek parmakla kaydırın, dokunun | İmleç akıcı oynar, dokunuş sol tık |
+| R2 | İki parmakla yukarı aşağı kaydırın; iki parmakla dokunun | Sayfa kayar (yön Windows dokunmatik yüzeyi gibi mi?); iki parmak dokunuşu sağ tık menüsünü açar |
+| R3 | Bir pencere başlığında basılı tutun (titreşim), sonra parmağı oynatın, bırakın | Pencere sürüklenir, bırakınca bırakılır |
+| R4 | **PC’ye yaz** alanına Türkçe karakterli bir cümle yazın, bir harf silin, Return | PC'de aynı metin (ş, ğ, ı doğru), silme ve Enter işler |
+| R5 | Esc, Tab, oklar, Sil, Enter, **Başlat** tuşları | Her biri PC'de aynı tuşu basar; Başlat menüsü açılır |
+| R6 | PowerPoint'te sunum açık: **Sunum kumandası** → **Başlat**, **Sonraki**, **Önceki**, **Siyah ekran**, **Bitir** | Slayt gösterisi başlar, ilerler, geri gider, ekran kararır, gösteri biter |
+| R7 | Lazer alanında basılı tutup gezdirin, bırakın | PC ekranında nokta parmağı izler, bırakınca kaybolur |
+| R8 | **PC’nin ekranını açık tut** açık, PC'nin ekran kapanma süresinden uzun bekleyin; sonra kumandadan çıkın | Açıkken ekran kapanmaz; çıkınca normale döner |
+| R9 | Kısayollar'da **Sonraki slayt** eylemini Eylem Düğmesi'ne atayın, Fenpo kapalıyken basın | Sonraki slayta geçer; olmazsa kayıttaki `[Intents]` satırını yazın |
+| R10 | Wi‑Fi kapalı, sadece Bluetooth ile R1 ve R6 | Çalışır, imleç biraz daha seyrek güncellenir |
+
+Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`, `[Input]`.
 
 Geri bildirim kilometre taşı 1'deki gibi: tablo, iPhone kaydı (Geliştirici → Kayıt → Dışa aktar) ve Windows'un kaydı.
 

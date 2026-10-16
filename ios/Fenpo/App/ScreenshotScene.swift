@@ -14,6 +14,8 @@ enum ScreenshotScene: String {
     case steps
     case ringing
     case camera
+    case touchpad
+    case presenter
 
     /// The scene requested by the launch arguments, if any.
     static var current: ScreenshotScene? {
@@ -39,6 +41,12 @@ enum ScreenshotScene: String {
             model.isRinging = true
         case .camera:
             model.cameraState = .sample
+        case .touchpad:
+            model.selectedTab = .pc
+            model.pcPath = [.touchpad]
+        case .presenter:
+            model.selectedTab = .pc
+            model.pcPath = [.presenter]
         }
         return model
     }

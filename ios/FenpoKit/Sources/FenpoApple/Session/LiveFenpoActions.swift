@@ -47,6 +47,15 @@ public final class LiveFenpoActions: FenpoActions {
         try await performReportFocus(isActive)
     }
 
+    public nonisolated func presenter(_ command: PresenterCommand) async throws {
+        try await performPresenter(command)
+    }
+
+    private func performPresenter(_ command: PresenterCommand) async throws {
+        let input = Fenpo_V1_PcInput.presenter(command == .next ? .next : .previous)
+        try await deliver(.pcInput(input), what: "presenter step")
+    }
+
     /// Sends the Focus state again after the PC's `Hello` on a channel: the PC forgets it when the
     /// iPhone disconnects. Does nothing until the filter has reported once.
     /// - Parameter channel: Channel that just finished its handshake.
