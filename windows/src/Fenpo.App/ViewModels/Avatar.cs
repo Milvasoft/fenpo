@@ -22,11 +22,20 @@ public static class Avatar
     ];
 
     /// <summary>
-    /// Gets the letter for a name, or "?" for an empty one.
+    /// Gets the first letter of a name, "#" for a bare number, or "?" for an empty one.
     /// </summary>
     /// <param name="text">Name.</param>
-    /// <returns>One upper-case letter.</returns>
-    public static string Initial(string text) => string.IsNullOrWhiteSpace(text) ? "?" : char.ToUpper(text.Trim()[0], CultureInfo.CurrentCulture).ToString();
+    /// <returns>One upper-case letter or sign.</returns>
+    public static string Initial(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            return "?";
+        }
+
+        var letter = text.FirstOrDefault(char.IsLetter);
+        return letter == default ? "#" : char.ToUpper(letter, CultureInfo.CurrentCulture).ToString();
+    }
 
     /// <summary>
     /// Gets the fill for a name; the same name always gets the same color.
