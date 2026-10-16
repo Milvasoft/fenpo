@@ -24,15 +24,20 @@ public struct PermissionsSnapshot: Equatable, Sendable {
     /// Paste from other apps.
     public var paste: PermissionState
 
+    /// The photo library, for the PC's photo browser and sending screenshots.
+    public var photos: PermissionState
+
     /// Creates a snapshot.
     /// - Parameters:
     ///   - bluetooth: Bluetooth access.
     ///   - localNetwork: Local network access.
     ///   - paste: Paste from other apps.
-    public init(bluetooth: PermissionState, localNetwork: PermissionState, paste: PermissionState) {
+    ///   - photos: The photo library.
+    public init(bluetooth: PermissionState, localNetwork: PermissionState, paste: PermissionState, photos: PermissionState = .allowed) {
         self.bluetooth = bluetooth
         self.localNetwork = localNetwork
         self.paste = paste
+        self.photos = photos
     }
 
     /// The state shown in the design.

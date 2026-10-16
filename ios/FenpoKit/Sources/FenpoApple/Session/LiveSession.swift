@@ -44,6 +44,7 @@ public final class LiveSession: SessionProviding {
         return SessionSnapshot(
             pc: PairedPC(id: record.pcID, name: record.name, systemName: "Windows"),
             links: ChannelLinks(bluetooth: central.state == .ready, wifi: wifi.state == .connected, usb: false),
+            notificationsShared: central.state == .ready ? central.pcStatus?.notificationsSubscribed : nil,
             proximity: .unknown,
             phoneClipboardPreview: nil,
             pcClipboardPreview: nil,
@@ -99,6 +100,10 @@ public final class FenpoServices {
     public let statusStore: SharedStatusStore
     public let camera: CameraService
     public let pcInput: PcInputService
+    public let pcNotifications: PcNotificationPresenter
+    public let hotspot: HotspotService
+    public let photos: PhotoLibraryService
+    public let screenshots: ScreenshotSender
     public let browser = PCBrowser()
 
     /// Called whenever the channel state, the PC's status or a transfer changes.
@@ -127,6 +132,10 @@ public final class FenpoServices {
         statusStore = SharedStatusStore()
         camera = CameraService(wifi: wifi)
         pcInput = PcInputService(central: central, wifi: wifi)
+        pcNotifications = PcNotificationPresenter()
+        hotspot = HotspotService()
+        photos = PhotoLibraryService(transfers: transfers)
+        screenshots = ScreenshotSender(transfers: transfers)
 
         central.onEnvelope = { [weak self] envelope in
             self?.route(envelope, from: .bluetooth)
@@ -141,13 +150,25 @@ public final class FenpoServices {
             self?.route(envelope, from: .wifi)
         }
         central.onHello = { [weak self] in
-            self?.actions.resendFocus(over: .bluetooth)
+            self?.channelGreeted(.bluetooth)
         }
         wifi.onStateChange = { [weak self] state in
             if state == .connected {
-                self?.actions.resendFocus(over: .wifi)
+                self?.channelGreeted(.wifi)
             }
             self?.onChange?()
+        }
+        hotspot.send = { [weak self] body, channel in
+            self?.send(body, on: channel)
+        }
+        photos.reply = { [weak self] body, replyTo, channel in
+            self?.reply(body, to: replyTo, on: channel)
+        }
+        hotspot.openChannels = { [weak self] in
+            guard let self else {
+                return []
+            }
+            return (central.state == .ready ? [Channel.bluetooth] : []) + (wifi.state == .connected ? [Channel.wifi] : [])
         }
         transfers.onChange = { [weak self] in
             self?.onChange?()
@@ -170,6 +191,7 @@ public final class FenpoServices {
         isActive = true
         connectWiFiIfUseful()
         camera.appBecameActive()
+        screenshots.check()
     }
 
     /// Fenpo went to the background: iOS suspends sockets, so close the channel unless a transfer runs.
@@ -226,11 +248,36 @@ public final class FenpoServices {
         }
     }
 
+    /// The PC's `Hello` arrived on a channel: send what the PC forgets when the iPhone disconnects.
+    private func channelGreeted(_ channel: Channel) {
+        actions.resendFocus(over: channel)
+        hotspot.sendInfo(over: channel)
+    }
+
+    /// Sends a message that is not a reply.
+    private func send(_ body: Fenpo_V1_Envelope.OneOf_Body, on channel: Channel) {
+        switch channel {
+        case .bluetooth:
+            do {
+                try central.send(body)
+            } catch {
+                log.error("Not sent over BLE: \(String(describing: error))")
+            }
+        case .wifi:
+            Task {
+                _ = try? await wifi.send(body)
+            }
+        }
+    }
+
     private func route(_ envelope: Fenpo_V1_Envelope, from channel: Channel) {
         for handler in extraHandlers where handler(envelope, channel) {
             return
         }
         if camera.handle(envelope) {
+            return
+        }
+        if photos.handle(envelope, from: channel) {
             return
         }
         if transfers.handle(envelope) {
@@ -253,6 +300,12 @@ public final class FenpoServices {
             ringer.handle(request)
         case .openURL(let message):
             openFromPC(message.url)
+        case .pcNotification(let notification):
+            pcNotifications.show(notification)
+        case .pcNotificationRemoved(let removed):
+            pcNotifications.remove(removed.id)
+        case .hotspotRequest:
+            reply(.hotspotStatus(hotspot.handleRequest()), to: envelope.id, on: channel)
         default:
             break
         }

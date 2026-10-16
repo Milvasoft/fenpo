@@ -74,6 +74,9 @@ public enum Handshake {
         .deviceState,
         .camera,
         .pcInput,
+        .pcNotifications,
+        .photos,
+        .hotspot,
     ]
 
     /// Builds this device's `Hello`.

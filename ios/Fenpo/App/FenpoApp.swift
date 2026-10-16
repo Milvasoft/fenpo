@@ -44,7 +44,7 @@ struct FenpoApp: App {
         #endif
         let services = FenpoServices.shared
         FenpoApp.services = services
-        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer, camera: services.camera, transferActivities: TransferActivities(), readsPermissions: true, pcInput: services.pcInput)
+        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer, camera: services.camera, transferActivities: TransferActivities(), readsPermissions: true, pcInput: services.pcInput, hotspot: services.hotspot, screenshots: services.screenshots)
         services.onChange = {
             model.scheduleRefresh()
         }

@@ -15,6 +15,12 @@ struct SettingsView: View {
     @AppStorage(FocusSync.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var focusSync = true
 
+    @AppStorage(PcNotificationPresenter.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    private var pcNotifications = true
+
+    @AppStorage(ScreenshotSender.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    private var sendsScreenshots = false
+
     @AppStorage("developer.unlocked")
     private var isDeveloperUnlocked = false
     @State private var isDeveloperPresented = false
@@ -51,9 +57,24 @@ struct SettingsView: View {
                             .onChange(of: focusSync) {
                                 Task { await model.focusSyncChanged() }
                             }
-                        // Phases 4 and 5: shown as in the design, not available yet.
+                        ToggleRow(icon: .bell, color: .dusk, title: "settings.pcNotifications", isOn: $pcNotifications)
+                        NavigationLink {
+                            HotspotSettingsView()
+                        } label: {
+                            SettingsRowLayout(icon: .symbol("personalhotspot"), color: .green, title: "settings.hotspot") {
+                                Text(model.hotspot?.details == nil ? "settings.hotspot.notSet" : "settings.hotspot.set")
+                                    .foregroundStyle(.textSecondary)
+                                chevron
+                            }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        ToggleRow(icon: .photo, color: .dusk, title: "settings.screenshots", isOn: $sendsScreenshots)
+                            .onChange(of: sendsScreenshots) { _, isOn in
+                                model.screenshots?.setEnabled(isOn)
+                            }
+                        // Phase 5: shown as in the design, not available yet.
                         Group {
-                            ToggleRow(icon: .photo, color: .dusk, title: "settings.screenshots", isOn: .constant(false))
                             ToggleRow(icon: .lock, color: .leaf, title: "settings.faceIDUnlock", isOn: .constant(false))
                         }
                         .disabled(true)
@@ -76,6 +97,13 @@ struct SettingsView: View {
                         permissionRow(icon: .bluetooth, color: .blue, title: "settings.permission.bluetooth", state: model.permissions.bluetooth)
                         permissionRow(icon: .wifi, color: .green, title: "settings.permission.localNetwork", state: model.permissions.localNetwork)
                         permissionRow(icon: .paste, color: .slate, title: "settings.permission.paste", state: model.permissions.paste)
+                        if model.permissions.photos == .notDetermined {
+                            DisclosureRow(icon: .photo, color: .dusk, title: "settings.permission.photos", value: Text(PermissionState.notDetermined.title), valueColor: .accent) {
+                                Task { await model.requestPhotoAccess() }
+                            }
+                        } else {
+                            permissionRow(icon: .photo, color: .dusk, title: "settings.permission.photos", state: model.permissions.photos)
+                        }
                     }
                     Text("settings.permission.paste.note")
                         .font(.footnote)

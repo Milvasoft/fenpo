@@ -34,7 +34,7 @@ products.append(.library(name: "FenpoApple", targets: ["FenpoApple"]))
 targets.append(
     .target(
         name: "FenpoApple",
-        dependencies: ["FenpoCore", "FenpoProtocol"]
+        dependencies: ["FenpoCore", "FenpoProtocol", .product(name: "SwiftProtobuf", package: "swift-protobuf")]
     )
 )
 targets.append(
