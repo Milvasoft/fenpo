@@ -58,6 +58,7 @@ public sealed class BluetoothHostedService(
         // The Fenpo service is advertised all the time so the iPhone app can find and wake for this PC (S4).
         await _channel.StartAsync();
         _channel.AndroidPhoneSeen += (sender, id) => OnAndroidPhoneSeen(id);
+        _link.ServicesReady += (sender, services) => OnServicesReady(services);
         _status.Attach();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -94,6 +95,19 @@ public sealed class BluetoothHostedService(
             }
 
             await Task.Delay(_searchInterval, stoppingToken);
+        }
+    }
+
+    // An Android phone bonded for the Fenpo channel is a paired LE phone too, and it bonds again with a new address
+    // after a lost bond. Whatever has none of the iPhone services is not the iPhone (S1 saw all three on the iPhone).
+    private void OnServicesReady(LinkServices services)
+    {
+        var apple = services.Services.ContainsKey(Gatt.GattUuids.Ancs) || services.Services.ContainsKey(Gatt.GattUuids.Ams) || services.Services.ContainsKey(Gatt.GattUuids.AppleContinuity);
+
+        if (!apple && Phone is { } phone)
+        {
+            _logger.LogInformation("{Name} has no iPhone services ({Count} services)", phone.Name, services.Services.Count);
+            OnAndroidPhoneSeen(phone.LeDeviceId);
         }
     }
 

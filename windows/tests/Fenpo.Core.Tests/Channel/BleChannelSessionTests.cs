@@ -129,6 +129,12 @@ public sealed class BleChannelSessionTests
 
         public ulong NextSend(string deviceId) => _sent[deviceId] = _sent.GetValueOrDefault(deviceId) + 1;
 
+        public void Reset(string deviceId)
+        {
+            _sent.Remove(deviceId);
+            _received.Remove(deviceId);
+        }
+
         public bool TryAcceptReceived(string deviceId, ulong counter)
         {
             if (_received.TryGetValue(deviceId, out var last) && counter <= last)

@@ -59,6 +59,19 @@ public sealed class BleCounterStore(ILogger<BleCounterStore> logger) : IBleCount
         }
     }
 
+    /// <inheritdoc/>
+    public void Reset(string deviceId)
+    {
+        lock (_lock)
+        {
+            var saved = Load();
+            saved.SendReserved.Remove(deviceId);
+            saved.Received.Remove(deviceId);
+            _nextSend.Remove(deviceId);
+            Save(saved);
+        }
+    }
+
     private Counters Load()
     {
         if (_saved is not null)
