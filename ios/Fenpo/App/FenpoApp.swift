@@ -19,12 +19,19 @@ struct FenpoApp: App {
         }
     }
 
+    /// Screenshot scenes use sample data; a normal launch starts the real channels.
     private static func makeModel() -> AppModel {
         #if DEBUG
         if let scene = ScreenshotScene.current {
             return scene.makeModel()
         }
         #endif
-        return AppModel(session: SampleSession())
+        let services = FenpoServices.shared
+        let model = AppModel(session: services.session, pairing: services.pairing)
+        services.central.onStateChange = { _ in
+            Task { await model.refresh() }
+        }
+        services.start()
+        return model
     }
 }

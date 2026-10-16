@@ -3,6 +3,8 @@
 <plist version="1.0">
 <!-- Keys Xcode cannot generate from build settings. The rest comes from INFOPLIST_KEY_* in project.yml. -->
 <dict>
+	<key>FenpoKeychainGroup</key>
+	<string>$(AppIdentifierPrefix)com.fenpo.shared</string>
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
