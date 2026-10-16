@@ -262,16 +262,16 @@ Kaynaklar: [setup-gradle](https://github.com/gradle/actions/blob/main/docs/setup
 Kaynaklar: [Geliştirici doğrulaması](https://developer.android.com/developer-verification), [SSS](https://developer.android.com/developer-verification/guides/faq), [Açık kaynak kaydı](https://developer.android.com/developer-verification/guides/open-source-app-registration), [Play test şartı](https://support.google.com/googleplay/android-developer/answer/14151465), [F-Droid Inclusion Policy](https://f-droid.org/docs/Inclusion_Policy/), [Anti-Features](https://f-droid.org/docs/Anti-Features/), [Reproducible Builds](https://f-droid.org/docs/Reproducible_Builds/), [IzzyOnDroid](https://apt.izzysoft.de/fdroid/index/info)
 
 ## 20. Protokol ve Windows tarafına etkisi
-Aşama A'da protokol değişikliği yapılmadı. Aşağıdakiler ilgili aşamada ayrı bir `protocol: ...` commit'i olur ve Buğra'ya sorulur.
+Her protokol değişikliği ayrı bir `protocol: ...` commit'i olur ve Buğra'ya sorulur. Durum (16 Ekim):
 
 | Konu | Gereken | Ne zaman |
 |---|---|---|
 | Medya kontrolü | Android'de AMS yok. Şu an çalan ve medya komutları için bir `Capability` ve Envelope aralığı yok; `CAPABILITY_NOTIFICATION_MIRROR` bunu kapsamıyor | Aşama D, ayrı yetenek önerilecek |
-| Bildirim aynalama | 90–99: bildirim eklendi/kaldırıldı, kapat, eylem çalıştır, yazılı yanıt | Aşama D |
+| Bildirim aynalama | 90–96: bildirim, kaldırma, anlık görüntü sonu, kapat, eylem ve yazılı yanıt, uygulama simgesi | **Yapıldı:** `aedd2c0`, `bfd7921` (§22), `main`'e onayla |
 | Mesajlar | 100–109: sadece MAP'i olmayan telefonlar için (§5) | Aşama D, MAP sonucuna göre |
-| `Hello` | İşletim sistemi sürümü ve model adı (DECISIONS #30, S5 commit'i); Android'de "Android 17, Pixel 9" | S5 |
-| Hassas pano | `ClipboardItem`'da "hassas" işareti (şifre yöneticisinden kopyalanan) | Pano işiyle |
-| Yakınlık | Telefonun ölçtüğü RSSI (`DeviceState` içinde veya ayrı mesaj, §4) | Aşama C |
+| `Hello` | İşletim sistemi sürümü ve model adı (DECISIONS #30, S5 commit'i); Android'de "Android 17, Pixel 9" | **Yapıldı:** `e185f5d` |
+| Hassas pano | `ClipboardItem`'da "hassas" işareti (şifre yöneticisinden kopyalanan) | Açık: pano yapıldı (§22), işaret henüz yok |
+| Yakınlık | Telefonun ölçtüğü RSSI (`DeviceState` içinde veya ayrı mesaj, §4) | Açık: telefon RSSI'yi ölçüyor, protokolde alanı yok |
 | Kamera isteği | PC kamerayı isteyince telefon "dokunuş bekleniyor" durumunu bildirebilmeli (§10) | Aşama 4 |
 
 Windows tarafı için notlar:
@@ -324,3 +324,20 @@ Windows'taki Fenpo'nun QR ekranından baştan sona: QR → TLS 1.3 (sabitlenmiş
 **Wi‑Fi kanalı (16 Ekim 15:00, Windows Fenpo `7396bc3`):** saklı adres `192.168.1.14:53113` ilk denemede TLS 1.3 ile açıldı, PC `Hello` verdi, `DeviceState` (%44, şarjda) Wi‑Fi'den gitti; 2 saniye sonra BLE yolu da açıldı, bildirim "Bağlı, Bluetooth ve Wi‑Fi". Telefonun Wi‑Fi'si kapatılınca bağlantı hemen kapandı, `DeviceState` BLE'ye geçti, bildirim "Bağlı, Bluetooth" oldu; Wi‑Fi açılınca 5 saniyede yeniden bağlandı. **Denenmedi:** DNS-SD yedeği (saklı adres çalıştığı için gerekmedi), `ERROR_CODE_NOT_PAIRED`, Android 17'de yerel ağ izni, PC'nin `DeviceState.addresses` göndermesi (Windows'ta henüz yok).
 
 Hâlâ denenecek: uygulama süreci ölüyken PC yaklaşınca uyanma.
+
+## 22. Aşama D (uygulandı, 16 Ekim)
+
+Hepsi protokole göre yazıldı ve birim testleriyle doğrulandı. **Windows tarafı bunları henüz sunmuyor**: PC'nin `Hello`'su sadece `CAPABILITY_DEVICE_STATE` veriyor, bu yüzden telefon diğer mesajları göndermiyor; uçtan uca cihaz denemesi Windows'taki karşılıklar gelince yapılacak. Telefon `Hello`'da `DEVICE_STATE`, `CLIPBOARD`, `OPEN_URL`, `RING`, `LOCK_PC`, `FILE_TRANSFER` ve `NOTIFICATION_MIRROR` sunuyor.
+
+| Özellik | Telefonda | Not |
+|---|---|---|
+| Mesajlaşma katmanı | `PcMessenger`: özellik mesajları Wi‑Fi açıksa Wi‑Fi'den, yoksa BLE'den; PC yeteneği sunmuyorsa gönderilmez. BLE'ye sığmayan mesaj Wi‑Fi bekler. | |
+| Pano (§8) | PC'den gelen metin, bağlantı ve PNG/JPEG panoya kendiliğinden yazılır ("PC'den panoya alındı"). Telefondan PC'ye: Hızlı Ayarlar kutucuğu, kalıcı bildirimdeki "Panoyu gönder", ana ekran kutucuğu; üçü de odak alan görünmez aktiviteyi açar. `ClipboardRequest`'e `ERROR_CODE_UNSUPPORTED` döner (Android arka planda okutmuyor). "Pano paylaşımı" kapalıysa iki yön de durur. | |
+| Telefonu çaldır | `RingDevice`: alarm sesi, alarm ses düzeyi tam, titreşim, "Durdur"lu bildirim, 1 dakikada kendiliğinden durur. | Rahatsız Etmeyin'de alarmlar engellenmemişse çalar. |
+| PC'yi kilitle | Hızlı Ayarlar kutucuğu ve kalıcı bildirim. | |
+| Bağlantılar | PC'den gelen `OpenUrl` dokununca açılan bildirim olur (arka planda tarayıcı açılamıyor); sadece http/https. Paylaşım menüsünde "PC'de aç" paylaşılan metindeki ilk bağlantıyı PC'de açar. | Belgeyi PC'de açmak için protokolde "aktarımdan sonra aç" alanı yok; şimdilik sadece bağlantılar. |
+| Dosya aktarımı (§9) | Veri bağlantısını her iki yönde telefon açar (protokol `c5e2cde`). Gönderme: paylaşım menüsü "PC'ye gönder" (tek ve çoklu), doğrudan paylaşım kısayolu (PC'nin adı kişilerin yanında), ana ekran "Fotoğraf gönder" (fotoğraf seçici). Alma: Wi‑Fi açık ve yer varsa kabul, `Download/Fenpo`'ya MediaStore ile (izinsiz), varsa SHA-256 denetimi, yarım dosyalar silinir. İlerleme bildirimi ve İptal; Aktarımlar sekmesinde süren aktarımlar ve geçmiş. | Tasarımda Aktarımlar ekranı yok; ana ekrandaki "Son aktarılanlar" satırları kullanıldı. Live Update ve `ProgressStyle` (API 36) henüz yok, standart ilerleme çubuğu. |
+| Bildirim aynalama (§6) | `NotificationListenerService` → her `Hello`'dan sonra anlık görüntü (`pre_existing`, `NotificationSnapshotDone`; Wi‑Fi açıkken BLE'de atlanır), sonra ekleme, güncelleme, kaldırma; `seq` zamana dayalı (µs), süreç yeniden başlasa da geri gitmez. Kapatma, eylem ve yazılı yanıt (`RemoteInput`), uygulama simgesi isteği. BLE'de büyük simge düşer, metin kısalır. Ayarlar'da uygulama başına seçim ("PC'den yanıtlanır", "Sadece gösterilir", "Kapalı") ve "Yeni uygulamalar da gönderilsin". | Protokol önerisi `aedd2c0` + `bfd7921` (Windows incelemesiyle kategori, anlık görüntü sınırı, `seq`); `main`'e Buğra'nın onayıyla girer. Android 15'in OTP sansürünü tespit edemiyoruz: `content_hidden` şimdilik hep `false`, A5'te bakılacak. |
+| Rahatsız Etmeyin | "Rahatsız etmeyin'i eşitle" kapalıysa `DeviceState.focus_active` gönderilmez. | |
+
+**Cihazda denenebilenler (PC'siz):** paylaşım hedefleri ve Hızlı Ayarlar kutucukları sisteme kayıtlı (`query-activities`, `query-services`). Wi‑Fi yolu 17 dakika kesintisiz kaldı, pil değiştikçe `DeviceState` gitti.
