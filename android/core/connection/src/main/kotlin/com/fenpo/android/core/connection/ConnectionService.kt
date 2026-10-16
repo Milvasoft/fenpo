@@ -12,6 +12,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -22,6 +23,7 @@ import com.fenpo.android.core.ble.GattConnection
 import com.fenpo.android.core.ble.GattState
 import com.fenpo.android.core.connection.clipboard.ClipboardSendActivity
 import com.fenpo.android.core.connection.clipboard.ClipboardSync
+import com.fenpo.android.core.connection.media.MediaBridge
 import com.fenpo.android.core.connection.notifications.NotificationMirror
 import com.fenpo.android.core.connection.remote.LinkOpener
 import com.fenpo.android.core.connection.remote.RingPlayer
@@ -47,12 +49,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import okio.ByteString
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import com.fenpo.android.core.designsystem.R as DesignR
@@ -89,6 +95,8 @@ class ConnectionService : Service() {
     @Inject lateinit var notificationMirror: NotificationMirror
 
     @Inject lateinit var settingsRepository: SettingsRepository
+
+    @Inject lateinit var mediaBridge: MediaBridge
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var link: Job? = null
@@ -170,6 +178,8 @@ class ConnectionService : Service() {
             }
             launch { transferManager.run() }
             launch { notificationMirror.run() }
+            launch { mediaBridge.run() }
+            launch { reportMedia() }
 
             val wifi =
                 WifiLink(
@@ -282,8 +292,9 @@ class ConnectionService : Service() {
         val preferred = messenger.sessions.map { it[LinkPath.WIFI] ?: it[LinkPath.BLUETOOTH] }.distinctUntilChanged()
         // "Sync Do Not Disturb" off: the PC does not learn about it.
         val dnd = settingsRepository.settings.map { it.features.doNotDisturbSync }.distinctUntilChanged()
-        combine(PhoneState.states(this), dnd, preferred) { phone, syncDnd, session ->
-            (if (syncDnd) phone else phone.copy(focus_active = null)) to session
+        val rssi = rssiReports().onStart { emit(null) }
+        combine(PhoneState.states(this), dnd, rssi, preferred) { phone, syncDnd, dbm, session ->
+            (if (syncDnd) phone else phone.copy(focus_active = null)).copy(ble_rssi_dbm = dbm) to session
         }.collect { (state, session) ->
             if (session == null) return@collect
             if (Capability.CAPABILITY_DEVICE_STATE !in session.awaitHello().capabilities) return@collect
@@ -297,6 +308,36 @@ class ConnectionService : Service() {
                 throw e
             } catch (e: Exception) {
                 Log.d(TAG, "DeviceState not sent on ${session.path}: ${e.message}")
+            }
+        }
+    }
+
+    /** The PC's signal as this phone measures it, for the proximity lock (protocol/README "Proximity"). */
+    private fun rssiReports(): Flow<Int?> {
+        val gate = RssiGate()
+        return flow {
+            while (true) {
+                val dbm = status.snapshot.value.rssi
+                if (dbm != null && gate.accept(dbm, SystemClock.elapsedRealtime())) emit(dbm)
+                delay(RSSI_INTERVAL)
+            }
+        }
+    }
+
+    /** Now playing on the best open path; artwork only on Wi-Fi, so a move to Wi-Fi sends it again. */
+    private suspend fun reportMedia() {
+        val preferred = messenger.sessions.map { it[LinkPath.WIFI] ?: it[LinkPath.BLUETOOTH] }.distinctUntilChanged()
+        combine(mediaBridge.states(), preferred, ::Pair).collect { (state, session) ->
+            Log.d(TAG, "Media: ${if (state.active) "${state.app_id}, playing ${state.playing}" else "nothing"}")
+            if (session == null) return@collect
+            if (Capability.CAPABILITY_MEDIA !in session.awaitHello().capabilities) return@collect
+            val body = if (session.path == LinkPath.WIFI) state else state.copy(artwork_jpeg = ByteString.EMPTY)
+            try {
+                session.send(Envelope.Body.MediaState(body))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.d(TAG, "MediaState not sent on ${session.path}: ${e.message}")
             }
         }
     }

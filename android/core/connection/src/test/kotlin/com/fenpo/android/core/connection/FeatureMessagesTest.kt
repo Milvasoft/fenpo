@@ -167,6 +167,47 @@ class FeatureMessagesTest {
         }
 
     @Test
+    fun sensitiveItemsAreMarkedAndNotPreviewed() =
+        runTest {
+            connect(Capability.CAPABILITY_CLIPBOARD)
+            val sync = ClipboardSync(context, messenger, settings)
+            val copied = ClipData.newPlainText("t", "hunter2")
+            copied.description.extras =
+                android.os.PersistableBundle().apply { putBoolean("android.content.extra.IS_SENSITIVE", true) }
+            clipboard.setPrimaryClip(copied)
+
+            assertEquals(ClipboardSendResult.SENT, sync.sendCurrent())
+            assertTrue(assertIs<Envelope.Body.Clipboard>(sent.single().first).value.sensitive)
+            assertEquals(context.getString(R.string.clipboard_sensitive), sync.toPc.value)
+
+            val job = launch { sync.run() }
+            runCurrent()
+            val fromPc = ClipboardItem(item_id = "p", sensitive = true, content = ClipboardItem.Content.Text("s3cret"))
+            messenger.deliver(Envelope(id = 6, body = Envelope.Body.Clipboard(fromPc)))
+            runCurrent()
+
+            assertEquals(
+                "s3cret",
+                clipboard.primaryClip
+                    ?.getItemAt(0)
+                    ?.text
+                    .toString(),
+            )
+            assertEquals(context.getString(R.string.clipboard_sensitive), sync.fromPc.value)
+            job.cancel()
+        }
+
+    @Test
+    fun rssiIsReportedOnChangeOrEveryHalfMinute() {
+        val gate = RssiGate()
+        assertTrue(gate.accept(-50, 0))
+        assertFalse(gate.accept(-52, 5_000))
+        assertTrue(gate.accept(-55, 10_000))
+        assertFalse(gate.accept(-55, 35_000))
+        assertTrue(gate.accept(-55, 40_000))
+    }
+
+    @Test
     fun findsWebLinksOnly() {
         assertEquals("https://fenpo.app/a?b=1", WebLink.firstIn("Fenpo docs https://fenpo.app/a?b=1."))
         assertEquals("http://192.168.1.14:8080/x", WebLink.firstIn("http://192.168.1.14:8080/x"))

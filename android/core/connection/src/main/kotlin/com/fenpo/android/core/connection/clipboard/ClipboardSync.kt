@@ -8,6 +8,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.PersistableBundle
 import android.util.Log
 import android.util.Patterns
 import androidx.core.app.NotificationCompat
@@ -118,7 +119,7 @@ class ClipboardSync
                 val image = item.content is ClipboardItem.Content.Image
                 return if (image) ClipboardSendResult.TOO_LARGE else ClipboardSendResult.NOT_CONNECTED
             }
-            _toPc.value = item.content.plainText()?.take(PREVIEW_CHARS)
+            _toPc.value = if (item.sensitive) hidden() else item.content.plainText()?.take(PREVIEW_CHARS)
             return ClipboardSendResult.SENT
         }
 
@@ -151,6 +152,8 @@ class ClipboardSync
                 }
             }
             val text = first.coerceToText(context)?.toString()?.takeIf { it.isNotEmpty() } ?: return null
+            // Password managers mark what they copy (Android 13+); the PC keeps it out of history.
+            val sensitive = clip.description.extras?.getBoolean(EXTRA_IS_SENSITIVE) == true
             val isUrl =
                 text.trim().let {
                     it.startsWith("http", ignoreCase = true) &&
@@ -158,9 +161,19 @@ class ClipboardSync
                 }
             return Content.Ready(
                 if (isUrl) {
-                    ClipboardItem(item_id = id, created_at = now, content = ClipboardItem.Content.Url(text.trim()))
+                    ClipboardItem(
+                        item_id = id,
+                        created_at = now,
+                        sensitive = sensitive,
+                        content = ClipboardItem.Content.Url(text.trim()),
+                    )
                 } else {
-                    ClipboardItem(item_id = id, created_at = now, content = ClipboardItem.Content.Text(text))
+                    ClipboardItem(
+                        item_id = id,
+                        created_at = now,
+                        sensitive = sensitive,
+                        content = ClipboardItem.Content.Text(text),
+                    )
                 },
             )
         }
@@ -191,8 +204,13 @@ class ClipboardSync
                     image != null -> imageClip(item.item_id, image) ?: return
                     else -> return
                 }
+            // Android 13+ hides a sensitive clip in its own copy preview.
+            if (item.sensitive) {
+                clip.description.extras =
+                    PersistableBundle().apply { putBoolean(EXTRA_IS_SENSITIVE, true) }
+            }
             clipboard.setPrimaryClip(clip)
-            val preview = text?.take(PREVIEW_CHARS)
+            val preview = if (item.sensitive) hidden() else text?.take(PREVIEW_CHARS)
             _fromPc.value = preview ?: context.getString(R.string.clipboard_image)
             Log.i(TAG, "Clipboard from the PC: ${if (image != null) "image" else "${preview?.length} chars"}")
             notifyReceived(preview)
@@ -250,6 +268,8 @@ class ClipboardSync
                 .first()
                 .features.clipboardSharing
 
+        private fun hidden(): String = context.getString(R.string.clipboard_sensitive)
+
         private fun ClipboardItem.Content?.plainText(): String? =
             when (this) {
                 is ClipboardItem.Content.Text -> value
@@ -274,6 +294,9 @@ class ClipboardSync
             const val CLIPBOARD_FOLDER = "clipboard"
             const val AUTHORITY_SUFFIX = ".files"
             const val BUFFER_BYTES = 16 * 1024
+
+            /** ClipDescription.EXTRA_IS_SENSITIVE, API 33; the key is honoured as a plain string before that. */
+            const val EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE"
 
             /** content.proto: larger images travel as a file transfer. */
             const val MAX_IMAGE_BYTES = 512 * 1024

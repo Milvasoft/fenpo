@@ -42,4 +42,5 @@
     </plurals>
     <string name="notification_listener_label">Fenpo: notifications to your PC</string>
     <string name="clipboard_turned_off">Clipboard sharing is off. Turn it on in Settings.</string>
+    <string name="clipboard_sensitive">Hidden content</string>
 </resources>

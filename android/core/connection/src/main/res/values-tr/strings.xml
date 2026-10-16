@@ -42,4 +42,5 @@
     </plurals>
     <string name="notification_listener_label">Fenpo: bildirimler PC’ye</string>
     <string name="clipboard_turned_off">Pano paylaşımı kapalı. Ayarlar’dan aç.</string>
+    <string name="clipboard_sensitive">Gizli içerik</string>
 </resources>
