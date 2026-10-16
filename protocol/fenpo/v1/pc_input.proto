@@ -49,7 +49,7 @@ enum PcKeyCode {
 }
 
 message PcPointerMove {
-  float dx = 1;                          // In the PC's pixels, scaled by the phone's speed setting.
+  float dx = 1;                          // In the phone's pixels, after its speed setting; the PC adds its own acceleration.
   float dy = 2;
 }
 
@@ -63,12 +63,36 @@ message PcScroll {
   float dy = 2;                          // Positive scrolls the content down.
 }
 
+enum PcKeyPhase {
+  PC_KEY_PHASE_TAP = 0;                  // Down and up.
+  PC_KEY_PHASE_DOWN = 1;
+  PC_KEY_PHASE_UP = 2;
+}
+
 message PcKey {
   PcKeyCode code = 1;
   bool ctrl = 2;
   bool alt = 3;
   bool shift = 4;
   bool win = 5;
+  uint32 virtual_key = 6;                // A Windows virtual-key code, used when code is UNSPECIFIED.
+  PcKeyPhase phase = 7;
+}
+
+enum PcPresenterAction {
+  PC_PRESENTER_ACTION_UNSPECIFIED = 0;
+  PC_PRESENTER_ACTION_NEXT = 1;
+  PC_PRESENTER_ACTION_PREVIOUS = 2;
+  PC_PRESENTER_ACTION_START = 3;
+  PC_PRESENTER_ACTION_END = 4;
+  PC_PRESENTER_ACTION_BLACK = 5;
+}
+
+// A dot the PC draws over its primary screen while active.
+message PcLaser {
+  bool active = 1;
+  float x = 2;                           // 0..1 of the PC's primary screen, from the left.
+  float y = 3;                           // 0..1 from the top.
 }
 
 message PcInput {
@@ -78,5 +102,8 @@ message PcInput {
     PcScroll scroll = 3;
     PcKey key = 4;
     string text = 5;                     // Typed as Unicode, whatever the PC's keyboard layout.
+    PcPresenterAction presenter = 6;     // The PC maps it to Right, Left, F5, Esc, B.
+    PcLaser laser = 7;
+    bool keep_awake = 8;                 // Keep the PC's screen on (presenting); dropped when the phone disconnects.
   }
 }
