@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Live video and audio from the phone: the camera (camera.proto) and the screen (screen.proto).
+//
+// Control messages run on the control connection. The media itself moves on its own TLS
+// connection that the phone opens to the PC's control server port, like file transfers: the
+// first frame is [uint32 length][Envelope with media_stream_open], then every frame is
+// [uint32 length][StreamPacket]. The phone closes it when the stream stops.
+
+enum VideoCodec {
+  VIDEO_CODEC_UNSPECIFIED = 0;
+  VIDEO_CODEC_H264 = 1;                  // Annex-B, Baseline or Main, no B-frames; every PC decodes it; the default.
+  VIDEO_CODEC_HEVC = 2;                  // Only when the PC lists it: many PCs lack the decoder.
+}
+
+enum AudioCodec {
+  AUDIO_CODEC_UNSPECIFIED = 0;           // No audio.
+  AUDIO_CODEC_OPUS = 1;                  // Needs an optional decoder on Windows; not used by default.
+  AUDIO_CODEC_AAC = 2;                   // AAC-LC, raw access units (no ADTS); codec_config carries the AudioSpecificConfig.
+  AUDIO_CODEC_PCM_S16LE = 3;             // Uncompressed, little-endian 16-bit; the PC's first choice on a LAN.
+}
+
+// What the PC can decode, in its order of preference. Empty lists mean H.264 and no audio.
+message AcceptedFormats {
+  repeated VideoCodec video = 1;
+  repeated AudioCodec audio = 2;
+}
+
+message VideoFormat {
+  VideoCodec codec = 1;
+  uint32 width = 2;                      // As encoded, after rotation.
+  uint32 height = 3;
+  uint32 fps = 4;
+  uint32 bitrate_kbps = 5;
+}
+
+enum StreamKind {
+  STREAM_KIND_UNSPECIFIED = 0;
+  STREAM_KIND_CAMERA = 1;
+  STREAM_KIND_SCREEN = 2;
+}
+
+// First frame of a media connection, as an Envelope body, so the PC can tell it from a control
+// connection (Hello) and a file transfer (TransferStreamHeader).
+message MediaStreamOpen {
+  string stream_id = 1;                  // From CameraStatus or ScreenStatus.
+  StreamKind kind = 2;
+  VideoFormat video = 3;
+  AudioCodec audio = 4;
+  uint32 audio_sample_rate = 5;
+  uint32 audio_channels = 6;
+}
+
+enum StreamTrack {
+  STREAM_TRACK_UNSPECIFIED = 0;
+  STREAM_TRACK_VIDEO = 1;
+  STREAM_TRACK_AUDIO = 2;
+}
+
+// PC → phone: send a key frame (with codec_config) now, e.g. after a decode error.
+message RequestKeyFrame {
+  string stream_id = 1;
+}
+
+// One encoded access unit. The phone drops video frames rather than queue them when the
+// connection falls behind, and always sends codec_config again before the next key frame.
+message StreamPacket {
+  StreamTrack track = 1;
+  uint64 pts_us = 2;                     // Presentation time on the phone's monotonic clock.
+  bool key_frame = 3;
+  bool codec_config = 4;                 // SPS/PPS (VPS) or the audio codec header.
+  bytes data = 5;
+}

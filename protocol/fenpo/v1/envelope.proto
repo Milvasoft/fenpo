@@ -7,6 +7,11 @@ import "fenpo/v1/pairing.proto";
 import "fenpo/v1/content.proto";
 import "fenpo/v1/transfer.proto";
 import "fenpo/v1/device.proto";
+import "fenpo/v1/media.proto";
+import "fenpo/v1/camera.proto";
+import "fenpo/v1/screen.proto";
+import "fenpo/v1/video.proto";
+import "fenpo/v1/notification.proto";
 
 option csharp_namespace = "Fenpo.Protocol.V1";
 option java_package = "com.fenpo.protocol.v1";
@@ -44,14 +49,40 @@ message Envelope {
     // 40-49: device control
     RingDevice ring = 40;
     LockPc lock_pc = 41;
+    MediaCommand media_command = 42;
 
     // 50-59: device state
     DeviceState device_state = 50;
     PcStatus pc_status = 51;
+    MediaState media_state = 52;
+
+    // 60-69: camera, and the first frame of every media connection
+    CameraStart camera_start = 60;
+    CameraStop camera_stop = 61;
+    CameraStatus camera_status = 62;
+    CameraSettingsChange camera_settings = 63;
+    MediaStreamOpen media_stream_open = 64;
+    RequestKeyFrame request_key_frame = 65;
+
+    // 80-89: screen mirroring (Android)
+    ScreenStart screen_start = 80;
+    ScreenStop screen_stop = 81;
+    ScreenStatus screen_status = 82;
+    ScreenInput screen_input = 83;
+
+    // 90-99: notification mirror (Android)
+    PhoneNotification phone_notification = 90;
+    NotificationRemoved notification_removed = 91;
+    DismissNotification dismiss_notification = 92;
+    RunNotificationAction run_notification_action = 93;
+    AppIconRequest app_icon_request = 94;
+    AppIcon app_icon = 95;
+    NotificationSnapshotDone notification_snapshot_done = 96;
   }
 
-  // 60-69 camera, 70-79 file provider, 80-89 screen mirror,
-  // 90-99 notification mirror (Android), 100-109 messages (Android).
+  // 66-69 camera additions, 70-79 file provider, 84-89 screen mirror additions, 100-109 messages (Android).
   // Defined in later phases.
-  reserved 60 to 109;
+  reserved 66 to 79;
+  reserved 84 to 89;
+  reserved 97 to 109;
 }

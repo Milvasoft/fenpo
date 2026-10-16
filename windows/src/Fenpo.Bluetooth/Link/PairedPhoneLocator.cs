@@ -14,7 +14,8 @@ public sealed record PairedPhone(string LeDeviceId, string? ClassicDeviceId, str
 
 /// <summary>
 /// Finds the paired iPhone. Windows Settings pairing creates both an LE and a classic record (S1); the LE record with
-/// the Phone appearance is preferred, then any paired LE device whose name matches a paired classic device.
+/// the Phone appearance is preferred, then any paired LE device whose name matches a paired classic device. Android
+/// phones paired with the Fenpo app are paired LE phones too and are left out.
 /// </summary>
 public sealed class PairedPhoneLocator(ILogger<PairedPhoneLocator> logger)
 {
@@ -26,11 +27,14 @@ public sealed class PairedPhoneLocator(ILogger<PairedPhoneLocator> logger)
     /// Finds the phone to use.
     /// </summary>
     /// <param name="preferredLeDeviceId">Device id saved in the settings, tried first.</param>
+    /// <param name="excludedLeDeviceIds">Devices that are not iPhones (Android phones seen on the Fenpo channel).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The phone, or null when none is paired.</returns>
-    public async Task<PairedPhone?> FindAsync(string? preferredLeDeviceId, CancellationToken cancellationToken = default)
+    public async Task<PairedPhone?> FindAsync(string? preferredLeDeviceId, IReadOnlyCollection<string> excludedLeDeviceIds, CancellationToken cancellationToken = default)
     {
-        var leDevices = await DeviceInformation.FindAllAsync(BluetoothLEDevice.GetDeviceSelectorFromPairingState(true)).AsTask(cancellationToken);
+        var leDevices = (await DeviceInformation.FindAllAsync(BluetoothLEDevice.GetDeviceSelectorFromPairingState(true)).AsTask(cancellationToken))
+            .Where(d => !excludedLeDeviceIds.Contains(d.Id, StringComparer.OrdinalIgnoreCase))
+            .ToList();
         var classicDevices = await DeviceInformation.FindAllAsync(BluetoothDevice.GetDeviceSelectorFromPairingState(true)).AsTask(cancellationToken);
 
         DeviceInformation? chosen = leDevices.FirstOrDefault(d => d.Id == preferredLeDeviceId);
@@ -61,5 +65,17 @@ public sealed class PairedPhoneLocator(ILogger<PairedPhoneLocator> logger)
         var classic = classicDevices.FirstOrDefault(c => c.Name == chosen.Name);
         _logger.LogInformation("Using {Name} (classic record {Classic})", chosen.Name, classic is null ? "missing" : "present");
         return new PairedPhone(chosen.Id, classic?.Id, chosen.Name);
+    }
+
+    /// <summary>
+    /// Finds the classic Bluetooth record of a phone by name (an Android phone gets one with its LE bond, CTKD).
+    /// </summary>
+    /// <param name="name">Phone name as Fenpo on it reported it.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The BluetoothDevice id, or null.</returns>
+    public async Task<string?> FindClassicAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var classicDevices = await DeviceInformation.FindAllAsync(BluetoothDevice.GetDeviceSelectorFromPairingState(true)).AsTask(cancellationToken);
+        return classicDevices.FirstOrDefault(c => string.Equals(c.Name, name, StringComparison.OrdinalIgnoreCase))?.Id;
     }
 }

@@ -14,11 +14,15 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
     private readonly IBleCounters _counters = counters;
     private readonly PcIdentity _identity = identity;
     private readonly Func<PcStatus> _pcStatus = pcStatus;
-    private readonly int _payloadLength = payloadLength;
     private readonly BleChunkAssembler _assembler = new();
     private readonly Lock _sendLock = new();
     private PairedAppDevice? _device;
     private ulong _nextId = 1;
+
+    /// <summary>
+    /// Gets or sets the payload bytes per chunk; updated when the phone subscribes and its notification size is known.
+    /// </summary>
+    public int PayloadLength { get; set; } = payloadLength;
 
     /// <summary>
     /// Raised with every chunk to notify on <c>tx</c>, in order.
@@ -47,9 +51,11 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
     /// <returns>The reason a completed message was dropped, or null.</returns>
     public string? OnChunk(ReadOnlySpan<byte> chunk)
     {
+        var dropped = _assembler.Dropped;
+
         if (!_assembler.TryAdd(chunk, out var sealedMessage) || sealedMessage is null)
         {
-            return null;
+            return _assembler.Dropped != dropped ? $"chunk {chunk.Length} bytes, flags {(chunk.Length > 0 ? chunk[0] : 0)}, out of order or too long" : null;
         }
 
         // A connection may belong to any paired phone until one key opens a message; then it stays with that phone.
@@ -103,7 +109,7 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
             envelope.Version = 1;
             envelope.Id = _nextId++;
             var sealedMessage = BleSeal.Seal(device.BleKey, BleSender.Pc, _counters.NextSend(device.DeviceId), envelope.ToByteArray());
-            chunks = BleChunks.Split(sealedMessage, _payloadLength);
+            chunks = BleChunks.Split(sealedMessage, PayloadLength);
 
             foreach (var chunk in chunks)
             {
@@ -125,9 +131,10 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
         switch (envelope.BodyCase)
         {
             case Envelope.BodyOneofCase.Hello:
-                HelloReceived?.Invoke(this, envelope.Hello);
+                // The PC's Hello comes first; whatever listeners send after Hello follows it.
                 Send(new Envelope { ReplyTo = envelope.Id, Hello = PcHello.Create(_identity) });
                 SendPcStatus();
+                HelloReceived?.Invoke(this, envelope.Hello);
                 break;
             case Envelope.BodyOneofCase.Ping:
                 Send(new Envelope { ReplyTo = envelope.Id, Pong = new Pong { Nonce = envelope.Ping.Nonce } });

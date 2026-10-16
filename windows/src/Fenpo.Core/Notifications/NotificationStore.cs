@@ -9,7 +9,8 @@ namespace Fenpo.Core.Notifications;
 /// <param name="Id">Stable id derived from the content (app, title, message, date).</param>
 /// <param name="Key">Source key of the current connection, or null when the phone dropped it.</param>
 /// <param name="Notification">Latest content.</param>
-public sealed record StoredNotification(string Id, string? Key, PhoneNotification Notification);
+/// <param name="Source">Key prefix of the source it came from ("i:" for the iPhone, "a:" for Android); empty if none.</param>
+public sealed record StoredNotification(string Id, string? Key, PhoneNotification Notification, string Source = "");
 
 /// <summary>
 /// Keeps the notifications currently on the phone. ANCS keys change with every connection (S1), so items are identified by
@@ -19,6 +20,7 @@ public sealed class NotificationStore
 {
     private readonly Lock _lock = new();
     private readonly List<StoredNotification> _items = [];
+    private string? _activeSource;
 
     /// <summary>
     /// Raised after the list changed.
@@ -36,7 +38,37 @@ public sealed class NotificationStore
     public event EventHandler<string>? Dismissed;
 
     /// <summary>
-    /// Gets a snapshot, newest first.
+    /// Gets or sets the source whose notifications show (the phone in use), or null for all. The others are kept so a
+    /// switch shows them at once, but they neither show nor pop up.
+    /// </summary>
+    public string? ActiveSource
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _activeSource;
+            }
+        }
+
+        set
+        {
+            lock (_lock)
+            {
+                if (_activeSource == value)
+                {
+                    return;
+                }
+
+                _activeSource = value;
+            }
+
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>
+    /// Gets a snapshot of the shown notifications, newest first.
     /// </summary>
     public IReadOnlyList<StoredNotification> Items
     {
@@ -44,7 +76,7 @@ public sealed class NotificationStore
         {
             lock (_lock)
             {
-                return [.. _items.OrderByDescending(i => i.Notification.Date ?? i.Notification.ReceivedAt)];
+                return [.. _items.Where(IsShown).OrderByDescending(i => i.Notification.Date ?? i.Notification.ReceivedAt)];
             }
         }
     }
@@ -74,7 +106,7 @@ public sealed class NotificationStore
         {
             var index = _items.FindIndex(i => i.Id == id);
             isNew = index < 0;
-            stored = new StoredNotification(id, notification.Key, notification);
+            stored = new StoredNotification(id, notification.Key, notification, SourceOf(notification.Key));
 
             if (isNew)
             {
@@ -86,7 +118,7 @@ public sealed class NotificationStore
             }
         }
 
-        if (isNew && !notification.Flags.HasFlag(NotificationFlags.PreExisting))
+        if (isNew && !notification.Flags.HasFlag(NotificationFlags.PreExisting) && IsShown(stored))
         {
             Arrived?.Invoke(this, stored);
         }
@@ -103,7 +135,7 @@ public sealed class NotificationStore
         lock (_lock)
         {
             _items.RemoveAll(i => i.Key == notification.Key);
-            _items.Add(new StoredNotification(Fingerprint(notification), notification.Key, notification));
+            _items.Add(new StoredNotification(Fingerprint(notification), notification.Key, notification, SourceOf(notification.Key)));
         }
 
         Changed?.Invoke(this, EventArgs.Empty);
@@ -131,15 +163,19 @@ public sealed class NotificationStore
     }
 
     /// <summary>
-    /// Marks every key as stale after a disconnect; items stay until the phone re-sends or drops them.
+    /// Marks keys as stale after a disconnect; items stay until the phone re-sends or drops them.
     /// </summary>
-    public void Detach()
+    /// <param name="keyPrefix">Only keys with this prefix (one source's); empty for all.</param>
+    public void Detach(string keyPrefix = "")
     {
         lock (_lock)
         {
             for (var i = 0; i < _items.Count; i++)
             {
-                _items[i] = _items[i] with { Key = null };
+                if (_items[i].Key?.StartsWith(keyPrefix, StringComparison.Ordinal) ?? false)
+                {
+                    _items[i] = _items[i] with { Key = null };
+                }
             }
         }
 
@@ -163,6 +199,11 @@ public sealed class NotificationStore
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    // "i:1:5" -> "i:"; keys without a source prefix belong to no source.
+    private static string SourceOf(string? key) => key is { Length: > 2 } && key[1] == ':' ? key[..2] : string.Empty;
+
+    private bool IsShown(StoredNotification item) => _activeSource is null || item.Source.Length == 0 || item.Source == _activeSource;
 
     /// <summary>
     /// Gets the current source key of a stored notification.

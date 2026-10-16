@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "fenpo/v1/video.proto";
+
+// The phone as the PC's webcam ("Fenpo Kamera", CAPABILITY_CAMERA).
+//
+// The PC sends CameraStart when an app opens Fenpo Kamera. Android starts the camera only after a
+// tap on the phone, so the phone first answers CameraStatus WAITING_FOR_TAP and shows a "Start
+// camera" notification; after the tap it reports STARTING, opens the media connection and reports
+// STREAMING. Either side sends CameraSettings when the user changes something on its screen; the
+// other side applies it and the phone confirms with CameraStatus. Either side may send CameraStop.
+
+enum CameraFacing {
+  CAMERA_FACING_UNSPECIFIED = 0;
+  CAMERA_FACING_BACK = 1;
+  CAMERA_FACING_FRONT = 2;
+}
+
+message CameraSettings {
+  CameraFacing facing = 1;
+  float zoom = 2;                        // Zoom ratio, e.g. 0.5, 1, 2; 0 keeps the current one.
+  bool microphone = 3;                   // Send the phone's microphone as the camera's audio (the PC needs a virtual microphone for it).
+  bool center_stage = 4;                 // Keep the face in the middle by cropping ("Ortala").
+}
+
+// PC → phone.
+message CameraStart {
+  CameraSettings settings = 1;
+  VideoFormat video = 2;                 // What the PC asks for; the phone may pick less.
+  string consumer = 3;                   // App using the camera, e.g. "Teams", shown on the phone.
+  AcceptedFormats accepted = 4;
+}
+
+// Either side.
+message CameraStop {
+}
+
+enum CameraState {
+  CAMERA_STATE_UNSPECIFIED = 0;
+  CAMERA_STATE_WAITING_FOR_TAP = 1;      // Android needs a tap on the phone to open the camera.
+  CAMERA_STATE_STARTING = 2;
+  CAMERA_STATE_STREAMING = 3;
+  CAMERA_STATE_STOPPED = 4;
+  CAMERA_STATE_FAILED = 5;               // reason says why, e.g. the camera is used by another app.
+}
+
+// Phone → PC, after every start, change and stop.
+message CameraStatus {
+  CameraState state = 1;
+  string stream_id = 2;                  // Of the media connection while STARTING or STREAMING.
+  CameraSettings settings = 3;           // As applied.
+  VideoFormat video = 4;                 // As encoded.
+  repeated float zoom_presets = 5;       // Ratios this camera supports well, e.g. 0.5, 1, 2.
+  bool front_available = 6;
+  string reason = 7;
+}
+
+// Either side: a change made on that side's screen. consumer changes when another app takes the camera.
+message CameraSettingsChange {
+  CameraSettings settings = 1;
+  string consumer = 2;
+}

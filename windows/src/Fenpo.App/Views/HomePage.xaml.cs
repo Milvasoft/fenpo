@@ -35,5 +35,7 @@ public sealed partial class HomePage : Page
 
     private void OnFilesClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().Navigate("Files");
 
+    private void OnSendFileClick(object sender, RoutedEventArgs e) => _ = App.GetService<MainWindow>().SendFilesAsync();
+
     private void OnPairClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowPairing();
 }

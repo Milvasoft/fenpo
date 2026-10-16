@@ -2,7 +2,10 @@ using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
 using Fenpo.Core.Api;
+using Fenpo.Bluetooth.Ams;
+using Fenpo.Bluetooth.Ancs;
 using Fenpo.Core.Channel;
+using Fenpo.Core.Media;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Pairing;
 using Fenpo.Core.Settings;
@@ -65,7 +68,21 @@ public partial class App : Application
                 .AddSingleton<ISettingsStore>(settings)
                 .AddSingleton<ThemeService>()
                 .AddSingleton<LocalizationService>()
+
+                // Before the channels start, so no Hello from a phone goes unseen.
+                .AddSingleton<PhoneChannel>()
+                .AddHostedService(sp => sp.GetRequiredService<PhoneChannel>())
                 .AddFenpoBluetooth()
+
+                // The iPhone (ANCS, AMS) and an Android phone (Fenpo channel) behind one notification and media source.
+                .AddSingleton<AndroidNotificationSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidNotificationSource>())
+                .AddSingleton<AndroidMediaSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidMediaSource>())
+                .AddSingleton<INotificationSource>(sp => new CombinedNotificationSource([("i:", sp.GetRequiredService<AncsClient>()), ("a:", sp.GetRequiredService<AndroidNotificationSource>())]))
+                .AddSingleton(sp => new CombinedMediaSource([sp.GetRequiredService<AmsClient>(), sp.GetRequiredService<AndroidMediaSource>()]))
+                .AddSingleton<IMediaSource>(sp => sp.GetRequiredService<CombinedMediaSource>())
+                .AddHostedService<ActivePhoneSync>()
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
@@ -74,8 +91,14 @@ public partial class App : Application
                 .AddSingleton<IBleCounters, BleCounterStore>()
                 .AddSingleton(sp => PcCertificate.LoadOrCreate(Path.Combine(localFolder, "pc-certificate.pfx"), Environment.MachineName))
                 .AddSingleton(new PairingTokens())
+                .AddSingleton<FileTransferService>()
+                .AddHostedService(sp => sp.GetRequiredService<FileTransferService>())
                 .AddSingleton<ControlServer>()
                 .AddHostedService<TransportHostedService>()
+                .AddSingleton<PhoneActions>()
+                .AddHostedService(sp => sp.GetRequiredService<PhoneActions>())
+                .AddSingleton<ClipboardSync>()
+                .AddHostedService(sp => sp.GetRequiredService<ClipboardSync>())
                 .AddSingleton(new PcIdentity(settings.Current.PcId!, Environment.MachineName, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0", $"Windows {Environment.OSVersion.Version}", string.Empty))
                 .AddSingleton<SentMessages>()
                 .AddSingleton<NotificationRouter>()
@@ -95,6 +118,8 @@ public partial class App : Application
                 .AddTransient<MessagesViewModel>()
                 .AddTransient<CallsViewModel>()
                 .AddTransient<AppFeatureViewModel>()
+                .AddTransient<ClipboardViewModel>()
+                .AddTransient<FilesViewModel>()
                 .AddTransient<PairingViewModel>()
                 .AddTransient<AppPairingViewModel>()
                 .AddTransient<SettingsViewModel>())
@@ -186,10 +211,7 @@ public partial class App : Application
         var dispatcher = _window.DispatcherQueue;
         var calls = GetService<CallService>();
         calls.AttachUi(dispatcher);
-
-        // The Wi-Fi channel's state shows in the phone status (the "Same Wi-Fi" chip, the app-only actions).
-        var tracker = GetService<Fenpo.Bluetooth.Status.PhoneStatusTracker>();
-        GetService<ControlServer>().SessionChanged += (sender, change) => tracker.Update(s => s with { WifiConnected = change.Connected, AppConnected = change.Connected || s.AppConnected });
+        GetService<ClipboardSync>().AttachUi(dispatcher);
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 
@@ -217,6 +239,13 @@ public partial class App : Application
         {
             calls.ShowSample();
             return;
+        }
+
+        // "--sample" fills the Files and Clipboard lists for the same checks.
+        if (arguments.Contains("--sample"))
+        {
+            GetService<FileTransferService>().ShowSamples();
+            GetService<ClipboardSync>().ShowSamples();
         }
 
         ShowMainWindow(page);

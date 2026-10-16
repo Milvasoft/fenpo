@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Fenpo.Core.Channel;
 using Fenpo.Core.Devices;
 using Fenpo.Core.Pairing;
+using Fenpo.Protocol.V1;
 using Fenpo.Transport;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media;
@@ -73,6 +74,14 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial StepState MessagesStep { get; set; } = StepState.Pending;
 
+    /// <summary>
+    /// Gets or sets a value indicating whether to warn that the phone's sound may come to this PC: Android turns on
+    /// the headset and A2DP connections by itself once the Bluetooth bond exists, and Fenpo cannot change that
+    /// (ANDROID.md A2).
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ShowAudioNotice { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the phone paired over Wi‑Fi.</summary>
     [ObservableProperty]
     public partial bool IsPaired { get; set; }
@@ -89,11 +98,15 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void Later() => Closed?.Invoke(this, EventArgs.Empty);
 
+    [RelayCommand]
+    private static async Task OpenBluetoothSettingsAsync() => await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
+
     private void OnTokenRotated(object? sender, EventArgs e) => _dispatcher.TryEnqueue(DrawQr);
 
-    private void OnPaired(object? sender, PairedAppDevice device) => _dispatcher.TryEnqueue(() =>
+    private void OnPaired(object? sender, (PairedAppDevice Device, DevicePlatform Platform) paired) => _dispatcher.TryEnqueue(() =>
     {
         IsPaired = true;
+        ShowAudioNotice = paired.Platform == DevicePlatform.Android;
         ApplyStatus(_status.Current);
     });
 
@@ -107,7 +120,7 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
         MessagesStep = status.MessagesAvailable ? StepState.Done : bluetoothDone ? StepState.Current : StepState.Pending;
 
         // Messages are optional; once the app is linked over Bluetooth and notifications flow, the screen is done.
-        if (IsPaired && bluetoothDone && !_closing)
+        if (IsPaired && bluetoothDone && !ShowAudioNotice && !_closing)
         {
             _closing = true;
             var close = _dispatcher.CreateTimer();

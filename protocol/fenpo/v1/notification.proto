@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// Notification mirroring from an Android phone (CAPABILITY_NOTIFICATION_MIRROR). The iPhone's
+// notifications reach the PC through ANCS instead; these messages are only used by Android.
+//
+// After Hello, on that channel, the phone sends a snapshot: every current notification with
+// pre_existing set, then NotificationSnapshotDone. The PC drops that phone's keys it did not get
+// since the snapshot started, and does not pop up pre_existing ones. Then the phone sends each
+// notification that is posted, updated (same key) or removed, on its best open channel.
+// seq orders messages across both channels: the PC ignores a message for a key whose seq is not
+// newer than the last one it saw, and remembers removed keys for a few minutes.
+// The PC asks for an app's icon only when it has not cached it.
+// On the BLE channel a PhoneNotification must fit the 4096-byte sealed limit: the phone drops
+// large_icon_png first, then shortens text and messages.
+
+// A notification on the phone, new or updated. A later message with the same key replaces it.
+message PhoneNotification {
+  string key = 1;                              // StatusBarNotification key; stable while it exists.
+  string app_id = 2;                           // Package name, e.g. "com.whatsapp".
+  string app_name = 3;                         // Label in the phone's language.
+  google.protobuf.Timestamp posted_at = 4;
+  string title = 5;
+  string text = 6;                             // Big text when the app gives one.
+  string conversation_title = 7;               // Group chat name, if any.
+  repeated NotificationMessage messages = 8;   // Last messages of a conversation, oldest first.
+  repeated NotificationAction actions = 9;
+  bool dismissible = 10;                       // false for ongoing notifications.
+  bool content_hidden = 11;                    // Android withheld the content (one-time codes, lock screen privacy).
+  bytes large_icon_png = 12;                   // Sender photo or thumbnail, at most 96x96. Empty if none.
+  bool silent = 13;                            // Updated without alerting on the phone; the PC should not pop up either.
+  NotificationCategory category = 14;
+  bool pre_existing = 15;                      // Part of the snapshot after Hello; not a new notification.
+  uint64 seq = 16;                             // Increases with every message about any notification, across channels.
+}
+
+// What kind of notification it is, from Notification.category on Android.
+enum NotificationCategory {
+  NOTIFICATION_CATEGORY_UNSPECIFIED = 0;
+  NOTIFICATION_CATEGORY_INCOMING_CALL = 1;     // "call": the PC shows it in the Island with its actions.
+  NOTIFICATION_CATEGORY_MISSED_CALL = 2;       // "missed_call"
+  NOTIFICATION_CATEGORY_VOICEMAIL = 3;
+  NOTIFICATION_CATEGORY_SOCIAL = 4;            // "msg", "social"
+  NOTIFICATION_CATEGORY_SCHEDULE = 5;          // "event", "reminder", "alarm"
+  NOTIFICATION_CATEGORY_EMAIL = 6;             // "email"
+  NOTIFICATION_CATEGORY_NEWS = 7;
+  NOTIFICATION_CATEGORY_HEALTH_AND_FITNESS = 8;
+  NOTIFICATION_CATEGORY_BUSINESS_AND_FINANCE = 9;
+  NOTIFICATION_CATEGORY_LOCATION = 10;         // "navigation"
+  NOTIFICATION_CATEGORY_ENTERTAINMENT = 11;
+}
+
+message NotificationMessage {
+  string sender = 1;                           // Empty for the phone's own user.
+  string text = 2;
+  google.protobuf.Timestamp sent_at = 3;
+}
+
+message NotificationAction {
+  uint32 index = 1;                            // Index to send back in RunNotificationAction.
+  string title = 2;                            // As the app shows it, e.g. "Mark as read".
+  bool accepts_reply = 3;                      // Has a text input (RemoteInput): the PC shows a reply box.
+}
+
+// The notification is gone on the phone (dismissed, opened or cancelled by its app).
+message NotificationRemoved {
+  string key = 1;
+  uint64 seq = 2;                              // Same sequence as PhoneNotification.seq.
+}
+
+// End of the snapshot that follows Hello.
+message NotificationSnapshotDone {
+}
+
+// PC → phone: dismiss it on the phone too. Ignored for notifications that are not dismissible.
+message DismissNotification {
+  string key = 1;
+}
+
+// PC → phone: press an action button, with the typed reply when the action accepts one.
+// Answered with Error INVALID_REQUEST when the notification or the action is gone.
+message RunNotificationAction {
+  string key = 1;
+  uint32 action_index = 2;
+  string reply_text = 3;
+}
+
+// PC → phone: send the icon of this app; the PC caches it by app_id.
+message AppIconRequest {
+  string app_id = 1;
+}
+
+// Phone → PC, answering AppIconRequest.
+message AppIcon {
+  string app_id = 1;
+  bytes png = 2;                               // 64x64. Over BLE only when it fits; otherwise on Wi-Fi.
+}

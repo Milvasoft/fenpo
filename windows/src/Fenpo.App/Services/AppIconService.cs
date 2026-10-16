@@ -49,6 +49,21 @@ public sealed class AppIconService(ILogger<AppIconService> logger)
     /// <returns>Full path of a PNG, or null.</returns>
     public string? GetCachedIconPath(string bundleId) => !string.IsNullOrEmpty(bundleId) && File.Exists(PathFor(bundleId)) ? PathFor(bundleId) : null;
 
+    /// <summary>
+    /// Stores an icon the phone sent (Android, AppIcon).
+    /// </summary>
+    /// <param name="appId">Package name.</param>
+    /// <param name="png">PNG bytes.</param>
+    /// <returns>Full path of the stored PNG.</returns>
+    public string Save(string appId, byte[] png)
+    {
+        var path = PathFor(appId);
+        Directory.CreateDirectory(_folder);
+        File.WriteAllBytes(path, png);
+        File.Delete(path + ".missing");
+        return path;
+    }
+
     private async Task<string?> LoadAsync(string bundleId)
     {
         var path = PathFor(bundleId);
