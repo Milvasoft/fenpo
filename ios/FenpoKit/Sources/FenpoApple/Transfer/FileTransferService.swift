@@ -100,6 +100,7 @@ public final class FileTransferService {
                     written += UInt64(chunk.count)
                     active[id]?.bytesDone = written
                 }
+                active[id]?.filesDone += 1
             }
             let result = try await resultWait.value
             await stream.drain(timeout: .seconds(3))
@@ -211,6 +212,9 @@ public final class FileTransferService {
                 for piece in splitter.consume(Array(data)) {
                     try handles[piece.fileIndex].write(contentsOf: piece.bytes)
                     hashers[piece.fileIndex].update(data: piece.bytes)
+                    if piece.completesFile {
+                        active[id]?.filesDone += 1
+                    }
                 }
                 active[id]?.bytesDone = splitter.bytesDone
                 if splitter.bytesDone - lastReport >= Self.reportEvery {

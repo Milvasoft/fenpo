@@ -1,4 +1,5 @@
 import FenpoCore
+import Foundation
 import Testing
 
 struct ActionsTests {
@@ -24,5 +25,23 @@ struct ActionsTests {
         }
         try await actions.sendText("merhaba")
         #expect(try await actions.fetchPCClipboard().isEmpty == false)
+    }
+}
+
+struct FocusSyncTests {
+    @Test
+    func switchIsOnUntilTurnedOff() throws {
+        let defaults = try #require(UserDefaults(suiteName: "FocusSyncTests.\(UUID().uuidString)"))
+        #expect(FocusSync.isEnabled(in: defaults))
+        defaults.set(false, forKey: FocusSync.enabledKey)
+        #expect(!FocusSync.isEnabled(in: defaults))
+        #expect(FocusSync.isEnabled(in: nil))
+    }
+
+    @Test
+    func reportsFocusOnlyWhenBothAreOn() {
+        #expect(FocusSync.reportedState(filterActive: true, enabled: true))
+        #expect(!FocusSync.reportedState(filterActive: true, enabled: false))
+        #expect(!FocusSync.reportedState(filterActive: false, enabled: true))
     }
 }

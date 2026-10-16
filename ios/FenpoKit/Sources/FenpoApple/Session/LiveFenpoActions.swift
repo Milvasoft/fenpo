@@ -43,6 +43,35 @@ public final class LiveFenpoActions: FenpoActions {
         try await performSendFiles(files)
     }
 
+    public nonisolated func reportFocus(_ isActive: Bool) async throws {
+        try await performReportFocus(isActive)
+    }
+
+    /// Sends the Focus state again, for example when the channel comes back or the Settings
+    /// switch changes. Does nothing until the filter has reported once.
+    public func resendFocus() {
+        guard UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: FocusSync.stateKey) != nil, central.state == .ready else {
+            return
+        }
+        try? central.send(.deviceState(focusState()))
+        log.info("Sent Focus state over BLE")
+    }
+
+    private func performReportFocus(_ isActive: Bool) async throws {
+        UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.set(isActive, forKey: FocusSync.stateKey)
+        try await deliver(.deviceState(focusState()), what: "Focus state")
+    }
+
+    private func focusState() -> Fenpo_V1_DeviceState {
+        let defaults = UserDefaults(suiteName: FenpoIdentifiers.appGroup)
+        var state = Fenpo_V1_DeviceState()
+        state.focusActive = FocusSync.reportedState(
+            filterActive: defaults?.bool(forKey: FocusSync.stateKey) ?? false,
+            enabled: FocusSync.isEnabled(in: defaults)
+        )
+        return state
+    }
+
     private func performSendFiles(_ files: [OutgoingFile]) async throws {
         guard store.load() != nil else {
             throw FenpoActionError.notPaired

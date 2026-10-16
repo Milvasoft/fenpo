@@ -10,5 +10,6 @@ struct FenpoWidgetsBundle: WidgetBundle {
         StatusWidget()
         PCBatteryWidget()
         PasteWidget()
+        TransferLiveActivity()
     }
 }

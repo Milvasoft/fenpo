@@ -12,6 +12,9 @@ struct SettingsView: View {
     @AppStorage("feature.clipboard", store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var clipboardSharing = true
 
+    @AppStorage(FocusSync.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    private var focusSync = true
+
     @AppStorage("developer.unlocked")
     private var isDeveloperUnlocked = false
     @State private var isDeveloperPresented = false
@@ -44,14 +47,23 @@ struct SettingsView: View {
                     CardRows {
                         ToggleRow(icon: .clipboard, color: .bloom, title: "settings.clipboardSharing", isOn: $clipboardSharing)
                         ValueRow(icon: .hand, color: .ink, title: "settings.backTap", value: Text("home.sendClipboard"))
+                        ToggleRow(icon: .moon, color: .orange, title: "settings.focus", isOn: $focusSync)
+                            .onChange(of: focusSync) {
+                                Task { await model.focusSyncChanged() }
+                            }
                         // Phases 4 and 5: shown as in the design, not available yet.
                         Group {
                             ToggleRow(icon: .photo, color: .dusk, title: "settings.screenshots", isOn: .constant(false))
-                            ToggleRow(icon: .moon, color: .orange, title: "settings.focus", isOn: .constant(false))
                             ToggleRow(icon: .lock, color: .leaf, title: "settings.faceIDUnlock", isOn: .constant(false))
                         }
                         .disabled(true)
                     }
+                    Text("settings.focus.hint")
+                        .font(.footnote)
+                        .foregroundStyle(.textSecondary)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     Text("settings.features.comingLater")
                         .font(.footnote)
                         .foregroundStyle(.textSecondary)

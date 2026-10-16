@@ -132,6 +132,8 @@ public final class FenpoServices {
         central.onStateChange = { [weak self] state in
             if state != .ready {
                 self?.pcBattery = nil
+            } else {
+                self?.actions.resendFocus()
             }
             self?.publishStatus()
         }

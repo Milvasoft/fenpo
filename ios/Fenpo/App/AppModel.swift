@@ -28,6 +28,7 @@ final class AppModel {
     private let actions: any FenpoActions
     private let ringer: PhoneRinger?
     private let camera: CameraService?
+    private let transferActivities: TransferActivities?
 
     /// Runs the pairing steps.
     let pairing: any PairingProviding
@@ -61,18 +62,21 @@ final class AppModel {
     ///   - actions: Clipboard and PC actions.
     ///   - ringer: Plays the ring the PC asks for; `nil` in previews.
     ///   - camera: Fenpo Kamera; `nil` in previews.
+    ///   - transferActivities: Live Activities of large transfers; `nil` in previews.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
         actions: any FenpoActions = SampleActions(),
         ringer: PhoneRinger? = nil,
-        camera: CameraService? = nil
+        camera: CameraService? = nil,
+        transferActivities: TransferActivities? = nil
     ) {
         self.session = session
         self.pairing = pairing
         self.actions = actions
         self.ringer = ringer
         self.camera = camera
+        self.transferActivities = transferActivities
     }
 
     /// The camera's live picture.
@@ -115,6 +119,19 @@ final class AppModel {
         snapshot = await session.snapshot()
         if let camera {
             cameraState = camera.state
+        }
+        transferActivities?.update(snapshot.activeTransfers, pcName: snapshot.pc?.name ?? "")
+    }
+
+    /// The Focus switch in Settings changed: tells the PC the state that now applies.
+    func focusSyncChanged() async {
+        guard let active = UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: FocusSync.stateKey) as? Bool else {
+            return
+        }
+        do {
+            try await actions.reportFocus(active)
+        } catch {
+            log.info("Focus state not delivered now: \(String(describing: error))")
         }
     }
 

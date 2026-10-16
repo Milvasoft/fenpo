@@ -86,3 +86,15 @@ struct IncomingFileSplitterTests {
         #expect(empty.isComplete)
     }
 }
+
+struct ActiveTransferTests {
+    @Test
+    func countsFilesLeft() {
+        var transfer = ActiveTransfer(id: "t", firstFileName: "a.jpg", fileCount: 3, direction: .toPC, totalBytes: 300)
+        #expect(transfer.filesLeft == 3)
+        transfer.filesDone = 2
+        #expect(transfer.filesLeft == 1)
+        transfer.filesDone = 5
+        #expect(transfer.filesLeft == 0)
+    }
+}

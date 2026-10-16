@@ -183,7 +183,35 @@ Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşm
 | M11 | QR'ın fotoğrafını çekin, 6 dakika bekleyin (QR 5 dakikada yenilenir), fotoğraftaki eski QR'ı okutun | Eşleşme reddedilir (`TOKEN_INVALID`), "Tamamlanmadı" |
 | M12 | PC sekmesi → **Eşleştirmeyi kaldır** | Ana ekran "Bilgisayarını ekle"ye döner; aksesuar iOS Ayarlar → Gizlilik ve Güvenlik → Aksesuarlar'dan da kalkar |
 
-**Windows tarafı bekleniyor:** Pano (`ClipboardItem`, `ClipboardRequest`), PC'yi kilitle (`LockPc`), telefonu çaldır (`RingDevice`), PC'de aç (`OpenUrl`) ve dosya aktarımı Windows'ta henüz yok. Geldikçe kilometre taşı 1'deki T15–T22, Mac aracı yerine gerçek PC ile tekrarlanacak. Paylaşım menüsündeki "PC'de aç" de Wi‑Fi kanalından bunu bekliyor.
+## Gerçek PC ile özellikler
+
+Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `RingDevice`, `OpenUrl`, `DeviceState`, dosya aktarımı, kamera). M1–M4 bittikten sonra, iPhone ile PC aynı Wi‑Fi'dayken:
+
+| # | Adım | Beklenen |
+|---|---|---|
+| F1 | Fenpo'yu açın, Geliştirici → Durum | **Wi‑Fi kanalı** `connected`, **PC adresleri** dolu (PC'nin `DeviceState.addresses`'i) |
+| F2 | Bir metin kopyalayın, ana ekranda **Panoyu gönder** | PC'de yapıştırınca aynı metin. Kısa metin Bluetooth'tan gider (kayıtta `over BLE`) |
+| F3 | 5 KB'tan uzun bir metinle F2 | Kayıtta `Too large for BLE, using Wi-Fi`, PC'de metin tam |
+| F4 | PC'de bir şey kopyalayın, iPhone'da **PC'den yapıştır** | iPhone panosunda aynı metin |
+| F5 | Denetim Merkezi'ne Fenpo düğmelerini ekleyip **PC'yi kilitle** | Windows kilitlenir. Fenpo kapalıyken de dene; olmazsa kayıttaki süreç adını yazın |
+| F6 | Safari'de bir sayfayı Paylaş → Fenpo → **PC'de aç** | Sayfa PC'nin tarayıcısında açılır |
+| F7 | Windows'tan **Telefonu çaldır**, iPhone kilitliyken | Bildirim ve ses; Fenpo'yu açınca çalma ekranı, **Durdur** |
+| F8 | Fenpo → Aktarımlar → **+**, 3 fotoğraf seçin | Aktarımlar'da "Sürüyor" satırı ilerler; PC'nin indirme klasöründe 3 dosya; satır "Biten"e geçer |
+| F9 | Fotoğraflar'da 200 MB'tan büyük bir video → Paylaş → Fenpo → **1 dosyayı PC'ye gönder** | Paylaşım sayfasında ilerleme; PC'de video tam, boyutu aynı |
+| F10 | F8'i büyük bir videoyla (10 MB üstü) tekrarlayın, gönderim sürerken iPhone'u kilitleyin | Kilit ekranında Canlı Etkinlik: "PC’ye gönderiliyor", yüzde ve çubuk; Dinamik Ada'lı telefonda adada yüzde. Aktarım bitince kaybolur |
+| F11 | F10 sürerken Fenpo'dan başka uygulamaya geçin, 1 dakika bekleyin | Aktarım sürer ve biter (arka plan süresi). Bitmezse kayıttaki son satırları yazın |
+| F12 | Windows'tan iPhone'a 2 dosya gönderin | iPhone'da "Bilgisayardan dosya geldi" bildirimi; Dosyalar → iPhone'umda → Fenpo içinde iki dosya; Aktarımlar'da satırlar, dokununca önizleme |
+| F13 | Aynı adla bir dosyayı ikinci kez gönderin | İkincisi "ad (2).uzantı" olarak kaydedilir, ilki silinmez |
+| F14 | Aktarım sürerken PC'de iptal edin | iPhone'da satır "İptal edildi" ya da "Tamamlanmadı"; yarım dosya Fenpo klasöründe kalmaz |
+| F15 | Windows'ta bir uygulamada (Kamera, Teams) "Fenpo Kamera"yı seçin, iPhone'da Fenpo açık | iPhone'da kamera ekranı açılır, PC'de görüntü gelir. Gecikme yaklaşık kaç saniye? |
+| F16 | Kamera açıkken 0,5 / 1× / 2, **Çevir**, **Ortala** (Center Stage'li ön kamerada) | PC'deki görüntü değişir; görüntü yan yatmıyor mu? |
+| F17 | Fenpo arka plandayken F15 | iPhone'da "Bilgisayarın kamerayı kullanmak istiyor" bildirimi; dokununca kamera başlar |
+| F18 | Kamera açıkken **Ekranı karart**, 5 dakika bekleyin | Görüntü sürer; telefon ne kadar ısındı, pil ne kadar düştü? |
+| F19 | Kamerayı iPhone'da **Kamerayı kapat** ile, sonra PC'deki uygulamayı kapatarak durdurun | İki yolda da kamera kapanır, PC'de görüntü donmuş kalmaz |
+| F20 | iOS Ayarlar → Odak → Rahatsız Etme → Filtre ekle → Fenpo, **PC’de sustur** açık. Rahatsız Etme'yi açıp kapatın | PC'de Fenpo bildirimleri odak açıkken susar, kapanınca döner (Windows'un `DeviceState.focus_active`'i göstermesine bağlı) |
+| F21 | Fenpo Ayarlar → **Odak modunu eşitle** kapalıyken F20 | PC susmaz |
+
+Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`.
 
 Geri bildirim kilometre taşı 1'deki gibi: tablo, iPhone kaydı (Geliştirici → Kayıt → Dışa aktar) ve Windows'un kaydı.
 
