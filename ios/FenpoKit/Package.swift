@@ -37,6 +37,12 @@ targets.append(
         dependencies: ["FenpoCore", "FenpoProtocol"]
     )
 )
+targets.append(
+    .testTarget(
+        name: "FenpoAppleTests",
+        dependencies: ["FenpoApple", "FenpoCore", "FenpoProtocol"]
+    )
+)
 #endif
 
 let package = Package(
