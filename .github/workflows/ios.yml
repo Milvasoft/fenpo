@@ -104,6 +104,21 @@ jobs:
           grep -E "warning:" "$log" | sort -u | head -40 || true
           tail -3 "$log"
 
+      - name: Test app (keychain and TLS)
+        working-directory: ios
+        run: |
+          log="$RUNNER_TEMP/app-test.log"
+          # Signed to run locally so the simulator applies the keychain entitlements.
+          xcodebuild test \
+            -project Fenpo.xcodeproj \
+            -scheme Fenpo \
+            -destination "id=$SIMULATOR_ID" \
+            CODE_SIGN_IDENTITY=- \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM= \
+            > "$log" 2>&1 || { grep -E "error:|failed|✘" "$log"; tail -60 "$log"; exit 1; }
+          grep -E "✔|✘|Test run|\*\* TEST" "$log" | tail -20
+
       - name: Screenshots
         run: ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/screenshots"
 

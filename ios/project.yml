@@ -58,7 +58,27 @@ targets:
         product: FenpoApple
       - target: FenpoShare
       - target: FenpoWidgets
-    scheme: {}
+    scheme:
+      testTargets:
+        - FenpoTests
+
+  # Tests that need the app's keychain entitlements (identity, TLS).
+  FenpoTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: FenpoTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.tests
+    dependencies:
+      - target: Fenpo
+      - package: FenpoKit
+        product: FenpoProtocol
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
 
   FenpoShare:
     type: app-extension
