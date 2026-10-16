@@ -34,6 +34,7 @@ public sealed partial class PcInputService(PhoneChannel channel, ILogger<PcInput
     private float _scrollX;
     private float _scrollY;
     private bool _keepingAwake;
+    private DateTimeOffset _lastMoveLog;
 
     /// <summary>
     /// Takes the UI thread for the laser window and keep-awake (both belong to a long-lived thread). Call once.
@@ -113,6 +114,17 @@ public sealed partial class PcInputService(PhoneChannel channel, ILogger<PcInput
 
     private void Handle(PcInput input)
     {
+        // Every input is logged except pointer moves, which are logged at most every few seconds.
+        if (input.ActionCase != PcInput.ActionOneofCase.Move)
+        {
+            _logger.LogInformation("Phone input: {Action} {Detail}", input.ActionCase, input.ActionCase == PcInput.ActionOneofCase.Text ? $"{input.Text.Length} characters" : input.ToString());
+        }
+        else if (DateTimeOffset.Now - _lastMoveLog > TimeSpan.FromSeconds(5))
+        {
+            _lastMoveLog = DateTimeOffset.Now;
+            _logger.LogInformation("Phone input: pointer moving");
+        }
+
         switch (input.ActionCase)
         {
             case PcInput.ActionOneofCase.Move:

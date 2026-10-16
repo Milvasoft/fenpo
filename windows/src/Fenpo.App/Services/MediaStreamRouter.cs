@@ -46,20 +46,20 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
         var packets = Channel.CreateUnbounded<StreamPacket>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
         var feed = new MediaFeed(open, packets.Reader);
 
-        switch (open.Kind)
-        {
-            case StreamKind.Screen:
-                await _screen.AcceptAsync(feed);
-                break;
-            case StreamKind.Camera:
-                await _camera.AcceptAsync(feed);
-                break;
-            default:
-                return;
-        }
-
         try
         {
+            switch (open.Kind)
+            {
+                case StreamKind.Screen:
+                    await _screen.AcceptAsync(feed);
+                    break;
+                case StreamKind.Camera:
+                    await _camera.AcceptAsync(feed);
+                    break;
+                default:
+                    return;
+            }
+
             while (await EnvelopeFraming.ReadFrameAsync(stream, cancellationToken) is { } frame)
             {
                 var packet = StreamPacket.Parser.ParseFrom(frame);
@@ -75,6 +75,10 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
         catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidProtocolBufferException or OperationCanceledException or ObjectDisposedException)
         {
             _logger.LogInformation("{Kind} stream ended: {Reason}", open.Kind, exception.Message);
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "{Kind} stream broke", open.Kind);
         }
         finally
         {
