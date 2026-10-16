@@ -49,7 +49,7 @@ public data class PairingUri(
                 params["a"]
                     ?.split(',')
                     ?.filter { it.isNotBlank() }
-                    ?.map { parseEndpoint(it) ?: return invalid(PairingUriError.BAD_ADDRESS) }
+                    ?.map { Endpoint.parse(it) ?: return invalid(PairingUriError.BAD_ADDRESS) }
                     ?.takeIf { it.isNotEmpty() }
                     ?: return invalid(PairingUriError.MISSING_FIELD)
 
@@ -95,24 +95,6 @@ public data class PairingUri(
             } catch (_: IllegalArgumentException) {
                 null
             }
-
-        private fun parseEndpoint(text: String): Endpoint? {
-            val host: String
-            val portText: String
-            if (text.startsWith("[")) {
-                val close = text.indexOf("]:")
-                if (close < 0) return null
-                host = text.substring(1, close)
-                portText = text.substring(close + 2)
-            } else {
-                val colon = text.lastIndexOf(':')
-                if (colon <= 0 || text.indexOf(':') != colon) return null
-                host = text.substring(0, colon)
-                portText = text.substring(colon + 1)
-            }
-            val port = portText.toIntOrNull()?.takeIf { it in 1..65535 } ?: return null
-            return Endpoint(host, port)
-        }
     }
 }
 

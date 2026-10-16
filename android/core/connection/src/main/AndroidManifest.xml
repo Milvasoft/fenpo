@@ -13,6 +13,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
+    <!-- The Wi-Fi channel follows the Wi-Fi network; INTERNET and ACCESS_LOCAL_NETWORK are in the app (§3). -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application>
         <service
             android:name=".ConnectionService"

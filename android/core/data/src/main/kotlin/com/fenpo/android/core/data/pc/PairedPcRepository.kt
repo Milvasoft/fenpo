@@ -58,6 +58,9 @@ interface PairedPcRepository {
         address: String,
     )
 
+    /** Replaces the PC's data channel addresses ("ip:port"), best first, as last seen on the network. */
+    suspend fun saveAddresses(addresses: List<String>)
+
     /** Current BLE channel counters. */
     suspend fun bleCounters(): BleCounters
 
@@ -124,6 +127,10 @@ internal class DataStorePairedPcRepository
                 it[PC_ASSOCIATION] = associationId
                 it[PC_BLE_ADDRESS] = address
             }
+        }
+
+        override suspend fun saveAddresses(addresses: List<String>) {
+            dataStore.edit { it[PC_ADDRESSES] = addresses.joinToString(SEPARATOR) }
         }
 
         override suspend fun bleCounters(): BleCounters {

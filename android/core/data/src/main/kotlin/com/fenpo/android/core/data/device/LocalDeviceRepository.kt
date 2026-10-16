@@ -63,7 +63,7 @@ internal class AndroidLocalDeviceRepository
         private companion object {
             val DEVICE_ID = stringPreferencesKey("device_id")
 
-            /** Only what this build really does; grows as features land (none yet in phase C). */
-            val IMPLEMENTED_CAPABILITIES = emptySet<Capability>()
+            /** Only what this build really does; grows as features land. */
+            val IMPLEMENTED_CAPABILITIES = setOf(Capability.CAPABILITY_DEVICE_STATE)
         }
     }

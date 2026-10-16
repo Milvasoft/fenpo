@@ -146,6 +146,12 @@ Kaynaklar: [KeyGenParameterSpec](https://raw.githubusercontent.com/aosp-mirror/p
 - PC'nin kimliği, sertifika parmak izi, adresleri ve BLE servis UUID'si DataStore'a; BLE kanal anahtarı Keystore'daki AES-GCM anahtarıyla şifrelenip yazılır.
 - Kontrol bağlantısında zarf sınırı PC ile aynı: 1 MB.
 
+### Wi‑Fi kanalı (Aşama C, uygulandı)
+- `ConnectionService` iki yolu yan yana çalıştırır: BLE (③) ve Wi‑Fi TLS (④). Biri açıkken telefon bağlı sayılır. Her bağlantı `Hello` ile başlar; PC'nin `Hello`'su gelince 30 saniyede bir `Ping` atılır, 10 saniyede `Pong` gelmezse yol yeniden kurulur.
+- Wi‑Fi yolu Wi‑Fi veya Ethernet ağı varken çalışır (internet şartı yok), soket o ağa bağlanır. Sırayla saklı adresler denenir, hiçbiri cevap vermezse 8 saniye DNS-SD (`_fenpo._tcp`, TXT `id` = PC kimliği). Cevap veren adres listenin başına yazılır. Ulaşılamazsa 5 saniyeden 5 dakikaya kadar artan aralıkla yeniden denenir; ağ değişince ve PC BLE üzerinden `DeviceState.addresses` gönderince hemen. PC `ERROR_CODE_NOT_PAIRED` derse Wi‑Fi yolu durur.
+- Telefon `CAPABILITY_DEVICE_STATE` sunar ve PC de sunuyorsa `DeviceState`'i (pil, şarj, Rahatsız Etmeyin) `Hello`'dan sonra ve her değişiklikte en iyi yoldan gönderir: Wi‑Fi, yoksa BLE.
+- Kalıcı bildirim yolu söyler: "Bağlı, Bluetooth", "Bağlı, Wi‑Fi", "Bağlı, Bluetooth ve Wi‑Fi".
+
 ## 14. Kütüphaneler ve sürümler
 **Karar: aşağıdaki tablo. Dış bağımlılık sadece özgür lisanslı (F-Droid şartı); Google Play Services, Firebase, ML Kit yok.**
 
@@ -301,6 +307,7 @@ Debug derlemesindeki "BLE probe" ile, ürün sınıfları doğrudan sürülerek 
 | A3 | **Çalışıyor (telefon tarafı).** Keystore anahtarı (P-256, `DIGEST_NONE`) Galaxy S10+ Android 12'de Conscrypt ile TLS 1.3 istemci sertifikası olarak el sıkıştı (instrumented test 3/3). Windows oturumu Keystore biçimindeki sertifikanın Schannel'la eşleştiğini kendi testiyle gösterdi; bcpkix gerekmiyor. Test sertifikaları Android 12'nin okuyabildiği eski PKCS#12 biçiminde (`keytool -J-Dkeystore.pkcs12.legacy`). |
 | A1 (devam) | Varlık olayları iki yönde geldi: "kayboldu" ve 17 dakika sonra "geldi", ardından otomatik bağlantı. Adres ilişkiden 30+ dakika sonra da tuttu (bağ sayesinde dönen adres çözülüyor). Süreç ölüyken uyanma hâlâ ayrıca denenecek. |
 | Ek | `bluetooth.profile.*` sistem özellikleri Samsung'da boş: MAP/PBAP desteği bu yolla okunamıyor, Windows'tan SDP sorgusuyla bakılacak (A4). |
+| A4 (ilk veri) | Gerçek eşleşme sırasında PC'nin MAP istemcisi Galaxy S10+'a bağlandı ("Message access connected", en büyük paket 65534; Windows oturumu, 16 Ekim 14:35). Bu Samsung'da MAP sunucusu var. Mesaj okuma ve gönderme henüz denenmedi. |
 
 ### Gerçek eşleşme (16 Ekim, Windows Fenpo `9f897f9` ↔ Galaxy S10+)
 
@@ -313,5 +320,7 @@ Windows'taki Fenpo'nun QR ekranından baştan sona: QR → TLS 1.3 (sabitlenmiş
 | PC bağı kaybetti (anahtar yok, 0x06); Android de bağı sildi, kayıtlı dönen adres artık çözülmedi ve bağlantı 133 ile düştü. | "Yeniden dene" Bluetooth adımında ilişkiyi baştan kuruyor; adresi farklı eski ilişki bırakılıyor. |
 | İzinler ekranındaki "Bildirim erişimi" satırı açılamıyordu: henüz `NotificationListenerService` yok, sistem listesinde Fenpo çıkmıyor. | Satır Aşama D'ye (bildirim aynalama) kadar gizli (`AppPermission.shown`). |
 | Samsung yazı tipinde izin düğmesinin metni kesildi. | Düğme yüksekliği metne göre uzuyor (`heightIn(min = 32.dp)`). |
+
+**Wi‑Fi kanalı (16 Ekim 15:00, Windows Fenpo `7396bc3`):** saklı adres `192.168.1.14:53113` ilk denemede TLS 1.3 ile açıldı, PC `Hello` verdi, `DeviceState` (%44, şarjda) Wi‑Fi'den gitti; 2 saniye sonra BLE yolu da açıldı, bildirim "Bağlı, Bluetooth ve Wi‑Fi". Telefonun Wi‑Fi'si kapatılınca bağlantı hemen kapandı, `DeviceState` BLE'ye geçti, bildirim "Bağlı, Bluetooth" oldu; Wi‑Fi açılınca 5 saniyede yeniden bağlandı. **Denenmedi:** DNS-SD yedeği (saklı adres çalıştığı için gerekmedi), `ERROR_CODE_NOT_PAIRED`, Android 17'de yerel ağ izni, PC'nin `DeviceState.addresses` göndermesi (Windows'ta henüz yok).
 
 Hâlâ denenecek: uygulama süreci ölüyken PC yaklaşınca uyanma.

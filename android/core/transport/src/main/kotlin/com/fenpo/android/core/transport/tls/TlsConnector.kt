@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okio.ByteString
 import java.net.InetSocketAddress
-import java.net.Socket
 import java.security.SecureRandom
+import javax.net.SocketFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocket
 import kotlin.time.Duration
@@ -26,12 +26,14 @@ public class TlsConnector(
      * Connects to [endpoint] and completes the handshake.
      *
      * @param pinnedCertificateSha256 Expected SHA-256 of the PC certificate.
+     * @param socketFactory Makes the TCP socket, e.g. one bound to the Wi-Fi network.
      * @throws java.io.IOException on network failures; [Throwable.isPinMismatch] tells a wrong
      *   certificate apart.
      */
     public suspend fun connect(
         endpoint: Endpoint,
         pinnedCertificateSha256: ByteString,
+        socketFactory: SocketFactory = SocketFactory.getDefault(),
     ): EnvelopeConnection =
         withContext(Dispatchers.IO) {
             val context = SSLContext.getInstance(TLS_1_3)
@@ -41,7 +43,7 @@ public class TlsConnector(
                 SecureRandom(),
             )
 
-            val raw = Socket()
+            val raw = socketFactory.createSocket()
             try {
                 raw.tcpNoDelay = true
                 raw.connect(InetSocketAddress(endpoint.host, endpoint.port), connectTimeout.inWholeMilliseconds.toInt())

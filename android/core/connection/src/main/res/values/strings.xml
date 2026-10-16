@@ -2,6 +2,8 @@
 <resources>
     <string name="connection_channel_name">Connection</string>
     <string name="connection_channel_description">Shows that Fenpo stays connected to your computer.</string>
-    <string name="connection_connecting">Connecting over Bluetooth</string>
+    <string name="connection_connecting">Connecting</string>
     <string name="connection_connected_bluetooth">Connected, Bluetooth</string>
+    <string name="connection_connected_wifi">Connected, Wi‑Fi</string>
+    <string name="connection_connected_both">Connected, Bluetooth and Wi‑Fi</string>
 </resources>

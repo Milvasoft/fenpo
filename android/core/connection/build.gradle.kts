@@ -12,4 +12,7 @@ dependencies {
     api(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(libs.androidx.core.ktx)
+
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
 }
