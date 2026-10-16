@@ -84,7 +84,15 @@ public static class PcHello
         Platform = DevicePlatform.Windows,
         AppVersion = identity.AppVersion,
         ProtocolVersions = { 1 },
-        Capabilities = { Capability.DeviceState },
+        Capabilities =
+        {
+            Capability.DeviceState,
+            Capability.Clipboard,
+            Capability.OpenUrl,
+            Capability.Ring,
+            Capability.LockPc,
+            Capability.FileTransfer,
+        },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
     };

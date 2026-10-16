@@ -139,7 +139,7 @@
                                     <ColumnDefinition />
                                     <ColumnDefinition />
                                 </Grid.ColumnDefinitions>
-                                <Button Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Ring">
+                                <Button Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.CanRing, Mode=OneWay}" Command="{x:Bind ViewModel.RingCommand}" x:Uid="Action_Ring">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE767;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_RingText" FontSize="13" TextWrapping="Wrap" />
@@ -151,7 +151,7 @@
                                         <TextBlock x:Uid="Action_HotspotText" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="2" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_SendFile">
+                                <Button Grid.Column="2" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" Click="OnSendFileClick" x:Uid="Action_SendFile">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE724;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_SendFileText" FontSize="13" TextWrapping="Wrap" />

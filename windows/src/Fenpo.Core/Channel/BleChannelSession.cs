@@ -129,9 +129,10 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
         switch (envelope.BodyCase)
         {
             case Envelope.BodyOneofCase.Hello:
-                HelloReceived?.Invoke(this, envelope.Hello);
+                // The PC's Hello comes first; whatever listeners send after Hello follows it.
                 Send(new Envelope { ReplyTo = envelope.Id, Hello = PcHello.Create(_identity) });
                 SendPcStatus();
+                HelloReceived?.Invoke(this, envelope.Hello);
                 break;
             case Envelope.BodyOneofCase.Ping:
                 Send(new Envelope { ReplyTo = envelope.Id, Pong = new Pong { Nonce = envelope.Ping.Nonce } });

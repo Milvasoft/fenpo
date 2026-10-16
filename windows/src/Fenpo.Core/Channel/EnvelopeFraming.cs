@@ -40,6 +40,30 @@ public static class EnvelopeFraming
     /// <exception cref="InvalidDataException">The frame is too long or not an Envelope.</exception>
     public static async Task<Envelope?> ReadAsync(Stream stream, CancellationToken cancellationToken = default)
     {
+        if (await ReadFrameAsync(stream, cancellationToken) is not { } body)
+        {
+            return null;
+        }
+
+        try
+        {
+            return Envelope.Parser.ParseFrom(body);
+        }
+        catch (InvalidProtocolBufferException exception)
+        {
+            throw new InvalidDataException("Frame is not an Envelope", exception);
+        }
+    }
+
+    /// <summary>
+    /// Reads one frame's bytes without parsing them (a data connection starts with a bare TransferStreamHeader).
+    /// </summary>
+    /// <param name="stream">Stream.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The frame body, or null when the peer closed the connection between frames.</returns>
+    /// <exception cref="InvalidDataException">The frame is too long.</exception>
+    public static async Task<byte[]?> ReadFrameAsync(Stream stream, CancellationToken cancellationToken = default)
+    {
         var prefix = new byte[4];
         var read = 0;
 
@@ -64,14 +88,6 @@ public static class EnvelopeFraming
 
         var body = new byte[length];
         await stream.ReadExactlyAsync(body, cancellationToken);
-
-        try
-        {
-            return Envelope.Parser.ParseFrom(body);
-        }
-        catch (InvalidProtocolBufferException exception)
-        {
-            throw new InvalidDataException("Frame is not an Envelope", exception);
-        }
+        return body;
     }
 }

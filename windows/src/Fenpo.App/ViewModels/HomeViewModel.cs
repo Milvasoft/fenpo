@@ -20,6 +20,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private readonly IMediaSource _media;
     private readonly AppIconService _icons;
     private readonly LocalizationService _localization;
+    private readonly PhoneActions _actions;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherQueueTimer _clock;
 
@@ -31,8 +32,10 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <param name="media">Phone media player.</param>
     /// <param name="icons">App icons.</param>
     /// <param name="localization">Strings.</param>
-    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization)
+    /// <param name="actions">Ring the phone.</param>
+    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions)
     {
+        _actions = actions;
         _status = status;
         _notifications = notifications;
         _media = media;
@@ -101,6 +104,10 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool AppConnected { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether Fenpo on the phone can ring.</summary>
+    [ObservableProperty]
+    public partial bool CanRing { get; set; }
+
     /// <summary>Gets or sets the clock on the phone illustration.</summary>
     [ObservableProperty]
     public partial string ClockText { get; set; } = string.Empty;
@@ -163,6 +170,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    private Task RingAsync() => _actions.RingAsync();
+
+    [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);
 
     [RelayCommand]
@@ -190,6 +200,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         UsbOn = status.UsbConnected;
         UsbText = _localization.GetString(status.UsbConnected ? "Chip_UsbOn" : "Chip_UsbOff");
         AppConnected = status.AppConnected;
+        CanRing = _actions.CanRing;
     }
 
     private void ApplyNotifications()

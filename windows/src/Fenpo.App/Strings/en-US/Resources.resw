@@ -31,7 +31,7 @@
     <value>Mirror screen</value>
   </data>
   <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the phone</value>
+    <value>Works with Fenpo on the phone</value>
   </data>
   <data name="Action_RingText.Text" xml:space="preserve">
     <value>Ring phone</value>
@@ -180,8 +180,17 @@
   <data name="Chip_WifiOn" xml:space="preserve">
     <value>Same Wi‑Fi</value>
   </data>
+  <data name="Clipboard_Copy.Text" xml:space="preserve">
+    <value>Copy</value>
+  </data>
   <data name="Clipboard_Empty.Text" xml:space="preserve">
     <value>What you copy on either side is listed here.</value>
+  </data>
+  <data name="Clipboard_FromPc" xml:space="preserve">
+    <value>From this PC, sent to the phone</value>
+  </data>
+  <data name="Clipboard_FromPhone" xml:space="preserve">
+    <value>From the phone, {0}</value>
   </data>
   <data name="Clipboard_History.Text" xml:space="preserve">
     <value>Recently copied</value>
@@ -201,6 +210,21 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Clipboard</value>
   </data>
+  <data name="Files_AndMore" xml:space="preserve">
+    <value>{0} and {1} more</value>
+  </data>
+  <data name="Files_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Files_Cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="Files_Declined" xml:space="preserve">
+    <value>The phone declined</value>
+  </data>
+  <data name="Files_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
   <data name="Files_DropHint.Text" xml:space="preserve">
     <value>Or pick files on this PC.</value>
   </data>
@@ -210,20 +234,65 @@
   <data name="Files_NeedsApp.Message" xml:space="preserve">
     <value>Connect Fenpo on the phone to this PC to send files and photos.</value>
   </data>
+  <data name="Files_NeedsWifi" xml:space="preserve">
+    <value>Files go over Wi‑Fi. Connect the phone to the same Wi‑Fi as the PC and open Fenpo on the phone.</value>
+  </data>
   <data name="Files_NoPhotos.Text" xml:space="preserve">
-    <value>Recent photos show up here once Fenpo on the phone is connected.</value>
+    <value>Recent photos will show here in a later version. For now, send photos from Fenpo on the phone.</value>
+  </data>
+  <data name="Files_NotConnected" xml:space="preserve">
+    <value>Fenpo on the phone is not connected. Open Fenpo on the phone.</value>
+  </data>
+  <data name="Files_NothingToSend" xml:space="preserve">
+    <value>Folders cannot be sent. Choose the files inside.</value>
   </data>
   <data name="Files_NoTransfers.Text" xml:space="preserve">
     <value>No transfers yet</value>
   </data>
+  <data name="Files_OpenFolder.Content" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
   <data name="Files_Pick.Content" xml:space="preserve">
     <value>Pick files</value>
+  </data>
+  <data name="Files_Received" xml:space="preserve">
+    <value>Received from the phone, {0}</value>
+  </data>
+  <data name="Files_ReceiveFailed" xml:space="preserve">
+    <value>Not received. Send it again from the phone.</value>
+  </data>
+  <data name="Files_Receiving" xml:space="preserve">
+    <value>Coming from the phone, {0} of {1}</value>
   </data>
   <data name="Files_RecentPhotos.Text" xml:space="preserve">
     <value>Recent photos</value>
   </data>
+  <data name="Files_Retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="Files_SendFailed" xml:space="preserve">
+    <value>Not sent. Try again with the phone and the PC on the same Wi‑Fi.</value>
+  </data>
+  <data name="Files_Sending" xml:space="preserve">
+    <value>Going to the phone, {0} of {1}</value>
+  </data>
+  <data name="Files_Sent" xml:space="preserve">
+    <value>Sent to the phone, {0}</value>
+  </data>
+  <data name="Files_Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
   <data name="Files_Transfers.Text" xml:space="preserve">
     <value>Transfers</value>
+  </data>
+  <data name="Files_Unsupported" xml:space="preserve">
+    <value>Fenpo on the phone does not take files. Update Fenpo on the phone.</value>
+  </data>
+  <data name="Files_WaitingData" xml:space="preserve">
+    <value>The phone is connecting</value>
+  </data>
+  <data name="Files_WaitingPhone" xml:space="preserve">
+    <value>Waiting for the phone to accept</value>
   </data>
   <data name="FilesTitle.Text" xml:space="preserve">
     <value>Files and photos</value>
@@ -663,6 +732,18 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Size_Bytes" xml:space="preserve">
+    <value>{0} B</value>
+  </data>
+  <data name="Size_GB" xml:space="preserve">
+    <value>{0} GB</value>
+  </data>
+  <data name="Size_KB" xml:space="preserve">
+    <value>{0} KB</value>
+  </data>
+  <data name="Size_MB" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
   <data name="Status_BrokenBond" xml:space="preserve">
     <value>Pairing broken, pair again</value>
   </data>
@@ -695,6 +776,15 @@
   </data>
   <data name="Time_Yesterday" xml:space="preserve">
     <value>Yesterday</value>
+  </data>
+  <data name="Toast_FileReceived" xml:space="preserve">
+    <value>{0} arrived</value>
+  </data>
+  <data name="Toast_FilesReceived" xml:space="preserve">
+    <value>{0} files arrived</value>
+  </data>
+  <data name="Toast_ShowFile" xml:space="preserve">
+    <value>Show</value>
   </data>
   <data name="Tray_Clipboard.Text" xml:space="preserve">
     <value>Clipboard</value>
@@ -733,7 +823,7 @@
     <value>Proximity lock</value>
   </data>
   <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the phone</value>
+    <value>Works with Fenpo on the phone</value>
   </data>
   <data name="Tray_RingText.Text" xml:space="preserve">
     <value>Ring</value>

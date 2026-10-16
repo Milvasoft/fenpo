@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Settings;
@@ -146,6 +147,23 @@ public sealed class NotificationRouter(
 
     private async Task OnInvokedAsync(IDictionary<string, string> arguments)
     {
+        // Fenpo's own notifications (received files): "Show" selects the file, a click opens their page.
+        if (arguments.TryGetValue("reveal", out var reveal))
+        {
+            if (File.Exists(reveal))
+            {
+                Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{reveal}\"") { UseShellExecute = true });
+            }
+
+            return;
+        }
+
+        if (arguments.TryGetValue("page", out var page))
+        {
+            OpenRequested?.Invoke(this, page);
+            return;
+        }
+
         if (!arguments.TryGetValue("action", out var action) || !arguments.TryGetValue("id", out var id))
         {
             // A click on the notification itself, not on one of its buttons.

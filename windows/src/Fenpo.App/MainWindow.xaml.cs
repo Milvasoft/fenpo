@@ -63,6 +63,20 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Opens the Files page and lets the user pick files to send to the phone.
+    /// </summary>
+    /// <returns>A task that completes when the offer went out or the picker was closed.</returns>
+    public async Task SendFilesAsync()
+    {
+        Navigate("Files");
+
+        if (ContentFrame.Content is Views.FilesPage page)
+        {
+            await page.PickAndSendAsync();
+        }
+    }
+
+    /// <summary>
     /// Shows the pairing wizard over the content until it is finished or postponed.
     /// </summary>
     public void ShowPairing()
