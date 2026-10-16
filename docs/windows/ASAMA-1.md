@@ -16,7 +16,8 @@
 | Windows açılınca başlat | Bitti, anahtar Windows başlangıç görevini açıp kapatıyor |
 | Eşleşme sihirbazı | Bitti, ekran kontrol edildi |
 | Yakınlık kilidi | Bitti, algoritma S1 kaydıyla testli; cihazla uzaklaşma denenmedi |
-| Mesajlar (MAP: OBEX, MAS, MNS, Mesajlar sayfası) | Bitti, S2 kaydının tekrar oynatılmasıyla testli. Cihazda iPhone erişimi reddetti: "Mesaj bildirimlerini göster" yeniden eşleşmeden sonra kapanmış. Sohbet listesi ve gönderme cihazda denenmedi |
+| Mesajlar (MAP: OBEX, MAS, MNS, Mesajlar sayfası) | Bitti, cihazda denendi: sohbet listesi, mesajlar, gönderme ve gönderilenin kalması çalışıyor. Kayıtlı kişilerin adı bildirimlerden öğreniliyor (RESEARCH §3) |
+| Rehber (PBAP) | Kod hazır, iPhone bağlantıyı reddediyor; muhtemelen HFP gerektiriyor (RESEARCH §3) |
 | Aramalar (Ada, Yanıtla/Reddet, son aramalar, aramada PC medyasını duraklat) | Bitti, ekranlar kontrol edildi, gerçek aramayla denenmedi |
 | Dosyalar, Pano, Kamera | Sayfalar ve "iPhone'da Fenpo gerekiyor" bandı hazır; işlevler iPhone uygulamasını bekliyor |
 | Yerel API ve Fenpo.Sdk | Bitti, gerçek pipe üzerinden uçtan uca testli, paketli uygulamaya dışarıdan bağlanıldı |
