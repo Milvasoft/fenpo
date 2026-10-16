@@ -65,6 +65,7 @@ fun HomeRoute(
     onPair: () -> Unit,
     onOpenNotificationSettings: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenCamera: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -107,9 +108,8 @@ fun HomeRoute(
                     pickPhotos.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
                 }
 
-                // The webcam comes with phase 4.
                 QuickAction.CAMERA -> {
-                    Unit
+                    onOpenCamera()
                 }
             }
         },

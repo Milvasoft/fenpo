@@ -98,6 +98,8 @@ class ConnectionService : Service() {
 
     @Inject lateinit var mediaBridge: MediaBridge
 
+    @Inject lateinit var features: Set<@JvmSuppressWildcards PcFeature>
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var link: Job? = null
     private var pcName = ""
@@ -179,6 +181,7 @@ class ConnectionService : Service() {
             launch { transferManager.run() }
             launch { notificationMirror.run() }
             launch { mediaBridge.run() }
+            features.forEach { feature -> launch { feature.run() } }
             launch { reportMedia() }
 
             val wifi =

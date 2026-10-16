@@ -1,3 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="camera_channel_name">Kamera istekleri</string>
+    <string name="camera_request_title">PC kamerayı kullanmak istiyor</string>
+    <string name="camera_request_title_app">%1$s kamerayı kullanmak istiyor</string>
+    <string name="camera_request_text">Android kamerayı ancak bir dokunuşla açtırıyor.</string>
+    <string name="camera_start">Kamerayı başlat</string>
+    <string name="camera_live_channel_name">Kamera</string>
+    <string name="camera_live_title">Telefon PC’nin kamerası</string>
+    <string name="camera_live_text">Fenpo Kamera</string>
+    <string name="camera_stop">Durdur</string>
+    <string name="camera_live">Canlı</string>
+    <string name="camera_live_app">Canlı: %1$s</string>
+    <string name="camera_starting">Başlıyor</string>
+    <string name="camera_failed">Kamera durdu</string>
+    <string name="camera_idle">PC bekleniyor</string>
+    <string name="camera_path_wifi">Wi‑Fi</string>
+    <string name="camera_center">Ortala</string>
+    <string name="camera_microphone">Mikrofon</string>
+    <string name="camera_flip">Çevir</string>
+    <string name="camera_dim">Ekranı karart</string>
+    <string name="camera_dimmed_hint">Kamerayı görmek için dokun</string>
+    <string name="camera_permission_needed">PC’nin kamerası olmak için Fenpo’nun kamera iznine ihtiyacı var. Ayarlar’dan izin ver.</string>
+    <string name="camera_no_request">PC’de bir uygulamada Fenpo Kamera’yı aç; kamera burada başlar.</string>
 </resources>

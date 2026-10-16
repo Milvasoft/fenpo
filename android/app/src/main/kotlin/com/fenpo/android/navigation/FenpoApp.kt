@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -27,6 +28,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.fenpo.android.R
 import com.fenpo.android.core.designsystem.icon.FenpoIcons
+import com.fenpo.android.feature.camera.CameraActivity
 import com.fenpo.android.feature.home.HomeKey
 import com.fenpo.android.feature.home.HomeRoute
 import com.fenpo.android.feature.home.PcKey
@@ -66,6 +68,7 @@ private val topLevelDestinations =
 @Composable
 fun FenpoApp(modifier: Modifier = Modifier) {
     val backStack = rememberNavBackStack(HomeKey)
+    val context = LocalContext.current
     val current = backStack.lastOrNull()
     val showNavigationBar = topLevelDestinations.any { it.key == current }
     val pop: () -> Unit = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
@@ -96,6 +99,7 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                             HomeRoute(
                                 onPair = { backStack.add(ScannerKey) },
                                 onOpenNotificationSettings = { backStack.add(NotificationAppsKey) },
+                                onOpenCamera = { context.startActivity(CameraActivity.intent(context)) },
                             )
                         }
                     }

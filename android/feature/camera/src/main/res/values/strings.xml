@@ -1,3 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="camera_channel_name">Camera requests</string>
+    <string name="camera_request_title">Your PC wants to use the camera</string>
+    <string name="camera_request_title_app">%1$s wants to use the camera</string>
+    <string name="camera_request_text">Android opens the camera only after a tap.</string>
+    <string name="camera_start">Start camera</string>
+    <string name="camera_live_channel_name">Camera</string>
+    <string name="camera_live_title">The phone is your PC’s camera</string>
+    <string name="camera_live_text">Fenpo Kamera</string>
+    <string name="camera_stop">Stop</string>
+    <string name="camera_live">Live</string>
+    <string name="camera_live_app">Live in %1$s</string>
+    <string name="camera_starting">Starting</string>
+    <string name="camera_failed">The camera stopped</string>
+    <string name="camera_idle">Waiting for the PC</string>
+    <string name="camera_path_wifi">Wi‑Fi</string>
+    <string name="camera_center">Center</string>
+    <string name="camera_microphone">Microphone</string>
+    <string name="camera_flip">Flip</string>
+    <string name="camera_dim">Dim screen</string>
+    <string name="camera_dimmed_hint">Tap to see the camera</string>
+    <string name="camera_permission_needed">Fenpo needs the camera permission to be your PC’s camera. Allow it in Settings.</string>
+    <string name="camera_no_request">Open Fenpo Kamera in an app on your PC; the camera starts here.</string>
 </resources>

@@ -28,6 +28,8 @@ dependencies {
     implementation(project(":feature:pairing"))
     implementation(project(":feature:transfers"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:camera"))
+    implementation(project(":feature:mirror"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
