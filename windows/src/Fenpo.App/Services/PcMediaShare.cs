@@ -1,3 +1,4 @@
+using Fenpo.App.Helpers;
 using Fenpo.Protocol.V1;
 using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Hosting;
@@ -107,7 +108,7 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
 
         try
         {
-            var state = new MediaState();
+            var state = new MediaState { VolumePercent = SystemVolume.Get() ?? 0 };
 
             if (_session is { } session)
             {
@@ -158,6 +159,13 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
     {
         var command = message.Envelope.MediaCommand;
 
+        // The PC's volume works without a player.
+        if (command.Action == MediaAction.SetVolume && _session is null)
+        {
+            SystemVolume.Set(command.VolumePercent);
+            return;
+        }
+
         if (_session is not { } session)
         {
             await _channel.ReplyAsync(message, new Envelope { Error = new Error { Code = ErrorCode.Unsupported, Message = "Nothing plays on the PC" } });
@@ -172,8 +180,15 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
             MediaAction.Next => await session.TrySkipNextAsync(),
             MediaAction.Previous => await session.TrySkipPreviousAsync(),
             MediaAction.Seek => await session.TryChangePlaybackPositionAsync(TimeSpan.FromMilliseconds(command.SeekToMs).Ticks),
+            MediaAction.SetVolume => SystemVolume.Set(command.VolumePercent),
             _ => false,
         };
+
+        // The phone shows the new volume from the next state.
+        if (done && command.Action == MediaAction.SetVolume)
+        {
+            _ = SendStateAsync();
+        }
 
         _logger.LogInformation("Phone media command {Action} on the PC: {Done}", command.Action, done);
 
