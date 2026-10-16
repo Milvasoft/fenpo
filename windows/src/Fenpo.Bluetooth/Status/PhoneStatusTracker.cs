@@ -86,6 +86,9 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
         _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
         _link.BrokenBondDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
         _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available });
+
+        // A forgotten iPhone or a new choice can change the phone in use.
+        _settings.Changed += (_, _) => Choose();
     }
 
     /// <summary>
@@ -133,6 +136,12 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
         }
     }
 
+    // The iPhone found before counts as paired while its link is still being looked up after a start, so the phone in
+    // use does not flip to the Android phone and back.
+    private bool IsPaired(PhoneKind kind) => kind == PhoneKind.Iphone
+        ? _iphone.State != PhoneConnectionState.NotPaired || _settings.Current.PhoneDeviceId is not null
+        : _android.State != PhoneConnectionState.NotPaired;
+
     // The chosen phone while it is paired; otherwise whichever is.
     private bool Choose()
     {
@@ -143,8 +152,8 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
         {
             var wanted = _settings.Current.ActivePhone ?? PhoneKind.Iphone;
             var other = wanted == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone;
-            var wantedPaired = (wanted == PhoneKind.Iphone ? _iphone : _android).State != PhoneConnectionState.NotPaired;
-            var otherPaired = (other == PhoneKind.Iphone ? _iphone : _android).State != PhoneConnectionState.NotPaired;
+            var wantedPaired = IsPaired(wanted);
+            var otherPaired = IsPaired(other);
             active = !wantedPaired && otherPaired ? other : wanted;
 
             if (active == _active)

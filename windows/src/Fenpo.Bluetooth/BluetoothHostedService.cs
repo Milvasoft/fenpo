@@ -86,6 +86,11 @@ public sealed class BluetoothHostedService(
                     continue;
                 }
 
+                if (phone is null && _settings.Current.PhoneDeviceId is not null)
+                {
+                    _settings.Update(s => s with { PhoneDeviceId = null });
+                }
+
                 _status.Update(s => s with { State = PhoneConnectionState.NotPaired });
             }
             catch (Exception exception) when (exception is not OperationCanceledException)

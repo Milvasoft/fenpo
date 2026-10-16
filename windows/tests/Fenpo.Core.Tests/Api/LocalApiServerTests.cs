@@ -105,6 +105,5 @@ public sealed class LocalApiServerTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task NotificationsFromClientsGetNoResponse() =>
-        Assert.Null(await _server.HandleAsync("""{"jsonrpc":"2.0","method":"fenpo.status"}""", TestContext.Current.CancellationToken));
+    public async Task NotificationsFromClientsGetNoResponse() => Assert.Null(await _server.HandleAsync("""{"jsonrpc":"2.0","method":"fenpo.status"}""", TestContext.Current.CancellationToken));
 }
