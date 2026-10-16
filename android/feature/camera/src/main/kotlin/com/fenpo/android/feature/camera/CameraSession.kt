@@ -55,6 +55,7 @@ class CameraSession(
     private var lenses = Lenses(main = Lens(id = "", reach = 1f), wide = null)
     private var lens = lenses.main
     private var mainMinZoom = 1f
+    private var opening: String? = null
     private var faceCenter: Pair<Float, Float>? = null
     private var lastCropUpdate = 0L
 
@@ -186,15 +187,19 @@ class CameraSession(
         isFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
         activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) ?: Rect()
         zoomRange = zoomRangeOf(next.id)
+        // One camera opens at a time; a lens wanted while another opens follows when that one is in.
+        if (opening != null) return
+        opening = next.id
         Log.i(TAG, "Opening camera ${next.id} (reach ${"%.2f".format(next.reach)}, zoom ${effectiveZoom()})")
         manager.openCamera(
             next.id,
             executor,
             object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
-                    // A lens change while this one was opening: the newer one is wanted.
-                    if (lens.id != next.id || device != null) {
+                    opening = null
+                    if (camera.id != lens.id || device != null) {
                         camera.close()
+                        if (device == null) openLens(lens)
                         return
                     }
                     device = camera
@@ -203,7 +208,11 @@ class CameraSession(
 
                 override fun onDisconnected(camera: CameraDevice) {
                     camera.close()
-                    if (camera.id != lens.id) return
+                    if (opening == camera.id) opening = null
+                    if (camera.id != lens.id) {
+                        if (device == null && opening == null) openLens(lens)
+                        return
+                    }
                     device = null
                     onFailure("Another app took the camera")
                 }
@@ -213,7 +222,11 @@ class CameraSession(
                     error: Int,
                 ) {
                     camera.close()
-                    if (camera.id != lens.id) return
+                    if (opening == camera.id) opening = null
+                    if (camera.id != lens.id) {
+                        if (device == null && opening == null) openLens(lens)
+                        return
+                    }
                     device = null
                     onFailure(
                         if (error ==
