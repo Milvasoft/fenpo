@@ -44,6 +44,7 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
         LanguageIndex = Math.Max(0, Array.IndexOf(_languages, current.Language));
         ShowNotifications = current.ShowNotifications;
         ShowIncomingCalls = current.ShowIncomingCalls;
+        RingForCalls = current.RingForCalls;
         ShareClipboard = current.ShareClipboard;
         MediaControl = current.MediaControl;
         ProximityLock = current.ProximityLock;
@@ -191,6 +192,12 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     public partial bool ShowIncomingCalls { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the PC rings for calls.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool RingForCalls { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the clipboard is shared.
     /// </summary>
     [ObservableProperty]
@@ -225,6 +232,8 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnShowNotificationsChanged(bool value) => _settings.Update(s => s with { ShowNotifications = value });
 
     partial void OnShowIncomingCallsChanged(bool value) => _settings.Update(s => s with { ShowIncomingCalls = value });
+
+    partial void OnRingForCallsChanged(bool value) => _settings.Update(s => s with { RingForCalls = value });
 
     partial void OnShareClipboardChanged(bool value) => _settings.Update(s => s with { ShareClipboard = value });
 

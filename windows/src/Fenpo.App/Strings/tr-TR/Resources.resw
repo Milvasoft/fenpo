@@ -720,6 +720,15 @@
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Görünüm ve dil</value>
   </data>
+  <data name="Settings_CallRing.Text" xml:space="preserve">
+    <value>Aramada bilgisayar da çalsın</value>
+  </data>
+  <data name="Settings_CallRingHint.Text" xml:space="preserve">
+    <value>Telefon çalarken bilgisayar Windows'un arama sesini çalar</value>
+  </data>
+  <data name="Settings_CallRingToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Aramada bilgisayar da çalsın</value>
+  </data>
   <data name="Settings_Calls.Text" xml:space="preserve">
     <value>Gelen aramaları ekranın üstünde göster</value>
   </data>
