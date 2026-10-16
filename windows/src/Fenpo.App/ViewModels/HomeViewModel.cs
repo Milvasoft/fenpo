@@ -21,8 +21,10 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private readonly AppIconService _icons;
     private readonly LocalizationService _localization;
     private readonly PhoneActions _actions;
+    private readonly FileTransferService _transfers;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherQueueTimer _clock;
+    private readonly DispatcherQueueTimer _transfersRefresh;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HomeViewModel"/> class.
@@ -33,9 +35,18 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <param name="icons">App icons.</param>
     /// <param name="localization">Strings.</param>
     /// <param name="actions">Ring the phone.</param>
-    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions)
+    /// <param name="transfers">File transfers (recent transfers card).</param>
+    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions, FileTransferService transfers)
     {
         _actions = actions;
+        _transfers = transfers;
+
+        // Progress arrives many times a second; the card follows twice a second.
+        _transfersRefresh = _dispatcher.CreateTimer();
+        _transfersRefresh.Interval = TimeSpan.FromMilliseconds(500);
+        _transfersRefresh.IsRepeating = false;
+        _transfersRefresh.Tick += (sender, e) => ApplyTransfers();
+        _transfers.Changed += OnTransfersChanged;
         _status = status;
         _notifications = notifications;
         _media = media;
@@ -54,11 +65,19 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         ApplyStatus(_status.Current);
         ApplyNotifications();
         ApplyMedia(_media.Current);
+        ApplyTransfers();
         Tick();
     }
 
     /// <summary>Gets the three newest notifications.</summary>
     public ObservableCollection<NotificationRowViewModel> RecentNotifications { get; } = [];
+
+    /// <summary>Gets the three newest file transfers.</summary>
+    public ObservableCollection<TransferRowViewModel> RecentTransfers { get; } = [];
+
+    /// <summary>Gets or sets a value indicating whether there are no transfers yet.</summary>
+    [ObservableProperty]
+    public partial bool NoTransfers { get; set; } = true;
 
     /// <summary>Gets or sets a value indicating whether a phone is paired.</summary>
     [ObservableProperty]
@@ -164,13 +183,32 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         _clock.Stop();
+        _transfersRefresh.Stop();
+        _transfers.Changed -= OnTransfersChanged;
         _status.Changed -= OnStatusChanged;
         _notifications.Changed -= OnNotificationsChanged;
         _media.Changed -= OnMediaChanged;
     }
 
+    /// <summary>Gets or sets a value indicating whether the ring just went out (the button says so for a moment).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotRinging))]
+    public partial bool IsRinging { get; set; }
+
+    /// <summary>Gets a value indicating whether the button shows its usual text.</summary>
+    public bool NotRinging => !IsRinging;
+
+    // The command stays busy (button disabled) while the button says the phone is ringing, so it is not pressed twice.
     [RelayCommand]
-    private Task RingAsync() => _actions.RingAsync();
+    private async Task RingAsync()
+    {
+        if (await _actions.RingAsync())
+        {
+            IsRinging = true;
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            IsRinging = false;
+        }
+    }
 
     [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);
@@ -184,6 +222,26 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => ApplyStatus(status));
 
     private void OnNotificationsChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(ApplyNotifications);
+
+    private void OnTransfersChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(() =>
+    {
+        if (!_transfersRefresh.IsRunning)
+        {
+            _transfersRefresh.Start();
+        }
+    });
+
+    private void ApplyTransfers()
+    {
+        RecentTransfers.Clear();
+
+        foreach (var transfer in _transfers.Transfers.Take(3))
+        {
+            RecentTransfers.Add(new TransferRowViewModel(transfer, _transfers, null, _localization));
+        }
+
+        NoTransfers = RecentTransfers.Count == 0;
+    }
 
     private void OnMediaChanged(object? sender, NowPlaying nowPlaying) => _dispatcher.TryEnqueue(() => ApplyMedia(nowPlaying));
 

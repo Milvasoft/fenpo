@@ -90,7 +90,10 @@
                 <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Stretch" Height="64" CornerRadius="6" Padding="4" FontSize="12" IsEnabled="{x:Bind ViewModel.CanRing, Mode=OneWay}" Command="{x:Bind ViewModel.RingCommand}" x:Uid="Tray_Ring">
                     <StackPanel Spacing="6">
                         <FontIcon Glyph="&#xE767;" FontSize="16" />
-                        <TextBlock x:Uid="Tray_RingText" HorizontalAlignment="Center" />
+                        <Grid HorizontalAlignment="Center">
+                            <TextBlock x:Uid="Tray_RingText" Visibility="{x:Bind ViewModel.NotRinging, Mode=OneWay}" />
+                            <TextBlock x:Uid="Tray_Ringing" Visibility="{x:Bind ViewModel.IsRinging, Mode=OneWay}" />
+                        </Grid>
                     </StackPanel>
                 </Button>
             </Grid>

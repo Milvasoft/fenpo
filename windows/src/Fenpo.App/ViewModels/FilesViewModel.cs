@@ -152,7 +152,7 @@ public sealed partial class FilesViewModel : ObservableObject, IDisposable
 public sealed partial class TransferRowViewModel : ObservableObject
 {
     private readonly FileTransferService _service;
-    private readonly FilesViewModel _owner;
+    private readonly FilesViewModel? _owner;
     private readonly LocalizationService _localization;
 
     /// <summary>
@@ -160,9 +160,9 @@ public sealed partial class TransferRowViewModel : ObservableObject
     /// </summary>
     /// <param name="transfer">Transfer.</param>
     /// <param name="service">Transfers (cancel, show).</param>
-    /// <param name="owner">Files page (retry).</param>
+    /// <param name="owner">Files page (retry), or null on the home page, which shows no buttons.</param>
     /// <param name="localization">Strings.</param>
-    public TransferRowViewModel(FileTransfer transfer, FileTransferService service, FilesViewModel owner, LocalizationService localization)
+    public TransferRowViewModel(FileTransfer transfer, FileTransferService service, FilesViewModel? owner, LocalizationService localization)
     {
         Transfer = transfer;
         _service = service;
@@ -183,6 +183,9 @@ public sealed partial class TransferRowViewModel : ObservableObject
 
     /// <summary>Gets the extension label on the file icon.</summary>
     public string Extension { get; }
+
+    /// <summary>Gets when it was offered ("2 min", "Yesterday").</summary>
+    public string When => NotificationRowViewModel.RelativeTime(Transfer.StartedAt, _localization);
 
     /// <summary>Gets or sets the line under the name.</summary>
     [ObservableProperty]
@@ -236,10 +239,11 @@ public sealed partial class TransferRowViewModel : ObservableObject
         ShowProgress = t.State is FileTransferState.InProgress;
         Progress = t.TotalBytes == 0 ? 0 : t.BytesDone * 100.0 / t.TotalBytes;
         Status = t.State == FileTransferState.Completed ? _localization.GetString("Files_Done") : string.Empty;
+        // A sent file has no button: "Retry" next to a finished transfer reads as a failure.
         ActionText = t.State switch
         {
             FileTransferState.Waiting or FileTransferState.InProgress => _localization.GetString("Files_Cancel"),
-            FileTransferState.Completed when t.Incoming => _localization.GetString("Files_Show"),
+            FileTransferState.Completed => t.Incoming ? _localization.GetString("Files_Show") : string.Empty,
             _ when !t.Incoming && t.SourcePaths.All(File.Exists) => _localization.GetString("Files_Retry"),
             _ => string.Empty,
         };
@@ -257,7 +261,7 @@ public sealed partial class TransferRowViewModel : ObservableObject
                 _service.Reveal(Transfer.SavedPaths.FirstOrDefault());
                 break;
             default:
-                if (!Transfer.Incoming)
+                if (!Transfer.Incoming && _owner is not null)
                 {
                     await _owner.SendAsync(Transfer.SourcePaths);
                 }
