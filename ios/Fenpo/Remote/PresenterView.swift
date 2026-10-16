@@ -57,6 +57,7 @@ struct PresenterView: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 12)
         .fenpoScreenBackground()
+        .disablesBackSwipe()
         .navigationTitle("remote.presenter")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
