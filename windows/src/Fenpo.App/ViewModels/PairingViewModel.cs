@@ -59,6 +59,11 @@ public sealed partial class PairingViewModel : ObservableObject, IDisposable
     /// </summary>
     public event EventHandler? Closed;
 
+    /// <summary>
+    /// Raised when the user picks pairing with the Fenpo iPhone app instead.
+    /// </summary>
+    public event EventHandler? AppPairingRequested;
+
     /// <summary>Gets or sets step 1 (iPhone Bluetooth screen).</summary>
     [ObservableProperty]
     public partial StepState OpenBluetoothStep { get; set; }
@@ -130,6 +135,9 @@ public sealed partial class PairingViewModel : ObservableObject, IDisposable
 
         PhoneLinkRunning = false;
     }
+
+    [RelayCommand]
+    private void WithApp() => AppPairingRequested?.Invoke(this, EventArgs.Empty);
 
     [RelayCommand]
     private void Later()

@@ -126,7 +126,7 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
         {
             case Envelope.BodyOneofCase.Hello:
                 HelloReceived?.Invoke(this, envelope.Hello);
-                Send(new Envelope { ReplyTo = envelope.Id, Hello = PcHello() });
+                Send(new Envelope { ReplyTo = envelope.Id, Hello = PcHello.Create(_identity) });
                 SendPcStatus();
                 break;
             case Envelope.BodyOneofCase.Ping:
@@ -139,16 +139,4 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
                 break;
         }
     }
-
-    private Hello PcHello() => new()
-    {
-        DeviceId = _identity.DeviceId,
-        DeviceName = _identity.DeviceName,
-        Platform = DevicePlatform.Windows,
-        AppVersion = _identity.AppVersion,
-        ProtocolVersions = { 1 },
-        Capabilities = { Capability.DeviceState },
-        OsVersion = _identity.OsVersion,
-        Model = _identity.Model,
-    };
 }

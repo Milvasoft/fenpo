@@ -118,6 +118,8 @@ public sealed class BleChannelSessionTests
     private sealed class Devices : IPairedAppDevices
     {
         public IReadOnlyList<PairedAppDevice> All { get; } = [_phone, _other];
+
+        public void Save(PairedAppDevice device) => throw new NotSupportedException();
     }
 
     private sealed class Counters : IBleCounters

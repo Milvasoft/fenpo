@@ -73,6 +73,12 @@ public sealed partial class MainWindow : Window
         }
 
         var viewModel = App.GetService<PairingViewModel>();
+        viewModel.AppPairingRequested += (_, _) => DispatcherQueue.TryEnqueue(() =>
+        {
+            viewModel.Dispose();
+            PairingHost.Content = null;
+            ShowAppPairing();
+        });
         viewModel.Closed += (_, _) => DispatcherQueue.TryEnqueue(() =>
         {
             viewModel.Dispose();
@@ -84,14 +90,41 @@ public sealed partial class MainWindow : Window
     }
 
     /// <summary>
+    /// Shows pairing with the Fenpo iPhone app (QR code) over the content.
+    /// </summary>
+    public void ShowAppPairing()
+    {
+        if (PairingHost.Content is AppPairingView)
+        {
+            return;
+        }
+
+        var viewModel = App.GetService<AppPairingViewModel>();
+        viewModel.Closed += (_, _) => DispatcherQueue.TryEnqueue(() =>
+        {
+            viewModel.Dispose();
+            PairingHost.Content = null;
+            PairingHost.Visibility = Visibility.Collapsed;
+        });
+        PairingHost.Content = new AppPairingView(viewModel);
+        PairingHost.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
     /// Shows the page registered under <paramref name="tag"/> and selects its menu item.
     /// </summary>
-    /// <param name="tag">Page tag, e.g. "Notifications", or "Pairing" for the pairing wizard.</param>
+    /// <param name="tag">Page tag, e.g. "Notifications"; "Pairing" and "AppPairing" open the pairing screens.</param>
     public void Navigate(string tag)
     {
         if (tag == "Pairing")
         {
             ShowPairing();
+            return;
+        }
+
+        if (tag == "AppPairing")
+        {
+            ShowAppPairing();
             return;
         }
 
