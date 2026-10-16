@@ -970,6 +970,91 @@
         }
       }
     },
+    "focus.filter.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silences Fenpo notifications on your PC while this Focus is on."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu odak açıkken bilgisayardaki Fenpo bildirimlerini susturur."
+          }
+        }
+      }
+    },
+    "focus.filter.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not silenced on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de susturulmadı"
+          }
+        }
+      }
+    },
+    "focus.filter.on": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silenced on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de susturuldu"
+          }
+        }
+      }
+    },
+    "focus.filter.silencePC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silence on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de sustur"
+          }
+        }
+      }
+    },
+    "focus.filter.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo on your PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’deki Fenpo"
+          }
+        }
+      }
+    },
     "home.addPC.accessibility": {
       "extractionState": "manual",
       "localizations": {
@@ -2475,6 +2560,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Odak modunu eşitle"
+          }
+        }
+      }
+    },
+    "settings.focus.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To use it, add the Fenpo filter to a Focus in Settings › Focus."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kullanmak için Ayarlar › Odak’ta bir odağa Fenpo filtresini ekle."
           }
         }
       }

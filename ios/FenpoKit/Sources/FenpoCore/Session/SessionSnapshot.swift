@@ -84,14 +84,23 @@ public struct ActiveTransfer: Equatable, Sendable, Identifiable {
     /// Bytes in the offer.
     public let totalBytes: UInt64
 
+    /// Files moved completely.
+    public var filesDone: Int
+
     /// Creates a summary.
-    public init(id: String, firstFileName: String, fileCount: Int, direction: TransferRecord.Direction, bytesDone: UInt64 = 0, totalBytes: UInt64) {
+    public init(id: String, firstFileName: String, fileCount: Int, direction: TransferRecord.Direction, bytesDone: UInt64 = 0, totalBytes: UInt64, filesDone: Int = 0) {
         self.id = id
         self.firstFileName = firstFileName
         self.fileCount = fileCount
         self.direction = direction
         self.bytesDone = bytesDone
         self.totalBytes = totalBytes
+        self.filesDone = filesDone
+    }
+
+    /// Files not yet moved completely.
+    public var filesLeft: Int {
+        max(0, fileCount - filesDone)
     }
 
     /// Progress between 0 and 1.

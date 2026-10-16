@@ -24,6 +24,10 @@ public protocol FenpoActions: Sendable {
     /// Sends files to the PC over the Wi-Fi data channel.
     /// - Parameter files: Files in the order to send.
     func sendFiles(_ files: [OutgoingFile]) async throws
+
+    /// Tells the PC whether a Focus is on, so it can silence Fenpo notifications.
+    /// - Parameter isActive: The Focus filter's state; the Settings switch is applied on top.
+    func reportFocus(_ isActive: Bool) async throws
 }
 
 /// Why an action could not be done. Each case has a user-facing message in the app.

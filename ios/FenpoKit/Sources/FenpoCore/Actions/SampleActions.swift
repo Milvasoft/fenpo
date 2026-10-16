@@ -24,4 +24,7 @@ public struct SampleActions: FenpoActions {
 
     public func sendFiles(_ files: [OutgoingFile]) async throws {
     }
+
+    public func reportFocus(_ isActive: Bool) async throws {
+    }
 }

@@ -18,6 +18,9 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<!-- Large transfers show on the Lock Screen and in the Dynamic Island. -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>UIPrefersShowingLanguageSettings</key>
 	<true/>
 	<key>UIBackgroundModes</key>
