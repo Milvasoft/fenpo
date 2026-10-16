@@ -52,6 +52,7 @@ struct TouchpadView: View {
                 RemoteButton(title: "touchpad.left") { send(.click()) }
                 RemoteButton(title: "touchpad.right") { send(.click(.right)) }
             }
+            .frame(height: 56)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
