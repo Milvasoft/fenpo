@@ -14,6 +14,7 @@ option java_multiple_files = true;
 
 // Every message on the control connection and the BLE channel is an Envelope.
 // Framing on TLS: [uint32 big-endian length][Envelope bytes].
+// On BLE the Envelope is sealed with AES-GCM and then split into chunks (protocol/README.md).
 // Field number ranges are reserved per feature group; keep new fields inside their range.
 message Envelope {
   uint32 version = 1;                    // Protocol version, currently 1.
@@ -46,6 +47,7 @@ message Envelope {
 
     // 50-59: device state
     DeviceState device_state = 50;
+    PcStatus pc_status = 51;
   }
 
   // 60-69 camera, 70-79 file provider, 80-89 screen mirror,

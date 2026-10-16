@@ -131,7 +131,7 @@ Android'de iOS'tan farklı olarak bildirimlere yazılı yanıt (`RemoteInput`), 
 
 ## Protokol
 
-Tek kaynak: `protocol/fenpo/v1/*.proto`. C# (`Grpc.Tools`, sadece mesaj üretimi) ve Swift (`swift-protobuf`) tipleri buradan üretilir. gRPC kullanılmıyor; kendi çerçevelememiz var.
+Tek kaynak: `protocol/fenpo/v1/*.proto`. C# (`Grpc.Tools`, sadece mesaj üretimi) ve Swift (`swift-protobuf`, `ios/scripts/generate-proto.sh` ile) tipleri buradan üretilir. gRPC kullanılmıyor; kendi çerçevelememiz var.
 
 ### Mesajlar
 
@@ -140,32 +140,34 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | Dosya | İçerik |
 |---|---|
 | `common.proto` | `DevicePlatform` (WINDOWS, IOS, ANDROID), `Capability` |
-| `hello.proto` | `Hello`, `Ping`, `Pong`, `Error` |
-| `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı ve servis UUID'si dahil) |
+| `hello.proto` | `Hello` (işletim sistemi sürümü ve model dahil), `Ping`, `Pong`, `Error` |
+| `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı dahil) |
 | `content.proto` | `ClipboardItem`, `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
-| `device.proto` | `DeviceState`, `RingDevice`, `LockPc` |
+| `device.proto` | `DeviceState`, `PcStatus`, `RingDevice`, `LockPc` |
 | `envelope.proto` | `Envelope` ve özellik gruplarına ayrılmış alan numarası aralıkları |
 
-**El sıkışma:** Her bağlantının ilk mesajı `Hello` (eşleşme bağlantısında `PairingRequest`). Cihaz türünü ve yetenek listesini taşır; iki taraf sadece ikisinin de desteklediği özellikleri açar. Böylece Android veya başka bir istemci, Windows tarafında özel durum açmadan eklenebilir.
+**El sıkışma:** Her bağlantının ilk mesajı `Hello` (eşleşme bağlantısında `PairingRequest`). Cihaz türünü, işletim sistemi sürümünü, modeli ve yetenek listesini taşır; iki taraf sadece ikisinin de desteklediği özellikleri açar. Böylece Android veya başka bir istemci, Windows tarafında özel durum açmadan eklenebilir. iPhone'daki cihaz satırının iOS sürümü `Hello.os_version`'dan gelir (DECISIONS #30).
+
+**PC durumu:** Telefon, PC'nin ANCS'ye abone olup olmadığını ve MAP'e bağlanıp bağlanmadığını kendisi göremez. PC bunları `PcStatus` ile `Hello`'dan hemen sonra ve her değişiklikte bildirir; iPhone'un eşleşme ekranındaki "Bildirim paylaşımı" ve "Mesajlar" adımları buna bakar.
 
 Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler üzerinden beslenir (`INotificationSource`, `IMessageSource`, `IMediaSource`). iPhone için kaynak ANCS, MAP ve AMS; Android kendi kaynağını Fenpo kanalı üzerinden ekler.
 
-**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz durumu. Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 90–99 bildirim aynalama (Android), 100–109 mesajlar (Android).
+**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz ve PC durumu. Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 90–99 bildirim aynalama (Android), 100–109 mesajlar (Android).
 
 ### Çerçeveleme
 
-- **④ TLS kanalı:** `[uint32 uzunluk, big-endian][Envelope bayt]`. Kontrol mesajları tek uzun ömürlü bağlantıda. Dosya gövdeleri ve video ayrı TLS bağlantılarında akar; kontrol kanalı tıkanmaz.
-- **③ BLE kanalı:** İki karakteristik: `rx` (iPhone yazar, yanıtsız yazma) ve `tx` (PC bildirir). MTU'ya göre parçalama: `[1 bayt bayrak: ilk/son][2 bayt sıra][parça]`. Sadece 4 KB'tan küçük mesajlar; büyükler için ③ "Wi‑Fi'ye geç" sinyali verir.
+- **④ TLS kanalı:** `[uint32 uzunluk, big-endian][Envelope bayt]`. Kontrol mesajları tek uzun ömürlü bağlantıda. Dosya gövdeleri ve video ayrı TLS bağlantılarında akar; kontrol kanalı tıkanmaz. Dosya bağlantısı `[uint32 uzunluk][TransferStreamHeader]` ile başlar, ardından dosyaların ham baytları teklif sırasıyla gelir.
+- **③ BLE kanalı:** Sabit bir Fenpo servisi ve iki karakteristik: `rx` (iPhone yazar, yanıtsız yazma) ve `tx` (PC bildirir), ikisi de şifreli bağlantı ister. UUID'ler her PC için aynı (`protocol/README.md`), çünkü AccessorySetupKit servis UUID'sinin iPhone uygulamasının Info.plist'inde önceden bildirilmesini istiyor. Yakında birden fazla Fenpo PC'si varsa ASK seçicisinde hangisinin hangisi olduğu S4'te netleşecek. Her Envelope önce AES-GCM ile mühürlenir (`nonce (12) || şifreli metin || etiket (16)`), sonra MTU'ya göre parçalanır: `[1 bayt bayrak: bit0 ilk, bit1 son][2 bayt sıra, big-endian, her mesajda 0'dan][parça]`. Mühürlü mesaj en fazla 4096 bayt; büyükler için ③ "Wi‑Fi'ye geç" sinyali verir. Telefon `tx` bildirimlerine abone olur olmaz `Hello` gönderir, PC `Hello` ve `PcStatus` ile cevap verir. Ayrıntı `protocol/README.md`.
 
 ### Eşleşme ve güvenlik
 
 1. PC ilk açılışta bir ECDSA P-256 anahtarı ve kendinden imzalı bir sertifika üretir (Windows'ta DPAPI ile korunur). P-256 seçildi çünkü hem Windows Schannel hem Apple Network.framework hem Android TLS yığını bunu sorunsuz destekliyor; Ed25519 sertifikaları TLS'te her yerde desteklenmiyor.
-2. PC ekranında QR: `fenpo://pair?v=1&id=<pcId>&n=<ad>&a=<ip:port,…>&fp=<sha256 sertifika parmak izi>&t=<tek kullanımlık 128 bit token>`. Yanında 6 haneli yedek kod.
-3. Telefon TLS ile bağlanır, sunucu sertifikasını `fp` ile doğrular, kendi sertifikasıyla `PairingRequest` gönderir (`t` token'ı içinde). PC token'ı tüketir, iPhone sertifikasını sabitler. Bundan sonra her bağlantı karşılıklı sertifika sabitlemeli TLS 1.3.
+2. PC ekranında QR: `fenpo://pair?v=1&id=<pcId>&n=<ad>&a=<ip:port,…>&fp=<sha256 sertifika parmak izi>&t=<tek kullanımlık 128 bit token>`. Sayısal yedek kod yok: QR olmadan telefonun elinde doğrulayacağı parmak izi olmaz ve kısa bir kod araya giren saldırgana karşı koruma sağlamaz. Kamera QR'ı okuyamazsa PC QR'ı yeniden gösterir (S5).
+3. Telefon TLS ile bağlanır, sunucu sertifikasını `fp` ile doğrular, kendi sertifikasıyla `PairingRequest` gönderir (`t` token'ı içinde). PC token'ı tüketir, iPhone'un parmak izini TLS el sıkışmasından hesaplayıp sabitler. Kabulde aynı bağlantı normal oturuma döner (telefon `Hello`, PC `Hello`); retde PC bağlantıyı kapatır. Bundan sonra her bağlantı karşılıklı sertifika sabitlemeli TLS 1.3.
 4. iPhone AccessorySetupKit ile PC'nin Fenpo BLE servisini seçer, bağlanır ve şifreleme isteyen bir karakteristiğe erişir. iOS eşleşme penceresi çıkar, bağ kurulur. PC aynı bağ üzerinden ANCS'yi bulur (önbelleksiz keşif) ve iOS "Bildirimleri paylaş" diye sorar.
 5. Klasik Bluetooth (MAP, PBAP, HFP) için Windows eşleşmesi gerekir. Sihirbaz kullanıcıyı Windows Bluetooth eşleşmesine ve iPhone'daki "Bildirimleri göster" ve "Kişileri eşzamanla" anahtarlarına yönlendirir.
-6. ③ kanalındaki mesajlar ayrıca, PC'nin eşleşmede ürettiği ve `PairingResult.ble_channel_key` ile TLS üzerinden ilettiği anahtarla AES-GCM ile şifrelenir. BLE bağı tek başına güven kaynağı sayılmaz.
+6. ③ kanalındaki mesajlar ayrıca, PC'nin eşleşmede ürettiği ve `PairingResult.ble_channel_key` ile TLS üzerinden ilettiği anahtarla AES-256-GCM ile şifrelenir. Nonce `[1 bayt gönderen: 0x01 telefon, 0x02 PC][3 bayt sıfır][8 bayt sayaç]`, AAD `fenpo-ble-v1`. Her gönderen sayacını kalıcı ve artan tutar; alıcı son gördüğünden küçük veya eşit sayacı reddeder. BLE bağı tek başına güven kaynağı sayılmaz.
 
 ### Keşif
 

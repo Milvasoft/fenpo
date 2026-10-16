@@ -9,7 +9,7 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/pairing.proto` | QR format, `PairingRequest`, `PairingResult` |
 | `fenpo/v1/content.proto` | Clipboard, open URL |
 | `fenpo/v1/transfer.proto` | File transfer negotiation and progress |
-| `fenpo/v1/device.proto` | Device state, ring, lock |
+| `fenpo/v1/device.proto` | Device state, PC status, ring, lock |
 | `fenpo/v1/envelope.proto` | `Envelope`, field ranges per feature group |
 
 ## Generation
@@ -17,10 +17,45 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | Platform | Tool | Output |
 |---|---|---|
 | Windows | `Grpc.Tools` (messages only, no services) in `Fenpo.Protocol.csproj` | `obj/` at build time |
-| iPhone | `protoc` + `protoc-gen-swift` (swift-protobuf) via the SwiftPM build plugin in `FenpoKit` | build time |
+| iPhone | `protoc` + `protoc-gen-swift` built from the swift-protobuf version `FenpoKit` resolves, run by `ios/scripts/generate-proto.sh` (SwiftPM build plugins cannot read files outside the package) | before building, into `ios/FenpoKit/Sources/FenpoProtocol/Generated/` (ignored by git) |
 | Android | protobuf Gradle plugin, Kotlin lite (or Wire, decided in Android phase A) | build time |
 
 Include path is this `protocol/` folder, so imports are written as `fenpo/v1/<file>.proto`.
+
+## Fenpo BLE channel
+
+The PC is the GATT server, the phone the client. These UUIDs are fixed for every PC and every app version; the iPhone app declares the service UUID in `NSAccessorySetupBluetoothServices`.
+
+| Item | UUID | Properties |
+|---|---|---|
+| Fenpo service | `1888047E-C8C5-45CC-AAEA-333A8859E79F` | Primary, advertised |
+| `rx` (phone → PC) | `ECC8D0D1-990A-4B02-A4FC-49FA647E7254` | Write without response, encryption required |
+| `tx` (PC → phone) | `E9EC01E0-8C02-4B8E-902C-4F113E25DFC8` | Notify, encryption required |
+
+Requiring encryption on both characteristics makes the first access trigger iOS pairing (bonding), which the PC then uses to discover ANCS.
+
+### Sealing
+
+Every Envelope is sealed before it is split; the Bluetooth bond alone is not trusted.
+
+- AES-256-GCM with `PairingResult.ble_channel_key`, delivered over TLS during pairing.
+- Nonce, 12 bytes: `[1 byte sender: 0x01 phone, 0x02 PC][3 zero bytes][8 byte counter, big-endian]`.
+- Additional authenticated data: the ASCII bytes `fenpo-ble-v1`.
+- Sealed message: `nonce (12) || ciphertext || tag (16)`, the same layout as CryptoKit's `combined`. The receiver reads the counter from the nonce.
+- Each sender keeps its counter persistent and increasing. The receiver rejects a counter less than or equal to the last one it accepted from that sender.
+- A sealed message is at most 4096 bytes. Anything larger goes over Wi‑Fi; the BLE channel only tells the other side to switch.
+
+### Chunks
+
+A sealed message is split to fit the ATT MTU. Each write (`rx`) or notification (`tx`) is `[1 byte flags][2 byte sequence, big-endian][payload]`.
+
+- Flags: bit 0 first chunk, bit 1 last chunk (a one-chunk message sets both).
+- The sequence starts at 0 for every message.
+- Payload is at most ATT MTU − 3 (ATT header) − 3 (chunk header) bytes.
+
+### Session
+
+The phone sends `Hello` as soon as it subscribes to `tx`, which means the encrypted bond is up. The PC answers with its own `Hello`, then `PcStatus`. `Ping`/`Pong` work on both channels.
 
 ## Rules
 

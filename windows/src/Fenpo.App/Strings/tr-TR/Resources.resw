@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Action_Camera.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_CameraText.Text" xml:space="preserve">
+    <value>Kamera olarak kullan</value>
+  </data>
+  <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_HotspotText.Text" xml:space="preserve">
+    <value>Hotspot’a bağlan</value>
+  </data>
+  <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_MirrorText.Text" xml:space="preserve">
+    <value>Ekranı yansıt</value>
+  </data>
+  <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_RingText.Text" xml:space="preserve">
+    <value>Telefonu çaldır</value>
+  </data>
+  <data name="Action_SendFile.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Action_SendFileText.Text" xml:space="preserve">
+    <value>Dosya gönder</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Telefonun ve Windows, aynı masada.</value>
+  </data>
+  <data name="AppPair_Intro.Text" xml:space="preserve">
+    <value>Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</value>
+  </data>
+  <data name="AppPair_NoNetworkText.Text" xml:space="preserve">
+    <value>Bilgisayarı telefonla aynı Wi‑Fi ağına bağla, kod kendiliğinden çıkar.</value>
+  </data>
+  <data name="AppPair_NoNetworkTitle.Text" xml:space="preserve">
+    <value>Bu bilgisayar bir ağa bağlı değil</value>
+  </data>
+  <data name="AppPair_QrHint.Text" xml:space="preserve">
+    <value>Kod 5 dakika geçerli, sonra kendiliğinden yenilenir</value>
+  </data>
+  <data name="AppPair_Step1.Hint" xml:space="preserve">
+    <value>App Store’da “Fenpo” ara</value>
+  </data>
+  <data name="AppPair_Step1.Title" xml:space="preserve">
+    <value>iPhone’a Fenpo’yu yükle</value>
+  </data>
+  <data name="AppPair_Step2.Hint" xml:space="preserve">
+    <value>Telefon ve bilgisayar aynı Wi‑Fi ağında olmalı</value>
+  </data>
+  <data name="AppPair_Step2.Title" xml:space="preserve">
+    <value>Kodu iPhone kamerasıyla okut</value>
+  </data>
+  <data name="AppPair_Step3.Hint" xml:space="preserve">
+    <value>iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</value>
+  </data>
+  <data name="AppPair_Step3.Title" xml:space="preserve">
+    <value>Bluetooth eşleşmesini onayla</value>
+  </data>
+  <data name="AppPair_Step4.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth &gt; Bu bilgisayar &gt; Bildirimleri göster</value>
+  </data>
+  <data name="AppPair_Step4.Title" xml:space="preserve">
+    <value>Mesajlar ve aramalar için izin ver</value>
+  </data>
+  <data name="AppPair_Title.Text" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
+  <data name="Battery_Percent" xml:space="preserve">
+    <value>%{0}</value>
+  </data>
+  <data name="Calls_Empty.Text" xml:space="preserve">
+    <value>Fenpo açıkken gelen aramalar burada listelenir.</value>
+  </data>
+  <data name="Calls_Incoming" xml:space="preserve">
+    <value>Gelen arama</value>
+  </data>
+  <data name="Calls_Missed" xml:space="preserve">
+    <value>Cevapsız arama</value>
+  </data>
+  <data name="Calls_OnPhoneNote.Text" xml:space="preserve">
+    <value>Bilgisayardan arama yapmak ve sesi bilgisayara almak Windows’un izin vermesini bekliyor.</value>
+  </data>
+  <data name="Calls_OnPhoneText.Text" xml:space="preserve">
+    <value>Gelen arama ekranın üstünde çıkar. Yanıtla ve Reddet iPhone’a gider, görüşme telefonda sürer.</value>
+  </data>
+  <data name="Calls_OnPhoneTitle.Text" xml:space="preserve">
+    <value>Görüşmeler iPhone’da</value>
+  </data>
+  <data name="Calls_Recent.Text" xml:space="preserve">
+    <value>Son aramalar</value>
+  </data>
+  <data name="CallsTitle.Text" xml:space="preserve">
+    <value>Aramalar</value>
+  </data>
+  <data name="Camera_CenterStage.Text" xml:space="preserve">
+    <value>Kişiyi ortala</value>
+  </data>
+  <data name="Camera_CenterStageHint.Text" xml:space="preserve">
+    <value>Hareket ettikçe kadraj seni takip eder</value>
+  </data>
+  <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Kişiyi ortala</value>
+  </data>
+  <data name="Camera_Hint.Text" xml:space="preserve">
+    <value>Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. iPhone’da Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</value>
+  </data>
+  <data name="Camera_Lens.Text" xml:space="preserve">
+    <value>Lens</value>
+  </data>
+  <data name="Camera_LensFront.Content" xml:space="preserve">
+    <value>Ön</value>
+  </data>
+  <data name="Camera_LensUltraWide.Content" xml:space="preserve">
+    <value>Ultra geniş</value>
+  </data>
+  <data name="Camera_LensWide.Content" xml:space="preserve">
+    <value>Geniş</value>
+  </data>
+  <data name="Camera_Microphone.Text" xml:space="preserve">
+    <value>iPhone mikrofonunu kullan</value>
+  </data>
+  <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>iPhone mikrofonunu kullan</value>
+  </data>
+  <data name="Camera_NeedsApp.Message" xml:space="preserve">
+    <value>iPhone’u kamera olarak kullanmak için uygulamayı aç.</value>
+  </data>
+  <data name="Camera_Portrait.Text" xml:space="preserve">
+    <value>Portre bulanıklığı</value>
+  </data>
+  <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Portre bulanıklığı</value>
+  </data>
+  <data name="CameraTitle.Text" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="Chip_Bluetooth.Text" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Chip_UsbOff" xml:space="preserve">
+    <value>USB yok</value>
+  </data>
+  <data name="Chip_UsbOn" xml:space="preserve">
+    <value>USB bağlı</value>
+  </data>
+  <data name="Chip_WifiOff" xml:space="preserve">
+    <value>Wi‑Fi bağlantısı yok</value>
+  </data>
+  <data name="Chip_WifiOn" xml:space="preserve">
+    <value>Aynı Wi‑Fi ağı</value>
+  </data>
+  <data name="Clipboard_Empty.Text" xml:space="preserve">
+    <value>İki tarafta kopyaladıkların burada listelenir.</value>
+  </data>
+  <data name="Clipboard_History.Text" xml:space="preserve">
+    <value>Son kopyalananlar</value>
+  </data>
+  <data name="Clipboard_NeedsApp.Message" xml:space="preserve">
+    <value>Pano paylaşımı iPhone uygulamasıyla çalışır.</value>
+  </data>
+  <data name="Clipboard_Share.Text" xml:space="preserve">
+    <value>Kopyaladığın her şey iPhone’a gitsin</value>
+  </data>
+  <data name="Clipboard_ShareHint.Text" xml:space="preserve">
+    <value>iPhone’dan gelenler için arka tarafına iki kez dokun ya da Denetim Merkezi’ndeki Fenpo düğmesini kullan.</value>
+  </data>
+  <data name="Clipboard_ShareToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pano paylaşımı</value>
+  </data>
+  <data name="ClipboardTitle.Text" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="Files_DropHint.Text" xml:space="preserve">
+    <value>Ya da bilgisayardan dosya seç.</value>
+  </data>
+  <data name="Files_DropTitle.Text" xml:space="preserve">
+    <value>Dosyaları buraya bırak, iPhone’a gitsin</value>
+  </data>
+  <data name="Files_NeedsApp.Message" xml:space="preserve">
+    <value>Dosya ve fotoğraf göndermek için iPhone uygulamasını bu bilgisayara bağla.</value>
+  </data>
+  <data name="Files_NoPhotos.Text" xml:space="preserve">
+    <value>iPhone uygulaması bağlanınca son fotoğraflar burada görünür.</value>
+  </data>
+  <data name="Files_NoTransfers.Text" xml:space="preserve">
+    <value>Henüz aktarım yok</value>
+  </data>
+  <data name="Files_Pick.Content" xml:space="preserve">
+    <value>Dosya seç</value>
+  </data>
+  <data name="Files_RecentPhotos.Text" xml:space="preserve">
+    <value>Son fotoğraflar</value>
+  </data>
+  <data name="Files_Transfers.Text" xml:space="preserve">
+    <value>Aktarımlar</value>
+  </data>
+  <data name="FilesTitle.Text" xml:space="preserve">
+    <value>Dosyalar ve fotoğraflar</value>
+  </data>
+  <data name="Filter_All.Content" xml:space="preserve">
+    <value>Tümü</value>
+  </data>
+  <data name="Filter_Calls.Content" xml:space="preserve">
+    <value>Aramalar</value>
+  </data>
+  <data name="Filter_Messages.Content" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Filter_Other.Content" xml:space="preserve">
+    <value>Diğer</value>
+  </data>
+  <data name="Home_Files.Content" xml:space="preserve">
+    <value>Dosyalar</value>
+  </data>
+  <data name="Home_NoNotifications.Text" xml:space="preserve">
+    <value>Henüz bildirim yok</value>
+  </data>
+  <data name="Home_NoPhone" xml:space="preserve">
+    <value>iPhone bağlı değil</value>
+  </data>
+  <data name="Home_NothingPlaying.Text" xml:space="preserve">
+    <value>Şu an bir şey çalmıyor</value>
+  </data>
+  <data name="Home_NothingPlayingHint.Text" xml:space="preserve">
+    <value>iPhone’da müzik başlayınca burada görünür</value>
+  </data>
+  <data name="Home_NoTransfers.Text" xml:space="preserve">
+    <value>Henüz aktarım yok</value>
+  </data>
+  <data name="Home_PairButton.Content" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
+  <data name="Home_PairHint.Text" xml:space="preserve">
+    <value>Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</value>
+  </data>
+  <data name="Home_RecentNotifications.Text" xml:space="preserve">
+    <value>Son bildirimler</value>
+  </data>
+  <data name="Home_RecentTransfers.Text" xml:space="preserve">
+    <value>Son aktarılanlar</value>
+  </data>
+  <data name="Home_SeeAll.Content" xml:space="preserve">
+    <value>Tümünü gör</value>
+  </data>
+  <data name="HomeTitle.Text" xml:space="preserve">
+    <value>iPhone’um</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yanıtla</value>
+  </data>
+  <data name="Island_Answer.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yanıtla</value>
+  </data>
+  <data name="Island_CallOnPhone" xml:space="preserve">
+    <value>Görüşme iPhone’da sürer</value>
+  </data>
+  <data name="Island_CallOnPhoneWith" xml:space="preserve">
+    <value>{0} · görüşme iPhone’da sürer</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="Island_Decline.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="Language_System" xml:space="preserve">
+    <value>Sistem dili ({0})</value>
+  </data>
+  <data name="LanguageCombo.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="LanguageRestart_Later.Content" xml:space="preserve">
+    <value>Sonra</value>
+  </data>
+  <data name="LanguageRestart_Message" xml:space="preserve">
+    <value>Fenpo yeniden başlayınca arayüz {0} olur.</value>
+  </data>
+  <data name="LanguageRestart_Now.Content" xml:space="preserve">
+    <value>Şimdi yeniden başlat</value>
+  </data>
+  <data name="LanguageRestart_Title.Text" xml:space="preserve">
+    <value>Dil değişecek.</value>
+  </data>
+  <data name="Media_Next.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Sonraki</value>
+  </data>
+  <data name="Media_PlayPause.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Oynat veya duraklat</value>
+  </data>
+  <data name="Media_Previous.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Önceki</value>
+  </data>
+  <data name="Messages_ConnectingText" xml:space="preserve">
+    <value>iPhone’dan mesaj listesi isteniyor.</value>
+  </data>
+  <data name="Messages_ConnectingTitle" xml:space="preserve">
+    <value>Mesajlara bağlanıyor</value>
+  </data>
+  <data name="Messages_Draft.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Messages_Draft.PlaceholderText" xml:space="preserve">
+    <value>Mesaj yaz</value>
+  </data>
+  <data name="Messages_FindingNumber" xml:space="preserve">
+    <value>Yanıt için numara iPhone’dan alınıyor.</value>
+  </data>
+  <data name="Messages_HistoryNote.Text" xml:space="preserve">
+    <value>iPhone’dan gönderdiğin mesajlar burada görünmez, Fenpo’dan gönderdiklerin görünür.</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_New.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_NewCancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="Messages_NewNumber" xml:space="preserve">
+    <value>Telefon numarası</value>
+  </data>
+  <data name="Messages_NewSend" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_NewText" xml:space="preserve">
+    <value>Mesaj</value>
+  </data>
+  <data name="Messages_NewTitle" xml:space="preserve">
+    <value>Yeni mesaj</value>
+  </data>
+  <data name="Messages_NoReply" xml:space="preserve">
+    <value>Bu gönderene yanıt yazılamıyor.</value>
+  </data>
+  <data name="Messages_PermissionText" xml:space="preserve">
+    <value>iPhone’da Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç. Açıksa iPhone’da Bluetooth’u kapatıp aç. Fenpo birkaç saniye içinde yeniden dener.</value>
+  </data>
+  <data name="Messages_PermissionTitle" xml:space="preserve">
+    <value>iPhone mesajlara izin vermiyor</value>
+  </data>
+  <data name="Messages_PickConversation.Text" xml:space="preserve">
+    <value>Soldan bir sohbet seç</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Messages_Refresh.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_Send.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Messages_SendFailed" xml:space="preserve">
+    <value>Gönderilemedi. iPhone yakında ve kilidi açıkken tekrar dene.</value>
+  </data>
+  <data name="Messages_Sms" xml:space="preserve">
+    <value>SMS</value>
+  </data>
+  <data name="Messages_TodayAt" xml:space="preserve">
+    <value>Bugün {0}</value>
+  </data>
+  <data name="Messages_UnavailableText" xml:space="preserve">
+    <value>Mesajlar iPhone yakındayken ve Bluetooth ile bağlıyken görünür.</value>
+  </data>
+  <data name="Messages_UnavailableTitle" xml:space="preserve">
+    <value>iPhone bağlı değil</value>
+  </data>
+  <data name="Messages_YesterdayAt" xml:space="preserve">
+    <value>Dün {0}</value>
+  </data>
+  <data name="MessagesTitle.Text" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Nav_Calls.Content" xml:space="preserve">
+    <value>Aramalar</value>
+  </data>
+  <data name="Nav_Camera.Content" xml:space="preserve">
+    <value>Kamera</value>
+  </data>
+  <data name="Nav_Clipboard.Content" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="Nav_Files.Content" xml:space="preserve">
+    <value>Dosyalar ve fotoğraflar</value>
+  </data>
+  <data name="Nav_Home.Content" xml:space="preserve">
+    <value>iPhone’um</value>
+  </data>
+  <data name="Nav_Messages.Content" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Nav_Notifications.Content" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Nav_Settings.Content" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="NeedsApp_Connect.Content" xml:space="preserve">
+    <value>iPhone uygulamasını bağla</value>
+  </data>
+  <data name="NeedsApp_Title.Text" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor.</value>
+  </data>
+  <data name="Notification_Dismiss" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Notification_DismissButton.Content" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Notifications_ClearAll.Content" xml:space="preserve">
+    <value>Tümünü temizle</value>
+  </data>
+  <data name="Notifications_Count" xml:space="preserve">
+    <value>{0} bildirim</value>
+  </data>
+  <data name="Notifications_Empty.Text" xml:space="preserve">
+    <value>iPhone’da bildirim yok</value>
+  </data>
+  <data name="Notifications_Footnote.Text" xml:space="preserve">
+    <value>WhatsApp gibi uygulamalarda yanıt yazılamıyor, iOS buna izin vermiyor. Mesajlar uygulamasındaki SMS ve iMessage’lar buradan yanıtlanabiliyor.</value>
+  </data>
+  <data name="NotificationsTitle.Text" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Pair_BrokenText.Text" xml:space="preserve">
+    <value>Windows Ayarlar’da ve iPhone’da bu eşleşmeyi kaldırıp yeniden eşleştir.</value>
+  </data>
+  <data name="Pair_BrokenTitle.Text" xml:space="preserve">
+    <value>Eşleşme bozuk görünüyor.</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Hint" xml:space="preserve">
+    <value>Bu bilgisayar telefonla eşleşebilir</value>
+  </data>
+  <data name="Pair_CheckBluetooth.Title" xml:space="preserve">
+    <value>Bluetooth açık</value>
+  </data>
+  <data name="Pair_CheckMessages.Hint" xml:space="preserve">
+    <value>İsteğe bağlı, sonra da açılabilir</value>
+  </data>
+  <data name="Pair_CheckMessages.Title" xml:space="preserve">
+    <value>Mesajlar</value>
+  </data>
+  <data name="Pair_CheckNotifications.Hint" xml:space="preserve">
+    <value>İzin verince kendiliğinden işaretlenir</value>
+  </data>
+  <data name="Pair_CheckNotifications.Title" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Pair_CheckPhone.Hint" xml:space="preserve">
+    <value>Eşleşme bitince burada görünür</value>
+  </data>
+  <data name="Pair_CheckPhone.Title" xml:space="preserve">
+    <value>iPhone</value>
+  </data>
+  <data name="Pair_Intro.Text" xml:space="preserve">
+    <value>iPhone’a bir şey yüklemeden başlayabilirsin. Bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir.</value>
+  </data>
+  <data name="Pair_Later.Content" xml:space="preserve">
+    <value>Sonra yap</value>
+  </data>
+  <data name="Pair_OpenSettings.Content" xml:space="preserve">
+    <value>Bluetooth ayarlarını aç</value>
+  </data>
+  <data name="Pair_PhoneLinkClose.Content" xml:space="preserve">
+    <value>Kapat</value>
+  </data>
+  <data name="Pair_PhoneLinkText.Text" xml:space="preserve">
+    <value>Aynı anda çalışırsa bildirimler gelmeyebilir.</value>
+  </data>
+  <data name="Pair_PhoneLinkTitle.Text" xml:space="preserve">
+    <value>Telefon Bağlantısı açık.</value>
+  </data>
+  <data name="Pair_StatusHeader.Text" xml:space="preserve">
+    <value>Bağlantı durumu</value>
+  </data>
+  <data name="Pair_Step1.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth ekranında kal, iPhone böylece görünür olur</value>
+  </data>
+  <data name="Pair_Step1.Title" xml:space="preserve">
+    <value>iPhone’da Bluetooth ayarlarını aç</value>
+  </data>
+  <data name="Pair_Step2.Hint" xml:space="preserve">
+    <value>Cihaz ekle &gt; Bluetooth &gt; iPhone’unu seç, iki ekrandaki kodu onayla</value>
+  </data>
+  <data name="Pair_Step2.Title" xml:space="preserve">
+    <value>Bu bilgisayarda eşleştir</value>
+  </data>
+  <data name="Pair_Step3.Hint" xml:space="preserve">
+    <value>iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</value>
+  </data>
+  <data name="Pair_Step3.Title" xml:space="preserve">
+    <value>Bildirimleri paylaşmaya izin ver</value>
+  </data>
+  <data name="Pair_Step4.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster</value>
+  </data>
+  <data name="Pair_Step4.Title" xml:space="preserve">
+    <value>Mesajlara izin ver</value>
+  </data>
+  <data name="Pair_Title.Text" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
+  <data name="Pair_WithApp.Content" xml:space="preserve">
+    <value>iPhone uygulamasıyla bağla</value>
+  </data>
+  <data name="Search.PlaceholderText" xml:space="preserve">
+    <value>Mesaj, kişi veya dosya ara</value>
+  </data>
+  <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
+    <value>Görünüm ve dil</value>
+  </data>
+  <data name="Settings_Calls.Text" xml:space="preserve">
+    <value>Gelen aramaları ekranın üstünde göster</value>
+  </data>
+  <data name="Settings_CallsHint.Text" xml:space="preserve">
+    <value>Yanıtla ve Reddet iPhone’a gider</value>
+  </data>
+  <data name="Settings_CallsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Gelen aramaları göster</value>
+  </data>
+  <data name="Settings_ChangeFolder.Content" xml:space="preserve">
+    <value>Değiştir</value>
+  </data>
+  <data name="Settings_Clipboard.Text" xml:space="preserve">
+    <value>Pano paylaşımı</value>
+  </data>
+  <data name="Settings_ClipboardToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Pano paylaşımı</value>
+  </data>
+  <data name="Settings_DeviceHeader.Text" xml:space="preserve">
+    <value>Cihaz</value>
+  </data>
+  <data name="Settings_DeviceModelState" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="Settings_FeaturesHeader.Text" xml:space="preserve">
+    <value>Özellikler</value>
+  </data>
+  <data name="Settings_Focus.Text" xml:space="preserve">
+    <value>Odak modunu eşitle</value>
+  </data>
+  <data name="Settings_FocusHint.Text" xml:space="preserve">
+    <value>iPhone’da Rahatsız Etme açılınca Fenpo bildirimleri susar</value>
+  </data>
+  <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Odak modunu eşitle</value>
+  </data>
+  <data name="Settings_IncomingFiles.Text" xml:space="preserve">
+    <value>Gelen dosyalar</value>
+  </data>
+  <data name="Settings_Language.Text" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="Settings_LanguageHint.Text" xml:space="preserve">
+    <value>Bildirimler, tepsi paneli ve ada da bu dili kullanır</value>
+  </data>
+  <data name="Settings_ManagePairing.Content" xml:space="preserve">
+    <value>Bluetooth ayarları</value>
+  </data>
+  <data name="Settings_Media.Text" xml:space="preserve">
+    <value>Medya kontrolü</value>
+  </data>
+  <data name="Settings_MediaHint.Text" xml:space="preserve">
+    <value>Klavyedeki medya tuşları iPhone’u kontrol eder</value>
+  </data>
+  <data name="Settings_MediaToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Medya kontrolü</value>
+  </data>
+  <data name="Settings_NoDevice" xml:space="preserve">
+    <value>Eşleşmiş iPhone yok</value>
+  </data>
+  <data name="Settings_NoDeviceHint" xml:space="preserve">
+    <value>iPhone’u bir kere eşleştir, sonra Fenpo kendiliğinden bağlanır</value>
+  </data>
+  <data name="Settings_Notifications.Text" xml:space="preserve">
+    <value>Bildirimleri göster</value>
+  </data>
+  <data name="Settings_NotificationsHint.Text" xml:space="preserve">
+    <value>iPhone’daki bildirimler Windows bildirimi olarak gelir</value>
+  </data>
+  <data name="Settings_NotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bildirimleri göster</value>
+  </data>
+  <data name="Settings_Pair.Content" xml:space="preserve">
+    <value>Eşleştir</value>
+  </data>
+  <data name="Settings_ProximityHeader.Text" xml:space="preserve">
+    <value>Yakınlık ve odak</value>
+  </data>
+  <data name="Settings_ProximityLock.Text" xml:space="preserve">
+    <value>iPhone uzaklaşınca bilgisayarı kilitle</value>
+  </data>
+  <data name="Settings_ProximityLockHint.Text" xml:space="preserve">
+    <value>Yaklaşık 3 metre, 30 saniye</value>
+  </data>
+  <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yakınlık kilidi</value>
+  </data>
+  <data name="Settings_Startup.Text" xml:space="preserve">
+    <value>Windows açılınca başlat</value>
+  </data>
+  <data name="Settings_StartupHint" xml:space="preserve">
+    <value>Fenpo tepside bekler, iPhone yakına gelince bağlanır</value>
+  </data>
+  <data name="Settings_StartupHintDisabledByUser" xml:space="preserve">
+    <value>Görev Yöneticisi’nde kapatılmış; Başlangıç uygulamaları sekmesinden aç</value>
+  </data>
+  <data name="Settings_StartupHintPolicy" xml:space="preserve">
+    <value>Kuruluşun bu ayarı yönetiyor</value>
+  </data>
+  <data name="Settings_StartupToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Windows açılınca başlat</value>
+  </data>
+  <data name="Settings_Theme.Text" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="Settings_ThemeHint.Text" xml:space="preserve">
+    <value>Sistem seçiliyken Windows’un açık veya koyu ayarını izler</value>
+  </data>
+  <data name="Settings_Unlock.Text" xml:space="preserve">
+    <value>iPhone ile kilit aç</value>
+  </data>
+  <data name="Settings_UnlockHint.Text" xml:space="preserve">
+    <value>Face ID onayıyla Windows oturumunu açar. Ayrı bir bileşen gerektirir (deneysel)</value>
+  </data>
+  <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>iPhone ile kilit aç</value>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Status_BrokenBond" xml:space="preserve">
+    <value>Eşleşme bozuk, yeniden eşleştir</value>
+  </data>
+  <data name="Status_Connected" xml:space="preserve">
+    <value>Bağlı</value>
+  </data>
+  <data name="Status_Connecting" xml:space="preserve">
+    <value>Bağlanıyor</value>
+  </data>
+  <data name="Status_Disconnected" xml:space="preserve">
+    <value>Bağlı değil</value>
+  </data>
+  <data name="Status_NotPaired" xml:space="preserve">
+    <value>Eşleşmiş iPhone yok</value>
+  </data>
+  <data name="Theme_Dark.Content" xml:space="preserve">
+    <value>Koyu</value>
+  </data>
+  <data name="Theme_Light.Content" xml:space="preserve">
+    <value>Açık</value>
+  </data>
+  <data name="Theme_System.Content" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="Time_Minutes" xml:space="preserve">
+    <value>{0} dk</value>
+  </data>
+  <data name="Time_Now" xml:space="preserve">
+    <value>şimdi</value>
+  </data>
+  <data name="Time_Yesterday" xml:space="preserve">
+    <value>Dün</value>
+  </data>
+  <data name="Tray_Clipboard.Text" xml:space="preserve">
+    <value>Pano</value>
+  </data>
+  <data name="Tray_Focus.Text" xml:space="preserve">
+    <value>Odak</value>
+  </data>
+  <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Tray_HotspotText.Text" xml:space="preserve">
+    <value>Hotspot</value>
+  </data>
+  <data name="Tray_LinksBluetooth" xml:space="preserve">
+    <value>Bluetooth</value>
+  </data>
+  <data name="Tray_LinksBluetoothUsb" xml:space="preserve">
+    <value>Bluetooth ve USB</value>
+  </data>
+  <data name="Tray_LinksBluetoothWifi" xml:space="preserve">
+    <value>Bluetooth ve Wi‑Fi</value>
+  </data>
+  <data name="Tray_MenuOpen" xml:space="preserve">
+    <value>Fenpo’yu aç</value>
+  </data>
+  <data name="Tray_MenuQuit" xml:space="preserve">
+    <value>Çık</value>
+  </data>
+  <data name="Tray_Notifications.Text" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Tray_Open.Content" xml:space="preserve">
+    <value>Fenpo’yu aç</value>
+  </data>
+  <data name="Tray_ProximityLock.Text" xml:space="preserve">
+    <value>Yakınlık kilidi</value>
+  </data>
+  <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>iPhone’da Fenpo gerekiyor</value>
+  </data>
+  <data name="Tray_RingText.Text" xml:space="preserve">
+    <value>Çaldır</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Tray_Settings.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="Tray_Summary" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+</root>

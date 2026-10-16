@@ -32,7 +32,17 @@ Komutlar: `adv <0|4|8|20>` (servis verisi uzunluğu), `send <metin>`, `status`, 
 - **Servis verisi eklenince**, 4 bayt bile olsa (4, 8, 13, 20, 40 denendi), durum **`StartedWithoutAllAdvertisementData`** oluyor. Windows reklamı başlatıyor ama servis verisini koymuyor. Adaptör genişletilmiş reklamı desteklediği halde (`MaxAdvertisementDataLength` 312) `GattServiceProvider` eski 31 baytlık reklamda kalıyor. Bayraklar (3) ve 128 bit UUID (18), 128 bit UUID'li servis verisine yer bırakmıyor.
 - Her `StartAdvertising` önce kısa bir `Aborted` olayı, hemen ardından asıl durumu veriyor. Ürün kodu ilk `Aborted`'ı hata saymamalı.
 
-### iPhone'la denenmesi gerekenler (Buğra, sabah)
+### iPhone'la (16 Ekim 13:20, iPhone 13, nRF Connect)
+
+- Tarayıcıda PC **BUGRAKOSEN** adıyla, `Device Information` ve `1888047E…` servisleriyle, -50 dBm civarında görünüyor; bağlanabilir. nRF Connect ham reklam baytlarını göstermedi. iPhone bu PC'ye zaten bağlı olduğu için adın reklamdan mı, iOS'un hatırladığı GAP adından mı geldiği kesin değil.
+- Bağlantı ve `tx` aboneliği **eşleşme ya da izin sorusu çıkmadan** oldu: iki cihaz arasında bağ (S1 ve bugünkü yeniden eşleşme) zaten vardı, şifreli karakteristik onu kullandı.
+- ATT MTU 527, `tx` için en büyük bildirim 524 bayt.
+- `rx`: telefon `merhaba` yazdı, PC 7 baytı `WriteWithoutResponse` olarak aldı.
+- `tx`: PC `selam` bildirdi (`Success`), nRF Connect değeri gösterdi.
+
+Kalan: bağı olmayan bir telefonla ilk erişimde iOS'un eşleşme penceresi (Fenpo uygulaması ve ASK ile, kilometre taşı 1) ve reklamdaki adın ASK seçicisinde görünüp görünmediği.
+
+### Önceden yazılan cihaz adımları
 
 Fenpo iOS uygulaması henüz cihazda olmadığı için genel amaçlı bir BLE uygulamasıyla bakılacak:
 
@@ -45,7 +55,12 @@ Fenpo iOS uygulaması henüz cihazda olmadığı için genel amaçlı bir BLE uy
 
 Gözlenecekler: reklamdaki ad, şifreli karakteristiğe ilk erişimde iOS'un ne yaptığı (S1'de bağ zaten kurulu olduğu için soru çıkmayabilir), PC loglarında abonelik ve yazmalar, MTU.
 
-## Karar (şimdilik)
+## Karar
+
+- **Fenpo BLE kanalı Windows tarafında çalışıyor:** sabit UUID'li servis, iki yönde veri, MTU 527. Ürün koduna `FenpoGattServer` olarak girer.
+- PC'yi ayırt etmek için öncelik reklamdaki/GAP adı (aşağıda 1. seçenek). Adın reklamdan geldiği ASK seçicisinde doğrulanana kadar 3. seçenek (bağlandıktan sonra `pc_id`) yedek kalır.
+
+### Önceki değerlendirme
 
 - PC'yi ayırt etmek için **reklamdaki servis verisi kullanılamaz** (`GattServiceProvider` buna izin vermiyor). Kalan seçenekler:
   1. Reklamdaki yerel ad. Windows'un bunu kendiliğinden koyup koymadığını nRF Connect gösterecek.

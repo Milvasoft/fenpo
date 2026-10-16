@@ -43,6 +43,12 @@ Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [an
 - Okundu işaretleme, MNS bildirim kaydı (iPhone 260 ms'de bizim RFCOMM sunucumuza bağlanıyor) ve **gönderme çalışıyor**: PushMessage 1,8 saniyede `Success` döndü, sonra `MessageShift` ve `SendingSuccess` olayları geldi, mesaj karşıya ulaştı.
 - Olay raporları MAP 1.0 biçiminde: gönderen ve metin yok. `NewMessage` sonrası `GetMessage` bir kez 33 saniye gecikti; yeni mesajın ilk gösterimi ANCS'den yapılmalı.
 
+**Ürün cihaz testi (16 Ekim öğlen, aynı iPhone, S3'teki yeniden eşleşmeden sonra):**
+- "Mesaj Bildirimlerini Göster" açık olduğu hâlde iPhone MAS kaydını SDP'de göstermedi (paketli Fenpo'da da paketsiz S2 programında da 0 kayıt). iPhone'da Bluetooth kapatılıp açılınca klasik bağlantı yeniden kuruldu ve MAS geri geldi. Fenpo bu durumu "izin gerekiyor" olarak gösteriyor; sihirbaz ve Mesajlar sayfasının metnine Bluetooth'u kapatıp açma adımı eklenmeli.
+- Rehberdeki bir kişiden gelen SMS listede `sender_name` olarak numarayla geldi, bMessage'daki `FN` de boştu (S2'de doluydu). Ad, aynı mesajın ANCS bildiriminin başlığından alınıyor (`SenderNames`: metin ve saat eşleşmesi). Bildirimi görülmemiş eski mesajlar numarayla kalıyor.
+- Fenpo'dan gönderilen mesaj karşıya ulaştı, ama `sent` klasörü boş kaldı (S2'de oradaydı). Fenpo gönderdiklerini bu bilgisayarda saklıyor (`SentMessages`).
+- **PBAP:** SDP'de PSE (0x112F) var, ama RFCOMM bağlantısını iPhone reddediyor ("destination host was down"). Bilgisayar PBAP istemci (PCE, 0x112E) kaydı yayınlasa ve iPhone'dan unutulup yeniden eşleşse de "Kişileri Eşzamanla" anahtarı çıkmadı. Tahmin (doğrulanmadı): iOS rehberi sadece eller serbest (HFP) bağlı cihazlarla paylaşıyor; HFP bu makinede kullanılamıyor (S3).
+
 Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https://github.com/BestOwl/MyPhone), [RfcommServiceId](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.rfcomm.rfcommserviceid.phonebookaccesspse?view=winrt-20348), [imsg-map](https://docs.rs/crate/imsg-map/0.3.1)
 
 ## 4. Aramalar: HFP
@@ -75,6 +81,7 @@ Kaynaklar: [Apple forum 706761](https://developer.apple.com/forums/thread/706761
 - TN3115 (Eylül 2025): çökme ve bellekten atılmada yeniden başlatılıyor; yeniden başlatmada ilk kilit açmadan sonra; Ayarlar'dan Bluetooth kapatılınca ve zorla kapatmada **hayır**. iOS 26'dan beri Denetim Merkezi'nden Bluetooth açıp kapatmada sadece AccessorySetupKit ile kurulan uygulamalar geri geliyor. Apple DTS, zorla kapatma sonrası için doğru yolun ASK olduğunu söylüyor.
 - Windows'ta `GattServiceProvider` için adaptörün çevre birim rolünü desteklemesi gerekiyor (`IsPeripheralRoleSupported`); bazı ucuz CSR donanımlarda yok. 128 bit UUID reklamın 31 baytının 16'sını kaplıyor.
 - **S4 Windows ölçümü (16 Ekim):** `GattServiceProvider` paketlenmemiş süreçte çalışıyor. Reklama servis verisi eklenince (4 bayt bile) durum `StartedWithoutAllAdvertisementData` oluyor: genişletilmiş reklam destekli adaptörde bile eski 31 baytlık reklamda kalıyor ve veriyi atıyor. PC'yi ayırt etmek servis verisiyle yapılamaz ([spikes/S4-ble-peripheral](../spikes/S4-ble-peripheral/README.md)).
+- **S4 iPhone'la (16 Ekim, nRF Connect):** PC bilgisayar adıyla (BUGRAKOSEN) ve Fenpo servisiyle görünüyor. Bağlı iPhone'la `rx` yazma ve `tx` bildirim çalışıyor, ATT MTU 527. Bağ zaten olduğu için şifreli karakteristikte soru çıkmadı.
 
 Kaynaklar: [TN3115](https://developer.apple.com/documentation/technotes/tn3115-bluetooth-state-restoration-app-relaunch-rules), [Arka plan BLE](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html), [Apple forum 840468](https://origin-devforums.apple.com/forums/thread/840468), [GATT sunucusu](https://learn.microsoft.com/en-us/windows/apps/develop/devices-sensors/gatt-server)
 
@@ -90,7 +97,7 @@ Kaynak: [windows-ble-hid](https://github.com/abhishek-raj/windows-ble-hid)
 - `MFCreateVirtualCamera` (Windows 11 22000+) özel medya kaynağının CLSID'sini alıyor. Kaynak Frame Server sürecinde yüklendiği için HKLM'de kayıtlı bir COM sunucusu olmalı ve Local Service tarafından okunabilir bir yerde durmalı (kullanıcı profili değil).
 - `smourier/VCamNetSample` (MIT): .NET 10 Native AOT sürümü var. Fenpo.exe ile medya kaynağı arasında paylaşımlı bellek veya paylaşımlı doku gerekiyor.
 - MSIX ile HKLM kaydı spike'ta netleşmeli; gerekirse kamera bileşeni ayrı, yönetici yetkili bir kurulumla gelir.
-- **S7 sonucu (16 Ekim, gece):** VCamNetSample'ın AOT medya kaynağı .NET 10 Native AOT ile 5,5 MB'lık tek bir DLL'e derleniyor. İmzalı bir MSIX içinde `com:SurrogateServer/com:Class` ile bildirildiğinde `MFCreateVirtualCamera` `S_OK` dönüyor, ama `Start` **`Class not registered`** veriyor: Frame Server paketli COM sınıfını görmüyor. Kamera bileşeni ayrı, yönetici onaylı bir kurulum gerektiriyor. HKLM kaydıyla görüntü denemesi henüz yapılmadı ([spikes/S7-virtual-camera](../spikes/S7-virtual-camera/README.md)).
+- **S7 sonucu (16 Ekim, gece):** VCamNetSample'ın AOT medya kaynağı .NET 10 Native AOT ile 5,5 MB'lık tek bir DLL'e derleniyor. İmzalı bir MSIX içinde `com:SurrogateServer/com:Class` ile bildirildiğinde `MFCreateVirtualCamera` `S_OK` dönüyor, ama `Start` **`Class not registered`** veriyor: Frame Server paketli COM sınıfını görmüyor. Kamera bileşeni ayrı, yönetici onaylı bir kurulum gerektiriyor. DLL `C:\ProgramData` altına kopyalanıp HKLM'ye kaydedilince `Start` `S_OK` dönüyor ve `MediaCapture` 1280×960 test desenini alıyor: Native AOT medya kaynağı Frame Server içinde çalışıyor ([spikes/S7-virtual-camera](../spikes/S7-virtual-camera/README.md)).
 
 Kaynaklar: [MFCreateVirtualCamera](https://learn.microsoft.com/en-us/windows/win32/api/mfvirtualcamera/nf-mfvirtualcamera-mfcreatevirtualcamera), [VCamNetSample](https://github.com/smourier/VCamNetSample)
 

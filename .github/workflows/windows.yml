@@ -1,0 +1,29 @@
+name: windows
+
+on:
+  push:
+    branches: [main]
+    paths: ['windows/**', 'protocol/**', '.github/workflows/windows.yml']
+  pull_request:
+    paths: ['windows/**', 'protocol/**', '.github/workflows/windows.yml']
+
+jobs:
+  build-and-test:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Test
+        working-directory: windows
+        run: |
+          dotnet test --project tests/Fenpo.Core.Tests -c Release
+          dotnet test --project tests/Fenpo.Bluetooth.Tests -c Release
+          dotnet test --project tests/Fenpo.Transport.Tests -c Release
+
+      - name: Build app (x64)
+        working-directory: windows
+        run: dotnet build src/Fenpo.App -c Release -p:Platform=x64

@@ -56,7 +56,7 @@ Zaten planda olanlar: pil, pano, dosya paylaşımı, bildirimler, SMS, aramalar,
 
 ## Yol haritası
 
-Her aşama kendi başına kullanılabilir bir ürün çıkarıyor. Aşama bitmeden bir sonrakine geçilmez.
+Her aşama kendi başına kullanılabilir bir ürün çıkarıyor. Windows uygulaması aşamalara bölünmeden baştan sona yapılıyor (DECISIONS #36); aşamalar iç sıralamayı ve iPhone tarafının kilometre taşlarını gösteriyor.
 
 ### Aşama 0: Spike'lar (2–3 hafta)
 
@@ -77,9 +77,9 @@ Planı en çok etkileyen belirsizlikleri, ürün kodu yazmadan önce küçük de
 - **S1 ve S8 bitti (16 Ekim).** ANCS, AMS, Battery ve Current Time çalışıyor. Eşleşme Windows Ayarlar'dan yapılıyor; yakınlık kilidi reklam RSSI'siyle yapılacak (DECISIONS #28–30). DIS'ten model kimliği okunuyor, iOS sürümü okunmuyor. Yeniden bağlandıktan sonra abonelik yenileme ve canlı bildirim gecikmesi Aşama 1'de doğrulanacak ([README](../spikes/S1-ancs-ams/README.md)).
 - **S2 bitti (16 Ekim).** MAP ile okuma, okundu işaretleme, yeni mesaj bildirimi ve gönderme çalışıyor; OBEX Fenpo içinde yazılacak. Gelen kutusu eski SMS'leri de veriyor, `sent` klasörü boş geliyor. Yeni mesaj ANCS'den gösterilecek (DECISIONS #32–33, [README](../spikes/S2-map/README.md)).
 - **S3 bitti, olumsuz (16 Ekim).** Bu makinede (Windows 11 26H2 Insider) `RegisterApp` HFP kaydını almıyor, LAF `Unavailable`. Aramalar Aşama 2'de ANCS aksiyonlarıyla yapılacak, ses iPhone'da kalacak; HFP beklemede (DECISIONS #34, [README](../spikes/S3-hfp/README.md)).
-- **S4 Windows tarafı hazır (16 Ekim).** Sabit UUID'lerle GATT sunucusu ve reklam çalışıyor; reklama servis verisi sığmıyor. iPhone'la (nRF Connect, sonra Fenpo uygulaması) denenmedi ([README](../spikes/S4-ble-peripheral/README.md)).
+- **S4 Windows tarafı bitti (16 Ekim).** Sabit UUID'lerle GATT sunucusu ve reklam çalışıyor; reklama servis verisi sığmıyor. nRF Connect ile iPhone'dan: PC "BUGRAKOSEN" adıyla görünüyor, iki yönde veri gidiyor, MTU 527, bağ varken soru çıkmıyor. Kalan: Fenpo uygulaması ve ASK ile ilk eşleşme ([README](../spikes/S4-ble-peripheral/README.md)).
 - **S5 Windows tarafı yazıldı, çalıştırılamadı (16 Ekim).** TLS 1.3 sunucusu, eşleşme, `Hello`, QR, DNS-SD ve telefon simülatörüyle 9 senaryo hazır. Windows Defender sunucu DLL'ini yanlış alarmla karantinaya aldı; çalıştırmak Buğra'nın Defender kararını bekliyor. Protokol önerisi README'de ([README](../spikes/S5-tls-pairing/README.md)).
-- **S7 kısmen bitti (16 Ekim).** Native AOT medya kaynağı derleniyor; MSIX içindeki paketli COM sınıfını Frame Server görmüyor, kamera ayrı ve yönetici onaylı bir kurulum gerektiriyor (DECISIONS #35). HKLM kaydıyla görüntü denemesi bekliyor ([README](../spikes/S7-virtual-camera/README.md)).
+- **S7 bitti (16 Ekim).** .NET Native AOT medya kaynağı HKLM kaydıyla Frame Server içinde görüntü veriyor; MSIX içindeki paketli COM sınıfını ise Frame Server görmüyor, kamera ayrı ve yönetici onaylı bir kurulum gerektiriyor (DECISIONS #35) ([README](../spikes/S7-virtual-camera/README.md)).
 
 ### Aşama 1: Telefonun masada (MVP)
 

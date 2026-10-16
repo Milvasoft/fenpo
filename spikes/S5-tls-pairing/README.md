@@ -42,6 +42,26 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
   2. Dosyayı Microsoft'a yanlış alarm olarak göndermek: <https://www.microsoft.com/wdsi/filesubmission>. Yanıt günler sürebilir.
 - Henüz ölçülmeyenler: TLS 1.3 el sıkışma süresi ve şifre takımı, Schannel'ın bu sertifikayla sunucu olarak çalışıp çalışmadığı, DNS-SD kaydının aynı makineden görünüp görünmediği, QR boyutu. Tahmini URI uzunluğu ~190 karakter (QR sürüm 9–10, ECC M).
 
+## Çalıştırma (16 Ekim 2026, 13:45)
+
+Buğra dosyayı Microsoft'a yanlış alarm olarak gönderdi (tespit `Backdoor:Win32/Farfli!pz`, tanım `1.461.43.0`) ve karantinadan geri yükledi. Önceden derlenmiş ikili dosyalar yeniden derlenmeden çalıştırıldı; protokol değişikliği (`e185f5d`) sonrası spike'ın yeniden derlenmesi gerekmedi.
+
+| # | Senaryo | Sonuç |
+|---|---|---|
+| 1 | DNS-SD kaydı görünüyor | **Kaldı.** `DnsServiceRegister` 0 ile tamamlandı, ama aynı makinedeki WinRT `DeviceInformation` izleyicisi 10 saniyede `_fenpo._tcp` örneğini bulamadı. iPhone'dan Bonjour ile görünüp görünmediği iOS uygulamasıyla denenecek. Asıl adres yolu zaten ③ kanalı (ARCHITECTURE "Keşif") |
+| 2 | QR'daki parmak izi yanlış | Geçti: telefon el sıkışmayı kesiyor |
+| 3 | Sadece TLS 1.2 | Geçti: reddediliyor |
+| 4 | İstemci sertifikası yok | Geçti: reddediliyor |
+| 5 | Yanlış token | Geçti: `TOKEN_INVALID` |
+| 6 | Doğru QR | Geçti: TLS 1.3, `TLS_AES_256_GCM_SHA384`, el sıkışma 2–73 ms, eşleşme + `Hello` + `Ping` toplam 53 ms |
+| 7 | Kullanılmış token | Geçti: `TOKEN_INVALID` |
+| 8 | Eşleşmiş sertifikayla yeniden bağlanma | Geçti: 3 ms |
+| 9 | Bilinmeyen sertifika | Geçti: `Error NOT_PAIRED` |
+
+- Schannel, DPAPI ile saklanan P-256 sertifikayla TLS 1.3 sunucusu olarak çalışıyor.
+- QR URI'si 180 karakter, QR sürüm 9.
+- Geri yüklenen `PcServer.dll` bu çalıştırmada yeniden işaretlenmedi.
+
 ## Ürün koduna etkisi
 
 1. **Defender yanlış alarmı ürün için de risk.** `Fenpo.exe` bu kodun hepsini taşıyacak. Yayından önce: imzalı ikili dosyalar ve MSIX, yayınlanacak her sürümü Microsoft'a önceden göndermek, CI'da Defender taraması. PLAN'ın dağıtım maddesine eklenmeli.
@@ -50,6 +70,8 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
 4. DNS-SD, WinRT `DnssdServiceInstance` yerine `DnsServiceRegister` ile; TLS sunucusu sade bir `TcpListener` üzerinde kalabiliyor.
 
 ## Önerilen protokol değişikliği (DECISIONS #23, #30)
+
+> Uygulandı: `e185f5d`, yedek kod için (a) seçildi (DECISIONS #39).
 
 `beede75` (iOS oturumunun UUID commit'i) `main`'e alındıktan sonra, Buğra'nın onayıyla tek bir `protocol: ...` commit'i ve aynı commit'te `docs/ARCHITECTURE.md` güncellemesi:
 
@@ -62,3 +84,11 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
    - Önerim (a), (b) ileride. Karar Buğra'nın.
 5. **BLE kanalında AES-GCM.** Anahtar `PairingResult.ble_channel_key`. Önce tüm Envelope şifrelenir, sonra parçalanır. Nonce 12 bayt: `[1 bayt gönderen: 0x01 telefon, 0x02 PC][3 bayt sıfır][8 bayt sayaç, big-endian]`. AAD `"fenpo-ble-v1"`. Her gönderen sayacını kalıcı ve artan tutar; alıcı son gördüğünden küçük veya eşit sayacı reddeder (tekrar saldırısı).
 6. **`TransferStreamHeader` çerçevesi.** Veri bağlantısı da `[uint32 BE uzunluk][TransferStreamHeader]` ile başlar, ardından dosyaların ham baytları teklif sırasıyla, bayt sayısı `FileInfo.size` toplamı kadar gelir.
+
+iOS oturumu 1–6'yı `ios` dalında uyguladı ve şu ayrıntıları ekledi (16 Ekim 2026). Bunlar da aynı commit'e girer:
+
+7. **Mühürlenmiş BLE mesajı:** `nonce (12) || ciphertext || tag (16)`. Nonce açık gider, alıcı sayacı buradan okur (CryptoKit `combined` biçimi). Sınır mühürlenmiş mesajda 4096 bayt.
+8. **Parça başlığı:** bayrak bit0 = ilk, bit1 = son; ardından 2 baytlık sıra numarası, big-endian, her mesajda 0'dan başlar. Şifreleme parçalamadan önce yapılır.
+9. **BLE'de Hello:** telefon `tx` bildirimlerine abone olur olmaz (şifreli bağ kurulmuş demek) kendi `Hello`'sunu gönderir; PC de BLE'de `Hello` ile cevap verir. `Ping`/`Pong` iki kanalda da var.
+10. **PC durumu sinyali (yeni).** Telefon, iOS'un "Bildirimleri paylaş" onayının verilip PC'nin ANCS'ye abone olduğunu bilemiyor. Önerim PC'den telefona ayrı bir mesaj: `PcStatus { bool notifications_subscribed = 1; bool messages_available = 2; }`. PC bunu `Hello`'dan hemen sonra ve her değişiklikte gönderir. Windows'ta iki değer zaten var (`PhoneStatus.NotificationsAvailable`, `MessagesAvailable`). iPhone'un eşleşme ekranındaki "Bildirim paylaşımı" ve "Mesajlar" adımları buna bakar. Commit'e kadar iOS, PC'nin BLE'deki `Hello`'sunu bildirim adımının bittiği diye sayıyor.
+11. **`PairingRequest.certificate_sha256`:** iOS şimdiden boş gönderiyor (madde 1).

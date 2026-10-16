@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fenpo.App.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Fenpo.App.Helpers">
+
+    <ScrollViewer>
+        <StackPanel Padding="32,28" Spacing="16" MaxWidth="900" HorizontalAlignment="Stretch">
+            <TextBlock x:Uid="SettingsTitle" Style="{StaticResource FenpoPageTitleStyle}" Margin="0,0,0,4" />
+
+            <!-- Language restart banner -->
+            <Border Style="{StaticResource FenpoNoticeStyle}" Padding="14,10" Visibility="{x:Bind ViewModel.RestartPending, Mode=OneWay}">
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <FontIcon Glyph="&#xE774;" FontSize="18" Foreground="{ThemeResource FenpoAccentBrush}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" VerticalAlignment="Center" TextWrapping="Wrap" FontSize="13" Foreground="{ThemeResource FenpoTextBrush}">
+                        <Run x:Uid="LanguageRestart_Title" FontWeight="SemiBold" />
+                        <Run Text="{x:Bind ViewModel.RestartMessage, Mode=OneWay}" />
+                    </TextBlock>
+                    <Button Grid.Column="2" x:Uid="LanguageRestart_Now" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.RestartCommand}" />
+                    <Button Grid.Column="3" x:Uid="LanguageRestart_Later" Command="{x:Bind ViewModel.DismissRestartCommand}" />
+                </Grid>
+            </Border>
+
+            <!-- Appearance and language -->
+            <StackPanel>
+                <TextBlock x:Uid="Settings_AppearanceHeader" Style="{StaticResource FenpoSectionHeaderStyle}" />
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE706;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Theme" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_ThemeHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <Border Grid.Column="2" Width="270" Style="{StaticResource FenpoSegmentBarStyle}">
+                                <Grid ColumnSpacing="3">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                        <ColumnDefinition />
+                                    </Grid.ColumnDefinitions>
+                                    <RadioButton x:Name="ThemeSystem" x:Uid="Theme_System" GroupName="Theme" Style="{StaticResource FenpoSegmentStyle}" Checked="OnThemeChecked" />
+                                    <RadioButton x:Name="ThemeLight" x:Uid="Theme_Light" Grid.Column="1" GroupName="Theme" Style="{StaticResource FenpoSegmentStyle}" Checked="OnThemeChecked" />
+                                    <RadioButton x:Name="ThemeDark" x:Uid="Theme_Dark" Grid.Column="2" GroupName="Theme" Style="{StaticResource FenpoSegmentStyle}" Checked="OnThemeChecked" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE774;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Language" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_LanguageHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ComboBox Grid.Column="2" MinWidth="200" VerticalAlignment="Center" SelectedIndex="{x:Bind ViewModel.LanguageIndex, Mode=TwoWay}" x:Uid="LanguageCombo">
+                                <ComboBoxItem Content="{x:Bind ViewModel.SystemLanguageLabel}" />
+                                <ComboBoxItem Content="Türkçe" />
+                                <ComboBoxItem Content="English" />
+                            </ComboBox>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Features -->
+            <StackPanel>
+                <TextBlock x:Uid="Settings_FeaturesHeader" Style="{StaticResource FenpoSectionHeaderStyle}" />
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE7F8;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Startup" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.StartupHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.StartWithWindows, Mode=TwoWay}" IsEnabled="{x:Bind ViewModel.StartupChangeable, Mode=OneWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_StartupToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xEA8F;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Notifications" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_NotificationsHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.ShowNotifications, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_NotificationsToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE717;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Calls" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_CallsHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.ShowIncomingCalls, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_CallsToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xF0E3;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Clipboard" Style="{StaticResource FenpoRowLabelStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.ShareClipboard, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_ClipboardToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE768;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Media" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_MediaHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.MediaControl, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_MediaToggle" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Proximity and focus -->
+            <StackPanel>
+                <TextBlock x:Uid="Settings_ProximityHeader" Style="{StaticResource FenpoSectionHeaderStyle}" />
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE72E;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_ProximityLock" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_ProximityLockHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.ProximityLock, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_ProximityLockToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE928;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Unlock" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_UnlockHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsEnabled="False" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_UnlockToggle" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE708;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_Focus" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Settings_FocusHint" Style="{StaticResource FenpoCaptionTextStyle}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.FocusSync, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_FocusToggle" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Device -->
+            <StackPanel>
+                <TextBlock x:Uid="Settings_DeviceHeader" Style="{StaticResource FenpoSectionHeaderStyle}" />
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8EA;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind ViewModel.DeviceTitle, Mode=OneWay}" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.DeviceHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="2" x:Uid="Settings_Pair" VerticalAlignment="Center" Click="OnPairClick" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.IsPaired), Mode=OneWay}" />
+                            <Button Grid.Column="2" x:Uid="Settings_ManagePairing" VerticalAlignment="Center" Click="OnManagePairingClick" Visibility="{x:Bind ViewModel.IsPaired, Mode=OneWay}" />
+                        </Grid>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8B7;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Settings_IncomingFiles" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock Text="{x:Bind ViewModel.IncomingFolder, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <Button Grid.Column="2" x:Uid="Settings_ChangeFolder" VerticalAlignment="Center" Click="OnChangeFolderClick" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

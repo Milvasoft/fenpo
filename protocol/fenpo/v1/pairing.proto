@@ -14,15 +14,26 @@ option java_multiple_files = true;
 //
 // The phone opens a TLS connection to one of the addresses, verifies the server
 // certificate against `fp`, presents its own self-signed certificate and sends
-// PairingRequest as the first message instead of Hello. The 6 digit fallback code
-// shown under the QR maps to the same token on the PC side.
+// PairingRequest as the first message instead of Hello. The PC takes the phone's
+// fingerprint from the TLS handshake and pins it.
+//
+// After PairingResult{accepted=true} the same connection becomes a normal session:
+// the phone sends Hello and the PC answers with Hello. On a rejection the PC closes
+// the connection.
+//
+// There is no numeric fallback code: without the QR the phone has no fingerprint to
+// verify, so a short code would not stop a man in the middle. If the camera cannot
+// read the QR, the PC shows it again.
 
 message PairingRequest {
   bytes token = 1;                       // One-time token from the QR code (16 bytes).
   string device_id = 2;
   string device_name = 3;
   DevicePlatform platform = 4;
-  bytes certificate_sha256 = 5;          // Fingerprint of the certificate used on this TLS connection.
+
+  // The PC computes the phone's fingerprint from the TLS handshake; a claimed value proves nothing.
+  reserved 5;
+  reserved "certificate_sha256";
 }
 
 message PairingResult {
@@ -30,8 +41,12 @@ message PairingResult {
   string pc_id = 2;
   string pc_name = 3;
   PairingFailure failure = 4;            // Set when accepted is false.
-  bytes ble_channel_key = 5;             // 32 bytes. AES-GCM key for the Fenpo BLE channel.
-  string ble_service_uuid = 6;           // Fenpo GATT service UUID advertised by this PC.
+  bytes ble_channel_key = 5;             // 32 bytes. AES-256-GCM key for the Fenpo BLE channel (protocol/README.md).
+
+  // The Fenpo GATT service UUID is the same for every PC (see protocol/README.md),
+  // because AccessorySetupKit needs it declared in the iPhone app's Info.plist.
+  reserved 6;
+  reserved "ble_service_uuid";
 }
 
 enum PairingFailure {

@@ -1,0 +1,321 @@
+using System.Collections.Concurrent;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Security.Cryptography;
+using Fenpo.Core.Channel;
+using Fenpo.Core.Pairing;
+using Fenpo.Protocol.V1;
+using Microsoft.Extensions.Logging;
+
+namespace Fenpo.Transport;
+
+/// <summary>
+/// The ④ control connection: TLS 1.3 with a client certificate required. A connection either pairs (PairingRequest with
+/// the QR's one-time token; the phone's certificate is pinned from TLS, not from what it claims) and then continues as a
+/// session, or opens a session directly with Hello from a pinned certificate (protocol/fenpo/v1/pairing.proto).
+/// </summary>
+public sealed class ControlServer(
+    PcCertificate certificate,
+    PairingTokens tokens,
+    IPairedAppDevices devices,
+    PcIdentity identity,
+    ILogger<ControlServer> logger) : IAsyncDisposable
+{
+    private static readonly TimeSpan _firstMessageTimeout = TimeSpan.FromSeconds(15);
+
+    private readonly PcCertificate _certificate = certificate;
+    private readonly PairingTokens _tokens = tokens;
+    private readonly IPairedAppDevices _devices = devices;
+    private readonly PcIdentity _identity = identity;
+    private readonly ILogger<ControlServer> _logger = logger;
+    private readonly ConcurrentDictionary<string, Session> _sessions = new();
+    private TcpListener? _listener;
+    private CancellationTokenSource? _stop;
+
+    /// <summary>
+    /// Raised after a phone paired.
+    /// </summary>
+    public event EventHandler<PairedAppDevice>? Paired;
+
+    /// <summary>
+    /// Raised when a paired phone's session opens (true) or closes (false).
+    /// </summary>
+    public event EventHandler<(PairedAppDevice Device, bool Connected)>? SessionChanged;
+
+    /// <summary>
+    /// Raised for session messages the server does not answer itself.
+    /// </summary>
+    public event EventHandler<(PairedAppDevice Device, Envelope Envelope)>? MessageReceived;
+
+    /// <summary>
+    /// Gets the port the server listens on, or 0 before it started.
+    /// </summary>
+    public int Port { get; private set; }
+
+    /// <summary>
+    /// Gets the QR code's content for the current token.
+    /// </summary>
+    /// <returns>The pairing URI.</returns>
+    public PairingUri PairingUri() => new(_identity.DeviceId, _identity.DeviceName, [.. LanAddresses().Select(a => $"{a}:{Port}")], _certificate.Fingerprint, _tokens.Current);
+
+    /// <summary>
+    /// Starts listening on every interface.
+    /// </summary>
+    /// <param name="preferredPort">Port to try first, so earlier QR codes and phones keep working; 0 for any.</param>
+    public void Start(int preferredPort)
+    {
+        if (_listener is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            _listener = new TcpListener(IPAddress.Any, preferredPort);
+            _listener.Start();
+        }
+        catch (SocketException) when (preferredPort != 0)
+        {
+            _listener = new TcpListener(IPAddress.Any, 0);
+            _listener.Start();
+        }
+
+        Port = ((IPEndPoint)_listener.LocalEndpoint).Port;
+        _stop = new CancellationTokenSource();
+        _ = Task.Run(() => AcceptLoopAsync(_listener, _stop.Token));
+        _logger.LogInformation("Fenpo control server listening on port {Port}", Port);
+    }
+
+    /// <summary>
+    /// Sends a message to a connected phone.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    /// <param name="envelope">Message.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>False when the phone is not connected.</returns>
+    public async Task<bool> SendAsync(string deviceId, Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        if (!_sessions.TryGetValue(deviceId, out var session))
+        {
+            return false;
+        }
+
+        await session.SendAsync(envelope, cancellationToken);
+        return true;
+    }
+
+    /// <summary>
+    /// Gets the LAN IPv4 addresses phones can reach (up, not loopback).
+    /// </summary>
+    /// <returns>Addresses.</returns>
+    public static IReadOnlyList<IPAddress> LanAddresses() => [.. NetworkInterface.GetAllNetworkInterfaces()
+        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel))
+        .OrderByDescending(n => n.GetIPProperties().GatewayAddresses.Count > 0)
+        .SelectMany(n => n.GetIPProperties().UnicastAddresses)
+        .Select(a => a.Address)
+        .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a))
+        .Distinct()];
+
+    /// <inheritdoc/>
+    public async ValueTask DisposeAsync()
+    {
+        if (_stop is not null)
+        {
+            await _stop.CancelAsync();
+        }
+
+        _listener?.Stop();
+        _listener = null;
+
+        foreach (var session in _sessions.Values)
+        {
+            await session.DisposeAsync();
+        }
+
+        _sessions.Clear();
+    }
+
+    private async Task AcceptLoopAsync(TcpListener listener, CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                var client = await listener.AcceptTcpClientAsync(cancellationToken);
+                _ = Task.Run(() => ServeAsync(client, cancellationToken), CancellationToken.None);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (SocketException exception)
+            {
+                _logger.LogWarning(exception, "Accepting a connection failed");
+            }
+        }
+    }
+
+    private async Task ServeAsync(TcpClient client, CancellationToken cancellationToken)
+    {
+        var remote = client.Client.RemoteEndPoint?.ToString() ?? "?";
+        var ssl = new SslStream(client.GetStream(), leaveInnerStreamOpen: false, (sender, certificate, chain, errors) => certificate is not null);
+        Session? session = null;
+
+        try
+        {
+            await ssl.AuthenticateAsServerAsync(
+                new SslServerAuthenticationOptions
+                {
+                    ServerCertificate = _certificate.Certificate,
+                    ClientCertificateRequired = true,
+                    EnabledSslProtocols = SslProtocols.Tls13,
+                    CertificateRevocationCheckMode = System.Security.Cryptography.X509Certificates.X509RevocationMode.NoCheck,
+                },
+                cancellationToken);
+
+            // The phone is who its TLS certificate says, never what a message claims (S5).
+            var fingerprint = Convert.ToHexStringLower(SHA256.HashData(ssl.RemoteCertificate!.GetRawCertData()));
+
+            using var firstTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            firstTimeout.CancelAfter(_firstMessageTimeout);
+            var first = await EnvelopeFraming.ReadAsync(ssl, firstTimeout.Token);
+            PairedAppDevice? device;
+
+            switch (first?.BodyCase)
+            {
+                case Envelope.BodyOneofCase.PairingRequest:
+                    device = await PairAsync(ssl, first, fingerprint, cancellationToken);
+
+                    if (device is null)
+                    {
+                        return;
+                    }
+
+                    // The same connection continues as a session: the phone sends Hello next.
+                    first = await EnvelopeFraming.ReadAsync(ssl, cancellationToken);
+
+                    if (first?.BodyCase != Envelope.BodyOneofCase.Hello)
+                    {
+                        return;
+                    }
+
+                    break;
+                case Envelope.BodyOneofCase.Hello:
+                    device = _devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint);
+
+                    if (device is null)
+                    {
+                        _logger.LogInformation("Hello from an unpaired certificate at {Remote}", remote);
+                        await EnvelopeFraming.WriteAsync(ssl, new Envelope { Version = 1, Id = 1, ReplyTo = first.Id, Error = new Error { Code = ErrorCode.NotPaired, Message = "Certificate is not paired with this PC" } }, cancellationToken);
+                        return;
+                    }
+
+                    break;
+                default:
+                    return;
+            }
+
+            session = new Session(device, ssl);
+
+            if (_sessions.TryRemove(device.DeviceId, out var older))
+            {
+                await older.DisposeAsync();
+            }
+
+            _sessions[device.DeviceId] = session;
+            await session.SendAsync(new Envelope { ReplyTo = first.Id, Hello = PcHello.Create(_identity) }, cancellationToken);
+            _logger.LogInformation("Fenpo app on {Phone} connected over Wi-Fi ({Platform} {Os})", device.Name, first.Hello.Platform, first.Hello.OsVersion);
+            SessionChanged?.Invoke(this, (device, true));
+
+            while (await EnvelopeFraming.ReadAsync(ssl, cancellationToken) is { } envelope)
+            {
+                if (envelope.BodyCase == Envelope.BodyOneofCase.Ping)
+                {
+                    await session.SendAsync(new Envelope { ReplyTo = envelope.Id, Pong = new Pong { Nonce = envelope.Ping.Nonce } }, cancellationToken);
+                }
+                else if (envelope.BodyCase != Envelope.BodyOneofCase.Pong)
+                {
+                    MessageReceived?.Invoke(this, (device, envelope));
+                }
+            }
+        }
+        catch (Exception exception) when (exception is AuthenticationException or IOException or InvalidDataException or OperationCanceledException or ObjectDisposedException)
+        {
+            _logger.LogDebug("Control connection from {Remote} ended: {Reason}", remote, exception.Message);
+        }
+        finally
+        {
+            if (session is not null && _sessions.TryGetValue(session.Device.DeviceId, out var current) && ReferenceEquals(current, session))
+            {
+                _sessions.TryRemove(session.Device.DeviceId, out _);
+                SessionChanged?.Invoke(this, (session.Device, false));
+            }
+
+            await ssl.DisposeAsync();
+            client.Dispose();
+        }
+    }
+
+    private async Task<PairedAppDevice?> PairAsync(SslStream ssl, Envelope request, string fingerprint, CancellationToken cancellationToken)
+    {
+        var pairing = request.PairingRequest;
+
+        if (!_tokens.TryConsume(pairing.Token.Span))
+        {
+            _logger.LogInformation("Pairing from {Name} refused: token invalid or expired", pairing.DeviceName);
+            await EnvelopeFraming.WriteAsync(ssl, new Envelope { Version = 1, Id = 1, ReplyTo = request.Id, PairingResult = new PairingResult { Accepted = false, Failure = PairingFailure.TokenInvalid } }, cancellationToken);
+            return null;
+        }
+
+        var device = new PairedAppDevice(pairing.DeviceId, pairing.DeviceName, RandomNumberGenerator.GetBytes(BleSeal.KeyLength), fingerprint);
+        _devices.Save(device);
+        await EnvelopeFraming.WriteAsync(
+            ssl,
+            new Envelope
+            {
+                Version = 1,
+                Id = 1,
+                ReplyTo = request.Id,
+                PairingResult = new PairingResult
+                {
+                    Accepted = true,
+                    PcId = _identity.DeviceId,
+                    PcName = _identity.DeviceName,
+                    BleChannelKey = Google.Protobuf.ByteString.CopyFrom(device.BleKey),
+                },
+            },
+            cancellationToken);
+        _logger.LogInformation("Paired with {Name} ({Platform})", pairing.DeviceName, pairing.Platform);
+        Paired?.Invoke(this, device);
+        return device;
+    }
+
+    private sealed class Session(PairedAppDevice device, SslStream stream) : IAsyncDisposable
+    {
+        private readonly SemaphoreSlim _writeGate = new(1, 1);
+        private ulong _nextId = 2;
+
+        public PairedAppDevice Device { get; } = device;
+
+        public async Task SendAsync(Envelope envelope, CancellationToken cancellationToken)
+        {
+            await _writeGate.WaitAsync(cancellationToken);
+
+            try
+            {
+                envelope.Version = 1;
+                envelope.Id = _nextId++;
+                await EnvelopeFraming.WriteAsync(stream, envelope, cancellationToken);
+            }
+            finally
+            {
+                _writeGate.Release();
+            }
+        }
+
+        public async ValueTask DisposeAsync() => await stream.DisposeAsync();
+    }
+}

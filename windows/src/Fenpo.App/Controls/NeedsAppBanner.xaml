@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Fenpo.App.Controls.NeedsAppBanner"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Design ".needs-app": the feature needs Fenpo on the iPhone (DECISIONS #36). -->
+    <Border Style="{StaticResource FenpoNoticeStyle}" Margin="0,0,0,16">
+        <Grid ColumnSpacing="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <FontIcon Glyph="&#xE8EA;" FontSize="18" Foreground="{ThemeResource FenpoAccentBrush}" VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="13" VerticalAlignment="Center" Foreground="{ThemeResource FenpoTextBrush}">
+                <Run x:Uid="NeedsApp_Title" FontWeight="SemiBold" />
+                <Run Text="{x:Bind Message, Mode=OneWay}" />
+            </TextBlock>
+            <Button Grid.Column="2" x:Uid="NeedsApp_Connect" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" Click="OnConnectClick" />
+        </Grid>
+    </Border>
+</UserControl>

@@ -1,6 +1,34 @@
-# Windows Aşama 1 uygulama planı (taslak, Buğra'nın onayını bekliyor)
+# Windows Aşama 1 uygulama planı
 
-> Kaynaklar: [PLAN.md](../PLAN.md) Aşama 1, [ARCHITECTURE.md](../ARCHITECTURE.md), DECISIONS #28–35, S1–S7 spike README'leri. Onaydan önce ürün kodu yazılmaz.
+> Kaynaklar: [PLAN.md](../PLAN.md) Aşama 1, [ARCHITECTURE.md](../ARCHITECTURE.md), DECISIONS #28–38, S1–S7 spike README'leri.
+>
+> Buğra planı onayladı ve kapsamı genişletti: aşama aşama değil, uygulamasız çalışan her şey baştan sona (DECISIONS #36–38). Menüler gizlenmez, ne gerektiğini söyler.
+
+## Durum (16 Ekim 2026)
+
+| Parça | Durum |
+|---|---|
+| İskelet, tema ve dil, Ayarlar | Bitti, iki temada ve iki dilde ekran görüntüsüyle kontrol edildi |
+| Bluetooth katmanı (IphoneLink, ANCS, AMS, BAS/CTS/DIS) | Bitti, S1 fixture'larıyla testli, cihazda bağlanıyor |
+| Bildirimler (router, Windows bildirimi, Bildirimler sayfası) | Bitti, cihazda denendi: canlı WhatsApp, Mesajlar, Gmail, cevapsız arama. İlk sürümde yeni bildirimler ilk partiden sonra kesiliyordu (abone olunan karakteristik çöp toplayıcıya gidiyordu); düzeltildi |
+| Medya (kart, medya tuşları, Windows medya paneli) | Kod bitti, cihazda müzik çalarken denenmedi |
+| iPhone'um, tepsi ikonu ve paneli, tek örnek, tepsiye kapanma | Bitti, kontrol edildi |
+| Windows açılınca başlat | Bitti, anahtar Windows başlangıç görevini açıp kapatıyor |
+| Eşleşme sihirbazı | Bitti, ekran kontrol edildi |
+| Yakınlık kilidi | Bitti, algoritma S1 kaydıyla testli; cihazla uzaklaşma denenmedi |
+| Mesajlar (MAP: OBEX, MAS, MNS, Mesajlar sayfası) | Bitti, cihazda denendi: sohbet listesi, mesajlar, gönderme ve gönderilenin kalması çalışıyor. Kayıtlı kişilerin adı bildirimlerden öğreniliyor (RESEARCH §3) |
+| Rehber (PBAP) | Kod hazır, iPhone bağlantıyı reddediyor; muhtemelen HFP gerektiriyor (RESEARCH §3) |
+| Aramalar (Ada, Yanıtla/Reddet, son aramalar, aramada PC medyasını duraklat) | Bitti, cihazda denendi: Ada çıkıyor, Yanıtla ve Reddet telefona gidiyor. Aramada PC medyasını duraklatma denenmedi |
+| Dosyalar, Pano, Kamera | Sayfalar ve "iPhone'da Fenpo gerekiyor" bandı hazır; işlevler iPhone uygulamasını bekliyor |
+| Yerel API ve Fenpo.Sdk | Bitti, gerçek pipe üzerinden uçtan uca testli, paketli uygulamaya dışarıdan bağlanıldı |
+| Fenpo BLE kanalı (③) | Bitti: GATT sunucusu, AES-GCM mühürleme, parçalama, Hello/PcStatus/Ping. Testli, PC'de yayında. iPhone uygulamasıyla uçtan uca denenmedi |
+| Wi‑Fi eşleşmesi ve kontrol kanalı (④) | Bitti: P-256 sertifika (DPAPI), TLS 1.3 karşılıklı sertifika, QR ve tek kullanımlık token, sertifika sabitleme, DNS-SD, QR ekranı. S5 senaryoları ürün sunucusuna karşı testli (loopback). iPhone uygulamasıyla denenmedi. Defender: S5 ikili dosyası Microsoft'a yanlış alarm olarak gönderildi |
+| Sağlamlaştırma, TESTING.md | Yapılmadı |
+
+Plandan sapmalar:
+
+- SQLite kullanılmadı. Ayarlar, ikon önbelleği, son aramalar ve mesaj kişileri `LocalState` altında küçük JSON dosyalarında. Bildirim geçmişi bellekte; kalıcı geçmiş gerekirse SQLite o zaman eklenir.
+- `--diag` modu yerine `--page <Ad>` var: ekran görüntüsü kontrolleri için sayfayı, `Tray` ile tepsi panelini, `Island` ile örnek aramayı açar.
 
 ## Kapsam
 
@@ -88,7 +116,7 @@ Her adım kendi başına derlenir, testleri geçer ve iki temada, iki dilde ekra
 | Elle, cihazda | `docs/windows/TESTING.md`: eşleşme, canlı bildirim gecikmesi, kapatma, medya tuşları, uzaklaşma ve kilit, yeniden bağlanma, 8 saat |
 | Görsel | Her ekran Açık/Koyu × Türkçe/English ekran görüntüsüyle |
 
-## Buğra'ya sorular
+## Buğra'ya sorular (cevaplandı, DECISIONS #36–38)
 
 1. Aşama 1'de olmayan menü öğeleri (Mesajlar, Aramalar, Dosyalar, Pano, Kamera) **gizlensin mi**, yoksa "Yakında" etiketiyle pasif mi dursun? Önerim gizlemek.
 2. Paket kimliği ve yayıncı adı: `Milvasoft.Fenpo` / "Milvasoft" mı? Geliştirmede kendinden imzalı `CN=Fenpo Development` sertifikası kullanılıyor.
