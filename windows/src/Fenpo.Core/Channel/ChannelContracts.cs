@@ -107,6 +107,7 @@ public static class PcHello
             Capability.Messages,
             Capability.PcNotifications,
             Capability.FileProvider,
+            Capability.Photos,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
