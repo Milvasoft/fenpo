@@ -57,10 +57,11 @@ message Envelope {
     RunNotificationAction run_notification_action = 93;
     AppIconRequest app_icon_request = 94;
     AppIcon app_icon = 95;
+    NotificationSnapshotDone notification_snapshot_done = 96;
   }
 
   // 60-69 camera, 70-79 file provider, 80-89 screen mirror, 100-109 messages (Android).
   // Defined in later phases.
   reserved 60 to 89;
-  reserved 96 to 109;
+  reserved 97 to 109;
 }
