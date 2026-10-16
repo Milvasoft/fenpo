@@ -11,6 +11,7 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/transfer.proto` | File transfer negotiation and progress |
 | `fenpo/v1/device.proto` | Device state, PC status, ring, lock |
 | `fenpo/v1/media.proto` | Now playing and media control |
+| `fenpo/v1/messages.proto` | SMS over the Fenpo channel for Android phones without MAP |
 | `fenpo/v1/video.proto` | Media connections: formats, `MediaStreamOpen`, `StreamPacket` |
 | `fenpo/v1/camera.proto` | The phone as a webcam |
 | `fenpo/v1/screen.proto` | The phone's screen on the PC, with control (Android) |
@@ -126,6 +127,14 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 - With `audio`, the phone also sends its own sound (Android's playback capture; apps that forbid capture stay silent), played on the PC.
 - When the phone locks, Android ends the capture: `PAUSED_LOCKED`. Mirroring resumes only with a new consent on the phone.
 - `ScreenInput` points are fractions of the streamed frame (0..1 from the top left). Control needs Fenpo's accessibility service on the phone; `control_available` says whether it is on, and input without it is answered with `Error` `UNSUPPORTED`. Windows that protect their content (`FLAG_SECURE`, banking apps) arrive black.
+
+## Messages (Android without MAP)
+
+- With MAP on the phone the PC reads and sends messages over classic Bluetooth and does not use these. `CAPABILITY_MESSAGES` is for phones whose Bluetooth has no message access.
+- The PC asks with `SmsSyncRequest` (conversations, newest first) and `SmsMessagesRequest` (one conversation, paged by `before`). The phone pushes every new incoming or outgoing message as `SmsMessage`, and the status changes of sent ones (`PENDING`, then `SENT` or `FAILED`).
+- `SmsSend` is answered with `SmsSendResult`; the stored message follows as `SmsMessage`.
+- Android does not let an app that is not the default SMS app mark messages read, so there is no "mark read". MMS content and RCS are not available to other apps; the PC says so in the conversation.
+- Contact names come from the PC's phone book (PBAP); the phone sends numbers only.
 
 ## Proximity
 

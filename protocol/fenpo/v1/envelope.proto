@@ -8,6 +8,7 @@ import "fenpo/v1/content.proto";
 import "fenpo/v1/transfer.proto";
 import "fenpo/v1/device.proto";
 import "fenpo/v1/media.proto";
+import "fenpo/v1/messages.proto";
 import "fenpo/v1/camera.proto";
 import "fenpo/v1/screen.proto";
 import "fenpo/v1/video.proto";
@@ -78,11 +79,22 @@ message Envelope {
     AppIconRequest app_icon_request = 94;
     AppIcon app_icon = 95;
     NotificationSnapshotDone notification_snapshot_done = 96;
+
+    // 100-109: messages (Android, phones without MAP)
+    SmsSyncRequest sms_sync_request = 100;
+    SmsConversations sms_conversations = 101;
+    SmsMessagesRequest sms_messages_request = 102;
+    SmsMessages sms_messages = 103;
+    SmsMessage sms_message = 104;
+    SmsSend sms_send = 105;
+    SmsSendResult sms_send_result = 106;
   }
 
-  // 66-69 camera additions, 70-79 file provider, 84-89 screen mirror additions, 100-109 messages (Android).
+  // 66-69 camera additions, 70-79 file provider, 84-89 screen mirror additions,
+  // 97-99 notification additions, 107-109 message additions.
   // Defined in later phases.
   reserved 66 to 79;
   reserved 84 to 89;
-  reserved 97 to 109;
+  reserved 97 to 99;
+  reserved 107 to 109;
 }

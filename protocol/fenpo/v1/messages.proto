@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// SMS over the Fenpo channel (CAPABILITY_MESSAGES, Android). Used only for phones whose Bluetooth
+// stack has no message access (MAP); with MAP the PC reads messages over classic Bluetooth.
+//
+// The PC asks for conversations and messages; the phone pushes every new incoming or outgoing
+// message with SmsMessage. Android lets an app that is not the default SMS app read and send SMS
+// but not mark messages read, and MMS and RCS are not covered: MMS content stays on the phone and
+// RCS is closed to other apps. Contact names come from the PC's own lookup (PBAP), not from here.
+
+message SmsConversation {
+  int64 thread_id = 1;
+  repeated string addresses = 2;          // Phone numbers as Android stores them.
+  string snippet = 3;                     // Last message, at most 200 characters.
+  google.protobuf.Timestamp last_at = 4;
+  uint32 unread = 5;
+}
+
+enum SmsStatus {
+  SMS_STATUS_UNSPECIFIED = 0;
+  SMS_STATUS_RECEIVED = 1;
+  SMS_STATUS_SENT = 2;
+  SMS_STATUS_PENDING = 3;                 // Queued or sending.
+  SMS_STATUS_FAILED = 4;
+}
+
+message SmsMessage {
+  int64 id = 1;                           // Unique on the phone.
+  int64 thread_id = 2;
+  string address = 3;                     // The other side.
+  string body = 4;
+  google.protobuf.Timestamp at = 5;
+  bool outgoing = 6;
+  bool read = 7;
+  SmsStatus status = 8;
+}
+
+// PC → phone: the conversations, most recent first. Answered with SmsConversations.
+message SmsSyncRequest {
+  uint32 limit = 1;                       // 0 means 50.
+}
+
+message SmsConversations {
+  repeated SmsConversation conversations = 1;
+}
+
+// PC → phone: messages of one conversation, newest first, before `before` (empty for the newest).
+// Answered with SmsMessages.
+message SmsMessagesRequest {
+  int64 thread_id = 1;
+  google.protobuf.Timestamp before = 2;
+  uint32 limit = 3;                       // 0 means 50.
+}
+
+message SmsMessages {
+  int64 thread_id = 1;
+  repeated SmsMessage messages = 2;
+}
+
+// PC → phone: send a text. Answered with SmsSendResult; the stored message then also arrives as
+// SmsMessage, first PENDING, then SENT or FAILED.
+message SmsSend {
+  string request_id = 1;
+  string address = 2;
+  string body = 3;
+}
+
+message SmsSendResult {
+  string request_id = 1;
+  bool accepted = 2;                      // Handed to the phone's radio; false with a reason.
+  string reason = 3;
+}
