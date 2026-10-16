@@ -11,8 +11,35 @@
     </Window.SystemBackdrop>
 
     <!-- Design "Ada": incoming call at the top center. The window is transparent; the Border draws the pill. -->
-    <Border x:Name="Root" Background="{ThemeResource FenpoIslandBrush}" CornerRadius="38" RequestedTheme="Dark">
+    <Border x:Name="Root" Background="{ThemeResource FenpoIslandBrush}" CornerRadius="38" RequestedTheme="Dark" RenderTransformOrigin="0.5,0.5">
+        <Border.RenderTransform>
+            <ScaleTransform x:Name="Grow" />
+        </Border.RenderTransform>
         <Border.Resources>
+            <!-- Design: the pill grows out of a small one (240 x 40) and fades in. -->
+            <Storyboard x:Name="AppearStoryboard">
+                <DoubleAnimation Storyboard.TargetName="Grow" Storyboard.TargetProperty="ScaleX" From="0.57" To="1" Duration="0:0:0.4">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.3" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation Storyboard.TargetName="Grow" Storyboard.TargetProperty="ScaleY" From="0.53" To="1" Duration="0:0:0.4">
+                    <DoubleAnimation.EasingFunction>
+                        <BackEase EasingMode="EaseOut" Amplitude="0.3" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.2" />
+            </Storyboard>
+
+            <!-- Design: a green ring around the pill fades out again and again while the phone rings. -->
+            <Storyboard x:Name="RingStoryboard" RepeatBehavior="Forever">
+                <DoubleAnimation Storyboard.TargetName="Pulse" Storyboard.TargetProperty="Opacity" From="0.9" To="0" Duration="0:0:1.6">
+                    <DoubleAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseOut" />
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+            </Storyboard>
+
             <!-- Round call button drawn as an ellipse: the default template's elevation border breaks up at this radius. -->
             <Style x:Key="CallButtonStyle" TargetType="Button">
                 <Setter Property="Width" Value="48" />
@@ -46,6 +73,8 @@
                 </Setter>
             </Style>
         </Border.Resources>
+        <Grid>
+        <Border x:Name="Pulse" CornerRadius="38" BorderThickness="1.5" BorderBrush="{ThemeResource FenpoIslandRingBrush}" Opacity="0" IsHitTestVisible="False" />
         <Grid Padding="14,0" ColumnSpacing="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="48" />
@@ -73,6 +102,7 @@
             <Button Grid.Column="3" x:Uid="Island_Answer" Style="{StaticResource CallButtonStyle}" Background="{ThemeResource FenpoAcceptBrush}" Click="OnAnswerClick" Visibility="{x:Bind CanAnswer}">
                 <FontIcon Glyph="&#xE717;" FontSize="20" />
             </Button>
+        </Grid>
         </Grid>
     </Border>
 </Window>

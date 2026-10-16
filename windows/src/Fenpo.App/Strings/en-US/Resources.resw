@@ -720,6 +720,15 @@
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Appearance and language</value>
   </data>
+  <data name="Settings_CallRing.Text" xml:space="preserve">
+    <value>Ring on the PC for calls</value>
+  </data>
+  <data name="Settings_CallRingHint.Text" xml:space="preserve">
+    <value>While the phone rings, the PC plays the Windows call sound</value>
+  </data>
+  <data name="Settings_CallRingToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ring on the PC for calls</value>
+  </data>
   <data name="Settings_Calls.Text" xml:space="preserve">
     <value>Show incoming calls at the top of the screen</value>
   </data>

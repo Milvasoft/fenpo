@@ -54,6 +54,11 @@ public sealed record AppSettings
     public bool ShowIncomingCalls { get; init; } = true;
 
     /// <summary>
+    /// Gets a value indicating whether the PC rings while the phone rings for a call.
+    /// </summary>
+    public bool RingForCalls { get; init; } = true;
+
+    /// <summary>
     /// Gets a value indicating whether the Windows clipboard is shared with the phone.
     /// </summary>
     public bool ShareClipboard { get; init; } = true;
