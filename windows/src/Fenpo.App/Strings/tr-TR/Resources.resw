@@ -126,6 +126,9 @@
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Aramalar</value>
   </data>
+  <data name="Camera_Apps.Text" xml:space="preserve">
+    <value>Uygulamalarda Fenpo Kamera</value>
+  </data>
   <data name="Camera_CenterStage.Text" xml:space="preserve">
     <value>Kişiyi ortala</value>
   </data>
@@ -139,10 +142,13 @@
     <value>Kamera açılamadı. Kamerayı kullanan başka bir uygulamayı kapatıp yeniden dene.</value>
   </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Önizleme telefonun kamerasını gösterir. Teams, Zoom ve Meet'te web kamerası olarak görünmesi için Fenpo Kamera bileşeni gerekiyor; o bir sonraki sürümde geliyor.</value>
+    <value>Önizleme telefonun kamerasını gösterir. Fenpo Kamera kuruluysa Teams, Zoom, Meet ve OBS'de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı; en iyisi telefonu yatay bir standa koymak.</value>
   </data>
   <data name="Camera_Idle" xml:space="preserve">
     <value>Telefonun kamerasını burada önizle.</value>
+  </data>
+  <data name="Camera_InUseBadge.Text" xml:space="preserve">
+    <value>Bir uygulama kullanıyor</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -173,6 +179,9 @@
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portre bulanıklığı</value>
+  </data>
+  <data name="Camera_Remove.Content" xml:space="preserve">
+    <value>Kaldır</value>
   </data>
   <data name="Camera_Starting" xml:space="preserve">
     <value>Kamera açılıyor…</value>
@@ -1109,5 +1118,26 @@
   </data>
   <data name="Tray_Summary" xml:space="preserve">
     <value>{0}, {1}</value>
+  </data>
+  <data name="VirtualCamera_Failed" xml:space="preserve">
+    <value>Kurulum tamamlanmadı. Yönetici onayını verip yeniden dene.</value>
+  </data>
+  <data name="VirtualCamera_Install" xml:space="preserve">
+    <value>Fenpo Kamera'yı kur</value>
+  </data>
+  <data name="VirtualCamera_Installed" xml:space="preserve">
+    <value>Uygulamanın kamera ayarında Fenpo Kamera'yı seç. Uygulama kamerayı açınca telefonun kamerası kendiliğinden başlar.</value>
+  </data>
+  <data name="VirtualCamera_InUse" xml:space="preserve">
+    <value>Bir uygulama Fenpo Kamera'yı kullanıyor. Görüntü telefonun kamerasından geliyor.</value>
+  </data>
+  <data name="VirtualCamera_NeedsUpdate" xml:space="preserve">
+    <value>Fenpo Kamera'nın yeni sürümü var. Güncelle'ye bas, Windows yönetici onayı ister.</value>
+  </data>
+  <data name="VirtualCamera_NotInstalled" xml:space="preserve">
+    <value>Teams, Zoom, Meet ve OBS'de telefonun kamerasını seçebilmek için Fenpo Kamera'yı kur. Windows bir kez yönetici onayı ister.</value>
+  </data>
+  <data name="VirtualCamera_Update" xml:space="preserve">
+    <value>Güncelle</value>
   </data>
 </root>

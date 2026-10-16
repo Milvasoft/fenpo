@@ -16,6 +16,8 @@ namespace Fenpo.App.Views;
 public sealed partial class CameraPage : Page
 {
     private readonly CameraService _camera = App.GetService<CameraService>();
+    private readonly VirtualCameraService _virtualCamera = App.GetService<VirtualCameraService>();
+    private bool _installFailed;
     private readonly LocalizationService _localization = App.GetService<LocalizationService>();
     private readonly ILogger<CameraPage> _logger = App.GetService<ILogger<CameraPage>>();
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
@@ -37,7 +39,9 @@ public sealed partial class CameraPage : Page
 
         _camera.Changed += OnCameraChanged;
         _camera.StreamOpened += OnStreamOpened;
+        _virtualCamera.Changed += OnVirtualCameraChanged;
         ApplyState();
+        ApplyVirtualCamera();
     }
 
     /// <summary>
@@ -52,11 +56,15 @@ public sealed partial class CameraPage : Page
         ViewModel.Dispose();
         _camera.Changed -= OnCameraChanged;
         _camera.StreamOpened -= OnStreamOpened;
+        _virtualCamera.Changed -= OnVirtualCameraChanged;
         _player?.Dispose();
         _player = null;
 
-        // The preview is this page's own; leaving the page ends it.
-        _ = _camera.StopCameraAsync();
+        // The preview is this page's own; leaving the page ends it, unless an app is using Fenpo Kamera.
+        if (!_virtualCamera.InUse)
+        {
+            _ = _camera.StopCameraAsync();
+        }
     }
 
     private void OnLensChecked(object sender, RoutedEventArgs e) => ViewModel.LensIndex = ReferenceEquals(sender, LensUltraWide) ? 1 : ReferenceEquals(sender, LensFront) ? 2 : 0;
@@ -73,6 +81,40 @@ public sealed partial class CameraPage : Page
         _player = new LiveH264Player(feed.Packets, feed.Open.Video?.Width ?? 0, feed.Open.Video?.Height ?? 0, _logger, () => _ = _camera.RequestKeyFrameAsync());
         Preview.SetMediaPlayer(_player.Player);
     });
+
+    private void OnVirtualCameraChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(ApplyVirtualCamera);
+
+    private async void OnInstallCameraClick(object sender, RoutedEventArgs e)
+    {
+        InstallCamera.IsEnabled = false;
+        _installFailed = !await _virtualCamera.InstallAsync();
+        InstallCamera.IsEnabled = true;
+        ApplyVirtualCamera();
+    }
+
+    private async void OnRemoveCameraClick(object sender, RoutedEventArgs e)
+    {
+        RemoveCamera.IsEnabled = false;
+        await _virtualCamera.UninstallAsync();
+        RemoveCamera.IsEnabled = true;
+        ApplyVirtualCamera();
+    }
+
+    private void ApplyVirtualCamera()
+    {
+        var installed = _virtualCamera.IsInstalled;
+        var update = installed && _virtualCamera.NeedsUpdate;
+        InUseBadge.Visibility = _virtualCamera.InUse ? Visibility.Visible : Visibility.Collapsed;
+        RemoveCamera.Visibility = installed ? Visibility.Visible : Visibility.Collapsed;
+        InstallCamera.Visibility = !installed || update ? Visibility.Visible : Visibility.Collapsed;
+        InstallCamera.Content = _localization.GetString(update ? "VirtualCamera_Update" : "VirtualCamera_Install");
+        VirtualCameraText.Text = _localization.GetString(
+            _installFailed && !installed ? "VirtualCamera_Failed"
+            : !installed ? "VirtualCamera_NotInstalled"
+            : update ? "VirtualCamera_NeedsUpdate"
+            : _virtualCamera.InUse ? "VirtualCamera_InUse"
+            : "VirtualCamera_Installed");
+    }
 
     private void ApplyState()
     {
