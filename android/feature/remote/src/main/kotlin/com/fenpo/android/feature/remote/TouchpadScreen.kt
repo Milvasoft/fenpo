@@ -27,9 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ fun TouchpadRoute(
     viewModel: RemoteViewModel = hiltViewModel(),
 ) {
     val available by viewModel.available.collectAsStateWithLifecycle()
+    val haptics = LocalHapticFeedback.current
     TouchpadScreen(
         available = available,
         onBack = onBack,
@@ -59,7 +62,10 @@ fun TouchpadRoute(
                 move = viewModel::move,
                 click = { viewModel.click() },
                 rightClick = { viewModel.click(PcButton.PC_BUTTON_RIGHT) },
-                press = { viewModel.click(kind = PcClickKind.PC_CLICK_KIND_PRESS) },
+                press = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.click(kind = PcClickKind.PC_CLICK_KIND_PRESS)
+                },
                 release = { viewModel.click(kind = PcClickKind.PC_CLICK_KIND_RELEASE) },
                 scroll = viewModel::scroll,
             ),
@@ -194,15 +200,17 @@ private suspend fun PointerInputScope.touchpad(actions: TouchpadActions) {
         var maxPointers = 1
         var moved = false
         var dragging = false
+        var lastTime = down.uptimeMillis
         while (true) {
             val waitingForHold = !moved && !dragging && maxPointers == 1
+            // A resting finger still reports tiny moves; the hold counts from the touch, not from
+            // the last event, or it never ends (device test, 16 October).
+            val holdLeft = LONG_PRESS_MS - (lastTime - down.uptimeMillis)
             var next =
-                if (waitingForHold) {
-                    withTimeoutOrNull(
-                        LONG_PRESS_MS,
-                    ) { awaitPointerEvent() }
-                } else {
-                    awaitPointerEvent()
+                when {
+                    !waitingForHold -> awaitPointerEvent()
+                    holdLeft <= 0 -> null
+                    else -> withTimeoutOrNull(holdLeft) { awaitPointerEvent() }
                 }
             if (next == null) {
                 // Held still: a drag starts.
@@ -211,6 +219,7 @@ private suspend fun PointerInputScope.touchpad(actions: TouchpadActions) {
                 next = awaitPointerEvent()
             }
             val event = next
+            event.changes.firstOrNull()?.let { lastTime = it.uptimeMillis }
             val pressed = event.changes.filter { it.pressed }
             if (pressed.isEmpty()) break
             maxPointers = maxOf(maxPointers, pressed.size)
