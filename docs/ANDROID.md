@@ -323,7 +323,7 @@ Windows'taki Fenpo'nun QR ekranından baştan sona: QR → TLS 1.3 (sabitlenmiş
 
 **Wi‑Fi kanalı (16 Ekim 15:00, Windows Fenpo `7396bc3`):** saklı adres `192.168.1.14:53113` ilk denemede TLS 1.3 ile açıldı, PC `Hello` verdi, `DeviceState` (%44, şarjda) Wi‑Fi'den gitti; 2 saniye sonra BLE yolu da açıldı, bildirim "Bağlı, Bluetooth ve Wi‑Fi". Telefonun Wi‑Fi'si kapatılınca bağlantı hemen kapandı, `DeviceState` BLE'ye geçti, bildirim "Bağlı, Bluetooth" oldu; Wi‑Fi açılınca 5 saniyede yeniden bağlandı. **Denenmedi:** DNS-SD yedeği (saklı adres çalıştığı için gerekmedi), `ERROR_CODE_NOT_PAIRED`, Android 17'de yerel ağ izni, PC'nin `DeviceState.addresses` göndermesi (Windows'ta henüz yok).
 
-Hâlâ denenecek: uygulama süreci ölüyken PC yaklaşınca uyanma.
+Süreç ölüyken uyanma §22'de denendi.
 
 ## 22. Aşama D (uygulandı, 16 Ekim)
 
@@ -353,6 +353,8 @@ Hepsi protokole göre yazıldı ve birim testleriyle doğrulandı. **Windows tar
 | Galeri paylaşımı ilk denemede düştü | Telefon veri bağlantısını son bayttan hemen sonra kapatıyordu; PC'nin TLS 1.3 oturum biletleri okunmadığı için Android TCP RST gönderdi, PC son baytları kaybetti. Telefon artık bağlantıyı boşaltıp PC'nin `COMPLETED`'ından sonra kapatıyor; protokol notu Windows'ta `2194f63`. Ayrıca boru veren sağlayıcılar önce önbelleğe kopyalanıyor. |
 | PC adres listesi | 169.254 (Tailscale) ve Hyper‑V adresleri önce geliyordu, her biri 5 saniye kaybettiriyordu. PC listeyi düzeltti; telefon da kendi alt ağını öne alıyor. |
 | Medya | Bildirim erişimi açıkken YouTube Music oturumu okundu. PC henüz `MEDIA` sunmuyor. |
+
+**Süreç ölüyken uyanma (16 Ekim 17:07–17:08):** PC 40 saniye kapatıldı, telefon "PC kayboldu" deyip servisi kapattı, uygulama süreci `am crash` ile öldürüldü. Android süreci bildirim dinleyicisi için 1 saniyede yeniden başlattı (dinleyici bağlıyken süreç `am kill` ile de ölmüyor; pratikte hep ayakta). PC dönünce CDM "göründü" olayını yeni sürece verdi, bağlantı servisi başladı ve PC'nin `Hello`'su 0,6 saniyede Wi‑Fi'den geldi, BLE 2 saniye sonra açıldı: **geçti**. Bildirim erişimi verilmemiş bir telefonda sürecin gerçekten ölü olduğu durum ayrıca denenecek.
 
 Kurulumdan sonraki "Paired with" kayıtları QR'ın elle yeniden okutulmasından; uygulama kendiliğinden eşleşmiyor.
 

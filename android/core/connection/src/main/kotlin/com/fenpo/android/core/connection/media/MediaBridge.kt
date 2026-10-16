@@ -106,7 +106,7 @@ class MediaBridge
                     controller = null
                 }
                 // Settings.System also changes for unrelated settings; only real differences go out.
-            }.distinctUntilChanged { a, b -> a.copy(position_at = null) == b.copy(position_at = null) }
+            }.distinctUntilChanged(::sameState)
 
         /** Carries out the PC's `MediaCommand`; answers `UNSUPPORTED` when nothing can be controlled. */
         suspend fun run() {
@@ -168,19 +168,21 @@ class MediaBridge
                 album = metadata.getString(MediaMetadata.METADATA_KEY_ALBUM).orEmpty(),
                 playing = playback?.state == PlaybackState.STATE_PLAYING,
                 duration_ms = metadata.getLong(MediaMetadata.METADATA_KEY_DURATION).coerceAtLeast(0),
-                position_ms = playback?.position?.coerceAtLeast(0) ?: 0,
-                position_at =
-                    playback?.let {
-                        Instant.ofEpochMilli(
-                            System.currentTimeMillis() - SystemClock.elapsedRealtime() + it.lastPositionUpdateTime,
-                        )
-                    },
+                // Carried forward to now: the PC's clock may differ by seconds, so position_at is the moment of sending.
+                position_ms = playback?.let(::positionNow) ?: 0,
+                position_at = Instant.now(),
                 volume_percent = volumePercent(),
                 can_previous = actions and PlaybackState.ACTION_SKIP_TO_PREVIOUS != 0L,
                 can_next = actions and PlaybackState.ACTION_SKIP_TO_NEXT != 0L,
                 can_seek = actions and PlaybackState.ACTION_SEEK_TO != 0L,
                 artwork_jpeg = artwork(metadata),
             )
+        }
+
+        private fun positionNow(state: PlaybackState): Long {
+            val elapsed = SystemClock.elapsedRealtime() - state.lastPositionUpdateTime
+            val moved = if (state.state == PlaybackState.STATE_PLAYING) (elapsed * state.playbackSpeed).toLong() else 0L
+            return (state.position + moved).coerceAtLeast(0)
         }
 
         private fun volumePercent(): Int {
@@ -240,3 +242,28 @@ class MediaBridge
             const val JPEG_QUALITY = 80
         }
     }
+
+/**
+ * Two states are the same when only the clock moved: Settings.System changes for unrelated settings
+ * too, and a playing position keeps growing. A seek shows up as a position that left its course.
+ */
+internal fun sameState(
+    a: MediaState,
+    b: MediaState,
+): Boolean {
+    if (a.copy(position_ms = 0, position_at = null) != b.copy(position_ms = 0, position_at = null)) return false
+    val at = a.position_at ?: return a.position_ms == b.position_ms
+    val later = b.position_at ?: return a.position_ms == b.position_ms
+    val expected =
+        a.position_ms +
+            if (a.playing) {
+                java.time.Duration
+                    .between(at, later)
+                    .toMillis()
+            } else {
+                0
+            }
+    return kotlin.math.abs(b.position_ms - expected) < SEEK_TOLERANCE_MS
+}
+
+private const val SEEK_TOLERANCE_MS = 1500

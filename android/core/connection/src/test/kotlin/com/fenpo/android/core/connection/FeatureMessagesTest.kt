@@ -208,6 +208,37 @@ class FeatureMessagesTest {
     }
 
     @Test
+    fun mediaStatesDifferOnlyOnRealChanges() {
+        val t0 = java.time.Instant.parse("2026-10-16T17:00:00Z")
+        val playing =
+            com.fenpo.protocol.v1.MediaState(
+                active = true,
+                title = "Song",
+                playing = true,
+                position_ms = 10_000,
+                position_at = t0,
+            )
+        val later = playing.copy(position_ms = 15_000, position_at = t0.plusSeconds(5))
+
+        assertTrue(
+            com.fenpo.android.core.connection.media
+                .sameState(playing, later),
+        )
+        assertFalse(
+            com.fenpo.android.core.connection.media
+                .sameState(playing, later.copy(position_ms = 60_000)),
+        )
+        assertFalse(
+            com.fenpo.android.core.connection.media
+                .sameState(playing, later.copy(playing = false)),
+        )
+        assertFalse(
+            com.fenpo.android.core.connection.media
+                .sameState(playing, later.copy(title = "Next")),
+        )
+    }
+
+    @Test
     fun findsWebLinksOnly() {
         assertEquals("https://fenpo.app/a?b=1", WebLink.firstIn("Fenpo docs https://fenpo.app/a?b=1."))
         assertEquals("http://192.168.1.14:8080/x", WebLink.firstIn("http://192.168.1.14:8080/x"))
