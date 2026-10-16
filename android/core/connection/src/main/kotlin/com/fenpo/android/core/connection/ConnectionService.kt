@@ -22,6 +22,7 @@ import com.fenpo.android.core.ble.GattConnection
 import com.fenpo.android.core.ble.GattState
 import com.fenpo.android.core.connection.clipboard.ClipboardSendActivity
 import com.fenpo.android.core.connection.clipboard.ClipboardSync
+import com.fenpo.android.core.connection.notifications.NotificationMirror
 import com.fenpo.android.core.connection.remote.LinkOpener
 import com.fenpo.android.core.connection.remote.RingPlayer
 import com.fenpo.android.core.connection.transfer.PcShareShortcut
@@ -29,6 +30,7 @@ import com.fenpo.android.core.connection.transfer.TransferManager
 import com.fenpo.android.core.data.device.LocalDeviceRepository
 import com.fenpo.android.core.data.pc.PairedPc
 import com.fenpo.android.core.data.pc.PairedPcRepository
+import com.fenpo.android.core.data.settings.SettingsRepository
 import com.fenpo.android.core.security.IdentityProvider
 import com.fenpo.android.core.transport.ble.BleChannelCrypto
 import com.fenpo.android.core.transport.tls.TlsConnector
@@ -83,6 +85,10 @@ class ConnectionService : Service() {
     @Inject lateinit var linkOpener: LinkOpener
 
     @Inject lateinit var transferManager: TransferManager
+
+    @Inject lateinit var notificationMirror: NotificationMirror
+
+    @Inject lateinit var settingsRepository: SettingsRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var link: Job? = null
@@ -163,6 +169,7 @@ class ConnectionService : Service() {
                 )
             }
             launch { transferManager.run() }
+            launch { notificationMirror.run() }
 
             val wifi =
                 WifiLink(
@@ -273,7 +280,11 @@ class ConnectionService : Service() {
     /** Sends battery, charging and Do Not Disturb on the best open path: Wi-Fi, else Bluetooth. */
     private suspend fun reportPhoneState() {
         val preferred = messenger.sessions.map { it[LinkPath.WIFI] ?: it[LinkPath.BLUETOOTH] }.distinctUntilChanged()
-        combine(PhoneState.states(this), preferred, ::Pair).collect { (state, session) ->
+        // "Sync Do Not Disturb" off: the PC does not learn about it.
+        val dnd = settingsRepository.settings.map { it.features.doNotDisturbSync }.distinctUntilChanged()
+        combine(PhoneState.states(this), dnd, preferred) { phone, syncDnd, session ->
+            (if (syncDnd) phone else phone.copy(focus_active = null)) to session
+        }.collect { (state, session) ->
             if (session == null) return@collect
             if (Capability.CAPABILITY_DEVICE_STATE !in session.awaitHello().capabilities) return@collect
             try {

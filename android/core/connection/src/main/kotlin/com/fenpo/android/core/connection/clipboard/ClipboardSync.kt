@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.connection.R
+import com.fenpo.android.core.data.settings.SettingsRepository
 import com.fenpo.protocol.v1.Capability
 import com.fenpo.protocol.v1.ClipboardImage
 import com.fenpo.protocol.v1.ClipboardItem
@@ -27,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import java.io.ByteArrayOutputStream
@@ -38,7 +40,7 @@ import javax.inject.Singleton
 import com.fenpo.android.core.designsystem.R as DesignR
 
 /** What happened to "Send clipboard". */
-enum class ClipboardSendResult { SENT, EMPTY, TOO_LARGE, NOT_CONNECTED, UNSUPPORTED }
+enum class ClipboardSendResult { SENT, EMPTY, TOO_LARGE, NOT_CONNECTED, UNSUPPORTED, TURNED_OFF }
 
 /**
  * Clipboard between the phone and the PC (docs/ANDROID.md §8). PC → phone is automatic: an item
@@ -52,6 +54,7 @@ class ClipboardSync
     constructor(
         @param:ApplicationContext private val context: Context,
         private val messenger: PcMessenger,
+        private val settingsRepository: SettingsRepository,
     ) {
         private val clipboard = context.getSystemService(ClipboardManager::class.java)
         private val sentIds = ArrayDeque<String>()
@@ -99,6 +102,7 @@ class ClipboardSync
 
         /** Reads the clipboard and sends it. Call only while an activity of this app has focus. */
         suspend fun sendCurrent(): ClipboardSendResult {
+            if (!sharingOn()) return ClipboardSendResult.TURNED_OFF
             if (!messenger.connected) return ClipboardSendResult.NOT_CONNECTED
             if (Capability.CAPABILITY_CLIPBOARD !in messenger.capabilities.value) return ClipboardSendResult.UNSUPPORTED
             val clip = clipboard.primaryClip?.takeIf { it.itemCount > 0 } ?: return ClipboardSendResult.EMPTY
@@ -178,7 +182,7 @@ class ClipboardSync
             }
 
         private suspend fun receive(item: ClipboardItem) {
-            if (item.item_id in sentIds) return
+            if (item.item_id in sentIds || !sharingOn()) return
             val text = item.content.plainText()
             val image = (item.content as? ClipboardItem.Content.Image)?.value
             val clip =
@@ -239,6 +243,12 @@ class ClipboardSync
                     .build()
             manager.notify(NOTIFICATION_ID, notification)
         }
+
+        /** Settings > Features > "Clipboard sharing" covers both directions. */
+        private suspend fun sharingOn(): Boolean =
+            settingsRepository.settings
+                .first()
+                .features.clipboardSharing
 
         private fun ClipboardItem.Content?.plainText(): String? =
             when (this) {

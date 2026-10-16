@@ -32,6 +32,7 @@ class FeatureMessagesTest {
     private val clipboard = context.getSystemService(ClipboardManager::class.java)
     private val messenger = PcMessenger()
     private val sent = mutableListOf<Pair<Envelope.Body, Long>>()
+    private val settings = FakeSettings()
 
     /** A Wi-Fi session whose PC offered [capabilities] in its Hello. */
     private suspend fun connect(vararg capabilities: Capability) {
@@ -56,7 +57,7 @@ class FeatureMessagesTest {
     @Test
     fun textFromThePcGoesToTheClipboard() =
         runTest {
-            val sync = ClipboardSync(context, messenger)
+            val sync = ClipboardSync(context, messenger, settings)
             val job = launch { sync.run() }
             runCurrent()
             val item = ClipboardItem(item_id = "a", content = ClipboardItem.Content.Text("docker compose up -d"))
@@ -79,7 +80,7 @@ class FeatureMessagesTest {
     fun clipboardRequestIsDeclinedBecauseAndroidForbidsBackgroundReads() =
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
-            val sync = ClipboardSync(context, messenger)
+            val sync = ClipboardSync(context, messenger, settings)
             val job = launch { sync.run() }
             runCurrent()
 
@@ -95,7 +96,7 @@ class FeatureMessagesTest {
     @Test
     fun sendsTextAndLinksWithTheirKind() =
         runTest {
-            val sync = ClipboardSync(context, messenger)
+            val sync = ClipboardSync(context, messenger, settings)
             assertEquals(ClipboardSendResult.NOT_CONNECTED, sync.sendCurrent())
 
             connect(Capability.CAPABILITY_CLIPBOARD)
@@ -119,7 +120,7 @@ class FeatureMessagesTest {
     fun ignoresItsOwnItemComingBack() =
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
-            val sync = ClipboardSync(context, messenger)
+            val sync = ClipboardSync(context, messenger, settings)
             clipboard.setPrimaryClip(ClipData.newPlainText("t", "mine"))
             sync.sendCurrent()
             val echoed = assertIs<Envelope.Body.Clipboard>(sent.single().first)
@@ -130,6 +131,38 @@ class FeatureMessagesTest {
             runCurrent()
 
             assertNull(sync.fromPc.value)
+            job.cancel()
+        }
+
+    @Test
+    fun clipboardSharingOffStopsBothDirections() =
+        runTest {
+            connect(Capability.CAPABILITY_CLIPBOARD)
+            settings.update { it.copy(features = it.features.copy(clipboardSharing = false)) }
+            val sync = ClipboardSync(context, messenger, settings)
+            clipboard.setPrimaryClip(ClipData.newPlainText("t", "before"))
+            val job = launch { sync.run() }
+            runCurrent()
+
+            assertEquals(ClipboardSendResult.TURNED_OFF, sync.sendCurrent())
+            messenger.deliver(
+                Envelope(
+                    id = 4,
+                    body =
+                        Envelope.Body.Clipboard(
+                            ClipboardItem(item_id = "x", content = ClipboardItem.Content.Text("from pc")),
+                        ),
+                ),
+            )
+            runCurrent()
+
+            assertEquals(
+                "before",
+                clipboard.primaryClip
+                    ?.getItemAt(0)
+                    ?.text
+                    .toString(),
+            )
             job.cancel()
         }
 

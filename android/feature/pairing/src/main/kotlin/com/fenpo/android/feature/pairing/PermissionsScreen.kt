@@ -1,6 +1,7 @@
 package com.fenpo.android.feature.pairing
 
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
@@ -39,6 +40,7 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fenpo.android.core.connection.notifications.FenpoNotificationListener
 import com.fenpo.android.core.data.permissions.AppPermission
 import com.fenpo.android.core.designsystem.component.FenpoListRow
 import com.fenpo.android.core.designsystem.component.FenpoSubTopBar
@@ -78,9 +80,14 @@ fun PermissionsRoute(
         onFix = { permission ->
             when (permission) {
                 AppPermission.NOTIFICATION_ACCESS -> {
-                    context.openSettings(
-                        Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS,
-                    )
+                    // Straight to Fenpo's own switch instead of the list of every listener.
+                    val listener = ComponentName(context.packageName, FenpoNotificationListener.CLASS_NAME)
+                    val intent =
+                        Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+                            .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, listener.flattenToString())
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    runCatching { context.startActivity(intent) }
+                        .onFailure { context.openSettings(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS) }
                 }
 
                 AppPermission.BATTERY -> {

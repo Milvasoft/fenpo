@@ -69,12 +69,8 @@ enum class AppPermission {
             }
 
     companion object {
-        /**
-         * Permissions the Permissions screen lists today. Notification access joins with the
-         * notification listener (phase D): until that service exists Android cannot grant it, and a
-         * row that can never turn green only confuses (device test, 16 October).
-         */
-        val shown: List<AppPermission> = entries.filter { it != NOTIFICATION_ACCESS }
+        /** Permissions the Permissions screen lists. */
+        val shown: List<AppPermission> = entries
 
         private const val ANDROID_13 = 33
         private const val ANDROID_17 = 37

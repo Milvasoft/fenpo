@@ -72,6 +72,7 @@ internal class AndroidLocalDeviceRepository
                     Capability.CAPABILITY_RING,
                     Capability.CAPABILITY_LOCK_PC,
                     Capability.CAPABILITY_FILE_TRANSFER,
+                    Capability.CAPABILITY_NOTIFICATION_MIRROR,
                 )
         }
     }

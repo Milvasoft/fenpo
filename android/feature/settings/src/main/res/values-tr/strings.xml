@@ -29,4 +29,16 @@
         <item quantity="one">%1$d izin eksik</item>
         <item quantity="other">%1$d izin eksik</item>
     </plurals>
+    <plurals name="feature_notifications_apps">
+        <item quantity="one">%d uygulama seçili</item>
+        <item quantity="other">%d uygulama seçili</item>
+    </plurals>
+    <string name="notification_apps_title">Bildirim gönderen uygulamalar</string>
+    <string name="notification_apps_new">Yeni uygulamalar da gönderilsin</string>
+    <string name="notification_apps_new_summary">Sonradan kurulanlar kendiliğinden açılır</string>
+    <string name="notification_apps_replyable">PC’den yanıtlanır</string>
+    <string name="notification_apps_shown">Sadece gösterilir</string>
+    <string name="notification_apps_off">Kapalı</string>
+    <string name="notification_apps_empty">Uygulamalar ilk bildirimlerinden sonra burada görünür.</string>
+    <string name="notification_apps_otp_note">Android, tek kullanımlık kod içeren bildirimlerin içeriğini gizleyebilir. O zaman bildirim PC’de sadece uygulama adıyla görünür; kodu telefondan oku.</string>
 </resources>

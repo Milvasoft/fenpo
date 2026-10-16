@@ -33,6 +33,7 @@ class ClipboardSendActivity : ComponentActivity() {
                     ClipboardSendResult.TOO_LARGE -> R.string.clipboard_too_large
                     ClipboardSendResult.NOT_CONNECTED -> R.string.pc_not_connected
                     ClipboardSendResult.UNSUPPORTED -> R.string.pc_update_needed
+                    ClipboardSendResult.TURNED_OFF -> R.string.clipboard_turned_off
                 }
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
             finish()

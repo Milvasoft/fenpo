@@ -50,6 +50,7 @@ import java.util.Locale
 @Composable
 fun SettingsRoute(
     onOpenPermissions: () -> Unit,
+    onOpenNotificationApps: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -67,6 +68,7 @@ fun SettingsRoute(
         onLanguageChange = viewModel::setLanguage,
         onFeatureChange = viewModel::setFeatureEnabled,
         onOpenPermissions = onOpenPermissions,
+        onOpenNotificationApps = onOpenNotificationApps,
         modifier = modifier,
     )
 }
@@ -87,6 +89,7 @@ fun SettingsScreen(
     onFeatureChange: (Feature, Boolean) -> Unit,
     onOpenPermissions: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenNotificationApps: () -> Unit = {},
     showLanguageDialog: Boolean = false,
 ) {
     var languageDialog by rememberSaveable { mutableStateOf(showLanguageDialog) }
@@ -118,13 +121,22 @@ fun SettingsScreen(
         )
 
         SectionLabel(stringResource(R.string.section_features))
-        FeatureRow(
-            Feature.NOTIFICATION_MIRRORING,
-            FenpoIcons.Bell,
-            R.string.feature_notifications,
-            null,
-            state,
-            onFeatureChange,
+        // Tapping the row opens the app list (design: "12 uygulama seçili"); the switch turns it all off.
+        val checked = state.features.notificationMirroring
+        FenpoListRow(
+            title = stringResource(R.string.feature_notifications),
+            supporting =
+                state.mirroredApps?.let {
+                    pluralStringResource(R.plurals.feature_notifications_apps, it, it)
+                },
+            leading = { LeadingIcon(FenpoIcons.Bell) },
+            trailing = {
+                Switch(
+                    checked = checked,
+                    onCheckedChange = { onFeatureChange(Feature.NOTIFICATION_MIRRORING, it) },
+                )
+            },
+            modifier = Modifier.clickable(onClick = onOpenNotificationApps),
         )
         FeatureRow(
             Feature.MESSAGE_SYNC,

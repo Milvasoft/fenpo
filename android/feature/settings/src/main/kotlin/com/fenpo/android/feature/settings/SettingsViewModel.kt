@@ -2,6 +2,7 @@ package com.fenpo.android.feature.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fenpo.android.core.data.notifications.NotificationAppsRepository
 import com.fenpo.android.core.data.permissions.PermissionChecker
 import com.fenpo.android.core.data.settings.AppLanguage
 import com.fenpo.android.core.data.settings.Feature
@@ -24,6 +25,7 @@ data class SettingsUiState(
     val language: AppLanguage = AppLanguage.SYSTEM,
     val features: FeatureSettings = FeatureSettings(),
     val missingPermissions: Int = 0,
+    val mirroredApps: Int? = null,
 )
 
 @HiltViewModel
@@ -33,16 +35,18 @@ class SettingsViewModel
         private val settingsRepository: SettingsRepository,
         private val languageController: LanguageController,
         private val permissionChecker: PermissionChecker,
+        notificationApps: NotificationAppsRepository,
     ) : ViewModel() {
         private val systemState = MutableStateFlow(readSystemState())
 
         val uiState: StateFlow<SettingsUiState> =
-            combine(settingsRepository.settings, systemState) { settings, system ->
+            combine(settingsRepository.settings, systemState, notificationApps.settings) { settings, system, apps ->
                 SettingsUiState(
                     themeMode = settings.themeMode,
                     language = system.first,
                     features = settings.features,
                     missingPermissions = system.second,
+                    mirroredApps = apps.apps.count { it.enabled }.takeIf { apps.apps.isNotEmpty() },
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 

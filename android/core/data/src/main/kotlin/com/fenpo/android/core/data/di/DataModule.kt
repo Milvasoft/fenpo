@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.fenpo.android.core.data.device.AndroidLocalDeviceRepository
 import com.fenpo.android.core.data.device.LocalDeviceRepository
+import com.fenpo.android.core.data.notifications.DataStoreNotificationAppsRepository
+import com.fenpo.android.core.data.notifications.NotificationAppsRepository
 import com.fenpo.android.core.data.pc.DataStorePairedPcRepository
 import com.fenpo.android.core.data.pc.PairedPcRepository
 import com.fenpo.android.core.data.permissions.PermissionChecker
@@ -45,6 +47,9 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun transferHistory(impl: DataStoreTransferHistory): TransferHistory
+
+    @Binds
+    abstract fun notificationApps(impl: DataStoreNotificationAppsRepository): NotificationAppsRepository
 
     companion object {
         @Provides

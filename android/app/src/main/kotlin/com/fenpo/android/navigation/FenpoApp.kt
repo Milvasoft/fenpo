@@ -37,6 +37,8 @@ import com.fenpo.android.feature.pairing.PermissionsKey
 import com.fenpo.android.feature.pairing.PermissionsRoute
 import com.fenpo.android.feature.pairing.ScannerKey
 import com.fenpo.android.feature.pairing.ScannerRoute
+import com.fenpo.android.feature.settings.NotificationAppsKey
+import com.fenpo.android.feature.settings.NotificationAppsRoute
 import com.fenpo.android.feature.settings.SettingsKey
 import com.fenpo.android.feature.settings.SettingsRoute
 import com.fenpo.android.feature.transfers.TransfersKey
@@ -93,7 +95,7 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                         Inset {
                             HomeRoute(
                                 onPair = { backStack.add(ScannerKey) },
-                                onOpenNotificationSettings = { backStack.selectTab(SettingsKey) },
+                                onOpenNotificationSettings = { backStack.add(NotificationAppsKey) },
                             )
                         }
                     }
@@ -103,9 +105,11 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                         Inset {
                             SettingsRoute(
                                 onOpenPermissions = { backStack.add(PermissionsKey) },
+                                onOpenNotificationApps = { backStack.add(NotificationAppsKey) },
                             )
                         }
                     }
+                    entry<NotificationAppsKey> { Inset(bottom = true) { NotificationAppsRoute(onBack = pop) } }
                     entry<ScannerKey> {
                         ScannerRoute(
                             onBack = pop,

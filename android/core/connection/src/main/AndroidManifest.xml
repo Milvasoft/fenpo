@@ -19,6 +19,14 @@
     <!-- "Find my phone" vibrates with the alarm sound. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
+    <!-- App names and icons of mirrored notifications: apps people get notifications from have a launcher entry. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
+
     <application>
         <service
             android:name=".ConnectionService"
@@ -62,6 +70,17 @@
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <!-- Notification mirroring (§6). -->
+        <service
+            android:name=".notifications.FenpoNotificationListener"
+            android:exported="true"
+            android:label="@string/notification_listener_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
 

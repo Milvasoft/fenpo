@@ -40,4 +40,6 @@
         <item quantity="one">%1$s ve %2$d dosya daha</item>
         <item quantity="other">%1$s ve %2$d dosya daha</item>
     </plurals>
+    <string name="notification_listener_label">Fenpo: bildirimler PC’ye</string>
+    <string name="clipboard_turned_off">Pano paylaşımı kapalı. Ayarlar’dan aç.</string>
 </resources>
