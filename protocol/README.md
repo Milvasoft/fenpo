@@ -10,6 +10,7 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/content.proto` | Clipboard, open URL |
 | `fenpo/v1/transfer.proto` | File transfer negotiation and progress |
 | `fenpo/v1/device.proto` | Device state, PC status, ring, lock |
+| `fenpo/v1/notification.proto` | Notification mirroring from Android phones |
 | `fenpo/v1/envelope.proto` | `Envelope`, field ranges per feature group |
 
 ## Generation
@@ -56,6 +57,16 @@ A sealed message is split to fit the ATT MTU. Each write (`rx`) or notification 
 ### Session
 
 The phone sends `Hello` as soon as it subscribes to `tx`, which means the encrypted bond is up. The PC answers with its own `Hello`, then `PcStatus`. `Ping`/`Pong` work on both channels.
+
+## Notification mirroring (Android)
+
+Only Android phones send their notifications over the Fenpo channel (`CAPABILITY_NOTIFICATION_MIRROR`); the iPhone's come through ANCS.
+
+- After `Hello` the phone sends `PhoneNotification` for every current notification, then one for each new or updated notification. The `key` identifies it; a message with a known key replaces the earlier one. `NotificationRemoved` says it is gone.
+- The PC answers with `DismissNotification` (only for `dismissible` ones) or `RunNotificationAction` (`reply_text` for actions with `accepts_reply`). A notification or action that no longer exists is answered with `Error` `INVALID_REQUEST`.
+- `content_hidden` means Android withheld the content (one-time codes, lock screen privacy); the PC says so instead of showing an empty notification.
+- App icons are not repeated in every notification: the PC sends `AppIconRequest` for an `app_id` it has not cached and the phone answers with `AppIcon` (64x64 PNG).
+- On the BLE channel a `PhoneNotification` must fit the 4096-byte sealed limit: the phone drops `large_icon_png` first, then shortens `text` and `messages`. An `AppIcon` that does not fit waits for Wi‑Fi.
 
 ## Rules
 
