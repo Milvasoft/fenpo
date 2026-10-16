@@ -61,16 +61,18 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
                     return;
             }
 
+            var traffic = new Traffic(open.Kind, _logger);
+
             while (await EnvelopeFraming.ReadFrameAsync(stream, cancellationToken) is { } frame)
             {
                 var packet = StreamPacket.Parser.ParseFrom(frame);
+                var dropped = packets.Reader.Count > _maxQueued && !packet.KeyFrame && !packet.CodecConfig;
+                traffic.Add(frame.Length, packets.Reader.Count, dropped);
 
-                if (packets.Reader.Count > _maxQueued && !packet.KeyFrame && !packet.CodecConfig)
+                if (!dropped)
                 {
-                    continue;
+                    packets.Writer.TryWrite(packet);
                 }
-
-                packets.Writer.TryWrite(packet);
             }
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidProtocolBufferException or OperationCanceledException or ObjectDisposedException)
@@ -85,6 +87,42 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
         {
             packets.Writer.TryComplete();
             _logger.LogInformation("{Kind} stream from {Phone} closed", open.Kind, device.Name);
+        }
+    }
+
+    // What arrives from the phone, every few seconds, so a frozen picture can be told apart: nothing coming in (the
+    // phone stopped) or packets piling up (the PC stopped taking them).
+    private sealed class Traffic(StreamKind kind, ILogger logger)
+    {
+        private readonly StreamKind _kind = kind;
+        private readonly ILogger _logger = logger;
+        private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
+        private readonly System.Diagnostics.Stopwatch _sinceLast = System.Diagnostics.Stopwatch.StartNew();
+        private int _packets;
+        private long _bytes;
+        private int _dropped;
+
+        public void Add(int bytes, int queued, bool dropped)
+        {
+            if (_sinceLast.Elapsed > TimeSpan.FromSeconds(1))
+            {
+                _logger.LogInformation("{Kind} stream: nothing came from the phone for {Silence} ms", _kind, (int)_sinceLast.Elapsed.TotalMilliseconds);
+            }
+
+            _sinceLast.Restart();
+            _packets++;
+            _bytes += bytes;
+            _dropped += dropped ? 1 : 0;
+
+            if (_window.Elapsed >= TimeSpan.FromSeconds(3))
+            {
+                var seconds = _window.Elapsed.TotalSeconds;
+                _logger.LogInformation("{Kind} stream: {Rate:F1} packets/s in, {Kbps} kbit/s, {Queued} waiting, {Dropped} dropped", _kind, _packets / seconds, (int)(_bytes * 8 / 1000 / seconds), queued, _dropped);
+                _packets = 0;
+                _bytes = 0;
+                _dropped = 0;
+                _window.Restart();
+            }
         }
     }
 }

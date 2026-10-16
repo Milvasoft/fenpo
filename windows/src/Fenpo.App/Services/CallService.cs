@@ -5,14 +5,17 @@ using Fenpo.Core.Settings;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Dispatching;
+using Microsoft.Win32;
 using Windows.Media.Control;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
 /// <summary>
-/// Incoming calls: shows the island while the phone rings, sends Answer and Decline to the phone, pauses what the PC is
-/// playing for the length of the call and keeps the recent calls list.
+/// Incoming calls: shows the island and rings the PC while the phone rings, sends Answer and Decline to the phone, pauses
+/// what the PC is playing for the length of the call and keeps the recent calls list.
 /// </summary>
 public sealed class CallService(
     NotificationStore notifications,
@@ -31,6 +34,7 @@ public sealed class CallService(
     private IslandWindow? _island;
     private string? _ringingId;
     private GlobalSystemMediaTransportControlsSession? _pausedSession;
+    private MediaPlayer? _ringer;
 
     /// <summary>
     /// Gets the recent calls.
@@ -86,6 +90,13 @@ public sealed class CallService(
                 }
 
                 _ = PausePcMediaAsync();
+
+                if (_settings.Current.RingForCalls)
+                {
+                    _ringingId ??= stored.Id;
+                    Ring();
+                }
+
                 break;
             case NotificationCategory.MissedCall:
                 Log.Missed(caller, notification.Date ?? notification.ReceivedAt);
@@ -102,6 +113,7 @@ public sealed class CallService(
         }
 
         _ringingId = null;
+        StopRinging();
         _dispatcher?.TryEnqueue(() => _island?.Hide());
         _ = ResumePcMediaAsync();
     }
@@ -113,8 +125,51 @@ public sealed class CallService(
             return;
         }
 
+        StopRinging();
         var accepted = await _router.PerformActionAsync(id, answer);
         _logger.LogInformation("Call {Action}: {Accepted}", answer ? "answer" : "decline", accepted);
+    }
+
+    // The sound picked for calls in Windows' sound settings, played until the phone stops ringing.
+    private void Ring()
+    {
+        try
+        {
+            _ringer ??= new MediaPlayer { IsLoopingEnabled = true, AudioCategory = MediaPlayerAudioCategory.Alerts };
+            _ringer.Source = MediaSource.CreateFromUri(new Uri(CallSoundPath()));
+            _ringer.Play();
+        }
+        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or UriFormatException)
+        {
+            _logger.LogWarning(exception, "Ringing on the PC failed");
+        }
+    }
+
+    private void StopRinging()
+    {
+        try
+        {
+            _ringer?.Pause();
+        }
+        catch (System.Runtime.InteropServices.COMException exception)
+        {
+            _logger.LogWarning(exception, "Stopping the ring failed");
+        }
+    }
+
+    private static string CallSoundPath()
+    {
+        var media = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Media");
+        var chosen = Registry.GetValue(@"HKEY_CURRENT_USER\AppEvents\Schemes\Apps\.Default\Notification.Looping.Call\.Current", null, null) as string;
+        chosen = string.IsNullOrEmpty(chosen) ? null : Environment.ExpandEnvironmentVariables(chosen);
+
+        // A bare name is a file in the Media folder. "None" (empty) still rings: Fenpo's own setting turns the ring off.
+        if (chosen is not null && !Path.IsPathRooted(chosen))
+        {
+            chosen = Path.Combine(media, chosen);
+        }
+
+        return chosen is not null && File.Exists(chosen) ? chosen : Path.Combine(media, "Ring01.wav");
     }
 
     private async Task PausePcMediaAsync()

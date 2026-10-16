@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Fenpo.App.Services;
+using Fenpo.Core.Devices;
 using Fenpo.Core.Notifications;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Media;
@@ -33,6 +34,7 @@ public sealed partial class NotificationsViewModel : ObservableObject, IDisposab
     private readonly AppIconService _icons;
     private readonly LocalizationService _localization;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
+    private readonly IPhoneStatusSource _status;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="NotificationsViewModel"/> class.
@@ -41,8 +43,12 @@ public sealed partial class NotificationsViewModel : ObservableObject, IDisposab
     /// <param name="router">Sends actions to the phone.</param>
     /// <param name="icons">App icons.</param>
     /// <param name="localization">Strings.</param>
-    public NotificationsViewModel(NotificationStore store, NotificationRouter router, AppIconService icons, LocalizationService localization)
+    /// <param name="status">Phone status, for the notice when the iPhone refuses notification access.</param>
+    public NotificationsViewModel(NotificationStore store, NotificationRouter router, AppIconService icons, LocalizationService localization, IPhoneStatusSource status)
     {
+        _status = status;
+        _status.Changed += OnStatusChanged;
+        NotificationsRefused = IsRefused(status.Current);
         _store = store;
         _router = router;
         _icons = icons;
@@ -58,12 +64,24 @@ public sealed partial class NotificationsViewModel : ObservableObject, IDisposab
     [ObservableProperty]
     public partial int FilterIndex { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the iPhone in use refuses to share its notifications.</summary>
+    [ObservableProperty]
+    public partial bool NotificationsRefused { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the list is empty.</summary>
     [ObservableProperty]
     public partial bool IsEmpty { get; set; }
 
     /// <inheritdoc/>
-    public void Dispose() => _store.Changed -= OnChanged;
+    public void Dispose()
+    {
+        _store.Changed -= OnChanged;
+        _status.Changed -= OnStatusChanged;
+    }
+
+    private bool IsRefused(PhoneStatus status) => _status.Active == PhoneKind.Iphone && status.NotificationsRefused;
+
+    private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => NotificationsRefused = IsRefused(status));
 
     partial void OnFilterIndexChanged(int value) => Refresh();
 
