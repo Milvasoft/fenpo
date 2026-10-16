@@ -33,14 +33,17 @@ struct TransfersView: View {
                                 SectionCaption(title: "transfers.section.done")
                                 CardRows(separatorInset: 64) {
                                     ForEach(model.snapshot.transfers) { record in
-                                        Button {
-                                            open(record)
-                                        } label: {
-                                            TransferRow(record: record)
-                                                .contentShape(.rect)
+                                        if record.localFileName != nil {
+                                            Button {
+                                                open(record)
+                                            } label: {
+                                                TransferRow(record: record)
+                                                    .contentShape(.rect)
+                                            }
+                                            .buttonStyle(.plain)
+                                        } else {
+                                            TransferRow(record: record, showsChevron: false)
                                         }
-                                        .buttonStyle(.plain)
-                                        .disabled(record.localFileName == nil)
                                     }
                                 }
                             }
