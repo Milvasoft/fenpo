@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// The phone's photo library browsed from the PC (CAPABILITY_PHOTOS), while Fenpo on the phone is running.
+//
+// The PC asks for pages of items, newest first, then thumbnails for the ones on screen, and the full files it wants as
+// an ordinary file transfer from the phone (transfer.proto). Requests go on the control connection and are answered
+// with the same reply_to. Lists and thumbnails go only over Wi‑Fi; on BLE the phone answers Error BUSY.
+
+// PC → phone.
+message PhotoListRequest {
+  google.protobuf.Timestamp before = 1;  // Items taken before this; unset for the newest page.
+  uint32 limit = 2;                      // The phone caps it at 200.
+}
+
+enum PhotoAccess {
+  PHOTO_ACCESS_UNSPECIFIED = 0;
+  PHOTO_ACCESS_FULL = 1;
+  PHOTO_ACCESS_LIMITED = 2;              // The user picked some photos (iOS limited library, Android partial access).
+  PHOTO_ACCESS_DENIED = 3;               // No items; the PC tells its user to allow access on the phone.
+}
+
+// Phone → PC.
+message PhotoList {
+  repeated PhotoItem items = 1;          // Newest first.
+  bool has_more = 2;
+  PhotoAccess access = 3;
+}
+
+message PhotoItem {
+  string id = 1;                         // Stable while the item exists (PHAsset localIdentifier, MediaStore id).
+  google.protobuf.Timestamp taken_at = 2;
+  uint32 width = 3;
+  uint32 height = 4;
+  bool is_video = 5;
+  uint32 duration_ms = 6;                // Videos only.
+  string name = 7;                       // File name the PC saves it as, e.g. "IMG_0042.HEIC".
+  uint64 size = 8;                       // Bytes, 0 when the phone does not know without downloading (iCloud).
+}
+
+// PC → phone: thumbnails for items on screen. The phone answers with one PhotoThumbnail per id, in any order.
+message PhotoThumbnailRequest {
+  repeated string ids = 1;               // At most 60 per request.
+  uint32 max_px = 2;                     // Longest side; the phone caps it at 512.
+}
+
+// Phone → PC. Empty jpeg when the item is gone or has no thumbnail.
+message PhotoThumbnail {
+  string id = 1;
+  bytes jpeg = 2;
+}
+
+// PC → phone: send these items. The phone offers them in one TransferOffer whose transfer_id is the one given here, so
+// the PC knows it as the answer and accepts it without asking its user. Originals are sent as they are (HEIC, MOV).
+message PhotoFetch {
+  repeated string ids = 1;
+  string transfer_id = 2;                // Chosen by the PC, unique.
+}

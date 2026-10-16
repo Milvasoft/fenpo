@@ -17,6 +17,10 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/camera.proto` | The phone as a webcam |
 | `fenpo/v1/screen.proto` | The phone's screen on the PC, with control (Android) |
 | `fenpo/v1/notification.proto` | Notification mirroring from Android phones |
+| `fenpo/v1/pc_notification.proto` | The PC's notifications on the phone |
+| `fenpo/v1/files.proto` | The PC's shared folders on the phone (Files app, Android file picker) |
+| `fenpo/v1/photos.proto` | The phone's photo library browsed from the PC |
+| `fenpo/v1/hotspot.proto` | Joining the phone's hotspot from the PC |
 | `fenpo/v1/envelope.proto` | `Envelope`, field ranges per feature group |
 
 ## Generation
@@ -146,6 +150,54 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 - The presentation remote sends `presenter` (next, previous, start, end, black; the PC maps them to Right, Left, F5, Esc, B), `laser` (a dot the PC draws at a point of its primary screen) and `keep_awake` (the PC's screen stays on until it is turned off or the phone disconnects).
 - Only the paired phone in use is accepted. Input does not reach elevated windows or the secure desktop (Windows UIPI).
 - Input goes on the best open channel in order; over Bluetooth only, the phone may send fewer moves.
+
+## PC notifications on the phone
+
+- `CAPABILITY_PC_NOTIFICATIONS`, PC → phone. The PC reads its own notifications through the Windows notification
+  listener, with its user's permission, and sends only those of the apps its user picked in Fenpo.
+- `PcNotification` goes on the best open channel when it appears, `PcNotificationRemoved` when it is gone on the PC.
+  The phone shows a local notification and removes it again. On BLE the message must fit the sealed limit: no
+  `app_icon_png`, shortened `text`. The phone caches icons per `app_id`.
+- On iOS the BLE channel is what wakes Fenpo in the background, so a notification arrives while the app is not open.
+
+## The PC's shared folders on the phone
+
+- `CAPABILITY_FILE_PROVIDER`. The iPhone shows them in the Files app (File Provider extension), Android in the system
+  file picker (DocumentsProvider). The PC shares only the folders its user picked; nothing else is reachable.
+- Paths are relative to the shared folders with `/` between parts; `""` lists the shared folders. The PC answers an
+  absolute path, `..`, a path through a link or one that leaves a shared folder with `Error` `INVALID_REQUEST`, and a
+  missing item the same way.
+- `FolderListRequest` → `FolderListing`, `FileThumbnailRequest` → `FileThumbnail`, `FileChange` → `FileChangeResult`,
+  all with the request's `reply_to`. A deleted item goes to the PC's Recycle Bin.
+- Contents are ordinary transfers. Download: the phone sends `FileFetch` with its own `transfer_id`; the PC answers with
+  a `TransferOffer` carrying that id, the phone accepts it without asking and opens the data connection as for any PC
+  to phone transfer. Upload: the phone's `TransferOffer` sets `destination_path`; a name that exists gets " (2)".
+- `FolderChanged` tells the phone that a folder it listed changed on the PC, so it lists it again.
+
+## Photo library from the PC
+
+- `CAPABILITY_PHOTOS`, while Fenpo on the phone runs. Lists and thumbnails go only over Wi‑Fi; on BLE the phone answers
+  `Error` `BUSY`.
+- `PhotoListRequest` pages the library newest first (`before`, at most 200 per page) → `PhotoList` with `access`
+  (`DENIED` has no items; the PC tells its user to allow photo access on the phone).
+- `PhotoThumbnailRequest` (at most 60 ids) → one `PhotoThumbnail` per id. `PhotoFetch` with the PC's `transfer_id` →
+  the phone offers the originals in one `TransferOffer` with that id and the PC accepts it without asking.
+
+## Hotspot
+
+- `CAPABILITY_HOTSPOT`. Apps cannot read the hotspot's name and password or turn it on, on iOS or Android, so the
+  phone's user types them into Fenpo once. The phone sends `HotspotInfo` after `Hello` and on every change (`cleared`
+  when removed); the PC keeps them with DPAPI and adds the Windows Wi‑Fi profile itself.
+- "Connect to hotspot" on the PC sends `HotspotRequest`. The phone answers `HotspotStatus`: `ASKED_USER` after showing
+  a notification that opens its hotspot settings (Android) or says where it is (iOS), `ON` when it knows the hotspot is
+  on, `NOT_SET_UP` without saved details. The PC joins as soon as the network is in range, for up to a minute.
+
+## Screen mirroring from the iPhone
+
+- Only the iPhone's user can start a ReplayKit broadcast. A `ScreenStart` is answered with `WAITING_FOR_CONSENT` and the
+  iPhone shows how to start it; once it runs, Fenpo's broadcast extension opens the media connection and the iPhone
+  reports `STREAMING` without a `ScreenStart`. There is no control from the PC: `control_available` is false and
+  `ScreenInput` is answered with `Error` `UNSUPPORTED`.
 
 ## Proximity
 
