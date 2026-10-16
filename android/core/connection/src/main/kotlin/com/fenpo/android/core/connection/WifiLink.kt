@@ -90,11 +90,12 @@ internal class WifiLink(
 
     private suspend fun connectOnce(network: Network): Outcome {
         status.update { it.copy(wifi = LinkState.CONNECTING) }
-        val connection = open(network)
-        if (connection == null) {
-            status.update { it.copy(wifi = LinkState.OFF) }
-            return Outcome.UNREACHABLE
-        }
+        val (endpoint, connection) =
+            open(network) ?: run {
+                status.update { it.copy(wifi = LinkState.OFF) }
+                return Outcome.UNREACHABLE
+            }
+        val pin = pc.certificateSha256.decodeHex()
         val session =
             PcSession(
                 LinkPath.WIFI,
@@ -104,6 +105,11 @@ internal class WifiLink(
                     pairedPcRepository.saveAddresses(addresses)
                 },
                 onOther = onOther,
+                // File transfer data connections go to the same PC address (transfer.proto).
+                openData = { port ->
+                    val target = if (port == 0) endpoint else Endpoint(endpoint.host, port)
+                    connector.connectData(target, pin, network.socketFactory)
+                },
             )
         try {
             status.update { it.copy(wifi = LinkState.CONNECTED) }
@@ -152,21 +158,21 @@ internal class WifiLink(
     }
 
     /** Tries the stored addresses, then whatever DNS-SD finds; remembers the one that answered first. */
-    private suspend fun open(network: Network): EnvelopeConnection? {
+    private suspend fun open(network: Network): Pair<Endpoint, EnvelopeConnection>? {
         val stored =
             pairedPcRepository.pairedPc
                 .first()
                 ?.addresses
                 .orEmpty()
         val known = stored.mapNotNull(Endpoint::parse)
-        tryEach(known, network)?.let { (endpoint, connection) ->
-            remember(endpoint, stored)
-            return connection
+        tryEach(known, network)?.let { opened ->
+            remember(opened.first, stored)
+            return opened
         }
         val discovered = discovery.find(pc.id, DISCOVERY_TIMEOUT).filter { it !in known }
-        tryEach(discovered, network)?.let { (endpoint, connection) ->
-            remember(endpoint, discovered.map { it.toString() } + stored)
-            return connection
+        tryEach(discovered, network)?.let { opened ->
+            remember(opened.first, discovered.map { it.toString() } + stored)
+            return opened
         }
         return null
     }

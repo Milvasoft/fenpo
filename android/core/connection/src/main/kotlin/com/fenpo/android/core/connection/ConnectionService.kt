@@ -24,6 +24,8 @@ import com.fenpo.android.core.connection.clipboard.ClipboardSendActivity
 import com.fenpo.android.core.connection.clipboard.ClipboardSync
 import com.fenpo.android.core.connection.remote.LinkOpener
 import com.fenpo.android.core.connection.remote.RingPlayer
+import com.fenpo.android.core.connection.transfer.PcShareShortcut
+import com.fenpo.android.core.connection.transfer.TransferManager
 import com.fenpo.android.core.data.device.LocalDeviceRepository
 import com.fenpo.android.core.data.pc.PairedPc
 import com.fenpo.android.core.data.pc.PairedPcRepository
@@ -80,6 +82,8 @@ class ConnectionService : Service() {
 
     @Inject lateinit var linkOpener: LinkOpener
 
+    @Inject lateinit var transferManager: TransferManager
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var link: Job? = null
     private var pcName = ""
@@ -100,6 +104,11 @@ class ConnectionService : Service() {
 
             ACTION_STOP_RING -> {
                 ringPlayer.stop()
+                return START_STICKY
+            }
+
+            ACTION_CANCEL_TRANSFER -> {
+                intent.getStringExtra(EXTRA_TRANSFER_ID)?.let(transferManager::cancel)
                 return START_STICKY
             }
 
@@ -135,6 +144,7 @@ class ConnectionService : Service() {
                 return@coroutineScope
             }
             pcName = pc.name
+            PcShareShortcut.publish(this@ConnectionService, pc.name)
             val local = localDeviceRepository.localDevice()
             val hello = local.hello()
             launch { showLinks() }
@@ -142,6 +152,17 @@ class ConnectionService : Service() {
             launch { clipboardSync.run() }
             launch { ringPlayer.run(serviceIntent(ACTION_STOP_RING)) }
             launch { linkOpener.run() }
+            transferManager.cancelIntentFor = { id ->
+                PendingIntent.getService(
+                    this@ConnectionService,
+                    id.hashCode(),
+                    Intent(this@ConnectionService, ConnectionService::class.java)
+                        .setAction(ACTION_CANCEL_TRANSFER)
+                        .putExtra(EXTRA_TRANSFER_ID, id),
+                    PendingIntent.FLAG_IMMUTABLE,
+                )
+            }
+            launch { transferManager.run() }
 
             val wifi =
                 WifiLink(
@@ -367,6 +388,8 @@ class ConnectionService : Service() {
         private const val ACTION_STOP = "com.fenpo.android.action.STOP_CONNECTION"
         private const val ACTION_STOP_RING = "com.fenpo.android.action.STOP_RING"
         private const val ACTION_LOCK_PC = "com.fenpo.android.action.LOCK_PC"
+        private const val ACTION_CANCEL_TRANSFER = "com.fenpo.android.action.CANCEL_TRANSFER"
+        private const val EXTRA_TRANSFER_ID = "transfer_id"
         private val RSSI_INTERVAL = 5.seconds
         private val MAX_BACKOFF = 60.seconds
 

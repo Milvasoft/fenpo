@@ -15,4 +15,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
 }

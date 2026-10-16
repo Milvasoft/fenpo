@@ -9,4 +9,21 @@
     <string name="share_opened">Opening on your PC</string>
     <string name="share_no_link">There is no link in what you shared. Share a web page or a link.</string>
     <string name="share_nothing">There is nothing to send. Share text or a link.</string>
+    <string name="share_sending">Sending to your PC</string>
+    <string name="share_needs_wifi">Files need Wi‑Fi. Join the same Wi‑Fi as your PC and share again.</string>
+    <string name="transfers_now">Now</string>
+    <string name="transfers_history">Earlier</string>
+    <string name="transfers_sending">Sending to the PC</string>
+    <string name="transfers_receiving">Coming from the PC</string>
+    <string name="transfers_cancel">Cancel</string>
+    <string name="transfers_from_pc">From the PC, %1$s</string>
+    <string name="transfers_to_pc">Sent to the PC, %1$s</string>
+    <string name="transfers_declined">The PC declined, %1$s</string>
+    <string name="transfers_cancelled">Cancelled, %1$s</string>
+    <string name="transfers_failed">Stopped, %1$s</string>
+    <string name="transfers_with_count">%1$s · %2$s</string>
+    <plurals name="transfers_count">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
 </resources>

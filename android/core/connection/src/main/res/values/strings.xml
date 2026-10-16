@@ -27,4 +27,17 @@
     <string name="link_channel_name">Links from your PC</string>
     <string name="link_title">Link from your PC</string>
     <string name="link_open">Open</string>
+    <string name="transfer_channel_name">Transfers</string>
+    <string name="transfer_sending">Sending to your PC</string>
+    <string name="transfer_receiving">Receiving from your PC</string>
+    <string name="transfer_sent">Sent to your PC</string>
+    <string name="transfer_received">Received from your PC</string>
+    <string name="transfer_declined">Your PC declined the files</string>
+    <string name="transfer_cancelled">Transfer cancelled</string>
+    <string name="transfer_failed">Transfer stopped. Check that both are on the same Wi‑Fi and try again.</string>
+    <string name="transfer_cancel">Cancel</string>
+    <plurals name="transfer_files">
+        <item quantity="one">%1$s and %2$d more file</item>
+        <item quantity="other">%1$s and %2$d more files</item>
+    </plurals>
 </resources>

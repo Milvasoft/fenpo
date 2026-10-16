@@ -2,6 +2,7 @@ package com.fenpo.android.core.connection
 
 import android.util.Log
 import com.fenpo.android.core.ble.TooLargeForBleException
+import com.fenpo.android.core.transport.tls.DataConnection
 import com.fenpo.protocol.v1.Capability
 import com.fenpo.protocol.v1.Envelope
 import kotlinx.coroutines.CancellationException
@@ -39,6 +40,9 @@ class PcMessenger
         /** `true` while at least one path has finished `Hello`. */
         val connected: Boolean get() = sessions.value.isNotEmpty()
 
+        /** `true` while the Wi-Fi path is open; files need it. */
+        val wifiOpen: Boolean get() = sessions.value[LinkPath.WIFI] != null
+
         /**
          * Sends [body] on the best open path, if the PC offers [capability].
          *
@@ -67,6 +71,13 @@ class PcMessenger
             }
             return false
         }
+
+        /**
+         * Opens a file transfer data connection on Wi-Fi, or returns `null` when Wi-Fi is not open:
+         * Bluetooth cannot carry files.
+         */
+        suspend fun openDataConnection(port: Int): DataConnection? =
+            sessions.value[LinkPath.WIFI]?.openData?.invoke(port)
 
         internal fun onSession(
             path: LinkPath,

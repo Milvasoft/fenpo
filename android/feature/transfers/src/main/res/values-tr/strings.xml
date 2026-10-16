@@ -9,4 +9,21 @@
     <string name="share_opened">PC’de açılıyor</string>
     <string name="share_no_link">Paylaştığın şeyde bağlantı yok. Bir sayfa ya da bağlantı paylaş.</string>
     <string name="share_nothing">Gönderilecek bir şey yok. Metin ya da bağlantı paylaş.</string>
+    <string name="share_sending">PC’ye gönderiliyor</string>
+    <string name="share_needs_wifi">Dosyalar için Wi‑Fi gerekiyor. PC ile aynı Wi‑Fi’ye bağlan ve yeniden paylaş.</string>
+    <string name="transfers_now">Şimdi</string>
+    <string name="transfers_history">Önceki</string>
+    <string name="transfers_sending">PC’ye gidiyor</string>
+    <string name="transfers_receiving">PC’den geliyor</string>
+    <string name="transfers_cancel">İptal</string>
+    <string name="transfers_from_pc">PC’den geldi, %1$s</string>
+    <string name="transfers_to_pc">PC’ye gitti, %1$s</string>
+    <string name="transfers_declined">PC almadı, %1$s</string>
+    <string name="transfers_cancelled">İptal edildi, %1$s</string>
+    <string name="transfers_failed">Yarıda kaldı, %1$s</string>
+    <string name="transfers_with_count">%1$s · %2$s</string>
+    <plurals name="transfers_count">
+        <item quantity="one">%d dosya</item>
+        <item quantity="other">%d dosya</item>
+    </plurals>
 </resources>

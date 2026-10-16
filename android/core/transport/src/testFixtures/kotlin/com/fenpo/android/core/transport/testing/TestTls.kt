@@ -1,6 +1,7 @@
 package com.fenpo.android.core.transport.testing
 
 import com.fenpo.android.core.transport.Endpoint
+import com.fenpo.android.core.transport.tls.DataConnection
 import com.fenpo.android.core.transport.tls.EnvelopeConnection
 import com.fenpo.android.core.transport.tls.TlsIdentity
 import kotlinx.coroutines.runBlocking
@@ -54,6 +55,18 @@ public object TestTls {
         identity: TlsIdentity,
         protocols: Array<String> = arrayOf("TLSv1.3"),
         handler: suspend (EnvelopeConnection) -> Unit,
+    ): TestTlsServer = start(identity, protocols) { socket -> EnvelopeConnection(socket).use { handler(it) } }
+
+    /** Like [startServer], for file transfer data connections. */
+    public fun startDataServer(
+        identity: TlsIdentity,
+        handler: suspend (DataConnection) -> Unit,
+    ): TestTlsServer = start(identity, arrayOf("TLSv1.3")) { socket -> DataConnection(socket).use { handler(it) } }
+
+    private fun start(
+        identity: TlsIdentity,
+        protocols: Array<String>,
+        handler: suspend (SSLSocket) -> Unit,
     ): TestTlsServer {
         val context = SSLContext.getInstance("TLS")
         context.init(arrayOf(identity.keyManager), arrayOf(AcceptAnyClient), SecureRandom())
@@ -86,7 +99,7 @@ public object TestTls {
 /** A running [TestTls.startServer]. Collects errors from the handler so tests can assert on them. */
 public class TestTlsServer internal constructor(
     private val server: SSLServerSocket,
-    private val handler: suspend (EnvelopeConnection) -> Unit,
+    private val handler: suspend (SSLSocket) -> Unit,
 ) : Closeable {
     /** Where to connect: the loopback address the server bound (IPv4 on a JVM, possibly ::1 on Android). */
     public val endpoint: Endpoint = Endpoint(server.inetAddress.hostAddress.substringBefore('%'), server.localPort)
@@ -107,7 +120,7 @@ public class TestTlsServer internal constructor(
                     }
                 try {
                     socket.startHandshake()
-                    EnvelopeConnection(socket).use { runBlocking { handler(it) } }
+                    runBlocking { handler(socket) }
                 } catch (e: Throwable) {
                     errors += e
                     runCatching { socket.close() }

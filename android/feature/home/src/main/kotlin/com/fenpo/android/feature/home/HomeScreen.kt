@@ -1,6 +1,9 @@
 package com.fenpo.android.feature.home
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fenpo.android.core.connection.clipboard.ClipboardSendActivity
+import com.fenpo.android.core.connection.transfer.SendResult
 import com.fenpo.android.core.designsystem.component.FenpoCard
 import com.fenpo.android.core.designsystem.component.FenpoListRow
 import com.fenpo.android.core.designsystem.component.FenpoRootTopBar
@@ -66,6 +70,20 @@ fun HomeRoute(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val pickPhotos =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+            if (uris.isEmpty()) return@rememberLauncherForActivityResult
+            scope.launch {
+                val message =
+                    when (viewModel.sendPhotos(uris)) {
+                        SendResult.STARTED -> null
+                        SendResult.NEEDS_WIFI -> R.string.photos_need_wifi
+                        SendResult.UNSUPPORTED -> ConnectionR.string.pc_update_needed
+                        SendResult.NOT_CONNECTED, SendResult.NOTHING_TO_SEND -> ConnectionR.string.pc_not_connected
+                    }
+                if (message != null) Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            }
+        }
     HomeScreen(
         state = state,
         onPair = onPair,
@@ -85,8 +103,12 @@ fun HomeRoute(
                     }
                 }
 
-                // Photos come with file transfer, the webcam with phase 4.
-                QuickAction.SEND_PHOTOS, QuickAction.CAMERA -> {
+                QuickAction.SEND_PHOTOS -> {
+                    pickPhotos.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+                }
+
+                // The webcam comes with phase 4.
+                QuickAction.CAMERA -> {
                     Unit
                 }
             }

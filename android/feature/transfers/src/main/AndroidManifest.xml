@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <!-- Share sheet targets (docs/ANDROID.md §9). Files join with file transfer. -->
+        <!-- Share sheet targets (docs/ANDROID.md §9). -->
         <activity
             android:name=".share.ShareToPcActivity"
             android:excludeFromRecents="true"
@@ -20,7 +20,12 @@
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
             </intent-filter>
         </activity-alias>
 

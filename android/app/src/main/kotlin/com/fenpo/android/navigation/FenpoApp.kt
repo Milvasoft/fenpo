@@ -40,7 +40,7 @@ import com.fenpo.android.feature.pairing.ScannerRoute
 import com.fenpo.android.feature.settings.SettingsKey
 import com.fenpo.android.feature.settings.SettingsRoute
 import com.fenpo.android.feature.transfers.TransfersKey
-import com.fenpo.android.feature.transfers.TransfersScreen
+import com.fenpo.android.feature.transfers.TransfersRoute
 
 /** A tab of the bottom navigation bar (design: Fenpo, Aktarımlar, PC, Ayarlar). */
 private data class TopLevelDestination(
@@ -97,7 +97,7 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                             )
                         }
                     }
-                    entry<TransfersKey> { Inset { TransfersScreen() } }
+                    entry<TransfersKey> { Inset { TransfersRoute() } }
                     entry<PcKey> { Inset { PcRoute(onPair = { backStack.add(ScannerKey) }) } }
                     entry<SettingsKey> {
                         Inset {

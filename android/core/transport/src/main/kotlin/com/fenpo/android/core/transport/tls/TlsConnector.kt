@@ -23,7 +23,7 @@ public class TlsConnector(
     private val handshakeTimeout: Duration = 10.seconds,
 ) {
     /**
-     * Connects to [endpoint] and completes the handshake.
+     * Connects to [endpoint] and completes the handshake, for the control connection.
      *
      * @param pinnedCertificateSha256 Expected SHA-256 of the PC certificate.
      * @param socketFactory Makes the TCP socket, e.g. one bound to the Wi-Fi network.
@@ -34,7 +34,23 @@ public class TlsConnector(
         endpoint: Endpoint,
         pinnedCertificateSha256: ByteString,
         socketFactory: SocketFactory = SocketFactory.getDefault(),
-    ): EnvelopeConnection =
+    ): EnvelopeConnection = EnvelopeConnection(handshake(endpoint, pinnedCertificateSha256, socketFactory))
+
+    /**
+     * Connects to [endpoint] for a file transfer data connection (transfer.proto): the same pinned
+     * TLS as the control connection, then a stream header and raw bytes.
+     */
+    public suspend fun connectData(
+        endpoint: Endpoint,
+        pinnedCertificateSha256: ByteString,
+        socketFactory: SocketFactory = SocketFactory.getDefault(),
+    ): DataConnection = DataConnection(handshake(endpoint, pinnedCertificateSha256, socketFactory))
+
+    private suspend fun handshake(
+        endpoint: Endpoint,
+        pinnedCertificateSha256: ByteString,
+        socketFactory: SocketFactory,
+    ): SSLSocket =
         withContext(Dispatchers.IO) {
             val context = SSLContext.getInstance(TLS_1_3)
             context.init(
@@ -52,7 +68,7 @@ public class TlsConnector(
                 socket.useClientMode = true
                 socket.soTimeout = handshakeTimeout.inWholeMilliseconds.toInt()
                 socket.startHandshake()
-                EnvelopeConnection(socket)
+                socket
             } catch (e: Exception) {
                 runCatching { raw.close() }
                 throw e

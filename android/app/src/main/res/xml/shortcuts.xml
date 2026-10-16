@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The paired PC as a direct share target next to contacts (docs/ANDROID.md §9). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <share-target android:targetClass="com.fenpo.android.feature.transfers.share.SendToPc">
+        <data android:mimeType="*/*" />
+        <category android:name="com.fenpo.android.category.SHARE_TO_PC" />
+    </share-target>
+</shortcuts>

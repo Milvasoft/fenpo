@@ -27,4 +27,17 @@
     <string name="link_channel_name">PC’den gelen bağlantılar</string>
     <string name="link_title">PC’den bağlantı</string>
     <string name="link_open">Aç</string>
+    <string name="transfer_channel_name">Aktarımlar</string>
+    <string name="transfer_sending">PC’ye gönderiliyor</string>
+    <string name="transfer_receiving">PC’den alınıyor</string>
+    <string name="transfer_sent">PC’ye gönderildi</string>
+    <string name="transfer_received">PC’den alındı</string>
+    <string name="transfer_declined">PC dosyaları almadı</string>
+    <string name="transfer_cancelled">Aktarım iptal edildi</string>
+    <string name="transfer_failed">Aktarım durdu. İkisinin aynı Wi‑Fi’de olduğuna bak ve yeniden dene.</string>
+    <string name="transfer_cancel">İptal</string>
+    <plurals name="transfer_files">
+        <item quantity="one">%1$s ve %2$d dosya daha</item>
+        <item quantity="other">%1$s ve %2$d dosya daha</item>
+    </plurals>
 </resources>

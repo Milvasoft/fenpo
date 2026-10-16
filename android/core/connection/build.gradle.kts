@@ -16,5 +16,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
     testImplementation(libs.robolectric)
+    testImplementation(testFixtures(project(":core:transport")))
     testImplementation(libs.androidx.test.ext.junit)
 }

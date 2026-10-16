@@ -2,6 +2,7 @@ package com.fenpo.android.core.connection
 
 import android.util.Log
 import com.fenpo.android.core.transport.session.Heartbeat
+import com.fenpo.android.core.transport.tls.DataConnection
 import com.fenpo.protocol.v1.Envelope
 import com.fenpo.protocol.v1.Hello
 import com.fenpo.protocol.v1.Pong
@@ -18,6 +19,8 @@ enum class LinkPath { BLUETOOTH, WIFI }
  *
  * @param transport Sends one body on this channel, answering the envelope id given (0 if none).
  * @param onAddresses Called with the PC's current data channel addresses.
+ * @param openData Opens a file transfer data connection to the PC on this path (Wi-Fi only);
+ *   the argument is `TransferAccept.data_port`, 0 for the control port.
  */
 internal class PcSession(
     val path: LinkPath,
@@ -25,6 +28,7 @@ internal class PcSession(
     private val transport: suspend (Envelope.Body, Long) -> Unit,
     private val onAddresses: suspend (List<String>) -> Unit,
     private val onOther: (Envelope) -> Unit = {},
+    val openData: (suspend (Int) -> DataConnection)? = null,
 ) {
     private val hello = CompletableDeferred<Hello>()
 

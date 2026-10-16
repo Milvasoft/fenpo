@@ -71,6 +71,7 @@ internal class AndroidLocalDeviceRepository
                     Capability.CAPABILITY_OPEN_URL,
                     Capability.CAPABILITY_RING,
                     Capability.CAPABILITY_LOCK_PC,
+                    Capability.CAPABILITY_FILE_TRANSFER,
                 )
         }
     }

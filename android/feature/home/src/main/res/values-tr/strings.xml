@@ -38,4 +38,5 @@
     <string name="transfer_to_pc">PC’ye gitti, %1$s</string>
 
     <string name="pc_title">PC</string>
+    <string name="photos_need_wifi">Fotoğraflar için Wi‑Fi gerekiyor. PC ile aynı Wi‑Fi’ye bağlan.</string>
 </resources>

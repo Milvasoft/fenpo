@@ -39,4 +39,5 @@
     <string name="transfer_to_pc">Sent to the PC, %1$s</string>
 
     <string name="pc_title">PC</string>
+    <string name="photos_need_wifi">Photos need Wi‑Fi. Join the same Wi‑Fi as your PC.</string>
 </resources>

@@ -15,6 +15,8 @@ import com.fenpo.android.core.data.settings.AppCompatLanguageController
 import com.fenpo.android.core.data.settings.DataStoreSettingsRepository
 import com.fenpo.android.core.data.settings.LanguageController
 import com.fenpo.android.core.data.settings.SettingsRepository
+import com.fenpo.android.core.data.transfer.DataStoreTransferHistory
+import com.fenpo.android.core.data.transfer.TransferHistory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -40,6 +42,9 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun permissionChecker(impl: SystemPermissionChecker): PermissionChecker
+
+    @Binds
+    abstract fun transferHistory(impl: DataStoreTransferHistory): TransferHistory
 
     companion object {
         @Provides
