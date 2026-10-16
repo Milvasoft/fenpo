@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.getByType
 internal object FenpoSdk {
     const val COMPILE = 37
     const val TARGET = 37
-    const val MIN = 33
+    const val MIN = 31
 }
 
 internal val Project.libs: VersionCatalog

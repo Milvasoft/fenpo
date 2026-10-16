@@ -118,7 +118,8 @@ Kaynaklar: [CameraX sürümleri](https://developer.android.com/jetpack/androidx/
 Kaynaklar: [MediaProjection](https://developer.android.com/media/grow/media-projection), [Android 14](https://developer.android.com/about/versions/14/behavior-changes-14), [Android 15](https://developer.android.com/about/versions/15/behavior-changes-all), [AccessibilityService](https://developer.android.com/reference/android/accessibilityservice/AccessibilityService), [Play: erişilebilirlik API'si](https://support.google.com/googleplay/android-developer/answer/10964491), [Android blog: veri gizliliği](https://developer.android.com/blog/posts/enhancing-android-security-stop-malware-from-snooping-on-your-app-data), [scrcpy](https://github.com/Genymobile/scrcpy)
 
 ## 12. En düşük sürüm (minSdk)
-**Karar: `minSdk 33` (Android 13), `targetSdk 37`, `compileSdk 37`. Buğra onayladı (16 Ekim).**
+**Karar: `minSdk 31` (Android 12), `targetSdk 37`, `compileSdk 37`. İlk karar 33'tü; test telefonu Galaxy S10+ Android 12'de kaldığı ve güncellenmediği için Buğra 31'e indirdi (16 Ekim).**
+- Android 12 için ayrı yollar: GATT'ta eski yazma ve bildirim geri çağrıları, CDM'de sonucun pencerenin activity sonucundan okunması (Android 12'de `AssociationInfo` ve ilişki kimliği yok, PC adresle tanınıyor), varlık servisinde adresli geri çağrılar, `POST_NOTIFICATIONS` sadece 13+'ta istenir. Android 12 CDM'i Activity bağlamı istiyor; uygulama bağlamıyla `associate` çöküyor (cihaz testi). Bu telefon Android 13+ yolunu denemiyor; onun için ayrıca bir telefon gerekiyor.
 - Güncel sürüm Android 17 (API 37), Pixel'de 16 Haziran 2026'da kararlı. Play, 31 Ağustos 2026'dan beri yeni uygulama ve güncellemelerde targetSdk 36 istiyor.
 - Dağılım (kümülatif): Google'ın Android Studio verisi (Aralık 2025) ≥31 %69, ≥33 %58; apilevels.com (Statcounter, Nisan 2026) ≥31 %79, ≥33 %69, ≥34 %55. Fenpo for Android en erken 2027'de yayımlanacağı için ≥33 o zaman %75 civarında olur.
 - **33 neden:** CDM'nin kullanışlı yüzeyi (`AssociationInfo`, executor'lı `associate`, `disassociate(int)`, `onDeviceAppeared(AssociationInfo)`) 33'te geliyor; `POST_NOTIFICATIONS` ve uygulama başına dil sistem ayarı 33'te. 31–32 için ikinci bir CDM ve bildirim yolu yazmak gerekirdi. Kısıtlanmış ayarlar zaten 13'ten itibaren var, yani İzinler ekranı tek tip.
@@ -284,3 +285,17 @@ Gerçek telefon (DECISIONS #27) ve Windows'ta Fenpo BLE çevre birimi (S4'ün Wi
 | A6 | Kamera FGS'si ekran kapalıyken | Web kamerası telefon kilitlenince sürüyor mu | "Ekranı karart" modu ekran açık kalarak |
 
 A3 emülatörde de yapılabilir; diğerleri gerçek Bluetooth istiyor.
+
+### Sonuçlar (16 Ekim, Galaxy S10+ SM-G975F, Android 12 / API 31, One UI; PC'de S4 PeripheralSpike, MediaTek adaptör)
+
+Debug derlemesindeki "BLE probe" ile, ürün sınıfları doğrudan sürülerek (S5 sunucusu Defender yüzünden çalışmadığı için gerçek eşleşme yerine test anahtarıyla).
+
+| # | Sonuç |
+|---|---|
+| A1 | **İlişki çalışıyor.** CDM penceresi PC'yi Fenpo servis UUID'siyle buldu ve **"BUGRAKOSEN"** adıyla gösterdi: Windows reklama bilgisayar adını koyuyor (S4'ün açık sorusu). Samsung metni: "Fenpo uygulaması BUGRAKOSEN cihazınızı yönetebilsin mi?". Kaydedilen adres `73:05:…` **çözülebilir özel adres** (dönen). **Varlık çalışıyor:** gözlem başlayınca "PC appeared" 1 saniyede geldi, `connectedDevice` servisi ön planda başladı ve `autoConnect` 9 saniyede bağlandı. **Denenemeyen:** "kayboldu" olayı ve uygulama süreci ölüyken uyanma; PC spike'ı ikinci çalıştırmadan itibaren reklamı `Aborted` durumunda bıraktı (Windows tarafı, S4'e not), PC görünmez olunca test anlamsızlaştı. Adres dönünce (Windows'ta yaklaşık 15 dakika) varlığın sürmesi de uzun bir denemeyle bakılacak. |
+| A2 | **Çalışıyor.** Bağ, şifreli CCCD yazmasıyla **pencere çıkmadan** (Just Works) 12 saniyede kuruldu; Android ayrıca PC'nin kimlik adresini (`CC:47:…`) bağladı. MTU **517**, PC tarafında `maxNotification` 514. `rx`'e yanıtsız yazma PC'ye ulaştı, yazma geri çağrısı geldi; PC'nin `tx` bildirimi geldi (Android 12'nin eski geri çağrısıyla). RSSI masada **−43…−47 dBm**. Şifreli `Hello` 119 bayt tek parça gitti; sayaç 1 → 2 → 3 ilerledi, yeniden başlatmada geri gitmedi. |
+| Ek | **Klasik bağ da oluştu (CTKD).** LE bağından sonra telefon PC'yi klasik Bluetooth'ta da bağlı gösterdi ve **HEADSET ile A2DP bağlantı politikasını kendiliğinden açtı**: telefonun sesi ve aramaları istenmeden PC'ye gidebilir. HFP için iyi haber (aramalar için ayrıca Windows eşleşmesi gerekmeyebilir), A2DP için istenmeyen bir yan etki. Fenpo bu politikaları değiştiremiyor (`BLUETOOTH_PRIVILEGED`); Windows tarafında A2DP sink'in kapatılması veya kullanıcıya söylenmesi gerekiyor. |
+| Ek | **Bağlantı canlı ama servis yok.** PC servisi kaldırınca Windows "Service Changed" gönderdi, telefon yeniden bağlandı ve Android önbellekteki GATT tablosuyla kanalı "hazır" saydı; arkada dinleyen yoktu. Bu yüzden bağlantı servisi, PC `Hello` ile cevap verdikten sonra her 30 saniyede `Ping` atıyor, 10 saniyede `Pong` gelmezse yeniden bağlanıyor (`Heartbeat`). Servis geri gelince "Service Changed" ile yeniden keşif ve abonelik doğru çalıştı. |
+| Ek | Samsung'un yazı tipi Roboto'dan uzun: hızlı işlem kutucuklarında ikinci satırın alt kısmı kesildi (ekran görüntüsü testleri bunu yakalamadı). Kutucuklar artık metne göre uzuyor. |
+| Ek | `bluetooth.profile.*` sistem özellikleri Samsung'da boş: MAP/PBAP desteği bu yolla okunamıyor, Windows'tan SDP sorgusuyla bakılacak (A4). |
+

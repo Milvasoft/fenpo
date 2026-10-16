@@ -4,6 +4,7 @@ import com.fenpo.android.buildlogic.library
 import com.fenpo.android.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 
@@ -15,6 +16,11 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             extensions.configure<LibraryExtension> {
                 configureAndroidCommon(this)
+            }
+
+            // Some modules only have instrumented tests (Keystore, Bluetooth); an empty unit test run is fine.
+            tasks.withType(Test::class.java).configureEach {
+                failOnNoDiscoveredTests.set(false)
             }
 
             dependencies {

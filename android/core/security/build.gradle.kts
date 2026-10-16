@@ -21,8 +21,3 @@ dependencies {
     androidTestImplementation(libs.kotlin.test)
     androidTestImplementation(libs.kotlinx.coroutines.test)
 }
-
-// Everything here needs the Android Keystore, so all tests are instrumented (src/androidTest).
-tasks.withType<Test>().configureEach {
-    failOnNoDiscoveredTests = false
-}

@@ -17,6 +17,13 @@
     <string name="pairing_open_permissions">Continue to permissions</string>
     <string name="pairing_later">Later</string>
 
+    <string name="step_bluetooth_active">Pairing over Bluetooth</string>
+    <string name="pairing_retry">Try again</string>
+    <string name="link_error_not_associated">The computer was not chosen</string>
+    <string name="link_error_bluetooth">Bluetooth pairing did not finish</string>
+    <string name="link_fix_not_associated">Choose your computer in the window that opens. If it is not listed, keep Fenpo open on Windows and turn on Location on the phone; Android needs it to search.</string>
+    <string name="link_fix_bluetooth">Keep the phone near the computer and accept the pairing request on both. If it keeps failing, remove the computer in Bluetooth settings and try again.</string>
+
     <string name="pairing_error_unreachable">Can’t reach the computer</string>
     <string name="pairing_error_certificate">This code belongs to another computer</string>
     <string name="pairing_error_handshake">Can’t set up an encrypted connection</string>

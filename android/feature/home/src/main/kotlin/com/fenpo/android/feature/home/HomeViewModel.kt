@@ -2,40 +2,55 @@ package com.fenpo.android.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fenpo.android.core.connection.ConnectionStatus
+import com.fenpo.android.core.connection.LinkState
 import com.fenpo.android.core.data.pc.PairedPcRepository
+import com.fenpo.protocol.v1.DevicePlatform
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import java.time.Instant
 import javax.inject.Inject
 
 /**
- * State for the home and PC screens. Until the connection layer exists (phase C) the PC is shown
- * as paired but not connected, and transfers, clipboard and mirroring stay empty.
+ * State for the home and PC screens: the paired PC and the live connection paths. Transfers,
+ * clipboard and mirroring stay empty until those features exist.
  */
 @HiltViewModel
 class HomeViewModel
     @Inject
     constructor(
         pairedPcRepository: PairedPcRepository,
+        connectionStatus: ConnectionStatus,
     ) : ViewModel() {
         val uiState: StateFlow<HomeUiState> =
-            pairedPcRepository.pairedPc
-                .map { pc ->
-                    HomeUiState(
-                        pc =
-                            pc?.let {
-                                PcCardState(
-                                    name = it.name,
-                                    osLabel = null,
-                                    connected = false,
-                                    bluetooth = false,
-                                    wifi = false,
-                                )
-                            },
-                        now = Instant.now(),
-                    )
-                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+            combine(pairedPcRepository.pairedPc, connectionStatus.snapshot) { pc, connection ->
+                HomeUiState(
+                    pc =
+                        pc?.let {
+                            PcCardState(
+                                name = it.name,
+                                // The OS version arrives in Hello once the protocol carries it (DECISIONS #30).
+                                osLabel =
+                                    if (connection.remote?.platform ==
+                                        DevicePlatform.DEVICE_PLATFORM_WINDOWS
+                                    ) {
+                                        WINDOWS
+                                    } else {
+                                        null
+                                    },
+                                connected = connection.connected,
+                                bluetooth = connection.bluetooth == LinkState.CONNECTED,
+                                wifi = connection.wifi == LinkState.CONNECTED,
+                            )
+                        },
+                    now = Instant.now(),
+                )
+            }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+        private companion object {
+            const val WINDOWS = "Windows"
+        }
     }

@@ -1,8 +1,11 @@
 package com.fenpo.android.feature.pairing
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -44,12 +47,22 @@ import com.fenpo.android.core.pairing.PairingError
 /** Progress of one pairing step. */
 enum class StepStatus { DONE, ACTIVE, QUEUED, FAILED }
 
+/** Why a Bluetooth step failed. */
+enum class LinkError {
+    /** The companion dialog was closed, or it found no Fenpo PC nearby. */
+    NOT_ASSOCIATED,
+
+    /** The first BLE connection or the bond did not complete. */
+    BLUETOOTH_FAILED,
+}
+
 /**
  * Where pairing stands after the QR code was read.
  *
  * @property pcName PC name from the code, shown in the Wi‑Fi step.
  * @property error Why the Wi‑Fi step failed, if it did.
- * @property paired The PC is stored; the flow continues with permissions.
+ * @property linkError Why a Bluetooth step failed, if one did.
+ * @property paired Both halves are done; the flow continues with permissions.
  */
 data class PairingStepsState(
     val pcName: String,
@@ -58,12 +71,14 @@ data class PairingStepsState(
     val bluetooth: StepStatus,
     val permissions: StepStatus,
     val error: PairingError? = null,
+    val linkError: LinkError? = null,
     val paired: Boolean = false,
 )
 
 /**
- * Steps screen with its view model. On Android 17 the local network permission is asked first
- * (it shares the "Nearby devices" dialog, docs/ANDROID.md §3); pairing starts once it is answered.
+ * Steps screen with its view model. The "Nearby devices" permission (Bluetooth, and the local
+ * network on Android 17, docs/ANDROID.md §3) is asked first; pairing starts once it is answered.
+ * The companion device step then shows the system dialog from here.
  */
 @Composable
 fun PairingStepsRoute(
@@ -87,25 +102,30 @@ fun PairingStepsRoute(
                 ContextCompat.checkSelfPermission(context, it) !=
                     PackageManager.PERMISSION_GRANTED
             }
-        if (Build.VERSION.SDK_INT >= ANDROID_17 &&
-            missing.isNotEmpty()
-        ) {
-            launcher.launch(missing.toTypedArray())
-        } else {
-            viewModel.start()
+        if (missing.isNotEmpty()) launcher.launch(missing.toTypedArray()) else viewModel.start()
+    }
+    val companionDialog =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            viewModel.onCompanionDialogResult(result.resultCode, result.data)
+        }
+    LaunchedEffect(state.device) {
+        if (state.device == StepStatus.ACTIVE) {
+            val activity = context.findActivity() ?: return@LaunchedEffect
+            viewModel.linkBluetooth(
+                activity,
+            ) { sender -> companionDialog.launch(IntentSenderRequest.Builder(sender).build()) }
         }
     }
     PairingStepsScreen(
         state = state,
         onBack = onBack,
         onRescan = onRescan,
+        onRetryLink = viewModel::retryLink,
         onOpenPermissions = onOpenPermissions,
         onDone = onDone,
         modifier = modifier,
     )
 }
-
-private const val ANDROID_17 = 37
 
 /**
  * "Almost done" (design: "Bilgisayarı tanıtma"). The system's companion device and Bluetooth
@@ -117,6 +137,7 @@ fun PairingStepsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     onRescan: () -> Unit = {},
+    onRetryLink: () -> Unit = {},
     onOpenPermissions: () -> Unit = {},
     onDone: () -> Unit = {},
 ) {
@@ -132,8 +153,20 @@ fun PairingStepsScreen(
                 failedText = state.error?.let { stringResource(it.title()) },
                 busy = state.wifi == StepStatus.ACTIVE,
             )
-            Step(icon = FenpoIcons.Pc, title = stringResource(R.string.step_device), status = state.device)
-            Step(icon = FenpoIcons.Bluetooth, title = stringResource(R.string.step_bluetooth), status = state.bluetooth)
+            Step(
+                icon = FenpoIcons.Pc,
+                title = stringResource(R.string.step_device),
+                status = state.device,
+                failedText = stringResource(R.string.link_error_not_associated),
+            )
+            Step(
+                icon = FenpoIcons.Bluetooth,
+                title = stringResource(R.string.step_bluetooth),
+                status = state.bluetooth,
+                activeText = stringResource(R.string.step_bluetooth_active),
+                failedText = stringResource(R.string.link_error_bluetooth),
+                busy = state.bluetooth == StepStatus.ACTIVE,
+            )
             Step(
                 icon = FenpoIcons.Bell,
                 title = stringResource(R.string.step_permissions),
@@ -153,6 +186,27 @@ fun PairingStepsScreen(
                     )
                     Button(onClick = onRescan, modifier = Modifier.fillMaxWidth().height(56.dp)) {
                         Text(stringResource(R.string.pairing_rescan), style = MaterialTheme.typography.titleMedium)
+                    }
+                }
+
+                state.linkError != null -> {
+                    Text(
+                        text =
+                            stringResource(
+                                if (state.linkError ==
+                                    LinkError.NOT_ASSOCIATED
+                                ) {
+                                    R.string.link_fix_not_associated
+                                } else {
+                                    R.string.link_fix_bluetooth
+                                },
+                            ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                    Button(onClick = onRetryLink, modifier = Modifier.fillMaxWidth().height(56.dp)) {
+                        Text(stringResource(R.string.pairing_retry), style = MaterialTheme.typography.titleMedium)
                     }
                 }
 

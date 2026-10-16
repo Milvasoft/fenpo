@@ -23,6 +23,7 @@ android {
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:data"))
+    implementation(project(":core:connection"))
     implementation(project(":feature:home"))
     implementation(project(":feature:pairing"))
     implementation(project(":feature:transfers"))

@@ -60,6 +60,20 @@ class PairingScreenshotTest {
             )
         }
 
+    @Test
+    fun pairingStepsBluetoothFailed() =
+        captureScreenVariants("pairing_steps_bluetooth_failed") {
+            PairingStepsScreen(
+                state =
+                    steps.copy(
+                        device = StepStatus.DONE,
+                        bluetooth = StepStatus.FAILED,
+                        linkError = LinkError.BLUETOOTH_FAILED,
+                    ),
+                onBack = {},
+            )
+        }
+
     /** The state drawn in the design: notification access and battery missing. */
     @Test
     fun permissions() =

@@ -24,7 +24,6 @@ import kotlin.time.Duration.Companion.seconds
  *
  * @property certificateSha256 Pin for the PC's TLS certificate (from the QR code, confirmed by the handshake).
  * @property bleChannelKey 32 byte AES-GCM key for the Fenpo BLE channel.
- * @property bleServiceUuid Fenpo GATT service UUID advertised by this PC.
  */
 public data class PairedPcInfo(
     val pcId: String,
@@ -32,7 +31,6 @@ public data class PairedPcInfo(
     val certificateSha256: ByteString,
     val addresses: List<Endpoint>,
     val bleChannelKey: ByteString,
-    val bleServiceUuid: String,
     val session: NegotiatedSession,
 )
 
@@ -203,7 +201,6 @@ public class PairingClient(
                 certificateSha256 = connection.peerCertificateSha256,
                 addresses = code.addresses,
                 bleChannelKey = result.ble_channel_key,
-                bleServiceUuid = result.ble_service_uuid,
                 session = session,
             )
         return PairingOutcome.Paired(pc, connection)

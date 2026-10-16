@@ -70,7 +70,6 @@ class PairingClientTest {
             pc_id = "pc-7f3a",
             pc_name = "BUGRA-PC",
             ble_channel_key = bleKey,
-            ble_service_uuid = "1888047E-C8C5-45CC-AAEA-333A8859E79F",
         )
 
     @Test

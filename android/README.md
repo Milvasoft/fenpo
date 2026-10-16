@@ -39,6 +39,8 @@ The second command is exactly what CI runs (`.github/workflows/android.yml`).
 | `core:transport` | `[uint32 length][Envelope]` framing, TLS 1.3 client with certificate pinning, `Hello` negotiation; test fixtures with an in-process TLS server |
 | `core:pairing` | Parser for the `fenpo://pair?...` QR code and the pairing exchange (`PairingRequest` → `PairingResult` → `Hello`) |
 | `core:security` | Phone's TLS identity in the Android Keystore, AES-GCM box for stored secrets |
+| `core:ble` | GATT client (one operation at a time, MTU, bond, Android 12 and 13+ paths) and the encrypted BLE channel |
+| `core:connection` | Companion device association and presence, the `connectedDevice` service, connection state |
 | `core:data` | Settings (DataStore), app language, device id and name, paired PC, permission checks |
 | `core:designsystem` | `FenpoTheme`, colour roles from the design, icons generated from the design's SVGs, shared components |
 | `core:testing` | `captureScreenVariants`: screenshots in both themes and both languages |
@@ -50,4 +52,6 @@ Instrumented tests (Keystore and TLS, need a phone or emulator): `./gradlew :cor
 
 ## Not done yet
 
-Pairing over Wi‑Fi (QR, TLS, `Hello`) is in place; the BLE channel, the companion device association and the connection service come next in phase C. Quick actions on the home screen and the feature switches in Settings are stored but not wired to anything yet.
+Pairing over Wi‑Fi (QR, TLS, `Hello`) and the BLE channel (companion device association, bond, encrypted and fragmented Envelopes, `connectedDevice` service with presence and heartbeat) are in place and were tried on a Galaxy S10+ with Android 12 (docs/ANDROID.md §21). End-to-end pairing with a real PC waits for the Windows side (S5). Quick actions on the home screen and the feature switches in Settings are stored but not wired to anything yet.
+
+Debug builds have a second launcher entry, **Fenpo BLE probe**, that drives the BLE classes directly for device tests against `spikes/S4-ble-peripheral`.

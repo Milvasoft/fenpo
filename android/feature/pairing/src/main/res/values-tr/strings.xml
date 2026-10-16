@@ -17,6 +17,13 @@
     <string name="pairing_open_permissions">İzinlere geç</string>
     <string name="pairing_later">Sonra</string>
 
+    <string name="step_bluetooth_active">Bluetooth ile eşleşiyor</string>
+    <string name="pairing_retry">Yeniden dene</string>
+    <string name="link_error_not_associated">Bilgisayar seçilmedi</string>
+    <string name="link_error_bluetooth">Bluetooth eşleşmesi tamamlanmadı</string>
+    <string name="link_fix_not_associated">Açılan pencerede bilgisayarını seç. Listede yoksa Windows’ta Fenpo’yu açık tut ve telefonda Konum’u aç; Android aramak için bunu istiyor.</string>
+    <string name="link_fix_bluetooth">Telefonu bilgisayarın yanında tut ve iki taraftaki eşleşme isteğini onayla. Olmamaya devam ederse bilgisayarı Bluetooth ayarlarından kaldırıp yeniden dene.</string>
+
     <string name="pairing_error_unreachable">Bilgisayara ulaşılamadı</string>
     <string name="pairing_error_certificate">Bu kod başka bir bilgisayara ait</string>
     <string name="pairing_error_handshake">Şifreli bağlantı kurulamadı</string>

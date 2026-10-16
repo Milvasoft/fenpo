@@ -4,11 +4,14 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -31,7 +34,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fenpo.android.core.designsystem.component.FenpoCard
@@ -118,7 +120,7 @@ private fun QuickActions(
     val colors = MaterialTheme.colorScheme
     val extended = FenpoTheme.extendedColors
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             QuickActionTile(
                 icon = FenpoIcons.Clipboard,
                 iconColors = colors.primary to colors.onPrimary,
@@ -138,7 +140,7 @@ private fun QuickActions(
                 modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             QuickActionTile(
                 icon = FenpoIcons.Photo,
                 iconColors = extended.success to extended.onSuccess,
@@ -180,16 +182,17 @@ private fun QuickActionTile(
     Surface(
         modifier =
             modifier
-                .height(104.dp)
+                // At least the design's 104 dp, taller when the font is (Samsung's is): device test, 16 October.
+                .heightIn(min = 104.dp)
+                .fillMaxHeight()
                 .clip(RoundedCornerShape(24.dp))
                 .clickable(onClick = onClick),
         color = FenpoTheme.extendedColors.card,
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             IconTile(icon = icon, containerColor = iconColors.first, contentColor = iconColors.second)
             Column {
-                // Tighter title line height so icon, title and summary fit the 104 dp tile of the design.
-                Text(text = title, style = MaterialTheme.typography.titleMedium.copy(lineHeight = 20.sp))
+                Text(text = title, style = MaterialTheme.typography.titleMedium)
                 Text(
                     text = summary,
                     style = MaterialTheme.typography.bodySmall,

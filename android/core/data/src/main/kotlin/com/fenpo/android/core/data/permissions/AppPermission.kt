@@ -45,7 +45,14 @@ enum class AppPermission {
                 }
 
                 POST_NOTIFICATIONS -> {
-                    listOf(Manifest.permission.POST_NOTIFICATIONS)
+                    // A runtime permission from Android 13; granted with the install before that.
+                    if (Build.VERSION.SDK_INT >=
+                        ANDROID_13
+                    ) {
+                        listOf(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        emptyList()
+                    }
                 }
 
                 NOTIFICATION_ACCESS, BATTERY -> {
@@ -62,6 +69,7 @@ enum class AppPermission {
             }
 
     private companion object {
+        const val ANDROID_13 = 33
         const val ANDROID_17 = 37
 
         // Manifest.permission.ACCESS_LOCAL_NETWORK, API 37 (docs/ANDROID.md §3).

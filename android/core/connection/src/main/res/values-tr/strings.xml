@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connection_channel_name">Bağlantı</string>
+    <string name="connection_channel_description">Fenpo’nun bilgisayarına bağlı kaldığını gösterir.</string>
+    <string name="connection_connecting">Bluetooth ile bağlanıyor</string>
+    <string name="connection_connected_bluetooth">Bağlı, Bluetooth</string>
+</resources>
