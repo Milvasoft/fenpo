@@ -33,5 +33,5 @@ enum Capability {
   CAPABILITY_PC_NOTIFICATIONS = 14;  // The PC's notifications on the phone (pc_notification.proto).
   CAPABILITY_PHOTOS = 15;            // The phone's photo library browsed from the PC (photos.proto).
   CAPABILITY_HOTSPOT = 16;           // Joining the phone's hotspot from the PC (hotspot.proto).
-  CAPABILITY_UNLOCK = 17;            // Unlocking the PC's locked session with the phone's biometrics (unlock.proto).
+  reserved 17;                       // Was unlocking the PC with the phone; dropped (DECISIONS #40).
 }
