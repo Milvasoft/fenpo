@@ -313,7 +313,7 @@
     <value>Bu gönderene yanıt yazılamıyor.</value>
   </data>
   <data name="Messages_PermissionText" xml:space="preserve">
-    <value>iPhone’da Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç. Fenpo birkaç saniye içinde yeniden dener.</value>
+    <value>iPhone’da Ayarlar &gt; Bluetooth &gt; bu bilgisayarın yanındaki (i) &gt; Mesaj bildirimlerini göster’i aç. Açıksa iPhone’da Bluetooth’u kapatıp aç. Fenpo birkaç saniye içinde yeniden dener.</value>
   </data>
   <data name="Messages_PermissionTitle" xml:space="preserve">
     <value>iPhone mesajlara izin vermiyor</value>
