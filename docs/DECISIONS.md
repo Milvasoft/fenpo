@@ -59,6 +59,7 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 36 | 16 Ekim | Windows uygulaması aşamalara bölünmeden baştan sona yapılır. PLAN'daki aşamalar iç sıralama olarak kalır. Menüler gizlenmez: iPhone uygulaması veya henüz olmayan bir şey gerektiren özellik, ne gerektiğini söyleyen bir durum ekranıyla görünür | Buğra'nın isteği |
 | 37 | 16 Ekim | Paket kimliği `Milvasoft.Fenpo`, yayıncı görünen adı "Milvasoft". Geliştirme sürümleri kendinden imzalı `CN=Fenpo Development` sertifikasıyla imzalanır; yayın sertifikası ayrıca belirlenir | Buğra'nın onayı |
 | 38 | 16 Ekim | Windows oturumu `design/desktop/desktop.html`'i günceller: uygulamasız (Windows Bluetooth) eşleşme sihirbazı eklenir; #31 ve #34'teki düzeltmeler uygulanır | Buğra'nın onayı; uygulama tasarıma birebir uymalı |
+| 39 | 16 Ekim | S5 protokol önerisi (1–11) `e185f5d` ile protokole girdi. 6 haneli yedek eşleşme kodu kaldırıldı; QR okunmazsa PC QR'ı yeniden gösterir. Sayı karşılaştırmalı (SAS) yöntem ileride düşünülebilir. PC, ANCS aboneliğini ve MAP bağlantısını telefona `PcStatus` ile bildirir | S5: kısa kod araya giren saldırgana karşı koruma sağlamıyor; iOS oturumunun ayrıntıları; Buğra'nın onayı |
 
 ## Açık konular
 
