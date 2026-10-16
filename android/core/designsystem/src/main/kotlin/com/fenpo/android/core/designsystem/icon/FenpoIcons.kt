@@ -48,6 +48,18 @@ object FenpoIcons {
 
     @DrawableRes val Lock = R.drawable.ic_lock
 
+    @DrawableRes val Next = R.drawable.ic_next
+
+    @DrawableRes val Pause = R.drawable.ic_pause
+
+    @DrawableRes val Play = R.drawable.ic_play
+
+    @DrawableRes val Previous = R.drawable.ic_prev
+
+    @DrawableRes val VolumeDown = R.drawable.ic_vol_down
+
+    @DrawableRes val VolumeUp = R.drawable.ic_vol_up
+
     @DrawableRes val Logo = R.drawable.ic_fenpo_logo
 
     @DrawableRes val Message = R.drawable.ic_msg

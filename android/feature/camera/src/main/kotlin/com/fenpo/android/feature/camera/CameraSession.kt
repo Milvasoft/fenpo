@@ -28,8 +28,8 @@ import java.util.concurrent.Executor
  * which is why this uses Camera2. Zoom uses `CONTROL_ZOOM_RATIO`; "Center" crops around the face
  * the camera detects.
  *
- * Frames reach the encoder in the sensor's orientation: upright when the phone lies in landscape,
- * as on the stand the design recommends.
+ * Frames come in the sensor's orientation; [GlFrameRotator] turns them upright for the PC using
+ * [sensorOrientation] and [isFront].
  */
 class CameraSession(
     context: Context,
@@ -53,6 +53,14 @@ class CameraSession(
 
     /** Zoom ratios worth offering for the current camera (design: 0,5 / 1× / 2). */
     var zoomPresets: List<Float> = listOf(1f)
+        private set
+
+    /** How the open camera's sensor is mounted, in degrees. */
+    @Volatile var sensorOrientation: Int = 0
+        private set
+
+    /** Whether the open camera faces the user. */
+    @Volatile var isFront: Boolean = false
         private set
 
     /** Whether the phone has a front camera to flip to. */
@@ -113,6 +121,8 @@ class CameraSession(
             return
         }
         val characteristics = manager.getCameraCharacteristics(id)
+        sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
+        isFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
         activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) ?: Rect()
         zoomRange = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE) ?: Range(1f, 1f)
         zoomPresets = presets(zoomRange)

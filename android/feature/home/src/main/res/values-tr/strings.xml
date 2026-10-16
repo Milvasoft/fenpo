@@ -39,4 +39,18 @@
 
     <string name="pc_title">PC</string>
     <string name="photos_need_wifi">Fotoğraflar için Wi‑Fi gerekiyor. PC ile aynı Wi‑Fi’ye bağlan.</string>
+    <string name="pc_now_playing">PC’de çalıyor</string>
+    <string name="pc_actions">PC’ye</string>
+    <string name="pc_ring">PC’yi çaldır</string>
+    <string name="pc_ring_summary">Bulmak için ses çalar</string>
+    <string name="pc_ringing">PC çalıyor</string>
+    <string name="pc_lock">PC’yi kilitle</string>
+    <string name="pc_lock_summary">Windows oturumunu kilitler</string>
+    <string name="pc_clipboard_summary">Telefonun panosu PC’ye gider</string>
+    <string name="pc_play">Oynat</string>
+    <string name="pc_pause">Duraklat</string>
+    <string name="pc_next">Sonraki</string>
+    <string name="pc_previous">Önceki</string>
+    <string name="pc_volume_up">Sesi aç</string>
+    <string name="pc_volume_down">Sesi kıs</string>
 </resources>

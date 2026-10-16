@@ -13,6 +13,7 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.SystemClock
 import android.util.Log
+import android.view.OrientationEventListener
 import android.view.Surface
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -57,6 +58,8 @@ class CameraStreamService :
     private var encoder: VideoEncoder? = null
     private var audio: AudioCapture? = null
     private var sender: MediaStreamSender? = null
+    private var rotator: GlFrameRotator? = null
+    private var orientation: OrientationEventListener? = null
     private var streamId = ""
     private var started = false
 
@@ -129,9 +132,19 @@ class CameraStreamService :
         videoEncoder = VideoEncoder(codec, width, height, fps, TARGET_KBPS, mediaSender::offer)
         encoder = videoEncoder
         sender = mediaSender
-        val camera = CameraSession(this, videoEncoder.surface, fps) { reason -> scope.launch { fail(reason) } }
+        val upright = GlFrameRotator(videoEncoder.surface, width, height)
+        rotator = upright
+        val camera = CameraSession(this, upright.inputSurface, fps) { reason -> scope.launch { fail(reason) } }
         session = camera
         camera.start(coordinator.ui.value.settings)
+        orientation =
+            object : OrientationEventListener(this) {
+                override fun onOrientationChanged(degrees: Int) {
+                    if (degrees == ORIENTATION_UNKNOWN) return
+                    upright.rotationDegrees =
+                        GlFrameRotator.rotationFor(camera.sensorOrientation, degrees, camera.isFront)
+                }
+            }.also { it.enable() }
         if (audioCodec != AudioCodec.AUDIO_CODEC_UNSPECIFIED && hasMicrophonePermission()) {
             @Suppress("MissingPermission")
             audio = AudioCapture.microphone(audioCodec, mediaSender::offer).also { it.start() }
@@ -186,12 +199,16 @@ class CameraStreamService :
     }
 
     private fun release() {
+        orientation?.disable()
+        orientation = null
         sender?.close()
         sender = null
         audio?.stop()
         audio = null
         session?.stop()
         session = null
+        rotator?.release()
+        rotator = null
         encoder?.stop()
         encoder = null
     }

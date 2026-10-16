@@ -2,6 +2,7 @@ package com.fenpo.android.feature.home
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fenpo.android.core.testing.captureScreenVariants
+import com.fenpo.protocol.v1.MediaState
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.GraphicsMode
@@ -46,6 +47,31 @@ class HomeScreenshotTest {
     fun homePaired() =
         captureScreenVariants("home_paired") {
             HomeScreen(state = paired, onPair = {}, onOpenNotificationSettings = {})
+        }
+
+    @Test
+    fun pcTab() =
+        captureScreenVariants("pc_tab") {
+            PcScreen(
+                pc = paired.pc,
+                onPair = {},
+                tab =
+                    PcTabState(
+                        media =
+                            MediaState(
+                                active = true,
+                                app_name = "Spotify",
+                                title = "Bir Derdim Var",
+                                artist = "mor ve ötesi",
+                                playing = true,
+                                can_next = true,
+                                can_previous = true,
+                                volume_percent = 40,
+                            ),
+                        canRing = true,
+                        canLock = true,
+                    ),
+            )
         }
 
     @Test

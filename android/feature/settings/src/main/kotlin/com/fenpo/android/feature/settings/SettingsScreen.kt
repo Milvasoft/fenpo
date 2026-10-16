@@ -1,5 +1,10 @@
 package com.fenpo.android.feature.settings
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.core.app.LocaleManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,13 +66,24 @@ fun SettingsRoute(
         onPauseOrDispose {}
     }
     val context = LocalContext.current
+    // "Send screenshots" needs the photo permission; ask for it when the switch goes on.
+    val photos =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) viewModel.setFeatureEnabled(Feature.SCREENSHOT_SHARING, true)
+        }
     val systemLanguage = remember(context) { systemLanguageName(LocaleManagerCompat.getSystemLocales(context).get(0)) }
     SettingsScreen(
         state = state,
         systemLanguageName = systemLanguage,
         onThemeModeChange = viewModel::setThemeMode,
         onLanguageChange = viewModel::setLanguage,
-        onFeatureChange = viewModel::setFeatureEnabled,
+        onFeatureChange = { feature, enabled ->
+            val permission = screenshotPermission()
+            val needsPermission =
+                feature == Feature.SCREENSHOT_SHARING && enabled &&
+                    ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+            if (needsPermission) photos.launch(permission) else viewModel.setFeatureEnabled(feature, enabled)
+        },
         onOpenPermissions = onOpenPermissions,
         onOpenNotificationApps = onOpenNotificationApps,
         modifier = modifier,
@@ -324,3 +341,15 @@ private fun systemLanguageName(locale: Locale?): String {
     val target = locale ?: Locale.getDefault()
     return target.getDisplayLanguage(target).replaceFirstChar { it.titlecase(target) }
 }
+
+/** Photos permission for reading new screenshots: READ_MEDIA_IMAGES from Android 13. */
+private fun screenshotPermission(): String =
+    if (Build.VERSION.SDK_INT >=
+        ANDROID_13
+    ) {
+        Manifest.permission.READ_MEDIA_IMAGES
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+private const val ANDROID_13 = 33

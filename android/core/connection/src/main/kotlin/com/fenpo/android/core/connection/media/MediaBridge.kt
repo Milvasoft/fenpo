@@ -16,6 +16,7 @@ import android.provider.Settings
 import android.util.Log
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.connection.notifications.FenpoNotificationListener
+import com.fenpo.protocol.v1.Capability
 import com.fenpo.protocol.v1.Envelope
 import com.fenpo.protocol.v1.Error
 import com.fenpo.protocol.v1.ErrorCode
@@ -25,6 +26,9 @@ import com.fenpo.protocol.v1.MediaState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import okio.ByteString
@@ -108,10 +112,31 @@ class MediaBridge
                 // Settings.System also changes for unrelated settings; only real differences go out.
             }.distinctUntilChanged(::sameState)
 
+        private val _pcMedia = MutableStateFlow<MediaState?>(null)
+
+        /** What the PC plays, as its `MediaState` says; `null` until it reports, or when disconnected. */
+        val pcMedia: StateFlow<MediaState?> = _pcMedia.asStateFlow()
+
+        /** Controls the PC's player from the PC tab; `false` when the PC does not take media commands. */
+        suspend fun controlPc(command: MediaCommand): Boolean =
+            messenger.send(Envelope.Body.MediaCommand(command), Capability.CAPABILITY_MEDIA)
+
         /** Carries out the PC's `MediaCommand`; answers `UNSUPPORTED` when nothing can be controlled. */
         suspend fun run() {
-            messenger.incoming.collect { envelope ->
-                val command = (envelope.body as? Envelope.Body.MediaCommand)?.value ?: return@collect
+            try {
+                messenger.incoming.collect(::onEnvelope)
+            } finally {
+                _pcMedia.value = null
+            }
+        }
+
+        private suspend fun onEnvelope(envelope: Envelope) {
+            (envelope.body as? Envelope.Body.MediaState)?.let {
+                _pcMedia.value = it.value
+                return
+            }
+            run {
+                val command = (envelope.body as? Envelope.Body.MediaCommand)?.value ?: return
                 if (!apply(command)) {
                     messenger.send(
                         Envelope.Body.Error(

@@ -40,4 +40,18 @@
 
     <string name="pc_title">PC</string>
     <string name="photos_need_wifi">Photos need Wi‑Fi. Join the same Wi‑Fi as your PC.</string>
+    <string name="pc_now_playing">Playing on the PC</string>
+    <string name="pc_actions">Ask the PC</string>
+    <string name="pc_ring">Ring the PC</string>
+    <string name="pc_ring_summary">Plays a sound to find it</string>
+    <string name="pc_ringing">Your PC is ringing</string>
+    <string name="pc_lock">Lock the PC</string>
+    <string name="pc_lock_summary">Locks the Windows session</string>
+    <string name="pc_clipboard_summary">The phone’s clipboard goes to the PC</string>
+    <string name="pc_play">Play</string>
+    <string name="pc_pause">Pause</string>
+    <string name="pc_next">Next</string>
+    <string name="pc_previous">Previous</string>
+    <string name="pc_volume_up">Volume up</string>
+    <string name="pc_volume_down">Volume down</string>
 </resources>
