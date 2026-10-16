@@ -23,9 +23,9 @@ enum Capability {
   CAPABILITY_RING = 4;               // Play a sound to find the phone.
   CAPABILITY_LOCK_PC = 5;            // Ask the PC to lock its session.
   CAPABILITY_DEVICE_STATE = 6;       // Battery, charging, network, focus.
-  CAPABILITY_CAMERA = 7;             // Phone as webcam (reserved, phase 4).
+  CAPABILITY_CAMERA = 7;             // Phone as webcam (camera.proto).
   CAPABILITY_FILE_PROVIDER = 8;      // Browse PC folders from the phone (reserved, phase 4).
-  CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC (reserved, phase 4).
+  CAPABILITY_SCREEN_MIRROR = 9;      // Phone screen on the PC with control (screen.proto, Android).
   CAPABILITY_NOTIFICATION_MIRROR = 10; // Phone notifications over the Fenpo channel (Android).
   CAPABILITY_MESSAGES = 11;          // SMS over the Fenpo channel (Android).
   CAPABILITY_MEDIA = 12;             // Now playing and media control (Android, PC).
