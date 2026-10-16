@@ -62,3 +62,11 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
    - Önerim (a), (b) ileride. Karar Buğra'nın.
 5. **BLE kanalında AES-GCM.** Anahtar `PairingResult.ble_channel_key`. Önce tüm Envelope şifrelenir, sonra parçalanır. Nonce 12 bayt: `[1 bayt gönderen: 0x01 telefon, 0x02 PC][3 bayt sıfır][8 bayt sayaç, big-endian]`. AAD `"fenpo-ble-v1"`. Her gönderen sayacını kalıcı ve artan tutar; alıcı son gördüğünden küçük veya eşit sayacı reddeder (tekrar saldırısı).
 6. **`TransferStreamHeader` çerçevesi.** Veri bağlantısı da `[uint32 BE uzunluk][TransferStreamHeader]` ile başlar, ardından dosyaların ham baytları teklif sırasıyla, bayt sayısı `FileInfo.size` toplamı kadar gelir.
+
+iOS oturumu 1–6'yı `ios` dalında uyguladı ve şu ayrıntıları ekledi (16 Ekim 2026). Bunlar da aynı commit'e girer:
+
+7. **Mühürlenmiş BLE mesajı:** `nonce (12) || ciphertext || tag (16)`. Nonce açık gider, alıcı sayacı buradan okur (CryptoKit `combined` biçimi). Sınır mühürlenmiş mesajda 4096 bayt.
+8. **Parça başlığı:** bayrak bit0 = ilk, bit1 = son; ardından 2 baytlık sıra numarası, big-endian, her mesajda 0'dan başlar. Şifreleme parçalamadan önce yapılır.
+9. **BLE'de Hello:** telefon `tx` bildirimlerine abone olur olmaz (şifreli bağ kurulmuş demek) kendi `Hello`'sunu gönderir; PC de BLE'de `Hello` ile cevap verir. `Ping`/`Pong` iki kanalda da var.
+10. **PC durumu sinyali (yeni).** Telefon, iOS'un "Bildirimleri paylaş" onayının verilip PC'nin ANCS'ye abone olduğunu bilemiyor. Önerim PC'den telefona ayrı bir mesaj: `PcStatus { bool notifications_subscribed = 1; bool messages_available = 2; }`. PC bunu `Hello`'dan hemen sonra ve her değişiklikte gönderir. Windows'ta iki değer zaten var (`PhoneStatus.NotificationsAvailable`, `MessagesAvailable`). iPhone'un eşleşme ekranındaki "Bildirim paylaşımı" ve "Mesajlar" adımları buna bakar. Commit'e kadar iOS, PC'nin BLE'deki `Hello`'sunu bildirim adımının bittiği diye sayıyor.
+11. **`PairingRequest.certificate_sha256`:** iOS şimdiden boş gönderiyor (madde 1).
