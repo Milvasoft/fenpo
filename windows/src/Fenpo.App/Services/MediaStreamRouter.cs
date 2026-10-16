@@ -43,7 +43,8 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
     public async Task HandleAsync(PairedAppDevice device, MediaStreamOpen open, Stream stream, CancellationToken cancellationToken)
     {
         _logger.LogInformation("{Kind} stream from {Phone}: {Codec} {Width}x{Height} at {Fps} fps", open.Kind, device.Name, open.Video?.Codec, open.Video?.Width, open.Video?.Height, open.Video?.Fps);
-        var packets = Channel.CreateUnbounded<StreamPacket>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
+        // Not single-reader: that variant cannot count its backlog, which the drop below needs.
+        var packets = Channel.CreateUnbounded<StreamPacket>(new UnboundedChannelOptions { SingleWriter = true });
         var feed = new MediaFeed(open, packets.Reader);
 
         try
