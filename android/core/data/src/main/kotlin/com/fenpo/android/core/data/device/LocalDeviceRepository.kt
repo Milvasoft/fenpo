@@ -105,8 +105,6 @@ internal class AndroidLocalDeviceRepository
                     Capability.CAPABILITY_FILE_PROVIDER,
                     // Answered NOT_SET_UP until the user types the hotspot's name and password.
                     Capability.CAPABILITY_HOTSPOT,
-                    // Each unlock is approved with the fingerprint on the phone.
-                    Capability.CAPABILITY_UNLOCK,
                 )
         }
     }

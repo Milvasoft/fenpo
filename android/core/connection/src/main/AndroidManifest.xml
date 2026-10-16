@@ -19,10 +19,6 @@
     <!-- "Find my phone" vibrates with the alarm sound. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Unlocking the PC (unlock.proto): the fingerprint check, opened at once from the request when allowed. -->
-    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-
     <!-- The photo library from the PC (photos.proto); asked for when the user turns it on. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
@@ -107,14 +103,6 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
-
-        <activity
-            android:name=".unlock.UnlockActivity"
-            android:excludeFromRecents="true"
-            android:exported="false"
-            android:noHistory="true"
-            android:taskAffinity=""
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
         <!-- The PC's shared folders in the file picker (files.proto). -->
         <provider

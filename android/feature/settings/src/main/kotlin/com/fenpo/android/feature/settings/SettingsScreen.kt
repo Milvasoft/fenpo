@@ -126,7 +126,6 @@ fun SettingsRoute(
             }
         },
         onOpenHotspot = onOpenHotspot,
-        onRemoveUnlock = viewModel::removeUnlock,
         onOpenPermissions = onOpenPermissions,
         onOpenNotificationApps = onOpenNotificationApps,
         modifier = modifier,
@@ -151,11 +150,9 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     onOpenNotificationApps: () -> Unit = {},
     onOpenHotspot: () -> Unit = {},
-    onRemoveUnlock: () -> Unit = {},
     showLanguageDialog: Boolean = false,
 ) {
     var languageDialog by rememberSaveable { mutableStateOf(showLanguageDialog) }
-    var unlockDialog by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier =
             modifier
@@ -255,19 +252,6 @@ fun SettingsScreen(
             leading = { LeadingIcon(FenpoIcons.Hotspot) },
             modifier = Modifier.clickable(onClick = onOpenHotspot),
         )
-        val unlockPc = state.unlockPcName
-        FenpoListRow(
-            title = stringResource(R.string.unlock_row),
-            supporting =
-                unlockPc?.let {
-                    stringResource(
-                        R.string.unlock_on,
-                        it,
-                    )
-                } ?: stringResource(R.string.unlock_off),
-            leading = { LeadingIcon(FenpoIcons.Lock) },
-            modifier = if (unlockPc != null) Modifier.clickable { unlockDialog = true } else Modifier,
-        )
 
         SectionLabel(stringResource(R.string.section_permissions))
         FenpoListRow(
@@ -291,28 +275,6 @@ fun SettingsScreen(
                 }
             },
             modifier = Modifier.clickable(onClick = onOpenPermissions),
-        )
-    }
-
-    val dialogPc = state.unlockPcName
-    if (unlockDialog && dialogPc != null) {
-        AlertDialog(
-            onDismissRequest = { unlockDialog = false },
-            title = { Text(stringResource(R.string.unlock_remove_title)) },
-            text = { Text(stringResource(R.string.unlock_remove_text, dialogPc)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        unlockDialog = false
-                        onRemoveUnlock()
-                    },
-                ) { Text(stringResource(R.string.unlock_remove)) }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { unlockDialog = false },
-                ) { Text(stringResource(R.string.unlock_keep)) }
-            },
         )
     }
 
