@@ -175,7 +175,7 @@ public final class FenpoServices {
         isActive = false
         if camera.state != nil {
             // iOS stops the camera in the background; tell the PC instead of freezing its picture.
-            camera.stopFromPhone()
+            camera.stopFromPhone(reason: "Fenpo went to the background")
         }
         if transfers.active.isEmpty {
             wifi.disconnect()

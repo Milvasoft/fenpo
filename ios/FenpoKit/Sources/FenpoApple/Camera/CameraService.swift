@@ -59,7 +59,11 @@ public final class CameraService {
     private var pipeline: CapturePipeline?
     private var encoder: H264Encoder?
     private var sender: MediaSender?
+    private let slot = MediaSenderSlot()
     private var format = Fenpo_V1_VideoFormat()
+    /// Changes on every start and stop, so work from an older start stops where it is.
+    private var generation = 0
+    private static let reconnectAttempts = 3
     private let log = FenpoLog("Camera")
 
     /// Creates the service.
@@ -77,12 +81,14 @@ public final class CameraService {
                 await begin(start)
             }
         case .cameraStop:
-            stop(sendStop: false)
+            stop(reason: "CameraStop from the PC", sendStop: false)
         case .cameraSettings(let change):
             apply(change.settings, consumer: change.consumer)
         case .requestKeyFrame(let request):
-            if request.streamID == streamID {
+            if request.streamID.isEmpty || request.streamID == streamID {
                 encoder?.requestKeyFrame()
+            } else {
+                log.info("RequestKeyFrame for another stream ignored")
             }
         default:
             return false
@@ -100,9 +106,10 @@ public final class CameraService {
         }
     }
 
-    /// Stops the camera from the phone (the close button).
-    public func stopFromPhone() {
-        stop(sendStop: true)
+    /// Stops the camera from the phone and tells the PC.
+    /// - Parameter reason: For the log.
+    public func stopFromPhone(reason: String = "close button") {
+        stop(reason: reason, sendStop: true)
     }
 
     /// Zoom from the lens buttons.
@@ -154,7 +161,11 @@ public final class CameraService {
     // MARK: - Private
 
     private func begin(_ start: Fenpo_V1_CameraStart) async {
+        // A new start replaces whatever runs; the PC gets STARTING and STREAMING for the new one.
+        stop(reason: "new CameraStart", sendStop: false, reportStopped: false)
+        let token = generation
         request = start
+        log.info("CameraStart \(start.video.width)x\(start.video.height)@\(start.video.fps), \(start.video.bitrateKbps) kbps")
         guard UIApplication.shared.applicationState == .active else {
             pendingStart = start
             await report(.waitingForTap)
@@ -172,8 +183,11 @@ public final class CameraService {
             await report(.failed, reason: "Camera access is off for Fenpo")
             return
         }
+        guard token == generation else {
+            log.info("Camera start superseded before capture")
+            return
+        }
 
-        stop(sendStop: false)
         let id = UUID().uuidString
         streamID = id
         let wanted = start.video
@@ -206,27 +220,23 @@ public final class CameraService {
             state = current
             await report(.starting)
 
-            let connection = try await wifi.openStream()
-            var open = Fenpo_V1_MediaStreamOpen()
-            open.streamID = id
-            open.kind = .camera
-            open.video = format
-            open.audio = .unspecified
-            var sequencer = EnvelopeSequencer()
-            let first = sequencer.envelope(.mediaStreamOpen(open))
-            try await connection.sendRaw(Data(try EnvelopeFraming.frame(try first.serializedBytes())))
-
-            let sender = MediaSender(connection: connection)
-            sender.start()
+            let sender = try await openMedia(id: id, token: token)
+            guard token == generation else {
+                sender.close()
+                log.info("Camera start superseded while opening the media connection")
+                return
+            }
+            let slot = slot
             let encoder = try H264Encoder(
                 width: size.width,
                 height: size.height,
                 fps: Int(format.fps),
                 bitrateKbps: Int(format.bitrateKbps)
             ) { packet in
-                sender.enqueue(packet)
+                slot.enqueue(packet)
             }
             self.sender = sender
+            slot.set(sender)
             self.encoder = encoder
             pipeline.setFrameHandler { buffer in
                 encoder.encode(buffer)
@@ -238,16 +248,85 @@ public final class CameraService {
             await report(.streaming)
             log.info("Camera streaming \(size.width)x\(size.height) at \(format.fps) fps, \(format.bitrateKbps) kbps")
         } catch {
+            guard token == generation else {
+                return
+            }
             log.error("Starting the camera failed: \(String(describing: error))")
-            stop(sendStop: false)
-            await report(.failed, reason: String(describing: error))
+            stop(reason: "start failed", sendStop: false, reportStopped: false)
+            await report(.failed, reason: String(describing: error), streamID: id)
         }
     }
 
-    private func stop(sendStop: Bool) {
-        let wasRunning = pipeline != nil
+    /// Opens a media connection and sends `MediaStreamOpen`; the sender is started.
+    private func openMedia(id: String, token: Int) async throws -> MediaSender {
+        let connection = try await wifi.openStream()
+        var open = Fenpo_V1_MediaStreamOpen()
+        open.streamID = id
+        open.kind = .camera
+        open.video = format
+        open.audio = .unspecified
+        var sequencer = EnvelopeSequencer()
+        let first = sequencer.envelope(.mediaStreamOpen(open))
+        do {
+            try await connection.sendRaw(Data(try EnvelopeFraming.frame(try first.serializedBytes())))
+        } catch {
+            await connection.cancel()
+            throw error
+        }
+        let sender = MediaSender(connection: connection) { [weak self] reason in
+            Task { @MainActor in
+                await self?.mediaLost(reason: reason, id: id, token: token)
+            }
+        }
+        sender.start()
+        log.info("Media connection open to \(connection.endpoint.description)")
+        return sender
+    }
+
+    /// The media connection broke while the camera runs: open a new one for the same stream.
+    private func mediaLost(reason: String, id: String, token: Int) async {
+        guard token == generation, streamID == id, state != nil else {
+            return
+        }
+        slot.set(nil)
+        sender = nil
+        for attempt in 1...Self.reconnectAttempts {
+            log.info("Reopening the media connection, attempt \(attempt)")
+            do {
+                let sender = try await openMedia(id: id, token: token)
+                guard token == generation else {
+                    sender.close()
+                    return
+                }
+                self.sender = sender
+                slot.set(sender)
+                encoder?.requestKeyFrame()
+                return
+            } catch {
+                log.error("Reopening failed: \(String(describing: error))")
+            }
+            try? await Task.sleep(for: .seconds(1))
+            guard token == generation else {
+                return
+            }
+        }
+        stop(reason: "media connection lost: \(reason)", sendStop: false, reportStopped: false)
+        await report(.failed, reason: "The media connection to the PC was lost", streamID: id)
+    }
+
+    /// Turns everything off. Also cancels a start in progress.
+    /// - Parameters:
+    ///   - reason: For the log.
+    ///   - sendStop: Also send `CameraStop` (the phone ended it).
+    ///   - reportStopped: Report `STOPPED` when something was running.
+    private func stop(reason: String, sendStop: Bool, reportStopped: Bool = true) {
+        generation += 1
+        let wasRunning = pipeline != nil || sender != nil
+        let oldStreamID = streamID
+        streamID = nil
         pipeline?.stop()
         pipeline = nil
+        slot.set(nil)
         sender?.close()
         sender = nil
         encoder = nil
@@ -256,14 +335,16 @@ public final class CameraService {
         guard wasRunning || sendStop else {
             return
         }
+        log.info("Camera stopped: \(reason)")
+        guard reportStopped else {
+            return
+        }
         Task {
             if sendStop {
                 _ = try? await wifi.send(.cameraStop(Fenpo_V1_CameraStop()))
             }
-            await report(.stopped)
-            streamID = nil
+            await report(.stopped, streamID: oldStreamID)
         }
-        log.info("Camera stopped")
     }
 
     private func apply(_ settings: Fenpo_V1_CameraSettings, consumer: String) {
@@ -307,10 +388,10 @@ public final class CameraService {
         }
     }
 
-    private func report(_ cameraState: Fenpo_V1_CameraState, reason: String = "") async {
+    private func report(_ cameraState: Fenpo_V1_CameraState, reason: String = "", streamID: String? = nil) async {
         var status = Fenpo_V1_CameraStatus()
         status.state = cameraState
-        status.streamID = streamID ?? ""
+        status.streamID = streamID ?? self.streamID ?? ""
         status.settings = currentSettings()
         status.video = format
         status.zoomPresets = state?.zoomPresets ?? []
