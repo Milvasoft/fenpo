@@ -1,12 +1,16 @@
 package com.fenpo.android.core.data.device
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.fenpo.android.core.data.settings.SettingsRepository
 import com.fenpo.android.core.protocol.ProtocolVersion
 import com.fenpo.android.core.transport.session.LocalDevice
 import com.fenpo.protocol.v1.Capability
@@ -28,17 +32,34 @@ internal class AndroidLocalDeviceRepository
     constructor(
         @param:ApplicationContext private val context: Context,
         private val dataStore: DataStore<Preferences>,
+        private val settingsRepository: SettingsRepository,
     ) : LocalDeviceRepository {
         override suspend fun localDevice(): LocalDevice =
             LocalDevice(
                 id = deviceId(),
                 name = deviceName(),
                 appVersion = appVersion(),
-                capabilities = IMPLEMENTED_CAPABILITIES,
+                capabilities = IMPLEMENTED_CAPABILITIES + optionalCapabilities(),
                 protocolVersions = ProtocolVersion.supported,
                 osVersion = "Android ${Build.VERSION.RELEASE}",
                 model = Build.MODEL,
             )
+
+        /**
+         * SMS over the Fenpo channel only when the user wants message sync and allowed SMS; with
+         * MAP on the phone the PC reads messages over Bluetooth instead (docs/ANDROID.md §7).
+         */
+        private suspend fun optionalCapabilities(): Set<Capability> {
+            val sms =
+                listOf(Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS).all {
+                    ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                }
+            val wanted =
+                settingsRepository.settings
+                    .first()
+                    .features.messageSync
+            return if (sms && wanted) setOf(Capability.CAPABILITY_MESSAGES) else emptySet()
+        }
 
         /** Stable UUID created on first use. */
         private suspend fun deviceId(): String {
