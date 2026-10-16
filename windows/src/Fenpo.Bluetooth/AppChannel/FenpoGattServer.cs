@@ -52,6 +52,11 @@ public sealed class FenpoGattServer(
     public event EventHandler<bool>? AppConnectionChanged;
 
     /// <summary>
+    /// Raised with the Bluetooth LE id of a phone that said Hello as Android (it is not an iPhone for the ANCS link).
+    /// </summary>
+    public event EventHandler<string>? AndroidPhoneSeen;
+
+    /// <summary>
     /// Raised for messages from the phone app that the channel does not answer itself.
     /// </summary>
     public event EventHandler<Envelope>? MessageReceived;
@@ -235,6 +240,11 @@ public sealed class FenpoGattServer(
             _logger.LogInformation("Fenpo app on {Phone} said hello ({Platform} {Os})", session.Device?.Name, hello.Platform, hello.OsVersion);
             _status.Update(s => s with { AppConnected = true });
             AppConnectionChanged?.Invoke(this, true);
+
+            if (hello.Platform == DevicePlatform.Android)
+            {
+                AndroidPhoneSeen?.Invoke(this, id);
+            }
         };
         session.MessageReceived += (sender, envelope) => MessageReceived?.Invoke(this, envelope);
         gattSession.SessionStatusChanged += (sender, e) =>

@@ -31,6 +31,19 @@
                     <controls:WizardStep Number="2" x:Uid="AppPair_Step2" State="{x:Bind ViewModel.ScanStep, Mode=OneWay}" />
                     <controls:WizardStep Number="3" x:Uid="AppPair_Step3" State="{x:Bind ViewModel.BluetoothStep, Mode=OneWay}" />
                     <controls:WizardStep Number="4" x:Uid="AppPair_Step4" State="{x:Bind ViewModel.MessagesStep, Mode=OneWay}" />
+
+                    <Border Style="{StaticResource FenpoNoticeStyle}" Margin="0,8,0,0" Visibility="{x:Bind ViewModel.ShowAudioNotice, Mode=OneWay}">
+                        <StackPanel Spacing="10">
+                            <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{ThemeResource FenpoTextBrush}">
+                                <Run x:Uid="AppPair_AudioTitle" FontWeight="SemiBold" />
+                                <Run x:Uid="AppPair_AudioText" />
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Uid="AppPair_AudioSettings" Command="{x:Bind ViewModel.OpenBluetoothSettingsCommand}" />
+                                <Button x:Uid="AppPair_AudioDone" Command="{x:Bind ViewModel.LaterCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </ScrollViewer>
 
