@@ -3176,40 +3176,6 @@
         }
       }
     },
-    "settings.faceIDUnlock": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unlock PC with Face ID"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID ile PC kilidini aç"
-          }
-        }
-      }
-    },
-    "settings.features.comingLater": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dimmed features arrive in a later version."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soluk olanlar sonraki sürümlerde gelecek."
-          }
-        }
-      }
-    },
     "settings.focus": {
       "extractionState": "manual",
       "localizations": {
