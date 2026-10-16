@@ -99,6 +99,7 @@ Kaynaklar: [Doğrudan paylaşım](https://developer.android.com/training/sharing
 
 ## 10. Telefonu web kamerası yapma
 **Karar: Fenpo'nun kendi hattı Wi‑Fi üzerinden: CameraX `Preview` → `MediaCodec` giriş yüzeyi → H.264/HEVC → TLS. Kamerayı başlatmak için telefonda bir dokunuş gerekiyor. USB için kendi taşımamızı yazmıyoruz; telefon destekliyorsa Android'in yerleşik USB web kamerası modu önerilir.**
+- **Uygulamada Camera2 kullanıldı (16 Ekim):** aynı kare hem kodlayıcıya hem kamera ekranındaki önizlemeye gitmeli; CameraX `Preview` kareyi tek yüzeye veriyor, Camera2 bir oturumda iki çıktıyı doğrudan destekliyor. Yakınlaştırma `CONTROL_ZOOM_RATIO`, "Ortala" yüz algılamayla `SCALER_CROP_REGION`. Aşağıdaki CameraX notu karar anındaki araştırma.
 - CameraX 1.6.2 kararlı (Ağustos 2026). `VideoCapture` dosyaya mux'lanmış çıktı veriyor, `ImageAnalysis` kareyi CPU'ya kopyalıyor; ikisi de akış için yanlış. Doğrusu `Preview` + `SurfaceProvider`'ın `MediaCodec.createInputSurface()` döndürmesi; vizör ve kodlayıcıya aynı kare için `CameraEffect` denenecek.
 - Kodlayıcı: `KEY_LOW_LATENCY` sadece çözücü içindir. Kodlayıcıda `KEY_LATENCY`, `KEY_MAX_B_FRAMES=0`, `KEY_PREPEND_HEADER_TO_SYNC_FRAMES`, `KEY_INTRA_REFRESH_PERIOD` (destek varsa), `KEY_REPEAT_PREVIOUS_FRAME_AFTER`; bitrate modu CBR (`isBitrateModeSupported` ile).
 - **Kamera FGS:** `camera` türü "kullanımdayken" izni; Android 14+ arka plandan başlatılırsa `SecurityException`. İstisnalar bildirim etkileşimi ve görünür aktivite; CDM yok. Yani PC kamerayı isteyince telefonda "Kamerayı başlat" bildirimi çıkar (tasarımda yazıyor). Başladıktan sonra arka planda sürebiliyor; ekran kapalıyken davranış üreticiye göre değişebilir (A6).
@@ -188,7 +189,8 @@ android/
 │   ├── pairing/       (JVM)    fenpo://pair ayrıştırma, eşleşme durum makinesi
 │   ├── security/               Keystore kimliği, KeyManager, sabitleyen TrustManager, AES-GCM
 │   ├── ble/                    GATT istemcisi, bağ, MTU, yeniden bağlanma
-│   ├── connection/             CDM, connectedDevice servisi; BLE + TLS bağlantılarını yönetir
+│   ├── connection/             CDM, connectedDevice servisi; BLE + TLS bağlantılarını yönetir; özellikler `PcFeature` ile takılır
+│   ├── media/                  (Aşama D'de eklendi) H.264 kodlayıcı, ses yakalama, görüntü bağlantısı göndericisi
 │   ├── data/                   DataStore: ayarlar (tema, dil, özellikler), eşleşmiş PC'ler
 │   ├── designsystem/           FenpoTheme, renk rolleri, ortak bileşenler
 │   └── testing/                sahteler, test dispatcher'ları, fixture yükleyici
@@ -196,7 +198,9 @@ android/
     ├── home/                   ana ekran
     ├── pairing/                QR tarayıcı, elle kod, eşleşme adımları, izinler
     ├── transfers/              aktarımlar, paylaşım hedefleri
-    └── settings/               ayarlar, dil, bildirim gönderen uygulamalar
+    ├── settings/               ayarlar, dil, bildirim gönderen uygulamalar
+    ├── camera/                 (Aşama D'de eklendi) kamera ekranı, kamera servisi
+    └── mirror/                 (Aşama D'de eklendi) ekran yansıtma, PC'den kontrol (erişilebilirlik servisi)
 ```
 
 - Bağımlılık yönü: `feature → core`, `app → feature + core`. Özellik modülleri birbirine bağlanmaz; Nav3 anahtarları her özelliğin kendi modülünde.
@@ -357,5 +361,14 @@ Hepsi protokole göre yazıldı ve birim testleriyle doğrulandı. **Windows tar
 **Süreç ölüyken uyanma (16 Ekim 17:07–17:08):** PC 40 saniye kapatıldı, telefon "PC kayboldu" deyip servisi kapattı, uygulama süreci `am crash` ile öldürüldü. Android süreci bildirim dinleyicisi için 1 saniyede yeniden başlattı (dinleyici bağlıyken süreç `am kill` ile de ölmüyor; pratikte hep ayakta). PC dönünce CDM "göründü" olayını yeni sürece verdi, bağlantı servisi başladı ve PC'nin `Hello`'su 0,6 saniyede Wi‑Fi'den geldi, BLE 2 saniye sonra açıldı: **geçti**. Bildirim erişimi verilmemiş bir telefonda sürecin gerçekten ölü olduğu durum ayrıca denenecek.
 
 Kurulumdan sonraki "Paired with" kayıtları QR'ın elle yeniden okutulmasından; uygulama kendiliğinden eşleşmiyor.
+
+**Kamera ve ekran yansıtma (16 Ekim, protokol `636f7d4` + `ef35a40`, Buğra'nın onayını bekliyor):**
+
+| Özellik | Telefonda | Not |
+|---|---|---|
+| Ortak | `core:media`: yüzey girişli H.264 kodlayıcı (Annex-B, Main, B-kare yok, CBR, 2 sn GOP, istekle anahtar kare, her anahtar kareden önce codec config), PCM 48 kHz ya da AAC-LC ses, görüntü bağlantısı (telefon açar, ilk çerçeve `MediaStreamOpen`), geride kalınca bir sonraki anahtar kareye kadar görüntü atılır ve bit hızı düşer (6 Mbps hedef, 1,5 taban). | PC'nin çözebildikleri `accepted` listesinden seçilir. |
+| Web kamerası | PC `CameraStart` gönderince "Kamerayı başlat" bildirimi (`WAITING_FOR_TAP`), dokununca kamera ekranı ve `camera` FGS'si; tasarımdaki ekran: "Canlı: Teams", Wi‑Fi, 0,5/1×/2, Ortala, Mikrofon, Çevir, Ekranı karart. Ayarlar iki yönde eşitlenir. Mikrofon PC kabul ederse gider. | **Cihazda denenmedi:** Windows'ta Fenpo Kamera yok. Görüntü sensör yönünde gider; telefon yatay standdayken düz. Dikey tutuşta döndürme için ayrı bir GL adımı gerekir. "Teams'te canlı" yerine "Canlı: Teams" (Türkçe ek uygulama adına göre değişiyor). |
+| Ekran yansıtma | PC `ScreenStart` gönderince "Ekranı paylaş" bildirimi (`WAITING_FOR_CONSENT`), Android'in onayı, `mediaProjection` FGS'si, VirtualDisplay → kodlayıcı; uzun kenar en fazla 1920; döndürmede aynı bağlantıda yeni boyut ve anahtar kare; kilitlenince `PAUSED_LOCKED`; istenirse telefonun sesi (playback capture). | **Cihazda denenmedi:** Windows tarafı yok. |
+| PC'den kontrol | `FenpoAccessibilityService` (`isAccessibilityTool=false`): dokunma, uzun basma, kaydırma, Geri/Ana ekran/Son uygulamalar/Bildirimler, odaktaki alana yazma. Kapalıyken `ScreenInput` `UNSUPPORTED` ile cevaplanır; PC kontrol isterse paylaşım bildiriminde "Kontrole izin ver" düğmesi erişilebilirlik ayarını açar. | İzinler ekranına eklenmedi: kontrol istemeyen için sürekli "eksik izin" olurdu. Mağaza dışı kurulumda Android 13+ kısıtlanmış ayar adımı gerekir. |
 
 **Cihazda denenebilenler (PC'siz):** paylaşım hedefleri ve Hızlı Ayarlar kutucukları sisteme kayıtlı (`query-activities`, `query-services`). Wi‑Fi yolu 17 dakika kesintisiz kaldı, pil değiştikçe `DeviceState` gitti.

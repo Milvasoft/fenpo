@@ -1,3 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="mirror_channel_name">Screen requests</string>
+    <string name="mirror_request_title">Your PC wants to see the screen</string>
+    <string name="mirror_request_text">Tap to share it. Android asks every time.</string>
+    <string name="mirror_request_control_text">Tap to share it; Android asks every time. To use the phone from the PC too, turn on Fenpo in Accessibility.</string>
+    <string name="mirror_share">Share screen</string>
+    <string name="mirror_allow_control">Allow control</string>
+    <string name="mirror_live_channel_name">Screen sharing</string>
+    <string name="mirror_live_title">The screen is on your PC</string>
+    <string name="mirror_live_text">Locking the phone ends sharing.</string>
+    <string name="mirror_stop">Stop</string>
+    <string name="mirror_accessibility_description">Lets your PC tap, swipe and type on this phone while you share its screen with Fenpo. It does nothing at other times.</string>
+    <string name="mirror_accessibility_label">Fenpo: control from the PC</string>
 </resources>

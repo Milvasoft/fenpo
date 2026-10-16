@@ -1,3 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="mirror_channel_name">Ekran istekleri</string>
+    <string name="mirror_request_title">PC ekranı görmek istiyor</string>
+    <string name="mirror_request_text">Paylaşmak için dokun. Android her seferinde soruyor.</string>
+    <string name="mirror_request_control_text">Paylaşmak için dokun; Android her seferinde soruyor. Telefonu PC’den de kullanmak için Erişilebilirlik’te Fenpo’yu aç.</string>
+    <string name="mirror_share">Ekranı paylaş</string>
+    <string name="mirror_allow_control">Kontrole izin ver</string>
+    <string name="mirror_live_channel_name">Ekran paylaşımı</string>
+    <string name="mirror_live_title">Ekran PC’de</string>
+    <string name="mirror_live_text">Telefonu kilitlemek paylaşımı bitirir.</string>
+    <string name="mirror_stop">Durdur</string>
+    <string name="mirror_accessibility_description">Ekranı Fenpo ile paylaşırken PC’nin bu telefonda dokunmasına, kaydırmasına ve yazmasına izin verir. Başka zaman hiçbir şey yapmaz.</string>
+    <string name="mirror_accessibility_label">Fenpo: PC’den kontrol</string>
 </resources>
