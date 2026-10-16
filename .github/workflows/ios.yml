@@ -18,6 +18,10 @@ on:
         description: "Upload a Release build to TestFlight after the tests pass"
         type: boolean
         default: false
+      without:
+        description: "TestFlight without these extension targets (e.g. FenpoFiles FenpoBroadcast), while their App IDs are not registered"
+        type: string
+        default: ""
       symbolicate:
         description: "Only symbolicate: crash offsets in the Fenpo image (e.g. 0x1C60B0 0x1A2B3C)"
         type: string
@@ -190,6 +194,17 @@ jobs:
       - name: Generate protocol code and project
         run: |
           ios/scripts/generate-proto.sh
+          (cd ios && xcodegen generate)
+
+      - name: Leave out extensions
+        if: inputs.without != ''
+        env:
+          WITHOUT: ${{ inputs.without }}
+        run: |
+          for target in $WITHOUT; do
+            sed -i '' "/^      - target: ${target}\$/d" ios/project.yml
+            echo "Left out $target"
+          done
           (cd ios && xcodegen generate)
 
       - name: Write the API key
