@@ -35,6 +35,14 @@ Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [an
 - BestOwl/MyPhone (MIT): OBEX istemci ve sunucu, `MasClient`, `MnsServer`, `PbapClient`. 2022'den beri durgun, `PushMessage()` yarım. iPhone klasör gezinmeye izin vermiyor.
 - iPhone kısıtları (Phone Link'te de aynı): sadece bağlıyken gelen ve giden mesajlar, grup mesajı yok, resim gönderme yok, SMS ile iMessage ayırt edilemiyor.
 
+**S2 sonucu (16 Ekim, iPhone 13, cihazda):** MAP kendi OBEX kodumuzla çalışıyor ([spikes/S2-map](../spikes/S2-map/README.md)).
+- İlk bağlantı `Forbidden` dönüyor; iPhone'da "Show Message Notifications" açılınca bağlanıyor.
+- SDP: MAP 1.4, RFCOMM kanal 8, L2CAP PSM `0x100B`, mesaj türü sadece `SMS_GSM`, en büyük OBEX paketi 4000 bayt.
+- Yukarıdaki iki bilgi bu iOS'ta geçerli değil: **`SetPath` ile klasör gezinme çalışıyor**, **gelen kutusunda eşleşmeden önceki SMS'ler de var**. `sent` klasörü ise boş geliyor; telefondan gönderilmiş eski mesajlar yok.
+- bMessage, gönderenin rehberdeki adını (`FN`) da taşıyor.
+- Okundu işaretleme, MNS bildirim kaydı (iPhone 260 ms'de bizim RFCOMM sunucumuza bağlanıyor) ve **gönderme çalışıyor**: PushMessage 1,8 saniyede `Success` döndü, sonra `MessageShift` ve `SendingSuccess` olayları geldi, mesaj karşıya ulaştı.
+- Olay raporları MAP 1.0 biçiminde: gönderen ve metin yok. `NewMessage` sonrası `GetMessage` bir kez 33 saniye gecikti; yeni mesajın ilk gösterimi ANCS'den yapılmalı.
+
 Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https://github.com/BestOwl/MyPhone), [RfcommServiceId](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.rfcomm.rfcommserviceid.phonebookaccesspse?view=winrt-20348), [imsg-map](https://docs.rs/crate/imsg-map/0.3.1)
 
 ## 4. Aramalar: HFP
@@ -43,6 +51,12 @@ Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https
 - Kısıtlı yetenekler yandan yüklemede onaysız çalışıyor; Store'a girmek onay ister ve büyük ihtimalle verilmez.
 - `MYSTRAVIL/klangbruecke` (2026) bu yolla iki yönlü sesli gerçek HFP araması raporluyor; ses yolunu Windows yönetiyor. Microsoft Q&A'da `RequestAccessAsync`'in yetenek varken bile DeniedBySystem döndüğü çözülmemiş bir rapor var.
 - HFP aktarımını aynı anda tek uygulama tutabilir; Phone Link çakışır.
+
+**S3 sonucu (16 Ekim, Windows 11 26H2 build 26300 Insider, iPhone 13): bu makinede çalışmadı** ([spikes/S3-hfp](../spikes/S3-hfp/README.md)).
+- Paketli (gevşek kayıt, Geliştirici Modu) bir uygulamada `RequestAccessAsync` `Allowed` dönüyor. Ama `RegisterApp` hata vermeden **kaydı almıyor**: `IsRegistered` false kalıyor, iPhone için `PhoneLine` oluşmuyor, `ConnectAsync` false dönüyor.
+- LAF `phonelinetransportdevice_v1` durumu `Unavailable`.
+- Phone Link kapalıyken ve iPhone sıfırdan eşleştirildikten sonra da sonuç aynı; rolü başka bir uygulamanın tutması elendi.
+- Kararlı Windows 11'de davranış bilinmiyor. Sefirah (Windows 11) ve klangbruecke (Windows 10) kaydı alabildiğini bildiriyor.
 
 Kaynaklar: [Yetenek bildirimleri](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/app-capability-declarations), [PhoneLineTransportDevice](https://learn.microsoft.com/en-us/uwp/api/windows.applicationmodel.calls.phonelinetransportdevice?view=winrt-26100), [klangbruecke](https://github.com/MYSTRAVIL/klangbruecke), [MyPhone #7](https://github.com/bestowl/myphone/issues/7), [Q&A](https://learn.microsoft.com/en-us/answers/questions/1258935/in-phonelinetransportdevice-windows-applicationmod)
 
@@ -60,6 +74,7 @@ Kaynaklar: [Apple forum 706761](https://developer.apple.com/forums/thread/706761
 - `bluetooth-central` + sabit `restoreIdentifier` ile iOS bağlantı ve bildirimlerde uygulamayı yaklaşık 10 saniyeliğine uyandırıyor. Bekleyen `connect()` hiç zaman aşımına uğramıyor.
 - TN3115 (Eylül 2025): çökme ve bellekten atılmada yeniden başlatılıyor; yeniden başlatmada ilk kilit açmadan sonra; Ayarlar'dan Bluetooth kapatılınca ve zorla kapatmada **hayır**. iOS 26'dan beri Denetim Merkezi'nden Bluetooth açıp kapatmada sadece AccessorySetupKit ile kurulan uygulamalar geri geliyor. Apple DTS, zorla kapatma sonrası için doğru yolun ASK olduğunu söylüyor.
 - Windows'ta `GattServiceProvider` için adaptörün çevre birim rolünü desteklemesi gerekiyor (`IsPeripheralRoleSupported`); bazı ucuz CSR donanımlarda yok. 128 bit UUID reklamın 31 baytının 16'sını kaplıyor.
+- **S4 Windows ölçümü (16 Ekim):** `GattServiceProvider` paketlenmemiş süreçte çalışıyor. Reklama servis verisi eklenince (4 bayt bile) durum `StartedWithoutAllAdvertisementData` oluyor: genişletilmiş reklam destekli adaptörde bile eski 31 baytlık reklamda kalıyor ve veriyi atıyor. PC'yi ayırt etmek servis verisiyle yapılamaz ([spikes/S4-ble-peripheral](../spikes/S4-ble-peripheral/README.md)).
 
 Kaynaklar: [TN3115](https://developer.apple.com/documentation/technotes/tn3115-bluetooth-state-restoration-app-relaunch-rules), [Arka plan BLE](https://developer.apple.com/library/archive/documentation/NetworkingInternetWeb/Conceptual/CoreBluetooth_concepts/CoreBluetoothBackgroundProcessingForIOSApps/PerformingTasksWhileYourAppIsInTheBackground.html), [Apple forum 840468](https://origin-devforums.apple.com/forums/thread/840468), [GATT sunucusu](https://learn.microsoft.com/en-us/windows/apps/develop/devices-sensors/gatt-server)
 
@@ -75,6 +90,7 @@ Kaynak: [windows-ble-hid](https://github.com/abhishek-raj/windows-ble-hid)
 - `MFCreateVirtualCamera` (Windows 11 22000+) özel medya kaynağının CLSID'sini alıyor. Kaynak Frame Server sürecinde yüklendiği için HKLM'de kayıtlı bir COM sunucusu olmalı ve Local Service tarafından okunabilir bir yerde durmalı (kullanıcı profili değil).
 - `smourier/VCamNetSample` (MIT): .NET 10 Native AOT sürümü var. Fenpo.exe ile medya kaynağı arasında paylaşımlı bellek veya paylaşımlı doku gerekiyor.
 - MSIX ile HKLM kaydı spike'ta netleşmeli; gerekirse kamera bileşeni ayrı, yönetici yetkili bir kurulumla gelir.
+- **S7 sonucu (16 Ekim, gece):** VCamNetSample'ın AOT medya kaynağı .NET 10 Native AOT ile 5,5 MB'lık tek bir DLL'e derleniyor. İmzalı bir MSIX içinde `com:SurrogateServer/com:Class` ile bildirildiğinde `MFCreateVirtualCamera` `S_OK` dönüyor, ama `Start` **`Class not registered`** veriyor: Frame Server paketli COM sınıfını görmüyor. Kamera bileşeni ayrı, yönetici onaylı bir kurulum gerektiriyor. DLL `C:\ProgramData` altına kopyalanıp HKLM'ye kaydedilince `Start` `S_OK` dönüyor ve `MediaCapture` 1280×960 test desenini alıyor: Native AOT medya kaynağı Frame Server içinde çalışıyor ([spikes/S7-virtual-camera](../spikes/S7-virtual-camera/README.md)).
 
 Kaynaklar: [MFCreateVirtualCamera](https://learn.microsoft.com/en-us/windows/win32/api/mfvirtualcamera/nf-mfvirtualcamera-mfcreatevirtualcamera), [VCamNetSample](https://github.com/smourier/VCamNetSample)
 
@@ -99,6 +115,7 @@ Kaynak: [UxPlay](https://github.com/FDH2/UxPlay)
 - Windows 1703'ten beri yerleşik mDNS: `DnssdServiceInstance.RegisterStreamSocketListenerAsync`.
 - Sessiz başarısızlıklar: güvenlik duvarı UDP 5353'ü engelliyor, ağ profili "Genel", birden fazla adaptör veya VPN.
 - iOS: `NSLocalNetworkUsageDescription` ve `NSBonjourServices` içinde `_fenpo._tcp` olmalı. Yerel ağ izni soruluyor. Arka planda tarama yok.
+- **S5 notu (16 Ekim, gece):** Kayıt için WinRT `DnssdServiceInstance` yerine Win32 `DnsServiceRegister` (dnsapi.dll) kullanıldı; TLS sunucusu sade bir `TcpListener` üzerinde kalabiliyor. Çalıştırılamadı: Windows Defender, TLS sunucusu, DPAPI ve mDNS kaydını birlikte taşıyan `PcServer.dll`'i `Backdoor:Win32/Farfli!pz` olarak karantinaya aldı (buluşsal yanlış alarm). Ürünün de aynı riski taşıdığı için imzalı ikili dosyalar ve sürümlerin Microsoft'a önceden gönderilmesi gerekiyor ([spikes/S5-tls-pairing](../spikes/S5-tls-pairing/README.md)).
 
 Kaynaklar: [DnssdServiceInstance](https://learn.microsoft.com/en-us/uwp/api/windows.networking.servicediscovery.dnssd.dnssdserviceinstance), [Apple forum 653316](https://developer.apple.com/forums/thread/653316)
 

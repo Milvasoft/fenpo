@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Client for Fenpo's local API (\\.\pipe\fenpo). No dependencies, so shells and tools can use it as is. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Fenpo.Sdk</RootNamespace>
+    <PackageId>Fenpo.Sdk</PackageId>
+    <Description>Client for the local API of Fenpo for Windows: phone status, media, notifications, events.</Description>
+  </PropertyGroup>
+
+</Project>
