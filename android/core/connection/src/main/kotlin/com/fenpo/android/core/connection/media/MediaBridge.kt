@@ -124,6 +124,7 @@ class MediaBridge
         }
 
         private fun apply(command: MediaCommand): Boolean {
+            Log.i(TAG, "Media command from the PC: ${command.action.name.removePrefix("MEDIA_ACTION_")}")
             if (command.action == MediaAction.MEDIA_ACTION_SET_VOLUME) {
                 val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
                 val level = (command.volume_percent.coerceIn(0, PERCENT) * max / PERCENT.toFloat()).roundToInt()

@@ -119,7 +119,12 @@ class NotificationMirror
                 )
                 if (!appSettings.isEnabled(sbn.packageName)) return@launch
                 val notification = converter.convert(sbn, nextSeq(), preExisting = false, update = update)
-                if (sendBest(notification)) {
+                val sent = sendBest(notification)
+                Log.d(
+                    TAG,
+                    "${if (update) "Updated" else "New"} ${sbn.packageName}, ${notification.actions.size} action(s): ${if (sent) "sent" else "not sent"}",
+                )
+                if (sent) {
                     sentKeys += sbn.key
                     _last.value =
                         MirroredNotification(notification.title.ifEmpty { notification.app_name }, Instant.now())
@@ -190,8 +195,12 @@ class NotificationMirror
         }
 
         private fun dismiss(key: String) {
-            val sbn = listener?.activeNotifications?.firstOrNull { it.key == key } ?: return
-            if (sbn.isClearable) listener?.cancelNotification(key)
+            val sbn = listener?.activeNotifications?.firstOrNull { it.key == key }
+            Log.i(
+                TAG,
+                "Dismiss from the PC: ${sbn?.packageName ?: "already gone"}${if (sbn?.isClearable == false) ", not clearable" else ""}",
+            )
+            if (sbn?.isClearable == true) listener?.cancelNotification(key)
         }
 
         private suspend fun runAction(
@@ -201,6 +210,10 @@ class NotificationMirror
             val sbn = listener?.activeNotifications?.firstOrNull { it.key == request.key }
             val action = sbn?.notification?.actions?.getOrNull(request.action_index)
             if (action == null) {
+                Log.i(
+                    TAG,
+                    "Action ${request.action_index} from the PC: ${if (sbn == null) "notification gone" else "no such action"}",
+                )
                 messenger.send(
                     Envelope.Body.Error(
                         Error(code = ErrorCode.ERROR_CODE_INVALID_REQUEST, message = "Notification or action is gone"),
