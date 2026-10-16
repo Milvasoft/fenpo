@@ -112,16 +112,22 @@ public sealed class LiveH264Player : IDisposable
         private readonly CancellationToken _cancellationToken = cancellationToken;
         private readonly ILogger _logger = logger;
 
-        // Frames come over Wi‑Fi in bursts; a frame may be shown up to a little more than the longest recent gap
-        // after it is handed over, so the burst keeps its spacing and a gap does not leave the player without a frame.
-        // Any later and the picture trails live, any earlier and it is late.
+        // Over this much lead for a whole second, the picture trails live by more than Wi‑Fi needs.
+        private static readonly TimeSpan Spare = TimeSpan.FromMilliseconds(60);
+
+        // Trimmed off the lead per frame while there is spare: 1 ms a frame is 3 % faster, which nobody sees.
+        private static readonly TimeSpan Trim = TimeSpan.FromMilliseconds(1);
+
         private readonly System.Diagnostics.Stopwatch _arrivals = System.Diagnostics.Stopwatch.StartNew();
         private TimeSpan _lastArrival;
         private TimeSpan _maxGap;
-        private TimeSpan _recentGap = TimeSpan.FromMilliseconds(60);
 
-        // Frame time = phone time since the first frame + this offset, which follows the player's clock.
+        // Frame time = phone time since the first frame + this offset, so frames keep the phone's even spacing even
+        // when Wi‑Fi delivers them in pairs or bursts. The offset only grows when a frame would be late (a visible
+        // hitch, rare) and shrinks slowly while every frame of the last second had lead to spare.
         private TimeSpan _offset;
+        private TimeSpan _leastEarly = TimeSpan.MaxValue;
+        private TimeSpan _spareSince;
         private TimeSpan _last = TimeSpan.FromTicks(-1);
         private TimeSpan _early;
         private int _skipped;
@@ -158,22 +164,24 @@ public sealed class LiveH264Player : IDisposable
                 var gap = now - _lastArrival;
                 _lastArrival = now;
                 _maxGap = gap > _maxGap ? gap : _maxGap;
-
-                // The longest gap lately, slowly forgotten (about 1 % per frame) so a single burst does not stick.
-                _recentGap = gap > _recentGap ? gap : _recentGap - ((_recentGap - TimeSpan.FromMilliseconds(60)) / 100);
-                var lead = TimeSpan.FromMilliseconds(Math.Clamp(_recentGap.TotalMilliseconds + 40, 80, 400));
                 var position = _position();
-                TimeSpan time;
+                var time = phoneTime + _offset;
 
                 if (_packets.Count > Backlog)
                 {
                     time = position;
                     _skipped++;
                 }
+                else if (time < position + MinLead)
+                {
+                    // Late: from here on frames get this much more lead, and the spare is measured afresh.
+                    time = position + MinLead;
+                    _leastEarly = TimeSpan.MaxValue;
+                    _spareSince = now;
+                }
                 else
                 {
-                    time = phoneTime + _offset;
-                    time = time < position + MinLead ? position + MinLead : time > position + lead ? position + lead : time;
+                    TrimLead(time - position, now);
                 }
 
                 // Times only go forward.
@@ -187,6 +195,27 @@ public sealed class LiveH264Player : IDisposable
             }
 
             return null;
+        }
+
+        private void TrimLead(TimeSpan early, TimeSpan now)
+        {
+            _leastEarly = early < _leastEarly ? early : _leastEarly;
+
+            if (now - _spareSince < TimeSpan.FromSeconds(1))
+            {
+                return;
+            }
+
+            // A second in which no frame came closer than this: take the spare off, a millisecond a frame.
+            if (_leastEarly > MinLead + Spare)
+            {
+                _offset -= Trim;
+                _leastEarly -= Trim;
+                return;
+            }
+
+            _leastEarly = TimeSpan.MaxValue;
+            _spareSince = now;
         }
 
         // Every few seconds: how many frames the player took and how many wait behind it.
