@@ -19,7 +19,7 @@
     <value>Use as camera</value>
   </data>
   <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the phone</value>
+    <value>Join the phone's hotspot; the name and password come from Fenpo on the phone</value>
   </data>
   <data name="Action_HotspotText.Text" xml:space="preserve">
     <value>Join hotspot</value>
@@ -392,6 +392,24 @@
   </data>
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>My phone</value>
+  </data>
+  <data name="Hotspot_Connected" xml:space="preserve">
+    <value>On the hotspot</value>
+  </data>
+  <data name="Hotspot_Failed" xml:space="preserve">
+    <value>Could not join the hotspot. Check that the password saved in Fenpo on the phone matches the hotspot's.</value>
+  </data>
+  <data name="Hotspot_Join" xml:space="preserve">
+    <value>Connect to hotspot</value>
+  </data>
+  <data name="Hotspot_Joining" xml:space="preserve">
+    <value>Joining the hotspot…</value>
+  </data>
+  <data name="Hotspot_NotFound" xml:space="preserve">
+    <value>The hotspot did not show up. Turn it on on the phone (on the iPhone: Settings › Personal Hotspot › Allow Others to Join), then try again.</value>
+  </data>
+  <data name="Hotspot_NotSetUp" xml:space="preserve">
+    <value>The phone has no hotspot name and password saved. Enter them once in Fenpo › Settings › Personal Hotspot on the iPhone, or Fenpo › Settings › Hotspot on Android, then try again.</value>
   </data>
   <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Answer</value>
@@ -1045,7 +1063,7 @@
     <value>Focus</value>
   </data>
   <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the phone</value>
+    <value>Join the phone's hotspot</value>
   </data>
   <data name="Tray_HotspotText.Text" xml:space="preserve">
     <value>Hotspot</value>

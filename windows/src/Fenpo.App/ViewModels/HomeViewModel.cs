@@ -16,6 +16,7 @@ namespace Fenpo.App.ViewModels;
 public sealed partial class HomeViewModel : ObservableObject, IDisposable
 {
     private readonly IPhoneStatusSource _status;
+    private readonly HotspotService _hotspot;
     private readonly NotificationStore _notifications;
     private readonly IMediaSource _media;
     private readonly AppIconService _icons;
@@ -38,9 +39,12 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <param name="actions">Ring the phone.</param>
     /// <param name="transfers">File transfers (recent transfers card).</param>
     /// <param name="mirror">Screen mirroring (Android).</param>
-    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions, FileTransferService transfers, ScreenMirrorService mirror)
+    /// <param name="hotspot">The phone's hotspot.</param>
+    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions, FileTransferService transfers, ScreenMirrorService mirror, HotspotService hotspot)
     {
         _actions = actions;
+        _hotspot = hotspot;
+        _hotspot.Changed += OnHotspotChanged;
         _transfers = transfers;
         _mirror = mirror;
 
@@ -66,6 +70,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         _clock.Start();
 
         ApplyStatus(_status.Current);
+        ApplyHotspot();
         ApplyNotifications();
         ApplyMedia(_media.Current);
         ApplyTransfers();
@@ -121,6 +126,22 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <summary>Gets or sets a value indicating whether USB is connected.</summary>
     [ObservableProperty]
     public partial bool UsbOn { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the phone can share its hotspot.</summary>
+    [ObservableProperty]
+    public partial bool CanHotspot { get; set; }
+
+    /// <summary>Gets or sets the hotspot button's text.</summary>
+    [ObservableProperty]
+    public partial string HotspotText { get; set; } = string.Empty;
+
+    /// <summary>Gets or sets what to tell about joining the hotspot, or empty.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasHotspotNotice))]
+    public partial string HotspotNotice { get; set; } = string.Empty;
+
+    /// <summary>Gets a value indicating whether <see cref="HotspotNotice"/> shows.</summary>
+    public bool HasHotspotNotice => HotspotNotice.Length > 0;
 
     /// <summary>Gets or sets a value indicating whether the iPhone in use refuses to share its notifications.</summary>
     [ObservableProperty]
@@ -205,6 +226,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         _transfersRefresh.Stop();
         _transfers.Changed -= OnTransfersChanged;
         _status.Changed -= OnStatusChanged;
+        _hotspot.Changed -= OnHotspotChanged;
         _notifications.Changed -= OnNotificationsChanged;
         _media.Changed -= OnMediaChanged;
     }
@@ -227,6 +249,29 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
             await Task.Delay(TimeSpan.FromSeconds(5));
             IsRinging = false;
         }
+    }
+
+    [RelayCommand]
+    private Task JoinHotspotAsync() => _hotspot.JoinAsync();
+
+    private void OnHotspotChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(ApplyHotspot);
+
+    private void ApplyHotspot()
+    {
+        CanHotspot = _hotspot.Available && _hotspot.State != HotspotJoinState.Joining;
+        HotspotText = _localization.GetString(_hotspot.State switch
+        {
+            HotspotJoinState.Joining => "Hotspot_Joining",
+            HotspotJoinState.Connected => "Hotspot_Connected",
+            _ => "Hotspot_Join",
+        });
+        HotspotNotice = _hotspot.State switch
+        {
+            HotspotJoinState.NotSetUp => _localization.GetString("Hotspot_NotSetUp"),
+            HotspotJoinState.NotFound => _localization.GetString("Hotspot_NotFound"),
+            HotspotJoinState.Failed => _localization.GetString("Hotspot_Failed"),
+            _ => string.Empty,
+        };
     }
 
     [RelayCommand]
