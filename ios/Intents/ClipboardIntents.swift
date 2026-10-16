@@ -101,3 +101,17 @@ extension FenpoActionError: @retroactive CustomLocalizedStringResourceConvertibl
         }
     }
 }
+
+/// Opens a link on the PC ("Open on PC"). In Shortcuts, "Show in Share Sheet" puts it in the share menu.
+struct OpenOnPCIntent: AppIntent {
+    static let title: LocalizedStringResource = "intent.openOnPC.title"
+    static let description = IntentDescription("intent.openOnPC.description")
+
+    @Parameter(title: "intent.openOnPC.parameter")
+    var url: URL
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        try await IntentSupport.actions(for: Self.self).openOnPC(url)
+        return .result(dialog: "intent.openOnPC.done")
+    }
+}

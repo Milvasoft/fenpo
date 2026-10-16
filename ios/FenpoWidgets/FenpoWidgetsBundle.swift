@@ -8,5 +8,7 @@ struct FenpoWidgetsBundle: WidgetBundle {
         PasteFromPCControl()
         LockPCControl()
         StatusWidget()
+        PCBatteryWidget()
+        PasteWidget()
     }
 }

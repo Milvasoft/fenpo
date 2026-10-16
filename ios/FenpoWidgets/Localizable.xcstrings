@@ -273,6 +273,74 @@
         }
       }
     },
+    "intent.openOnPC.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the link in your PC’s browser."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantıyı bilgisayarın tarayıcısında açar."
+          }
+        }
+      }
+    },
+    "intent.openOnPC.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened on your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de açıldı."
+          }
+        }
+      }
+    },
+    "intent.openOnPC.parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlantı"
+          }
+        }
+      }
+    },
+    "intent.openOnPC.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de aç"
+          }
+        }
+      }
+    },
     "intent.pasteFromPC.description": {
       "extractionState": "manual",
       "localizations": {
@@ -460,6 +528,57 @@
         }
       }
     },
+    "widget.battery.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows your PC’s battery on the Lock Screen."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın pilini kilit ekranında gösterir."
+          }
+        }
+      }
+    },
+    "widget.battery.label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC"
+          }
+        }
+      }
+    },
+    "widget.battery.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC battery"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC pili"
+          }
+        }
+      }
+    },
     "widget.status.connected": {
       "extractionState": "manual",
       "localizations": {
@@ -507,6 +626,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bağlı değil"
+          }
+        }
+      }
+    },
+    "widget.status.last %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Son: %@"
           }
         }
       }

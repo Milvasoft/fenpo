@@ -103,6 +103,19 @@ Panoyu kontrol etmek için Notlar'da yeni bir not açıp yapıştırın.
 | T17 | Denetim Merkezi'nden **PC'yi kilitle** | Mac'te `the phone asked to lock the PC` |
 | T18 | Kısayollar'da yeni bir kısayol yapın: **Panoyu Al** → Fenpo **Metni PC'ye gönder**. Ayarlar → Erişilebilirlik → Dokunma → Arkaya Dokun'a bağlayın. Başka bir uygulamada bir şey kopyalayıp telefonun arkasına iki kez dokunun | Fenpo açılmadan Mac'te `clipboard from phone` |
 
+### Telefonu çaldır, kilit ekranı widget'ları, PC'de aç (isteğe bağlı)
+
+Test eşleşmesinden sonra Fenpo öne geldiğinde bildirim izni sorulur; izin verin.
+
+| # | Adım | Beklenen |
+|---|---|---|
+| T19 | Fenpo açıkken Mac'te `ring` | "Fenpo çalıyor" ekranı ve ses; sessiz anahtar açıkken bile çalar. **Durdur** sesi keser. Bir kez de Mac'ten `ring-stop` ile durdurun |
+| T20 | Fenpo arka plandayken ve iPhone kilitliyken `ring` | Sesli bir bildirim gelir. Sessiz modda ses beklenmez (iOS kısıtı). Bildirime dokununca Fenpo açılır ve ses durur |
+| T21 | Kilit ekranını düzenleyip Fenpo'nun **PC durumu**, **PC pili** ve **PC'den yapıştır** widget'larını ekleyin. Mac'te `battery 64` | PC pili halkası %64'ü gösterir, PC durumu "Fenpo Test · Bağlı" der. Mac'te aracı kapatınca birkaç saniye içinde "Bağlı değil" olur. Yapıştır widget'ı T16'daki gibi çalışır |
+| T22 | Kısayollar'da yeni kısayol: **Paylaşım Sayfasında Göster** (girdi: URL) → Fenpo **PC'de aç**. Safari'de bir sayfayı bu kısayolla paylaşın | Mac'te `open on PC: https://...` |
+
+Paylaşım menüsündeki Fenpo uzantısının **PC'de aç** düğmesi Wi‑Fi kanalını kullanır. Windows'ta Wi‑Fi eşleşmesi gelince kilometre taşı 2'de denenecek.
+
 ## 5. Geri bildirim
 
 Buğra'ya şunları gönderin:
@@ -114,7 +127,7 @@ Buğra'ya şunları gönderin:
    |---|---|---|
    | T1 | | |
    | … | | |
-   | T18 | | |
+   | T22 | | |
 
 3. Uygulama kaydı: Geliştirici → Kayıt → **Dışa aktar** (Mac'e gönderin, `fenpo-log.txt`).
 4. Mac aracının kaydı: `~/fenpo-peripheral.log`.

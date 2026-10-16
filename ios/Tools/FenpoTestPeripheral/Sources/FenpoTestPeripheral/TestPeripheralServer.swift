@@ -14,7 +14,8 @@ final class TestPeripheralServer: NSObject {
       ping-every <seconds>   Send Ping repeatedly (background wake test); `stop` ends it
       clip <text>            Send a clipboard text (S6)
       clip-in <seconds> <text>  Send a clipboard text after a delay, to lock or background the phone first
-      ring                   Send RingDevice
+      ring                   Ring the phone (RingDevice); `ring-stop` stops it
+      battery <percent> [charging]  Send DeviceState with the PC battery (lock screen widget)
       pc-clip <text>         Set the text the "PC clipboard" returns to Paste from PC
       notifications on|off   Change PcStatus.notifications_subscribed and send it
       stop                   Stop ping-every
@@ -100,6 +101,15 @@ final class TestPeripheralServer: NSObject {
             }
         case "ring":
             send(.ring(Fenpo_V1_RingDevice()))
+        case "ring-stop":
+            var ring = Fenpo_V1_RingDevice()
+            ring.stop = true
+            send(.ring(ring))
+        case "battery":
+            var state = Fenpo_V1_DeviceState()
+            state.batteryPercent = UInt32(parts.dropFirst().first ?? "") ?? 64
+            state.charging = parts.dropFirst(2).first == "charging"
+            send(.deviceState(state))
         case "pc-clip":
             pcClipboard = parts.dropFirst().joined(separator: " ")
             say("PC clipboard is now \"\(pcClipboard)\"")
@@ -207,6 +217,8 @@ final class TestPeripheralServer: NSObject {
             send(envelope: sequencer.envelope(.clipboard(item), replyTo: envelope.id))
         case .lockPc:
             say("   the phone asked to lock the PC")
+        case .openURL(let message):
+            say("   open on PC: \(message.url)")
         default:
             if let reply = Handshake.automaticReply(to: envelope, sequencer: &sequencer) {
                 send(envelope: reply)

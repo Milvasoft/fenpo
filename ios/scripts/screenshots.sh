@@ -8,7 +8,7 @@ udid="$1"
 app="$2"
 out="$3"
 bundle_id="com.fenpo.app"
-scenes=(home home-unpaired transfers pc settings developer scan steps)
+scenes=(home home-unpaired transfers pc settings developer scan steps ringing)
 
 mkdir -p "$out"
 xcrun simctl bootstatus "$udid" -b >/dev/null

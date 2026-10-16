@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "action.error.notPaired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair Fenpo with your PC first."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önce Fenpo’yu bilgisayarınla eşleştir."
+          }
+        }
+      }
+    },
     "share.close": {
       "extractionState": "manual",
       "localizations": {
@@ -14,6 +31,125 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapat"
+          }
+        }
+      }
+    },
+    "share.error.generic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That didn’t work. Open Fenpo and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olmadı. Fenpo’yu açıp yeniden dene."
+          }
+        }
+      }
+    },
+    "share.error.wifi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t reach your PC over Wi‑Fi. Make sure both are on the same network."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye Wi‑Fi üzerinden ulaşılamıyor. İkisinin aynı ağda olduğundan emin ol."
+          }
+        }
+      }
+    },
+    "share.files.later": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sending files and photos arrives with Wi‑Fi transfer."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dosya ve fotoğraf gönderme Wi‑Fi aktarımıyla gelecek."
+          }
+        }
+      }
+    },
+    "share.notPaired.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No paired computer"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eşleşmiş bilgisayar yok"
+          }
+        }
+      }
+    },
+    "share.nothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing here Fenpo can send yet."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burada Fenpo’nun gönderebileceği bir şey yok."
+          }
+        }
+      }
+    },
+    "share.openOnPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de aç"
+          }
+        }
+      }
+    },
+    "share.openOnPC.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opened on your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’de açıldı."
           }
         }
       }

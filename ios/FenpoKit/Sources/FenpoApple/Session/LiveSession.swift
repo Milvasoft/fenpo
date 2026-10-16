@@ -2,6 +2,7 @@
 import FenpoCore
 import FenpoProtocol
 import Foundation
+import UIKit
 
 /// Session state from the stored pairing and the BLE channel.
 ///
@@ -80,7 +81,13 @@ public final class FenpoServices {
     public let session: LiveSession
     public let clipboard: PCClipboardReceiver
     public let actions: LiveFenpoActions
+    public let ringer: PhoneRinger
+    public let statusStore: SharedStatusStore
 
+    /// Called whenever the channel state or the PC's status changes.
+    public var onChange: (() -> Void)?
+
+    private var pcBattery: (percent: Int, charging: Bool)?
     private let log = FenpoLog("Services")
 
     private init() {
@@ -92,12 +99,17 @@ public final class FenpoServices {
         session = LiveSession(store: pairedStore, central: central, accessories: accessories)
         clipboard = PCClipboardReceiver()
         actions = LiveFenpoActions(store: pairedStore, central: central)
+        ringer = PhoneRinger()
+        statusStore = SharedStatusStore()
 
-        let clipboard = clipboard
-        central.onEnvelope = { envelope in
-            if case .clipboard(let item) = envelope.body {
-                clipboard.handle(item)
+        central.onEnvelope = { [weak self] envelope in
+            self?.route(envelope)
+        }
+        central.onStateChange = { [weak self] state in
+            if state != .ready {
+                self?.pcBattery = nil
             }
+            self?.publishStatus()
         }
     }
 
@@ -106,6 +118,60 @@ public final class FenpoServices {
         FenpoActionsRegistry.shared.register(actions)
         accessories.activate()
         pairing.resumeChannel()
+        publishStatus()
+    }
+
+    /// Writes the widget status and tells the app.
+    public func publishStatus() {
+        let record = pairedStore.load()
+        statusStore.save(SharedStatus(
+            pcName: record?.name,
+            isConnected: record != nil && central.state == .ready,
+            pcBatteryPercent: pcBattery?.percent,
+            pcCharging: pcBattery?.charging
+        ))
+        onChange?()
+    }
+
+    private func route(_ envelope: Fenpo_V1_Envelope) {
+        switch envelope.body {
+        case .clipboard(let item):
+            clipboard.handle(item)
+        case .deviceState(let state):
+            apply(state)
+        case .ring(let request):
+            ringer.handle(request)
+        case .openURL(let message):
+            openFromPC(message.url)
+        default:
+            break
+        }
+    }
+
+    private func apply(_ state: Fenpo_V1_DeviceState) {
+        if state.hasBatteryPercent {
+            pcBattery = (Int(state.batteryPercent), state.hasCharging && state.charging)
+        }
+        if !state.addresses.isEmpty, var record = pairedStore.load() {
+            record.endpoints = state.addresses
+            try? pairedStore.update(record)
+        }
+        log.info("PC state: battery \(state.hasBatteryPercent ? "\(state.batteryPercent)%" : "unknown"), \(state.addresses.count) address(es)")
+        publishStatus()
+    }
+
+    /// "Open on iPhone": only possible while Fenpo is in front; iOS does not let a background app open links.
+    private func openFromPC(_ text: String) {
+        guard let url = URL(string: text), let scheme = url.scheme?.lowercased(), ["http", "https"].contains(scheme) else {
+            log.error("Ignored OpenUrl with an unsupported link")
+            return
+        }
+        guard UIApplication.shared.applicationState == .active else {
+            log.info("OpenUrl arrived in the background; not opened")
+            return
+        }
+        UIApplication.shared.open(url)
+        log.info("Opened a link from the PC")
     }
 
     // MARK: - Device tests (Developer menu)
