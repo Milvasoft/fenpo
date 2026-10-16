@@ -14,11 +14,15 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
     private readonly IBleCounters _counters = counters;
     private readonly PcIdentity _identity = identity;
     private readonly Func<PcStatus> _pcStatus = pcStatus;
-    private readonly int _payloadLength = payloadLength;
     private readonly BleChunkAssembler _assembler = new();
     private readonly Lock _sendLock = new();
     private PairedAppDevice? _device;
     private ulong _nextId = 1;
+
+    /// <summary>
+    /// Gets or sets the payload bytes per chunk; updated when the phone subscribes and its notification size is known.
+    /// </summary>
+    public int PayloadLength { get; set; } = payloadLength;
 
     /// <summary>
     /// Raised with every chunk to notify on <c>tx</c>, in order.
@@ -103,7 +107,7 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
             envelope.Version = 1;
             envelope.Id = _nextId++;
             var sealedMessage = BleSeal.Seal(device.BleKey, BleSender.Pc, _counters.NextSend(device.DeviceId), envelope.ToByteArray());
-            chunks = BleChunks.Split(sealedMessage, _payloadLength);
+            chunks = BleChunks.Split(sealedMessage, PayloadLength);
 
             foreach (var chunk in chunks)
             {
