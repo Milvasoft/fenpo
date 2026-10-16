@@ -25,7 +25,9 @@ public sealed partial class ScreenMirrorWindow : Window
     private readonly ILogger _logger;
     private readonly DispatcherQueue _dispatcher;
     private LiveH264Player? _player;
+    private LivePcmPlayer? _sound;
     private MediaFeed? _stream;
+    private MediaFeed? _soundStream;
     private Point _pressedAt;
     private DateTimeOffset _pressedTime;
 
@@ -74,6 +76,8 @@ public sealed partial class ScreenMirrorWindow : Window
         _mirror.StreamOpened -= OnStreamOpened;
         _player?.Dispose();
         _player = null;
+        _sound?.Dispose();
+        _sound = null;
         _ = _mirror.StopMirroringAsync();
     }
 
@@ -116,6 +120,14 @@ public sealed partial class ScreenMirrorWindow : Window
         _player?.Dispose();
         _player = new LiveH264Player(stream.Packets, video?.Width ?? 0, video?.Height ?? 0, _logger, () => _ = _mirror.RequestKeyFrameAsync());
         Player.SetMediaPlayer(_player.Player);
+
+        // A resize restarts only the picture; the sound of the same stream keeps playing.
+        if (_sound is null || !ReferenceEquals(_soundStream, stream))
+        {
+            _sound?.Dispose();
+            _sound = stream.Open.Audio == AudioCodec.PcmS16Le ? new LivePcmPlayer(stream.Audio, stream.Open.AudioSampleRate, stream.Open.AudioChannels, _logger) : null;
+            _soundStream = stream;
+        }
     }
 
     // Where the frame is inside the element (letterboxed, Uniform) and a point on it as 0..1.

@@ -71,10 +71,9 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
         {
             Max = new VideoFormat { Codec = VideoCodec.H264, Width = 1920, Height = 1920, Fps = 60, BitrateKbps = 8000 },
             Control = true,
-            Accepted = new AcceptedFormats { Video = { VideoCodec.H264 } },
-
-            // The phone's sound needs a second track in the player; video comes first.
-            Audio = false,
+            // Sound uncompressed: the PC plays PCM without a decoder, and a LAN carries it easily.
+            Accepted = new AcceptedFormats { Video = { VideoCodec.H264 }, Audio = { AudioCodec.PcmS16Le } },
+            Audio = true,
         };
         SetState(ScreenState.WaitingForConsent);
         var sent = await _channel.SendAsync(new Envelope { ScreenStart = start });
