@@ -13,6 +13,7 @@ enum ScreenshotScene: String {
     case developer
     case steps
     case ringing
+    case camera
 
     /// The scene requested by the launch arguments, if any.
     static var current: ScreenshotScene? {
@@ -36,6 +37,8 @@ enum ScreenshotScene: String {
             model.isPairingPresented = true
         case .ringing:
             model.isRinging = true
+        case .camera:
+            model.cameraState = .sample
         }
         return model
     }

@@ -221,3 +221,16 @@ struct HandshakeTests {
         #expect(Handshake.automaticReply(to: sequencer.envelope(.lockPc(Fenpo_V1_LockPc())), sequencer: &sequencer) == nil)
     }
 }
+
+struct EnvelopeDescriptionTests {
+    @Test
+    func namesTheMessageWithoutItsContents() {
+        var sequencer = EnvelopeSequencer()
+        var item = Fenpo_V1_ClipboardItem()
+        item.text = "secret"
+        let envelope = sequencer.envelope(.clipboard(item))
+        #expect(envelope.bodyName == "clipboard")
+        #expect(!envelope.bodyName.contains("secret"))
+        #expect(Fenpo_V1_Envelope().bodyName == "empty")
+    }
+}

@@ -31,6 +31,18 @@ struct RootView: View {
             }
         }
         .animation(.snappy, value: model.toast?.id)
+        .fullScreenCover(isPresented: Binding(
+            get: { model.cameraState != nil },
+            set: { isPresented in
+                if !isPresented {
+                    model.cameraActions.stop()
+                }
+            }
+        )) {
+            if let state = model.cameraState {
+                CameraModeView(state: state, session: model.cameraSession, actions: model.cameraActions)
+            }
+        }
         .fullScreenCover(isPresented: $model.isRinging) {
             RingingView(pcName: model.snapshot.pc?.name) {
                 model.stopRinging()

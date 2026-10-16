@@ -1,46 +1,14 @@
 import FenpoProtocol
 
 extension Fenpo_V1_Envelope {
-    /// Message type for logs, e.g. "Ping". Never includes the contents.
+    /// Message type for logs, e.g. "ping". Never includes the contents.
+    ///
+    /// Read from the case name, so new protocol messages need no change here.
     public var bodyName: String {
-        switch body {
-        case .hello:
-            "Hello"
-        case .ping:
-            "Ping"
-        case .pong:
-            "Pong"
-        case .error:
-            "Error"
-        case .pairingRequest:
-            "PairingRequest"
-        case .pairingResult:
-            "PairingResult"
-        case .clipboard:
-            "ClipboardItem"
-        case .clipboardRequest:
-            "ClipboardRequest"
-        case .openURL:
-            "OpenUrl"
-        case .transferOffer:
-            "TransferOffer"
-        case .transferAccept:
-            "TransferAccept"
-        case .transferProgress:
-            "TransferProgress"
-        case .transferCancel:
-            "TransferCancel"
-        case .ring:
-            "RingDevice"
-        case .lockPc:
-            "LockPc"
-        case .deviceState:
-            "DeviceState"
-        case .pcStatus:
-            "PcStatus"
-        case nil:
-            "empty"
+        guard let body else {
+            return "empty"
         }
+        return Mirror(reflecting: body).children.first?.label ?? "unknown"
     }
 }
 
