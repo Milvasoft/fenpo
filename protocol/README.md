@@ -12,6 +12,7 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/device.proto` | Device state, PC status, ring, lock |
 | `fenpo/v1/media.proto` | Now playing and media control |
 | `fenpo/v1/messages.proto` | SMS over the Fenpo channel for Android phones without MAP |
+| `fenpo/v1/pc_input.proto` | The phone as the PC's touchpad, keyboard and presentation remote |
 | `fenpo/v1/video.proto` | Media connections: formats, `MediaStreamOpen`, `StreamPacket` |
 | `fenpo/v1/camera.proto` | The phone as a webcam |
 | `fenpo/v1/screen.proto` | The phone's screen on the PC, with control (Android) |
@@ -135,6 +136,13 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 - `SmsSend` is answered with `SmsSendResult`; the stored message follows as `SmsMessage`.
 - Android does not let an app that is not the default SMS app mark messages read, so there is no "mark read". MMS content and RCS are not available to other apps; the PC says so in the conversation.
 - Contact names come from the PC's phone book (PBAP); the phone sends numbers only.
+
+## PC input (touchpad, keyboard, presentation remote)
+
+- `CAPABILITY_PC_INPUT`, phone → PC only. The PC injects `PcInput` into the current Windows session; it ignores input while the session is locked (the phone can still send `LockPc`).
+- Pointer moves are relative, in the PC's pixels after the phone's speed setting, summed on the phone and sent at most 60 times a second. A drag is `PRESS`, moves, `RELEASE`. Scrolls are in wheel notches and may be fractional.
+- Text goes as Unicode, so it does not depend on the PC's keyboard layout; `PcKey` is for keys that are not text, with modifiers. The presentation remote uses `RIGHT`/`LEFT` (next/previous), `F5`, `SHIFT_F5` and `BLACK_SCREEN`.
+- Input goes on the best open channel in order; over Bluetooth only, the phone may send fewer moves.
 
 ## Proximity
 
