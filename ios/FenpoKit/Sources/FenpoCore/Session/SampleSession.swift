@@ -34,9 +34,9 @@ public actor SampleSession: SessionProviding {
             pcClipboardPreview: "docker compose -f deploy/compose.yml up -d",
             readyPhotoCount: 3,
             transfers: [
-                TransferRecord(fileName: "Sözleşme_v3.pdf", direction: .fromPC, date: now.addingTimeInterval(-120)),
+                TransferRecord(fileName: "Sözleşme_v3.pdf", direction: .fromPC, date: now.addingTimeInterval(-120), localFileName: "Sözleşme_v3.pdf"),
                 TransferRecord(fileName: "IMG_4835.HEIC", direction: .toPC, date: now.addingTimeInterval(-3_600), folder: "Resimler"),
-                TransferRecord(fileName: "Bütçe_Ekim.xlsx", direction: .fromPC, date: now.addingTimeInterval(-86_400)),
+                TransferRecord(fileName: "Bütçe_Ekim.xlsx", direction: .fromPC, date: now.addingTimeInterval(-86_400), localFileName: "Bütçe_Ekim.xlsx"),
                 TransferRecord(fileName: "Teklif v2.docx", direction: .toPC, date: now.addingTimeInterval(-172_800), folder: "Belgeler"),
             ],
             activeTransfers: [
