@@ -615,6 +615,9 @@
   <data name="Pair_WithApp.Content" xml:space="preserve">
     <value>Telefondaki Fenpo ile bağla</value>
   </data>
+  <data name="Phone_SwitchTo" xml:space="preserve">
+    <value>{0} telefonuna geç</value>
+  </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
   </data>
@@ -659,6 +662,9 @@
   </data>
   <data name="Settings_IncomingFiles.Text" xml:space="preserve">
     <value>Gelen dosyalar</value>
+  </data>
+  <data name="Settings_InUse" xml:space="preserve">
+    <value>Kullanılıyor · {0}</value>
   </data>
   <data name="Settings_Language.Text" xml:space="preserve">
     <value>Dil</value>
@@ -737,6 +743,9 @@
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Telefonla kilit aç</value>
+  </data>
+  <data name="Settings_UsePhone.Content" xml:space="preserve">
+    <value>Bu telefonu kullan</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>

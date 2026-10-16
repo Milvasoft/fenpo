@@ -89,6 +89,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" FontSize="24" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <HyperlinkButton Content="{x:Bind ViewModel.OtherPhoneText, Mode=OneWay}" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" Visibility="{x:Bind ViewModel.HasOtherPhone, Mode=OneWay}" Padding="0" FontSize="13" Margin="0,2,0,0" />
 
                         <!-- Not paired: one clear way forward -->
                         <StackPanel Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.IsPaired), Mode=OneWay}" Margin="0,12,0,0" Spacing="12">

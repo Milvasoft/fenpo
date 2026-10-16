@@ -75,7 +75,7 @@ public sealed class PairedAppDeviceStore(ILogger<PairedAppDeviceStore> logger) :
             {
                 foreach (var device in stored)
                 {
-                    _devices.Add(new PairedAppDevice(device.DeviceId, device.Name, ProtectedData.Unprotect(Convert.FromBase64String(device.ProtectedKey), _entropy, DataProtectionScope.CurrentUser), device.CertificateSha256 ?? string.Empty));
+                    _devices.Add(new PairedAppDevice(device.DeviceId, device.Name, ProtectedData.Unprotect(Convert.FromBase64String(device.ProtectedKey), _entropy, DataProtectionScope.CurrentUser), device.CertificateSha256 ?? string.Empty, device.Platform));
                 }
             }
         }
@@ -90,7 +90,7 @@ public sealed class PairedAppDeviceStore(ILogger<PairedAppDeviceStore> logger) :
 
     private void Write(List<PairedAppDevice> devices)
     {
-        var stored = devices.Select(d => new StoredDevice(d.DeviceId, d.Name, Convert.ToBase64String(ProtectedData.Protect(d.BleKey, _entropy, DataProtectionScope.CurrentUser)), d.CertificateSha256)).ToList();
+        var stored = devices.Select(d => new StoredDevice(d.DeviceId, d.Name, Convert.ToBase64String(ProtectedData.Protect(d.BleKey, _entropy, DataProtectionScope.CurrentUser)), d.CertificateSha256, d.Platform)).ToList();
 
         try
         {
@@ -102,5 +102,5 @@ public sealed class PairedAppDeviceStore(ILogger<PairedAppDeviceStore> logger) :
         }
     }
 
-    private sealed record StoredDevice(string DeviceId, string Name, string ProtectedKey, string? CertificateSha256);
+    private sealed record StoredDevice(string DeviceId, string Name, string ProtectedKey, string? CertificateSha256, Protocol.V1.DevicePlatform Platform = Protocol.V1.DevicePlatform.Unspecified);
 }

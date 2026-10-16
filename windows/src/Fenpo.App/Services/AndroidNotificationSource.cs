@@ -80,7 +80,7 @@ public sealed class AndroidNotificationSource(PhoneChannel channel, AppIconServi
 
         if (!positive)
         {
-            return notification.Dismissible && await _channel.SendAsync(new Envelope { DismissNotification = new DismissNotification { Key = key } }, cancellationToken);
+            return notification.Dismissible && await _channel.SendToAndroidAsync(new Envelope { DismissNotification = new DismissNotification { Key = key } }, cancellationToken);
         }
 
         return notification.Actions.FirstOrDefault(a => !a.AcceptsReply) is { } first && await RunActionAsync(key, (int)first.Index, null, cancellationToken);
@@ -89,7 +89,7 @@ public sealed class AndroidNotificationSource(PhoneChannel channel, AppIconServi
     /// <inheritdoc/>
     public async Task<bool> RunActionAsync(string key, int index, string? reply, CancellationToken cancellationToken = default)
     {
-        var sent = await _channel.SendAsync(new Envelope { RunNotificationAction = new RunNotificationAction { Key = key, ActionIndex = (uint)index, ReplyText = reply ?? string.Empty } }, cancellationToken);
+        var sent = await _channel.SendToAndroidAsync(new Envelope { RunNotificationAction = new RunNotificationAction { Key = key, ActionIndex = (uint)index, ReplyText = reply ?? string.Empty } }, cancellationToken);
         _logger.LogInformation("Notification action {Index} ({Reply}) sent: {Sent}", index, reply is null ? "no reply" : "reply", sent);
         return sent;
     }
@@ -121,7 +121,7 @@ public sealed class AndroidNotificationSource(PhoneChannel channel, AppIconServi
 
     private void OnChannelChanged()
     {
-        var connected = _channel.IsConnected && _channel.Platform == DevicePlatform.Android;
+        var connected = _channel.AndroidConnected;
 
         if (_connected && !connected)
         {
@@ -189,6 +189,7 @@ public sealed class AndroidNotificationSource(PhoneChannel channel, AppIconServi
 
         if (decision == MirrorDecision.Add)
         {
+            _logger.LogInformation("Android notification from {App} ({Category}{Snapshot})", wire.AppId, wire.Category, wire.PreExisting ? ", snapshot" : string.Empty);
             Added?.Invoke(this, notification);
         }
         else
@@ -218,7 +219,7 @@ public sealed class AndroidNotificationSource(PhoneChannel channel, AppIconServi
 
         if (_iconRequests.TryAdd(appId, waiter))
         {
-            await _channel.SendAsync(new Envelope { AppIconRequest = new AppIconRequest { AppId = appId } });
+            await _channel.SendToAndroidAsync(new Envelope { AppIconRequest = new AppIconRequest { AppId = appId } });
         }
         else
         {

@@ -615,6 +615,9 @@
   <data name="Pair_WithApp.Content" xml:space="preserve">
     <value>Connect with Fenpo on the phone</value>
   </data>
+  <data name="Phone_SwitchTo" xml:space="preserve">
+    <value>Switch to {0}</value>
+  </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>
   </data>
@@ -659,6 +662,9 @@
   </data>
   <data name="Settings_IncomingFiles.Text" xml:space="preserve">
     <value>Incoming files</value>
+  </data>
+  <data name="Settings_InUse" xml:space="preserve">
+    <value>In use · {0}</value>
   </data>
   <data name="Settings_Language.Text" xml:space="preserve">
     <value>Language</value>
@@ -737,6 +743,9 @@
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Unlock with the phone</value>
+  </data>
+  <data name="Settings_UsePhone.Content" xml:space="preserve">
+    <value>Use this phone</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>

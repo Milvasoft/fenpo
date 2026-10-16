@@ -367,7 +367,7 @@ public sealed class ControlServer(
             return null;
         }
 
-        var device = new PairedAppDevice(pairing.DeviceId, pairing.DeviceName, RandomNumberGenerator.GetBytes(BleSeal.KeyLength), fingerprint);
+        var device = new PairedAppDevice(pairing.DeviceId, pairing.DeviceName, RandomNumberGenerator.GetBytes(BleSeal.KeyLength), fingerprint, pairing.Platform);
         _devices.Save(device);
 
         // A new key: the phone starts its BLE counter over, and so does the PC.

@@ -21,9 +21,10 @@ public sealed record ChannelMessage(PairedAppDevice Device, Envelope Envelope, b
 
 /// <summary>
 /// Fenpo on the phone over both channels as one: the Wi‑Fi control connection (④) and the BLE channel (③). Messages go
-/// over Wi‑Fi while it is up and over Bluetooth otherwise; what the phone offered in Hello decides which features are
-/// on. Keeps the phone status up to date: app and Wi‑Fi connected, the OS version, and for an Android phone (no
-/// Bluetooth link of its own) the name, model and battery from DeviceState.
+/// to the phone in use (<see cref="IPhoneStatusSource.Active"/>), over Wi‑Fi while it is up and over Bluetooth
+/// otherwise; what it offered in Hello decides which features are on. Messages from either phone are passed on. Keeps
+/// each phone's status up to date: app and Wi‑Fi connected, the OS version, and for an Android phone (no Bluetooth
+/// link of its own) the name, model and battery from DeviceState.
 /// </summary>
 public sealed class PhoneChannel(
     ControlServer wifi,
@@ -39,7 +40,7 @@ public sealed class PhoneChannel(
     private readonly ILogger<PhoneChannel> _logger = logger;
     private readonly ConcurrentDictionary<string, Hello> _wifiHellos = new();
     private readonly ConcurrentDictionary<string, Hello> _bleHellos = new();
-    private PairedAppDevice? _phone;
+    private readonly ConcurrentDictionary<string, PairedAppDevice> _connected = new();
 
     /// <summary>
     /// Raised from a background thread for every message the channels do not answer themselves.
@@ -57,9 +58,9 @@ public sealed class PhoneChannel(
     public event EventHandler<ChannelMessage>? HelloReceived;
 
     /// <summary>
-    /// Gets the phone Fenpo talks to: the one that said Hello last.
+    /// Gets the phone Fenpo talks to: the phone in use, when Fenpo on it is connected.
     /// </summary>
-    public PairedAppDevice? Phone => Volatile.Read(ref _phone);
+    public PairedAppDevice? Phone => _connected.Values.FirstOrDefault(d => KindOf(HelloOf(d.DeviceId)) == _status.Active);
 
     /// <summary>
     /// Gets a value indicating whether the phone is on either channel.
@@ -95,15 +96,17 @@ public sealed class PhoneChannel(
             }
         };
         _wifi.MessageReceived += (sender, e) => OnMessage(new ChannelMessage(e.Device, e.Envelope, OverWifi: true));
-        _wifi.Paired += (sender, e) => _status.Update(s => s with { HasAppPhone = true });
+        _wifi.Paired += (sender, e) => OnPaired(e.Device);
+        _status.ActiveChanged += (sender, kind) => Changed?.Invoke(this, EventArgs.Empty);
         _ble.HelloReceived += (sender, e) => OnHello(e.Device, e.Hello, overWifi: false);
         _ble.SessionClosed += (sender, device) => OnLeft(device, overWifi: false);
         _ble.MessageReceived += (sender, e) => OnMessage(new ChannelMessage(e.Device, e.Envelope, OverWifi: false));
         NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
 
-        if (_devices.All is { Count: > 0 } paired)
+        // An Android phone is paired as long as its record is; the iPhone is paired in Windows Bluetooth settings.
+        if (_devices.All.LastOrDefault(d => d.Platform == DevicePlatform.Android) is { } android)
         {
-            _status.Update(s => s with { HasAppPhone = true, Name = s.Name.Length > 0 ? s.Name : paired[^1].Name });
+            OnPaired(android);
         }
 
         return Task.CompletedTask;
@@ -125,6 +128,27 @@ public sealed class PhoneChannel(
     public async Task<bool> SendAsync(Envelope envelope, CancellationToken cancellationToken = default)
     {
         if (Phone is not { } phone)
+        {
+            return false;
+        }
+
+        return (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken)) || _ble.Send(phone.DeviceId, envelope);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether Fenpo on an Android phone is connected, in use or not.
+    /// </summary>
+    public bool AndroidConnected => _connected.Values.Any(d => KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android);
+
+    /// <summary>
+    /// Sends a message to the Android phone, in use or not (its notifications and player answer to it).
+    /// </summary>
+    /// <param name="envelope">Message.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>False when it is not connected.</returns>
+    public async Task<bool> SendToAndroidAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        if (_connected.Values.FirstOrDefault(d => KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android) is not { } phone)
         {
             return false;
         }
@@ -161,26 +185,57 @@ public sealed class PhoneChannel(
         return _ble.Send(deviceId, reply) || await _wifi.SendAsync(deviceId, reply, cancellationToken);
     }
 
+    private static PhoneKind? KindOf(Hello? hello) => hello?.Platform switch
+    {
+        DevicePlatform.Ios => PhoneKind.Iphone,
+        DevicePlatform.Android => PhoneKind.Android,
+        _ => null,
+    };
+
     private Hello? HelloOf(string deviceId) => _wifiHellos.TryGetValue(deviceId, out var wifi) ? wifi : _bleHellos.TryGetValue(deviceId, out var ble) ? ble : null;
+
+    private void OnPaired(PairedAppDevice device)
+    {
+        if (device.Platform != DevicePlatform.Android)
+        {
+            return;
+        }
+
+        _status.Update(PhoneKind.Android, s => s with
+        {
+            HasAppPhone = true,
+            Name = device.Name,
+            State = s.State == PhoneConnectionState.NotPaired ? PhoneConnectionState.Disconnected : s.State,
+        });
+    }
 
     private void OnHello(PairedAppDevice device, Hello hello, bool overWifi)
     {
         (overWifi ? _wifiHellos : _bleHellos)[device.DeviceId] = hello;
-        Volatile.Write(ref _phone, device);
-        var android = hello.Platform == DevicePlatform.Android;
+        _connected[device.DeviceId] = device;
 
-        _status.Update(s => s with
+        // Records from before platforms were kept learn theirs here.
+        if (device.Platform != hello.Platform && hello.Platform != DevicePlatform.Unspecified)
         {
-            AppConnected = true,
-            HasAppPhone = true,
-            WifiConnected = _wifiHellos.ContainsKey(device.DeviceId),
-            OsVersion = string.IsNullOrEmpty(hello.OsVersion) ? s.OsVersion : hello.OsVersion,
+            _devices.Save(device with { Platform = hello.Platform });
+        }
 
-            // An Android phone has no Bluetooth link of its own here: Fenpo on it is the connection.
-            Name = android ? device.Name : s.Name,
-            State = android && !s.BluetoothConnected ? PhoneConnectionState.Connected : s.State,
-            ModelIdentifier = android && !string.IsNullOrEmpty(hello.Model) ? hello.Model : s.ModelIdentifier,
-        });
+        if (KindOf(hello) is { } kind)
+        {
+            var android = kind == PhoneKind.Android;
+            _status.Update(kind, s => s with
+            {
+                AppConnected = true,
+                HasAppPhone = true,
+                WifiConnected = _wifiHellos.ContainsKey(device.DeviceId),
+                OsVersion = string.IsNullOrEmpty(hello.OsVersion) ? s.OsVersion : hello.OsVersion,
+
+                // An Android phone has no Bluetooth link of its own here: Fenpo on it is the connection.
+                Name = android ? device.Name : s.Name,
+                State = android ? PhoneConnectionState.Connected : s.State,
+                ModelIdentifier = android && !string.IsNullOrEmpty(hello.Model) ? hello.Model : s.ModelIdentifier,
+            });
+        }
 
         // The phone keeps these and tries Wi‑Fi again right away, which helps after the PC's address changed.
         if (!overWifi)
@@ -195,21 +250,21 @@ public sealed class PhoneChannel(
     private void OnLeft(PairedAppDevice device, bool overWifi)
     {
         (overWifi ? _wifiHellos : _bleHellos).TryRemove(device.DeviceId, out var hello);
+        var kind = KindOf(hello ?? HelloOf(device.DeviceId)) ?? (device.Platform == DevicePlatform.Android ? PhoneKind.Android : PhoneKind.Iphone);
+        var connected = _wifiHellos.ContainsKey(device.DeviceId) || _bleHellos.ContainsKey(device.DeviceId);
 
-        if (!ReferenceEquals(Phone, device) && Phone?.DeviceId != device.DeviceId)
+        if (!connected)
         {
-            return;
+            _connected.TryRemove(device.DeviceId, out _);
         }
 
-        var connected = _wifiHellos.ContainsKey(device.DeviceId) || _bleHellos.ContainsKey(device.DeviceId);
-        var android = (hello ?? HelloOf(device.DeviceId))?.Platform == DevicePlatform.Android;
         _logger.LogInformation("Fenpo on {Phone} left the {Channel} channel; still connected: {Connected}", device.Name, overWifi ? "Wi-Fi" : "Bluetooth", connected);
 
-        _status.Update(s => s with
+        _status.Update(kind, s => s with
         {
             AppConnected = connected,
             WifiConnected = _wifiHellos.ContainsKey(device.DeviceId),
-            State = android && !connected && !s.BluetoothConnected ? PhoneConnectionState.Disconnected : s.State,
+            State = kind == PhoneKind.Android && !connected ? PhoneConnectionState.Disconnected : s.State,
         });
         Changed?.Invoke(this, EventArgs.Empty);
     }
@@ -235,7 +290,7 @@ public sealed class PhoneChannel(
             return;
         }
 
-        _status.Update(s => s with
+        _status.Update(PhoneKind.Android, s => s with
         {
             BatteryPercent = state.HasBatteryPercent ? (int)state.BatteryPercent : s.BatteryPercent,
             Charging = state.HasCharging ? state.Charging : s.Charging,
@@ -260,9 +315,9 @@ public sealed class PhoneChannel(
 
     private void OnNetworkAddressChanged(object? sender, EventArgs e)
     {
-        if (Phone is { } phone && _bleHellos.ContainsKey(phone.DeviceId))
+        foreach (var device in _connected.Values.Where(d => _bleHellos.ContainsKey(d.DeviceId)))
         {
-            SendAddresses(phone);
+            SendAddresses(device);
         }
     }
 }

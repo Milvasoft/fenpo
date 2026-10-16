@@ -10,7 +10,8 @@ namespace Fenpo.Core.Channel;
 /// <param name="Name">Phone's name.</param>
 /// <param name="BleKey">PairingResult.ble_channel_key (32 bytes).</param>
 /// <param name="CertificateSha256">SHA-256 of the phone's TLS certificate (DER), lower-case hex.</param>
-public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "");
+/// <param name="Platform">The phone's platform from pairing or its Hello; unspecified for records from before.</param>
+public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "", DevicePlatform Platform = DevicePlatform.Unspecified);
 
 /// <summary>
 /// Phones paired with the Fenpo app.
