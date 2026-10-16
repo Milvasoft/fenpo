@@ -125,10 +125,6 @@ public sealed class AndroidMediaSource(PhoneChannel channel, ILogger<AndroidMedi
                 _volume = message.Envelope.MediaState.VolumePercent;
                 Publish(ToNowPlaying(message.Envelope.MediaState, DateTimeOffset.Now));
                 break;
-            case Envelope.BodyOneofCase.MediaCommand:
-                // The phone controlling the PC's own player is not offered yet.
-                _ = _channel.ReplyAsync(message, new Envelope { Error = new Error { Code = ErrorCode.Unsupported, Message = "The PC does not take media commands yet" } });
-                break;
         }
     }
 
