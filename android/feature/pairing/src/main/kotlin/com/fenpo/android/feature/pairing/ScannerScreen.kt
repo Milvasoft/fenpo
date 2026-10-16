@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -64,7 +65,23 @@ enum class ScannerHint {
 
     /** The code comes from a newer Fenpo on the PC. */
     UPDATE_NEEDED,
+
+    /** A Fenpo pairing code, but a field is missing or broken (bad print, partial read). */
+    UNREADABLE,
 }
+
+private const val TAG = "FenpoScanner"
+
+private fun PairingUriError.hint(): ScannerHint =
+    when (this) {
+        PairingUriError.NOT_FENPO -> ScannerHint.NOT_FENPO
+        PairingUriError.UNSUPPORTED_VERSION -> ScannerHint.UPDATE_NEEDED
+        else -> ScannerHint.UNREADABLE
+    }
+
+/** The code with every parameter value except `v` and `a` masked, for logs. */
+private fun redact(text: String): String =
+    text.replace(Regex("([?&])(id|n|fp|t)=[^&]*")) { "${it.groupValues[1]}${it.groupValues[2]}=…(${it.value.length})" }
 
 /**
  * Scanner with camera permission handling. A valid code goes to [onCode]; anything else becomes
@@ -131,14 +148,9 @@ fun ScannerRoute(
                             }
 
                             is PairingUriResult.Invalid -> {
-                                codeHint =
-                                    if (result.error ==
-                                        PairingUriError.UNSUPPORTED_VERSION
-                                    ) {
-                                        ScannerHint.UPDATE_NEEDED
-                                    } else {
-                                        ScannerHint.NOT_FENPO
-                                    }
+                                // Field names only; the token and fingerprint never reach the log.
+                                Log.i(TAG, "Rejected code: ${result.error}, ${redact(text)}")
+                                codeHint = result.error.hint()
                             }
                         }
                     }
@@ -230,6 +242,7 @@ private fun ScannerHint.text(): Int =
         ScannerHint.CAMERA_BLOCKED -> R.string.scanner_camera_blocked
         ScannerHint.NOT_FENPO -> R.string.scanner_not_fenpo
         ScannerHint.UPDATE_NEEDED -> R.string.scanner_update_needed
+        ScannerHint.UNREADABLE -> R.string.scanner_unreadable
     }
 
 /** Dark gradient behind the finder while the camera is not running. */

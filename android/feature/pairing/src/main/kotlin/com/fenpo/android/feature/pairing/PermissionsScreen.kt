@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -152,7 +153,8 @@ fun PermissionsScreen(
                     if (item.granted) {
                         Granted()
                     } else {
-                        Button(onClick = { onFix(item.permission) }, modifier = Modifier.height(32.dp)) {
+                        // At least 32 dp as in the design, taller for fonts with deeper descenders (Samsung).
+                        Button(onClick = { onFix(item.permission) }, modifier = Modifier.heightIn(min = 32.dp)) {
                             Text(stringResource(text.action), style = MaterialTheme.typography.labelLarge)
                         }
                     }

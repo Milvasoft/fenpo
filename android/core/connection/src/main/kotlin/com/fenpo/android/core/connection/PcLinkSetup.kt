@@ -9,6 +9,7 @@ import android.util.Log
 import com.fenpo.android.core.ble.GattConnection
 import com.fenpo.android.core.data.pc.PairedPcRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,12 +32,14 @@ class PcLinkSetup
             activity: Activity,
             launch: (IntentSender) -> Unit,
         ): AssociationOutcome {
+            val previous = pairedPcRepository.pairedPc.first()
             val outcome = association.associate(activity, launch)
             if (outcome is AssociationOutcome.Associated) {
-                pairedPcRepository.saveBleLink(
-                    outcome.associationId,
-                    outcome.address,
-                )
+                pairedPcRepository.saveBleLink(outcome.associationId, outcome.address)
+                // A repeated association for the same PC leaves the old, outdated one behind; drop it.
+                if (previous != null && previous.bleAddress.isNotEmpty() && previous.bleAddress != outcome.address) {
+                    runCatching { association.forget(previous.associationId, previous.bleAddress) }
+                }
             }
             return outcome
         }

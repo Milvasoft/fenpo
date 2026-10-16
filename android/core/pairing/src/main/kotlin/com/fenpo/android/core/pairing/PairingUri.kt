@@ -56,7 +56,7 @@ public data class PairingUri(
             val fingerprint =
                 params["fp"]
                     ?.takeIf { it.length == FINGERPRINT_BYTES * 2 }
-                    ?.let { runCatching { it.lowercase().decodeHex() }.getOrNull() }
+                    ?.let { hex -> hex.lowercase().takeIf { it.all(Char::isHexDigit) }?.decodeHex() }
                     ?: return invalid(PairingUriError.BAD_FINGERPRINT)
 
             val token =
@@ -78,11 +78,23 @@ public data class PairingUri(
                 if (eq <= 0) return null
                 val key = part.substring(0, eq)
                 val value =
-                    runCatching { URLDecoder.decode(part.substring(eq + 1), Charsets.UTF_8) }.getOrNull() ?: return null
+                    decode(part.substring(eq + 1)) ?: return null
                 if (result.put(key, value) != null) return null
             }
             return result
         }
+
+        /**
+         * Percent-decodes one value. Uses the `String` charset overload on purpose: the
+         * `Charset` one only exists from Android 13, and this module runs on Android 12 too
+         * (device test, 16 October). Only a bad escape is caught, so a missing API still fails loudly.
+         */
+        private fun decode(value: String): String? =
+            try {
+                URLDecoder.decode(value, "UTF-8")
+            } catch (_: IllegalArgumentException) {
+                null
+            }
 
         private fun parseEndpoint(text: String): Endpoint? {
             val host: String
@@ -140,3 +152,5 @@ public enum class PairingUriError {
     /** The token is not 16 bytes of base64url. */
     BAD_TOKEN,
 }
+
+private fun Char.isHexDigit(): Boolean = this in '0'..'9' || this in 'a'..'f'

@@ -8,6 +8,7 @@
     <string name="scanner_camera_needed">Fenpo needs the camera to read the code.</string>
     <string name="scanner_camera_blocked">Camera access is off. Turn it on in Fenpo’s settings.</string>
     <string name="scanner_not_fenpo">This is not a Fenpo code. Scan the code in the Fenpo window on Windows.</string>
+    <string name="scanner_unreadable">The code could not be read completely. Show it again in Fenpo on Windows and hold the phone still.</string>
     <string name="scanner_update_needed">This code comes from a newer Fenpo. Update Fenpo on this phone.</string>
 
     <string name="step_connecting">Connecting</string>

@@ -30,5 +30,5 @@ class PermissionsViewModel
             _items.value = read()
         }
 
-        private fun read() = AppPermission.entries.map { PermissionItem(it, checker.isGranted(it)) }
+        private fun read() = AppPermission.shown.map { PermissionItem(it, checker.isGranted(it)) }
     }

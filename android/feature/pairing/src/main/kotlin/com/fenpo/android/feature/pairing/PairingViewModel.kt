@@ -25,7 +25,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -136,13 +135,12 @@ class PairingViewModel
                     _state.update { it.copy(device = StepStatus.ACTIVE, linkError = null) }
                 }
 
+                // A failed bond often means the PC's private address has rotated since the association
+                // (the old bond, which resolved it, is gone): associate again to learn the current one.
                 current.bluetooth == StepStatus.FAILED -> {
-                    job =
-                        viewModelScope.launch {
-                            val pc = pairedPcRepository.pairedPc.first() ?: return@launch
-                            _state.update { it.copy(bluetooth = StepStatus.ACTIVE, linkError = null) }
-                            bond(pc.associationId, pc.bleAddress)
-                        }
+                    _state.update {
+                        it.copy(device = StepStatus.ACTIVE, bluetooth = StepStatus.QUEUED, linkError = null)
+                    }
                 }
             }
         }

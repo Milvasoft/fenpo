@@ -67,6 +67,37 @@ class PairingUriTest {
     }
 
     @Test
+    fun parsesTheCodeWindowsFenpoShows() {
+        // Shape of ControlServer.PairingUri() on Windows: UUID id, IPv4 addresses only, lowercase hex, unpadded base64url.
+        val windows =
+            "fenpo://pair?v=1&id=0f5c7d2a-9b8e-4c1d-a6f3-2e7b9c0d1a45&n=BUGRAKOSEN" +
+                "&a=192.168.1.14:53113,169.254.83.107:53113,172.27.144.1:53113&fp=$fingerprint&t=$token"
+
+        val uri = assertIs<PairingUriResult.Valid>(PairingUri.parse(windows)).uri
+
+        assertEquals("BUGRAKOSEN", uri.pcName)
+        assertEquals(3, uri.addresses.size)
+    }
+
+    @Test
+    fun rejectsBadPercentEscape() {
+        assertEquals(PairingUriResult.Invalid(PairingUriError.MALFORMED), PairingUri.parse(code().replace("%20", "%2")))
+    }
+
+    @Test
+    fun rejectsNonHexFingerprint() {
+        assertEquals(
+            PairingUriResult.Invalid(PairingUriError.BAD_FINGERPRINT),
+            PairingUri.parse(
+                code(
+                    fp =
+                        "z" + fingerprint.drop(1),
+                ),
+            ),
+        )
+    }
+
+    @Test
     fun rejectsMissingFieldsAndDuplicates() {
         assertEquals(
             PairingUriResult.Invalid(PairingUriError.MISSING_FIELD),

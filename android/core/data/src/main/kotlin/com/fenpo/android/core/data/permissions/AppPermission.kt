@@ -68,12 +68,19 @@ enum class AppPermission {
                 }
             }
 
-    private companion object {
-        const val ANDROID_13 = 33
-        const val ANDROID_17 = 37
+    companion object {
+        /**
+         * Permissions the Permissions screen lists today. Notification access joins with the
+         * notification listener (phase D): until that service exists Android cannot grant it, and a
+         * row that can never turn green only confuses (device test, 16 October).
+         */
+        val shown: List<AppPermission> = entries.filter { it != NOTIFICATION_ACCESS }
+
+        private const val ANDROID_13 = 33
+        private const val ANDROID_17 = 37
 
         // Manifest.permission.ACCESS_LOCAL_NETWORK, API 37 (docs/ANDROID.md §3).
-        const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
+        private const val ACCESS_LOCAL_NETWORK = "android.permission.ACCESS_LOCAL_NETWORK"
     }
 }
 
@@ -83,7 +90,7 @@ interface PermissionChecker {
     fun isGranted(permission: AppPermission): Boolean
 
     /** Permissions that are not granted yet, in display order. */
-    fun missing(): List<AppPermission> = AppPermission.entries.filterNot(::isGranted)
+    fun missing(): List<AppPermission> = AppPermission.shown.filterNot(::isGranted)
 }
 
 /** [PermissionChecker] that asks the system. */

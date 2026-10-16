@@ -302,3 +302,16 @@ Debug derlemesindeki "BLE probe" ile, ürün sınıfları doğrudan sürülerek 
 | A1 (devam) | Varlık olayları iki yönde geldi: "kayboldu" ve 17 dakika sonra "geldi", ardından otomatik bağlantı. Adres ilişkiden 30+ dakika sonra da tuttu (bağ sayesinde dönen adres çözülüyor). Süreç ölüyken uyanma hâlâ ayrıca denenecek. |
 | Ek | `bluetooth.profile.*` sistem özellikleri Samsung'da boş: MAP/PBAP desteği bu yolla okunamıyor, Windows'tan SDP sorgusuyla bakılacak (A4). |
 
+### Gerçek eşleşme (16 Ekim, Windows Fenpo `9f897f9` ↔ Galaxy S10+)
+
+Windows'taki Fenpo'nun QR ekranından baştan sona: QR → TLS 1.3 (sabitlenmiş PC sertifikası, Keystore istemci sertifikası) → `PairingRequest`/`PairingResult` → iki yönlü `Hello` → CDM ilişkisi → bağ → BLE üzerinden şifreli `Hello` ve PC'nin `PcStatus`'u. Kalp atışı `Pong`'ları geliyor. Windows oturumu kendi tarafında doğruladı.
+
+| Bulgu | Ne yapıldı |
+|---|---|
+| QR Android 12'de "Bu bir Fenpo kodu değil" dedi. `URLDecoder.decode(String, Charset)` API 33'te geldi; API 31'de `NoSuchMethodError` `runCatching` içinde yutulup "bozuk kod" sayıldı. | `decode(value, "UTF-8")` kullanılıyor, sadece `IllegalArgumentException` yakalanıyor. Windows'un gösterdiği kodun biçimiyle birim testi eklendi. JVM modülleri (`core:pairing`, `core:transport`) Android API düzeyine göre lint'ten geçmiyor; ayrıca bir API imza denetimi düşünülecek. |
+| Okunan ama alanı bozuk kod da "Fenpo kodu değil" diyordu. | Ayrı ipucu: "Kod tam okunamadı…". Reddedilen kod log'a alan adlarıyla düşüyor; `id`, `n`, `fp`, `t` değerleri maskeli. |
+| PC bağı kaybetti (anahtar yok, 0x06); Android de bağı sildi, kayıtlı dönen adres artık çözülmedi ve bağlantı 133 ile düştü. | "Yeniden dene" Bluetooth adımında ilişkiyi baştan kuruyor; adresi farklı eski ilişki bırakılıyor. |
+| İzinler ekranındaki "Bildirim erişimi" satırı açılamıyordu: henüz `NotificationListenerService` yok, sistem listesinde Fenpo çıkmıyor. | Satır Aşama D'ye (bildirim aynalama) kadar gizli (`AppPermission.shown`). |
+| Samsung yazı tipinde izin düğmesinin metni kesildi. | Düğme yüksekliği metne göre uzuyor (`heightIn(min = 32.dp)`). |
+
+Hâlâ denenecek: uygulama süreci ölüyken PC yaklaşınca uyanma.

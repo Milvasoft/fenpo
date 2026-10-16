@@ -74,13 +74,13 @@ class PairingScreenshotTest {
             )
         }
 
-    /** The state drawn in the design: notification access and battery missing. */
+    /** Battery restriction missing; notification access waits for phase D. */
     @Test
     fun permissions() =
         captureScreenVariants("permissions") {
             PermissionsScreen(
                 items =
-                    AppPermission.entries.map {
+                    AppPermission.shown.map {
                         PermissionItem(
                             it,
                             granted =

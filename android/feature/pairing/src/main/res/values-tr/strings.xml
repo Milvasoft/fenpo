@@ -8,6 +8,7 @@
     <string name="scanner_camera_needed">Kodu okumak için Fenpo’nun kameraya ihtiyacı var.</string>
     <string name="scanner_camera_blocked">Kamera erişimi kapalı. Fenpo’nun ayarlarından aç.</string>
     <string name="scanner_not_fenpo">Bu bir Fenpo kodu değil. Windows’taki Fenpo penceresindeki kodu okut.</string>
+    <string name="scanner_unreadable">Kod tam okunamadı. Windows’taki Fenpo’da kodu yeniden göster ve telefonu sabit tut.</string>
     <string name="scanner_update_needed">Bu kod daha yeni bir Fenpo’dan geliyor. Telefondaki Fenpo’yu güncelle.</string>
 
     <string name="step_connecting">Bağlanıyor</string>
