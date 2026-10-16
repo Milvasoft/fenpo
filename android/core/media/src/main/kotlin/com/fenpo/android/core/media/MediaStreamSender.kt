@@ -1,5 +1,6 @@
 package com.fenpo.android.core.media
 
+import android.os.SystemClock
 import android.util.Log
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.transport.MediaFraming
@@ -9,12 +10,14 @@ import com.fenpo.protocol.v1.StreamPacket
 import com.fenpo.protocol.v1.StreamTrack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okio.blackholeSink
 import java.io.IOException
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * One media connection to the PC (protocol/README "Media connections"). Encoders hand packets to
@@ -33,14 +36,23 @@ class MediaStreamSender(
 
     @Volatile private var connection: DataConnection? = null
 
+    // Counters for the 5-second log line: frames from the encoder, frames dropped, bytes written.
+    private val framesIn = AtomicInteger()
+    private val framesDropped = AtomicInteger()
+
     /** Called from encoder threads. */
     fun offer(packet: StreamPacket) {
         val video = packet.track == StreamTrack.STREAM_TRACK_VIDEO
+        if (video && !packet.codec_config) framesIn.incrementAndGet()
         if (video && waitingForKeyFrame) {
-            if (!packet.codec_config && !packet.key_frame) return
+            if (!packet.codec_config && !packet.key_frame) {
+                framesDropped.incrementAndGet()
+                return
+            }
             waitingForKeyFrame = false
         }
         if (queue.trySend(packet).isFailure && video) {
+            framesDropped.incrementAndGet()
             // Behind: a missing P-frame breaks every frame up to the next key frame, so skip to it.
             waitingForKeyFrame = true
             onCongestion()
@@ -60,9 +72,31 @@ class MediaStreamSender(
             val drain = CoroutineScope(Dispatchers.IO).launch { runCatching { data.source.readAll(blackholeSink()) } }
             try {
                 MediaFraming.writeOpen(data.sink, open)
+                var bytes = 0L
+                var oldestMs = 0L
+                var since = SystemClock.elapsedRealtime()
                 for (packet in queue) {
                     MediaFraming.writePacket(data.sink, packet)
+                    bytes += packet.data_.size
                     if (queue.isEmpty) data.sink.flush()
+                    if (packet.track == StreamTrack.STREAM_TRACK_VIDEO && !packet.codec_config) {
+                        oldestMs = maxOf(oldestMs, ageMs(packet.pts_us))
+                    }
+                    val now = SystemClock.elapsedRealtime()
+                    if (now - since >= STATS_MS) {
+                        val seconds = (now - since) / MILLIS
+                        val fps = framesIn.getAndSet(0) / seconds
+                        val dropped = framesDropped.getAndSet(0)
+                        val kbps = bytes * BITS / seconds / KILO
+                        Log.i(
+                            TAG,
+                            "Stream ${open.stream_id.take(ID_CHARS)}: $fps fps in, $dropped dropped, $kbps kbps, " +
+                                "queue ${queueDepth()}, oldest frame $oldestMs ms after capture",
+                        )
+                        bytes = 0
+                        oldestMs = 0
+                        since = now
+                    }
                     if (!isActive) break
                 }
                 true
@@ -75,6 +109,19 @@ class MediaStreamSender(
             }
         }
 
+    /**
+     * How long ago a frame was captured. Camera timestamps use either the boot clock or the
+     * monotonic clock depending on the sensor; the smaller non-negative age is the right one.
+     */
+    private fun ageMs(ptsUs: Long): Long {
+        val boot = SystemClock.elapsedRealtimeNanos() / NANOS_PER_MICRO - ptsUs
+        val monotonic = System.nanoTime() / NANOS_PER_MICRO - ptsUs
+        return listOf(boot, monotonic).filter { it >= 0 }.minOrNull()?.div(MICROS_PER_MILLI) ?: 0
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun queueDepth(): String = if (queue.isEmpty) "empty" else "busy"
+
     /** Ends the stream after what is queued. */
     fun close() {
         queue.close()
@@ -85,6 +132,13 @@ class MediaStreamSender(
 
         // About a second of video at 30 fps plus audio; more only adds latency.
         const val QUEUE = 48
+        const val STATS_MS = 5_000L
+        const val MILLIS = 1000.0
+        const val BITS = 8
+        const val KILO = 1000
+        const val ID_CHARS = 8
+        const val NANOS_PER_MICRO = 1000L
+        const val MICROS_PER_MILLI = 1000L
     }
 }
 

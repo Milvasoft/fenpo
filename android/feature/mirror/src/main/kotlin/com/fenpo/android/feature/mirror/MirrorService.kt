@@ -28,6 +28,7 @@ import androidx.core.content.IntentCompat
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.media.AudioCapture
 import com.fenpo.android.core.media.BitrateController
+import com.fenpo.android.core.media.LowLatencyWifi
 import com.fenpo.android.core.media.MediaStreamSender
 import com.fenpo.android.core.media.VideoEncoder
 import com.fenpo.protocol.v1.AudioCodec
@@ -69,6 +70,7 @@ class MirrorService :
     private var encoder: VideoEncoder? = null
     private var audio: AudioCapture? = null
     private var sender: MediaStreamSender? = null
+    private val wifi by lazy { LowLatencyWifi(this) }
     private var bitrate = BitrateController(DEFAULT_KBPS, FLOOR_KBPS)
     private var streamId = ""
     private var codec = VideoCodec.VIDEO_CODEC_H264
@@ -183,6 +185,7 @@ class MirrorService :
                 encoder?.setBitrate(bitrate.onTick(SystemClock.elapsedRealtime()))
             }
         }
+        wifi.acquire()
         val ok = mediaSender.run()
         Log.i(TAG, "Screen stream $streamId ended${if (ok) "" else " (connection lost or no Wi-Fi)"}")
         if (sender != null) {
@@ -277,6 +280,7 @@ class MirrorService :
     }
 
     private fun release() {
+        wifi.release()
         sender?.close()
         sender = null
         audio?.stop()

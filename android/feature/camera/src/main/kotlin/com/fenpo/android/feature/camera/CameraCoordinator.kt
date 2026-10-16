@@ -73,6 +73,11 @@ class CameraCoordinator
         private val _ui = MutableStateFlow(CameraUiState())
         val ui: StateFlow<CameraUiState> = _ui.asStateFlow()
 
+        private val _requests = MutableStateFlow(0)
+
+        /** Grows with every `CameraStart`; an open camera screen starts the camera when it changes. */
+        val requests: StateFlow<Int> = _requests.asStateFlow()
+
         /** The PC's last request, used when the user starts the camera. */
         @Volatile var request: CameraStart? = null
             private set
@@ -93,6 +98,7 @@ class CameraCoordinator
 
         private suspend fun onStart(start: CameraStart) {
             request = start
+            _requests.update { it + 1 }
             _ui.update { it.copy(consumer = start.consumer, settings = merged(it.settings, start.settings)) }
             if (stream != null) {
                 stream?.applySettings(_ui.value.settings)

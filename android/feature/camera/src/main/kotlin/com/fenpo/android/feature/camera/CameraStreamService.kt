@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.media.AudioCapture
 import com.fenpo.android.core.media.BitrateController
+import com.fenpo.android.core.media.LowLatencyWifi
 import com.fenpo.android.core.media.MediaStreamSender
 import com.fenpo.android.core.media.VideoEncoder
 import com.fenpo.protocol.v1.AudioCodec
@@ -58,6 +59,7 @@ class CameraStreamService :
     private var encoder: VideoEncoder? = null
     private var audio: AudioCapture? = null
     private var sender: MediaStreamSender? = null
+    private val wifi by lazy { LowLatencyWifi(this) }
     private var rotator: GlFrameRotator? = null
     private var orientation: OrientationEventListener? = null
     private var streamId = ""
@@ -143,8 +145,9 @@ class CameraStreamService :
             object : OrientationEventListener(this) {
                 override fun onOrientationChanged(degrees: Int) {
                     if (degrees == ORIENTATION_UNKNOWN) return
-                    upright.rotationDegrees =
-                        GlFrameRotator.rotationFor(camera.sensorOrientation, degrees, camera.isFront)
+                    val rotation = GlFrameRotator.rotationFor(camera.sensorOrientation, degrees, camera.isFront)
+                    upright.rotationDegrees = rotation
+                    camera.setCropCompensation(if (rotation % HALF_TURN != 0) width.toFloat() / height else 1f)
                 }
             }.also { it.enable() }
         if (audioCodec != AudioCodec.AUDIO_CODEC_UNSPECIFIED && hasMicrophonePermission()) {
@@ -162,6 +165,7 @@ class CameraStreamService :
                 videoEncoder.setBitrate(bitrate.onTick(SystemClock.elapsedRealtime()))
             }
         }
+        wifi.acquire()
         val ok = mediaSender.run()
         Log.i(TAG, "Camera stream $streamId ended${if (ok) "" else " (connection lost or no Wi-Fi)"}")
         if (sender != null) {
@@ -201,6 +205,7 @@ class CameraStreamService :
     }
 
     private fun release() {
+        wifi.release()
         orientation?.disable()
         orientation = null
         sender?.close()
@@ -277,6 +282,7 @@ class CameraStreamService :
         private const val BITRATE_TICK_MS = 2_000L
         private const val STREAMING_AFTER_MS = 1_500L
         private const val SETTINGS_REPORT_MS = 500L
+        private const val HALF_TURN = 180
 
         /** Starts the stream; call only from the visible camera screen (camera FGS rule). */
         fun start(context: Context) {

@@ -30,6 +30,10 @@ import java.util.concurrent.Executor
  *
  * Frames come in the sensor's orientation; [GlFrameRotator] turns them upright for the PC using
  * [sensorOrientation] and [isFront].
+ *
+ * Zoom is relative to the facing's main lens. Below what the main lens reaches (0,5, or the phone
+ * held upright, where the rotator crops by about 1.8) the session moves to the back's ultra-wide
+ * lens when the phone shows it to apps, like a webcam held upright keeps its field of view.
  */
 class CameraSession(
     context: Context,
@@ -48,6 +52,9 @@ class CameraSession(
     private var settings = CameraSettings(facing = CameraFacing.CAMERA_FACING_BACK, zoom = 1f)
     private var activeArray = Rect()
     private var zoomRange = Range(1f, 1f)
+    private var lenses = Lenses(main = Lens(id = "", reach = 1f), wide = null)
+    private var lens = lenses.main
+    private var mainMinZoom = 1f
     private var faceCenter: Pair<Float, Float>? = null
     private var lastCropUpdate = 0L
 
@@ -65,7 +72,7 @@ class CameraSession(
 
     /** Whether the phone has a front camera to flip to. */
     val frontAvailable: Boolean
-        get() = cameraId(CameraFacing.CAMERA_FACING_FRONT) != null
+        get() = lensesFor(CameraFacing.CAMERA_FACING_FRONT) != null
 
     /** Opens the camera for [initial]; reports problems through `onFailure`. */
     fun start(initial: CameraSettings) {
@@ -81,8 +88,45 @@ class CameraSession(
                 open(next)
             } else {
                 settings = next.copy(facing = settings.facing, zoom = if (next.zoom > 0f) next.zoom else settings.zoom)
-                repeat()
+                follow()
             }
+        }
+    }
+
+    @Volatile private var cropCompensation = 1f
+
+    /**
+     * How much [GlFrameRotator] crops (1 in landscape, about 1.8 when the phone is upright): the
+     * camera zooms out by as much, on the ultra-wide lens when the main one cannot, so the PC sees
+     * the field of view the zoom setting means instead of a close-up (device test, 16 October:
+     * the S10+'s main lens stops at 1×, its ultra-wide sees about twice as wide).
+     */
+    fun setCropCompensation(factor: Float) {
+        handler.post {
+            if (factor == cropCompensation) return@post
+            cropCompensation = factor
+            follow()
+        }
+    }
+
+    /** The zoom ratio on the open lens that gives the field of view [settings] mean. */
+    private fun effectiveZoom(): Float =
+        (settings.zoom * lens.reach / cropCompensation).coerceIn(zoomRange.lower, zoomRange.upper)
+
+    /** The lens the current zoom and crop need: the ultra-wide only where the main one is too narrow. */
+    private fun wantedLens(): Lens {
+        val wide = lenses.wide ?: return lenses.main
+        return if (settings.zoom / cropCompensation < mainMinZoom) wide else lenses.main
+    }
+
+    /** Moves to the lens the settings need, or changes the request on the open one. */
+    private fun follow() {
+        val next = wantedLens()
+        if (next.id != lens.id) {
+            closeCamera()
+            openLens(next)
+        } else {
+            repeat()
         }
     }
 
@@ -105,9 +149,8 @@ class CameraSession(
         }
     }
 
-    @SuppressLint("MissingPermission") // The camera screen asks for CAMERA before this service starts.
     private fun open(wanted: CameraSettings) {
-        val facing =
+        val asked =
             if (wanted.facing ==
                 CameraFacing.CAMERA_FACING_UNSPECIFIED
             ) {
@@ -115,34 +158,52 @@ class CameraSession(
             } else {
                 wanted.facing
             }
-        val id = cameraId(facing) ?: cameraId(CameraFacing.CAMERA_FACING_BACK)
-        if (id == null) {
+        val facing = if (lensesFor(asked) != null) asked else CameraFacing.CAMERA_FACING_BACK
+        val found = lensesFor(facing)
+        if (found == null) {
             onFailure("No camera")
             return
         }
-        val characteristics = manager.getCameraCharacteristics(id)
-        sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
-        isFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
-        activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) ?: Rect()
-        zoomRange = characteristics.get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE) ?: Range(1f, 1f)
-        zoomPresets = presets(zoomRange)
+        lenses = found
+        val mainRange = zoomRangeOf(found.main.id)
+        mainMinZoom = mainRange.lower
+        // Zoom settings are on the main lens's scale; the ultra-wide reaches below its 1×.
+        val limits = Range(found.wide?.let { zoomRangeOf(it.id).lower / it.reach } ?: mainRange.lower, mainRange.upper)
+        zoomPresets = presets(limits)
         settings =
             wanted.copy(
                 facing = facing,
-                zoom =
-                    wanted.zoom.takeIf { it > 0f }?.coerceIn(zoomRange.lower, zoomRange.upper) ?: 1f,
+                zoom = wanted.zoom.takeIf { it > 0f }?.coerceIn(limits.lower, limits.upper) ?: 1f,
             )
+        openLens(wantedLens())
+    }
+
+    @SuppressLint("MissingPermission") // The camera screen asks for CAMERA before this service starts.
+    private fun openLens(next: Lens) {
+        lens = next
+        val characteristics = manager.getCameraCharacteristics(next.id)
+        sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
+        isFront = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
+        activeArray = characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) ?: Rect()
+        zoomRange = zoomRangeOf(next.id)
+        Log.i(TAG, "Opening camera ${next.id} (reach ${"%.2f".format(next.reach)}, zoom ${effectiveZoom()})")
         manager.openCamera(
-            id,
+            next.id,
             executor,
             object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
+                    // A lens change while this one was opening: the newer one is wanted.
+                    if (lens.id != next.id || device != null) {
+                        camera.close()
+                        return
+                    }
                     device = camera
                     configure()
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
                     camera.close()
+                    if (camera.id != lens.id) return
                     device = null
                     onFailure("Another app took the camera")
                 }
@@ -152,6 +213,7 @@ class CameraSession(
                     error: Int,
                 ) {
                     camera.close()
+                    if (camera.id != lens.id) return
                     device = null
                     onFailure(
                         if (error ==
@@ -209,7 +271,7 @@ class CameraSession(
                     set(CaptureRequest.CONTROL_ZOOM_RATIO, 1f)
                     set(CaptureRequest.SCALER_CROP_REGION, centerCrop())
                 } else {
-                    set(CaptureRequest.CONTROL_ZOOM_RATIO, settings.zoom.coerceIn(zoomRange.lower, zoomRange.upper))
+                    set(CaptureRequest.CONTROL_ZOOM_RATIO, effectiveZoom())
                 }
             }
         runCatching { current.setRepeatingRequest(request.build(), FaceTracker(), handler) }
@@ -242,9 +304,9 @@ class CameraSession(
 
     /** A crop of the active array around the face, as tight as the zoom setting (at least 1.4×). */
     private fun centerCrop(): Rect {
-        val zoom = maxOf(settings.zoom, CENTER_MIN_ZOOM)
-        val width = (activeArray.width() / zoom).toInt()
-        val height = (activeArray.height() / zoom).toInt()
+        val zoom = maxOf(settings.zoom, CENTER_MIN_ZOOM) * lens.reach / cropCompensation
+        val width = (activeArray.width() / zoom.coerceAtLeast(1f)).toInt()
+        val height = (activeArray.height() / zoom.coerceAtLeast(1f)).toInt()
         val (cx, cy) = faceCenter ?: (activeArray.exactCenterX() to activeArray.exactCenterY())
         val left = (cx - width / 2).toInt().coerceIn(activeArray.left, activeArray.right - width)
         val top = (cy - height / 2).toInt().coerceIn(activeArray.top, activeArray.bottom - height)
@@ -259,8 +321,8 @@ class CameraSession(
         faceCenter = null
     }
 
-    private fun cameraId(facing: CameraFacing): String? {
-        val lens =
+    private fun lensesFor(facing: CameraFacing): Lenses? {
+        val wanted =
             if (facing ==
                 CameraFacing.CAMERA_FACING_FRONT
             ) {
@@ -268,17 +330,56 @@ class CameraSession(
             } else {
                 CameraMetadata.LENS_FACING_BACK
             }
-        return manager.cameraIdList.firstOrNull {
-            manager.getCameraCharacteristics(it).get(CameraCharacteristics.LENS_FACING) ==
-                lens
-        }
+        val ids =
+            manager.cameraIdList.filter {
+                manager.getCameraCharacteristics(it).get(CameraCharacteristics.LENS_FACING) ==
+                    wanted
+            }
+        val main = ids.firstOrNull() ?: return null
+        val mainView = viewOf(main)
+        val lenses = ids.map { Lens(id = it, reach = viewOf(it) / mainView) }
+        val wide = lenses.filter { it.reach >= WIDER_LENS }.maxByOrNull { it.reach }
+        return Lenses(
+            main = Lens(id = main, reach = 1f),
+            wide =
+                wide.takeIf {
+                    facing !=
+                        CameraFacing.CAMERA_FACING_FRONT
+                },
+        )
     }
+
+    /** Half the horizontal field of view as a tangent: sensor width over twice the focal length. */
+    private fun viewOf(id: String): Float {
+        val characteristics = manager.getCameraCharacteristics(id)
+        val width = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)?.width ?: return 1f
+        val focal =
+            characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)?.minOrNull() ?: return 1f
+        return width / (2 * focal)
+    }
+
+    private fun zoomRangeOf(id: String): Range<Float> =
+        manager.getCameraCharacteristics(id).get(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE) ?: Range(1f, 1f)
+
+    /** One camera and how much wider than the facing's main lens it sees. */
+    private class Lens(
+        val id: String,
+        val reach: Float,
+    )
+
+    private class Lenses(
+        val main: Lens,
+        val wide: Lens?,
+    )
 
     companion object {
         private const val TAG = "FenpoCamera"
         private const val SMOOTHING = 0.3f
         private const val CROP_INTERVAL_MS = 200L
         private const val CENTER_MIN_ZOOM = 1.4f
+
+        /** A lens counts as the ultra-wide when it sees at least this much wider than the main one. */
+        private const val WIDER_LENS = 1.3f
 
         /** 0.5 when the camera goes that wide, 1, and 2 when it zooms that far. */
         fun presets(range: Range<Float>): List<Float> =
