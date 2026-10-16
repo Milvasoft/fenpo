@@ -124,9 +124,7 @@ struct FramePacerTests {
     @Test
     func picksUpAfterAPause() {
         var pacer = FramePacer(fps: 30)
-        #expect(pacer.accept(0))
-        #expect(pacer.accept(5))
-        #expect(!pacer.accept(5.01))
-        #expect(pacer.accept(5.034))
+        let results = [0, 5, 5.01, 5.034].map { pacer.accept($0) }
+        #expect(results == [true, true, false, true])
     }
 }
