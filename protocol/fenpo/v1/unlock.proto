@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Unlocking the PC's locked session with Face ID or the fingerprint on the phone (CAPABILITY_UNLOCK). Only a locked
+// session: after a restart the first sign-in still takes the Windows password or PIN.
+//
+// The PC keeps the user's Windows password encrypted (AES-256-GCM) with a key it does not keep: the key lives on the
+// phone, protected by the phone's biometrics (iOS keychain with biometryCurrentSet, Android Keystore with user
+// authentication), and comes to the PC only after the phone's user approves with Face ID or a fingerprint. Neither
+// device alone can recover the password. Changing the phone's enrolled biometrics invalidates the key; the PC then asks
+// for the password again.
+//
+// Enrolment: the PC sends UnlockEnroll after its user typed the Windows password into Fenpo; the phone creates a random
+// 32-byte key for this PC (replacing an older one), stores it, and answers UnlockKey after a biometric check.
+// Unlock: the PC sends UnlockRequest when its user picks "Unlock with Fenpo" on the lock screen; the phone asks its
+// user (a notification when Fenpo is in the background, tapping it opens the biometric prompt) and answers UnlockKey,
+// or Error DECLINED when the user cancels, or Error NOT_PAIRED when it has no key for this PC.
+// These messages go on the BLE channel (sealed) or the TLS channel, whichever is open; never anywhere else.
+
+// PC → phone: make a key for this PC.
+message UnlockEnroll {
+  string pc_name = 1;                    // Shown in the phone's prompt.
+}
+
+// PC → phone: the PC's user wants to unlock; answer with the key after the biometric check.
+message UnlockRequest {
+  string pc_name = 1;
+  string request_id = 2;                 // Echoed in UnlockKey, so a late answer to an old request is ignored.
+}
+
+// Phone → PC: the key, after the biometric check.
+message UnlockKey {
+  string request_id = 1;                 // Empty for an enrolment answer.
+  bytes key = 2;                         // 32 bytes.
+}
+
+// PC → phone: forget this PC's key (unlocking turned off in Fenpo).
+message UnlockRevoke {
+}
