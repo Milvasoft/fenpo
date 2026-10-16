@@ -32,6 +32,7 @@ public partial class App : Application
     private MainWindow? _window;
     private TrayWindow? _trayWindow;
     private TrayIconService? _trayIcon;
+    private ScreenMirrorWindow? _mirrorWindow;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="App"/> class.
@@ -93,6 +94,8 @@ public partial class App : Application
                 .AddSingleton(new PairingTokens())
                 .AddSingleton<FileTransferService>()
                 .AddHostedService(sp => sp.GetRequiredService<FileTransferService>())
+                .AddSingleton<ScreenMirrorService>()
+                .AddHostedService(sp => sp.GetRequiredService<ScreenMirrorService>())
                 .AddSingleton<ControlServer>()
                 .AddHostedService<TransportHostedService>()
                 .AddSingleton<PhoneActions>()
@@ -178,6 +181,22 @@ public partial class App : Application
 
         _window.AppWindow.Show();
         _window.Activate();
+    }
+
+    /// <summary>
+    /// Shows the phone's screen in its own window and asks the phone to start, or brings the open window forward.
+    /// </summary>
+    public void ShowScreenMirror()
+    {
+        if (_mirrorWindow is not null)
+        {
+            _mirrorWindow.Activate();
+            return;
+        }
+
+        _mirrorWindow = new ScreenMirrorWindow(GetService<ScreenMirrorService>(), GetService<ThemeService>(), GetService<LocalizationService>(), GetService<ILogger<ScreenMirrorWindow>>());
+        _mirrorWindow.Closed += (sender, e) => _mirrorWindow = null;
+        _mirrorWindow.Start();
     }
 
     /// <summary>

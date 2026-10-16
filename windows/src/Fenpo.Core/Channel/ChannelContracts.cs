@@ -28,6 +28,12 @@ public interface IPairedAppDevices
     /// </summary>
     /// <param name="device">Phone.</param>
     void Save(PairedAppDevice device);
+
+    /// <summary>
+    /// Forgets a paired phone; its certificate and key no longer open anything.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    void Remove(string deviceId);
 }
 
 /// <summary>
@@ -95,6 +101,7 @@ public static class PcHello
             Capability.FileTransfer,
             Capability.NotificationMirror,
             Capability.Media,
+            Capability.ScreenMirror,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,

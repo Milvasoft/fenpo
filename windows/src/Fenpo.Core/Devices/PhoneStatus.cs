@@ -97,6 +97,11 @@ public sealed record PhoneStatus
     public bool AppConnected { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether Do Not Disturb or a Focus mode is on, as Fenpo on the phone reports it.
+    /// </summary>
+    public bool FocusActive { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether a phone is paired with Fenpo on it (an Android phone has no Bluetooth link to
     /// show otherwise).
     /// </summary>

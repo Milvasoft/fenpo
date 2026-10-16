@@ -223,7 +223,8 @@
                                 <TextBlock Text="{x:Bind ViewModel.DeviceHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
                             </StackPanel>
                             <Button Grid.Column="2" x:Uid="Settings_Pair" VerticalAlignment="Center" Click="OnPairClick" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.IsPaired), Mode=OneWay}" />
-                            <Button Grid.Column="2" x:Uid="Settings_ManagePairing" VerticalAlignment="Center" Click="OnManagePairingClick" Visibility="{x:Bind ViewModel.IsPaired, Mode=OneWay}" />
+                            <Button Grid.Column="2" x:Uid="Settings_ManagePairing" VerticalAlignment="Center" Click="OnManagePairingClick" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.ActiveIsAndroid), Mode=OneWay}" />
+                            <Button Grid.Column="2" x:Uid="Settings_ForgetPhone" VerticalAlignment="Center" Click="OnForgetClick" Visibility="{x:Bind ViewModel.ActiveIsAndroid, Mode=OneWay}" />
                         </Grid>
                         <!-- The other paired phone: Fenpo uses one at a time. -->
                         <StackPanel Visibility="{x:Bind ViewModel.HasOtherPhone, Mode=OneWay}">
@@ -239,7 +240,10 @@
                                     <TextBlock Text="{x:Bind ViewModel.OtherDeviceTitle, Mode=OneWay}" Style="{StaticResource FenpoRowLabelStyle}" />
                                     <TextBlock Text="{x:Bind ViewModel.OtherDeviceHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
                                 </StackPanel>
-                                <Button Grid.Column="2" x:Uid="Settings_UsePhone" VerticalAlignment="Center" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button x:Uid="Settings_ForgetPhone" Click="OnForgetClick" Visibility="{x:Bind ViewModel.OtherIsAndroid, Mode=OneWay}" />
+                                    <Button x:Uid="Settings_UsePhone" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" />
+                                </StackPanel>
                             </Grid>
                         </StackPanel>
                         <Border Style="{StaticResource FenpoRowDividerStyle}" />

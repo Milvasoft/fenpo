@@ -1,0 +1,317 @@
+using System.Runtime.InteropServices.WindowsRuntime;
+using Fenpo.App.Services;
+using Fenpo.Protocol.V1;
+using Microsoft.Extensions.Logging;
+using Microsoft.UI.Dispatching;
+using Microsoft.UI.Input;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
+using Windows.Foundation;
+using Windows.Media.Core;
+using Windows.Media.MediaProperties;
+using Windows.Media.Playback;
+using VirtualKey = Windows.System.VirtualKey;
+
+namespace Fenpo.App;
+
+/// <summary>
+/// The Android phone's screen in a window: H.264 from the media connection is decoded and shown by Windows' own player
+/// through a live <see cref="MediaStreamSource"/>; clicks become taps, holds long presses, drags swipes and the wheel
+/// a short swipe, all as points 0..1 on the streamed frame.
+/// </summary>
+public sealed partial class ScreenMirrorWindow : Window
+{
+    private static readonly TimeSpan _longPress = TimeSpan.FromMilliseconds(500);
+    private const double _tapSlop = 8;
+
+    private readonly ScreenMirrorService _mirror;
+    private readonly LocalizationService _localization;
+    private readonly ILogger _logger;
+    private readonly DispatcherQueue _dispatcher;
+    private MediaPlayer? _player;
+    private MirrorStream? _stream;
+    private CancellationTokenSource? _feeding;
+    private (uint Width, uint Height) _playingSize;
+    private Point _pressedAt;
+    private DateTimeOffset _pressedTime;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ScreenMirrorWindow"/> class.
+    /// </summary>
+    /// <param name="mirror">Screen mirroring.</param>
+    /// <param name="themeService">Applies the Theme setting to this window.</param>
+    /// <param name="localization">Strings.</param>
+    /// <param name="logger">Logger.</param>
+    public ScreenMirrorWindow(ScreenMirrorService mirror, ThemeService themeService, LocalizationService localization, ILogger<ScreenMirrorWindow> logger)
+    {
+        _mirror = mirror;
+        _localization = localization;
+        _logger = logger;
+        InitializeComponent();
+        _dispatcher = DispatcherQueue;
+
+        Title = localization.GetString("Mirror_Title");
+        AppWindow.SetIcon("Assets/Fenpo.ico");
+        AppWindow.Resize(new Windows.Graphics.SizeInt32(Scale(440), Scale(900)));
+        themeService.Register(this);
+
+        _mirror.Changed += OnMirrorChanged;
+        _mirror.StreamOpened += OnStreamOpened;
+        Closed += (sender, e) => OnClosed();
+        ApplyState();
+    }
+
+    /// <summary>
+    /// Shows the window and asks the phone to start.
+    /// </summary>
+    public void Start()
+    {
+        Activate();
+        _ = _mirror.StartMirroringAsync();
+    }
+
+    private static Envelope Global(ScreenGlobalAction action) => new() { ScreenInput = new ScreenInput { Global = action } };
+
+    private int Scale(int pixels) => (int)(pixels * (Content?.XamlRoot?.RasterizationScale ?? NativeMethods.GetDpiForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this)) / 96.0));
+
+    private void OnClosed()
+    {
+        _mirror.Changed -= OnMirrorChanged;
+        _mirror.StreamOpened -= OnStreamOpened;
+        _feeding?.Cancel();
+        _player?.Dispose();
+        _player = null;
+        _ = _mirror.StopMirroringAsync();
+    }
+
+    private void OnMirrorChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(() =>
+    {
+        ApplyState();
+
+        // After a rotation the same connection carries a new size (new SPS/PPS and a key frame): the player starts
+        // over at that key frame instead of relying on the decoder to change size on the fly.
+        if (_stream is { } stream && _mirror.Video is { Width: > 0 } video && (video.Width, video.Height) != _playingSize)
+        {
+            _logger.LogInformation("Screen size changed to {Width}x{Height}; restarting the player", video.Width, video.Height);
+            Play(stream);
+            _ = _mirror.RequestKeyFrameAsync();
+        }
+    });
+
+    private void ApplyState()
+    {
+        var state = _mirror.State;
+        StatePanel.Visibility = state == ScreenState.Streaming ? Visibility.Collapsed : Visibility.Visible;
+        Waiting.Visibility = state == ScreenState.WaitingForConsent ? Visibility.Visible : Visibility.Collapsed;
+        RestartButton.Visibility = state is ScreenState.PausedLocked or ScreenState.Stopped or ScreenState.Failed ? Visibility.Visible : Visibility.Collapsed;
+        StateText.Text = _localization.GetString(state switch
+        {
+            ScreenState.WaitingForConsent => "Mirror_WaitingConsent",
+            ScreenState.PausedLocked => "Mirror_Locked",
+            ScreenState.Failed => "Mirror_Failed",
+            _ => "Mirror_Stopped",
+        });
+        NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable;
+    }
+
+    private void OnStreamOpened(object? sender, MirrorStream stream) => _dispatcher.TryEnqueue(() => Play(stream));
+
+    // A live source: no buffering, samples handed over as they arrive, starting at a key frame with its SPS/PPS.
+    private void Play(MirrorStream stream)
+    {
+        var video = _stream == stream && _mirror.Video is { Width: > 0 } current ? current : stream.Open.Video;
+        _stream = stream;
+        var properties = VideoEncodingProperties.CreateH264();
+        properties.Width = video?.Width ?? 1080;
+        properties.Height = video?.Height ?? 1920;
+        _playingSize = (properties.Width, properties.Height);
+        var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
+
+        // One reader at a time: the previous player's pending request ends here.
+        _feeding?.Cancel();
+        _feeding = new CancellationTokenSource();
+        var feeder = new SampleFeeder(stream, _feeding.Token);
+        source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
+        source.SampleRequested += async (sender, args) =>
+        {
+            var deferral = args.Request.GetDeferral();
+
+            try
+            {
+                args.Request.Sample = await feeder.NextAsync();
+            }
+            catch (OperationCanceledException)
+            {
+                args.Request.Sample = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Feeding the screen stream failed");
+                args.Request.Sample = null;
+            }
+            finally
+            {
+                deferral.Complete();
+            }
+        };
+
+        _player?.Dispose();
+        _player = new MediaPlayer { RealTimePlayback = true, IsMuted = true };
+        _player.MediaFailed += (sender, args) =>
+        {
+            _logger.LogWarning("Screen stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
+            _ = _mirror.RequestKeyFrameAsync();
+        };
+        _player.Source = MediaSource.CreateFromMediaStreamSource(source);
+        Player.SetMediaPlayer(_player);
+        _player.Play();
+    }
+
+    // Where the frame is inside the element (letterboxed, Uniform) and a point on it as 0..1.
+    private ScreenPoint? ToFrame(Point point)
+    {
+        var session = _player?.PlaybackSession;
+        double frameWidth = session?.NaturalVideoWidth ?? 0;
+        double frameHeight = session?.NaturalVideoHeight ?? 0;
+
+        if (frameWidth == 0 || frameHeight == 0)
+        {
+            frameWidth = _mirror.Video?.Width ?? 0;
+            frameHeight = _mirror.Video?.Height ?? 0;
+        }
+
+        var width = TouchSurface.ActualWidth;
+        var height = TouchSurface.ActualHeight;
+
+        if (frameWidth == 0 || frameHeight == 0 || width == 0 || height == 0)
+        {
+            return null;
+        }
+
+        var scale = Math.Min(width / frameWidth, height / frameHeight);
+        var shownWidth = frameWidth * scale;
+        var shownHeight = frameHeight * scale;
+        var x = (point.X - ((width - shownWidth) / 2)) / shownWidth;
+        var y = (point.Y - ((height - shownHeight) / 2)) / shownHeight;
+        return x is < 0 or > 1 || y is < 0 or > 1 ? null : new ScreenPoint { X = (float)x, Y = (float)y };
+    }
+
+    private void Send(ScreenInput input)
+    {
+        if (_mirror.State == ScreenState.Streaming && _mirror.ControlAvailable)
+        {
+            _ = _mirror.SendInputAsync(input);
+        }
+    }
+
+    private void OnPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        _pressedAt = e.GetCurrentPoint(TouchSurface).Position;
+        _pressedTime = DateTimeOffset.Now;
+        TouchSurface.CapturePointer(e.Pointer);
+    }
+
+    private void OnPointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        TouchSurface.ReleasePointerCapture(e.Pointer);
+        var releasedAt = e.GetCurrentPoint(TouchSurface).Position;
+        var held = DateTimeOffset.Now - _pressedTime;
+        var moved = Math.Sqrt(Math.Pow(releasedAt.X - _pressedAt.X, 2) + Math.Pow(releasedAt.Y - _pressedAt.Y, 2));
+
+        if (ToFrame(_pressedAt) is not { } from)
+        {
+            return;
+        }
+
+        if (moved < _tapSlop)
+        {
+            Send(held >= _longPress ? new ScreenInput { LongPress = from } : new ScreenInput { Tap = from });
+            return;
+        }
+
+        if (ToFrame(releasedAt) is { } to)
+        {
+            Send(new ScreenInput { Swipe = new ScreenSwipe { From = from, To = to, DurationMs = (uint)Math.Clamp(held.TotalMilliseconds, 100, 2000) } });
+        }
+    }
+
+    // One wheel notch scrolls about a fifth of the screen, like a short swipe the other way.
+    private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
+    {
+        var point = e.GetCurrentPoint(TouchSurface);
+
+        if (ToFrame(point.Position) is not { } at)
+        {
+            return;
+        }
+
+        var notches = point.Properties.MouseWheelDelta / 120.0;
+        var to = new ScreenPoint { X = at.X, Y = (float)Math.Clamp(at.Y + (notches * 0.2), 0, 1) };
+        Send(new ScreenInput { Swipe = new ScreenSwipe { From = at, To = to, DurationMs = 150 } });
+    }
+
+    private void OnBackClick(object sender, RoutedEventArgs e) => Send(Global(ScreenGlobalAction.Back).ScreenInput);
+
+    private void OnHomeClick(object sender, RoutedEventArgs e) => Send(Global(ScreenGlobalAction.Home).ScreenInput);
+
+    private void OnRecentsClick(object sender, RoutedEventArgs e) => Send(Global(ScreenGlobalAction.Recents).ScreenInput);
+
+    private void OnNotificationsClick(object sender, RoutedEventArgs e) => Send(Global(ScreenGlobalAction.Notifications).ScreenInput);
+
+    private void OnTypeKeyDown(object sender, KeyRoutedEventArgs e)
+    {
+        if (e.Key != VirtualKey.Enter || TypeBox.Text.Length == 0)
+        {
+            return;
+        }
+
+        Send(new ScreenInput { Text = TypeBox.Text });
+        TypeBox.Text = string.Empty;
+        e.Handled = true;
+    }
+
+    private void OnStopClick(object sender, RoutedEventArgs e) => Close();
+
+    private void OnRestartClick(object sender, RoutedEventArgs e) => _ = _mirror.StartMirroringAsync();
+
+    // Turns stream packets into samples: video only, from the first key frame, SPS/PPS in front of every key frame,
+    // time from the phone's clock relative to the first sample.
+    private sealed class SampleFeeder(MirrorStream stream, CancellationToken cancellationToken)
+    {
+        private readonly MirrorStream _stream = stream;
+        private readonly CancellationToken _cancellationToken = cancellationToken;
+        private byte[] _config = [];
+        private ulong? _firstPts;
+
+        public async Task<MediaStreamSample?> NextAsync()
+        {
+            while (await _stream.Packets.WaitToReadAsync(_cancellationToken))
+            {
+                if (!_stream.Packets.TryRead(out var packet) || packet.Track != StreamTrack.Video)
+                {
+                    continue;
+                }
+
+                if (packet.CodecConfig)
+                {
+                    _config = packet.Data.ToByteArray();
+                    continue;
+                }
+
+                if (_firstPts is null && !packet.KeyFrame)
+                {
+                    continue;
+                }
+
+                _firstPts ??= packet.PtsUs;
+                var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
+                var time = TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10);
+                var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
+                sample.KeyFrame = packet.KeyFrame;
+                return sample;
+            }
+
+            return null;
+        }
+    }
+}

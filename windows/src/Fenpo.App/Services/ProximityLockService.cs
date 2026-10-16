@@ -1,5 +1,6 @@
 using Fenpo.Bluetooth.Link;
 using Fenpo.Bluetooth.Proximity;
+using Fenpo.Core.Devices;
 using Fenpo.Core.Proximity;
 using Fenpo.Core.Settings;
 using Microsoft.Extensions.Hosting;
@@ -14,11 +15,15 @@ namespace Fenpo.App.Services;
 public sealed class ProximityLockService(
     AdvertisementRssiMonitor monitor,
     IphoneLink link,
+    PhoneChannel channel,
+    IPhoneStatusSource status,
     ISettingsStore settings,
     ILogger<ProximityLockService> logger) : BackgroundService
 {
     private readonly AdvertisementRssiMonitor _monitor = monitor;
     private readonly IphoneLink _link = link;
+    private readonly PhoneChannel _channel = channel;
+    private readonly IPhoneStatusSource _status = status;
     private readonly ISettingsStore _settings = settings;
     private readonly ILogger<ProximityLockService> _logger = logger;
     private readonly ProximityDetector _detector = new();
@@ -39,8 +44,36 @@ public sealed class ProximityLockService(
     {
         ApplySettings(_settings.Current);
         _settings.Changed += (_, current) => ApplySettings(current);
-        _monitor.Sample += (_, sample) => Locked(() => _detector.AddSample(sample.At, sample.Rssi));
-        _link.ConnectionChanged += (_, connected) => Locked(() => _detector.SetConnected(connected, DateTimeOffset.Now));
+        // The iPhone's signal comes from its advertisements; an Android phone measures the PC on the BLE link instead.
+        _monitor.Sample += (_, sample) => Locked(() =>
+        {
+            if (_status.Active == PhoneKind.Iphone)
+            {
+                _detector.AddSample(sample.At, sample.Rssi);
+            }
+        });
+        _channel.AndroidRssi += (_, rssi) => Locked(() =>
+        {
+            if (_status.Active == PhoneKind.Android)
+            {
+                _detector.AddSample(DateTimeOffset.Now, rssi);
+            }
+        });
+        _link.ConnectionChanged += (_, connected) => Locked(() =>
+        {
+            if (_status.Active == PhoneKind.Iphone)
+            {
+                _detector.SetConnected(connected, DateTimeOffset.Now);
+            }
+        });
+        _status.Changed += (_, current) => Locked(() =>
+        {
+            if (_status.Active == PhoneKind.Android)
+            {
+                _detector.SetConnected(current.AppConnected, DateTimeOffset.Now);
+            }
+        });
+        _status.ActiveChanged += (_, kind) => Locked(() => _detector.SetConnected(kind == PhoneKind.Iphone ? _link.IsConnected : _status.Current.AppConnected, DateTimeOffset.Now));
         _detector.StateChanged += (_, state) =>
         {
             _logger.LogInformation("Proximity {State} (average {Average:F0} dBm)", state, _detector.AverageDbm);

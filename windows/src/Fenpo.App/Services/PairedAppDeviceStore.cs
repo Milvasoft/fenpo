@@ -43,10 +43,7 @@ public sealed class PairedAppDeviceStore(ILogger<PairedAppDeviceStore> logger) :
         }
     }
 
-    /// <summary>
-    /// Forgets a paired phone.
-    /// </summary>
-    /// <param name="deviceId">Phone id.</param>
+    /// <inheritdoc/>
     public void Remove(string deviceId)
     {
         lock (_lock)
