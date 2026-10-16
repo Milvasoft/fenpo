@@ -1,4 +1,4 @@
-@testable import FenpoApple
+import FenpoApple
 import FenpoCore
 import FenpoProtocol
 import Foundation
@@ -9,6 +9,8 @@ import Testing
 
 /// TLS 1.3 between `TLSControlConnection` and an in-process server that plays the PC:
 /// pinned server certificate, the phone's certificate as client identity, framed Ping/Pong.
+///
+/// Hosted in the app so the keychain has the app's entitlements; package tests have none (-34018).
 @Suite(.serialized)
 struct TLSLoopbackTests {
     let keychain = Keychain(accessGroup: nil)
@@ -134,17 +136,16 @@ final class EchoServer: @unchecked Sendable {
     }
 
     private func listen() async throws -> UInt16 {
-        let once = Once<UInt16>()
         let listener = listener
         let queue = queue
         return try await withCheckedThrowingContinuation { continuation in
-            once.set(continuation)
+            let pending = PendingContinuation(continuation)
             listener.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
-                    once.resume(returning: listener.port?.rawValue ?? 0)
+                    pending.take()?.resume(returning: listener.port?.rawValue ?? 0)
                 case .failed(let error):
-                    once.resume(throwing: error)
+                    pending.take()?.resume(throwing: error)
                 default:
                     break
                 }
@@ -174,4 +175,20 @@ final class EchoServer: @unchecked Sendable {
 /// Shared slot for the fingerprint the server's verify block sees.
 final class FingerprintBox: Sendable {
     let value = Mutex<[UInt8]?>(nil)
+}
+
+/// Hands a continuation to the first caller only.
+final class PendingContinuation<Value: Sendable>: Sendable {
+    private let slot: Mutex<CheckedContinuation<Value, any Error>?>
+
+    init(_ continuation: CheckedContinuation<Value, any Error>) {
+        slot = Mutex(continuation)
+    }
+
+    func take() -> CheckedContinuation<Value, any Error>? {
+        slot.withLock { stored in
+            defer { stored = nil }
+            return stored
+        }
+    }
 }
