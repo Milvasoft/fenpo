@@ -97,11 +97,11 @@ public final class PhotoLibraryService {
         options.fetchLimit = limit + 1
         let assets = PHAsset.fetchAssets(with: options)
         let count = min(assets.count, limit)
-        list.hasMore = assets.count > limit
+        list.hasMore_p = assets.count > limit
         list.items = (0..<count).map { index in
             Self.item(for: assets.object(at: index))
         }
-        log.info("Photo list: \(count) item(s), more: \(list.hasMore)")
+        log.info("Photo list: \(count) item(s), more: \(list.hasMore_p)")
         return list
     }
 
