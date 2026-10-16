@@ -168,7 +168,10 @@ class CameraStreamService :
             object : OrientationEventListener(this) {
                 override fun onOrientationChanged(degrees: Int) {
                     if (degrees == ORIENTATION_UNKNOWN) return
-                    held = degrees
+                    // Only a clear turn changes the way it is held: around 45° the picture flipped
+                    // between portrait and landscape on the PC (device test, 17 October).
+                    if (GlFrameRotator.angleBetween(degrees, held) < TURN_MARGIN) return
+                    held = GlFrameRotator.quarter(degrees)
                     turnUpright()
                 }
             }.also { it.enable() }
@@ -305,6 +308,7 @@ class CameraStreamService :
         private const val STREAMING_AFTER_MS = 1_500L
         private const val SETTINGS_REPORT_MS = 500L
         private const val HALF_TURN = 180
+        private const val TURN_MARGIN = 60
 
         /** Starts the stream; call only from the visible camera screen (camera FGS rule). */
         fun start(context: Context) {

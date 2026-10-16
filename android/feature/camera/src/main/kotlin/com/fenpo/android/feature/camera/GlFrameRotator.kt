@@ -246,11 +246,18 @@ class GlFrameRotator(
             return ((turn % FULL) + FULL) % FULL
         }
 
+        /** The smaller angle between two directions, 0 to 180. */
+        fun angleBetween(
+            a: Int,
+            b: Int,
+        ): Int = abs(((a - b) % FULL + FULL + HALF_TURN) % FULL - HALF_TURN)
+
         /** `OrientationEventListener` degrees rounded to the nearest quarter turn. */
         fun quarter(degrees: Int): Int = ((degrees + QUARTER / 2) / QUARTER * QUARTER) % FULL
 
         private const val HALF = 0.5f
         private const val QUARTER = 90
+        private const val HALF_TURN = 180
         private const val FULL = 360
     }
 }

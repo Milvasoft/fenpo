@@ -20,4 +20,12 @@ class RotationTest {
         assertEquals(0, GlFrameRotator.rotationFor(270, 270, front = true))
         assertEquals(180, GlFrameRotator.rotationFor(270, 90, front = true))
     }
+
+    @Test
+    fun anglesWrapAround() {
+        assertEquals(44, GlFrameRotator.angleBetween(316, 0))
+        assertEquals(45, GlFrameRotator.angleBetween(45, 90))
+        assertEquals(180, GlFrameRotator.angleBetween(0, 180))
+        assertEquals(20, GlFrameRotator.angleBetween(350, 10))
+    }
 }
