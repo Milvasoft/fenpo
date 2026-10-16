@@ -243,6 +243,12 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Pano</value>
   </data>
+  <data name="Control_Active" xml:space="preserve">
+    <value>Klavye ve fare telefonda · Bilgisayara dönmek için Ctrl+Alt+I</value>
+  </data>
+  <data name="Control_Connecting" xml:space="preserve">
+    <value>Telefona bağlanıyor… İmleç için iPhone'da AssistiveTouch açık olmalı · Ctrl+Alt+I ile vazgeç</value>
+  </data>
   <data name="Files_AndMore" xml:space="preserve">
     <value>{0} ve {1} dosya daha</value>
   </data>
@@ -572,6 +578,12 @@
   </data>
   <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Geri</value>
+  </data>
+  <data name="Mirror_Control.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bilgisayarın klavye ve faresini iPhone'a ver (Ctrl+Alt+I)</value>
+  </data>
+  <data name="Mirror_ControlText.Text" xml:space="preserve">
+    <value>Klavye ve fare</value>
   </data>
   <data name="Mirror_Failed" xml:space="preserve">
     <value>Yansıtma başlamadı. Telefonda Fenpo açıkken yeniden başlat.</value>
@@ -1138,10 +1150,10 @@
     <value>Telefonda onayla</value>
   </data>
   <data name="Unlock_PasswordLabel" xml:space="preserve">
-    <value>Şifre</value>
+    <value>Windows şifresi (PIN değil)</value>
   </data>
   <data name="Unlock_PasswordText" xml:space="preserve">
-    <value>Fenpo şifreni bu bilgisayarda şifreli saklar; onu açacak anahtar telefonunda durur ve sadece Face ID ya da parmak izi onayından sonra gelir. Windows Hello PIN'ini değil, hesabının şifresini yaz.</value>
+    <value>Fenpo şifreni bu bilgisayarda şifreli saklar; onu açacak anahtar telefonunda durur ve sadece Face ID ya da parmak izi onayından sonra gelir. Windows Hello PIN'i olmaz: hesabının şifresini yaz. Microsoft hesabıyla giriyorsan Microsoft hesabının şifresi.</value>
   </data>
   <data name="Unlock_PasswordTitle" xml:space="preserve">
     <value>Windows şifren</value>
@@ -1150,7 +1162,7 @@
     <value>Telefonda Face ID ya da parmak iziyle onayla. Telefondaki Fenpo bir bildirim gösterdi.</value>
   </data>
   <data name="Unlock_WrongPassword" xml:space="preserve">
-    <value>Windows bu şifreyi kabul etmedi. Hesabının şifresini yeniden yaz.</value>
+    <value>Windows bu şifreyi kabul etmedi. PIN kabul edilmez; hesabının şifresini gir. Microsoft hesabıyla giriyorsan Microsoft hesabının şifresi.</value>
   </data>
   <data name="VirtualCamera_Failed" xml:space="preserve">
     <value>Kurulum tamamlanmadı. Yönetici onayını verip yeniden dene.</value>

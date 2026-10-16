@@ -53,6 +53,13 @@
                 <FontIcon Glyph="&#xEA8F;" FontSize="16" />
             </Button>
             <TextBox x:Name="TypeBox" Grid.Column="4" x:Uid="Mirror_Type" KeyDown="OnTypeKeyDown" VerticalAlignment="Center" />
+            <!-- iPhone: the PC's keyboard and mouse go to the phone (HID); Ctrl+Alt+I brings them back. -->
+            <Button x:Name="ControlButton" Grid.Column="4" x:Uid="Mirror_Control" HorizontalAlignment="Left" Click="OnControlClick">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE765;" FontSize="16" />
+                    <TextBlock x:Uid="Mirror_ControlText" />
+                </StackPanel>
+            </Button>
             <Button x:Name="StopButton" Grid.Column="5" x:Uid="Mirror_Stop" Padding="8" Click="OnStopClick">
                 <FontIcon Glyph="&#xE71A;" FontSize="16" />
             </Button>
