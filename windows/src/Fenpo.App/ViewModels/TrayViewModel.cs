@@ -17,6 +17,7 @@ public sealed partial class TrayViewModel : ObservableObject
     private readonly IMediaSource _media;
     private readonly ISettingsStore _settings;
     private readonly LocalizationService _localization;
+    private readonly PhoneActions _actions;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private bool _applyingSettings;
 
@@ -27,8 +28,10 @@ public sealed partial class TrayViewModel : ObservableObject
     /// <param name="media">Phone media player.</param>
     /// <param name="settings">Settings store (quick toggles).</param>
     /// <param name="localization">Strings.</param>
-    public TrayViewModel(IPhoneStatusSource status, IMediaSource media, ISettingsStore settings, LocalizationService localization)
+    /// <param name="actions">Ring the phone.</param>
+    public TrayViewModel(IPhoneStatusSource status, IMediaSource media, ISettingsStore settings, LocalizationService localization, PhoneActions actions)
     {
+        _actions = actions;
         _status = status;
         _media = media;
         _settings = settings;
@@ -95,6 +98,13 @@ public sealed partial class TrayViewModel : ObservableObject
     [ObservableProperty]
     public partial string PlayPauseGlyph { get; set; } = "";
 
+    /// <summary>Gets or sets a value indicating whether Fenpo on the phone can ring.</summary>
+    [ObservableProperty]
+    public partial bool CanRing { get; set; }
+
+    [RelayCommand]
+    private Task RingAsync() => _actions.RingAsync();
+
     [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);
 
@@ -133,6 +143,7 @@ public sealed partial class TrayViewModel : ObservableObject
         Summary = PhoneStatusText.Summary(status, _localization);
         StatusText = PhoneStatusText.State(status, _localization);
         AppConnected = status.AppConnected;
+        CanRing = _actions.CanRing;
         ToolTip = status.State == PhoneConnectionState.NotPaired ? "Fenpo" : $"Fenpo\n{DeviceName}: {Summary}";
     }
 

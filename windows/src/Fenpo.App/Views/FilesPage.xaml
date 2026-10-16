@@ -3,7 +3,8 @@
     x:Class="Fenpo.App.Views.FilesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Fenpo.App.Controls">
+    xmlns:controls="using:Fenpo.App.Controls"
+    xmlns:vm="using:Fenpo.App.ViewModels">
 
     <ScrollViewer>
         <StackPanel Padding="32,28">
@@ -12,7 +13,7 @@
 
             <!-- Design "Dosyalar ve fotoğraflar": drop area, transfers, recent photos. -->
             <StackPanel Spacing="16" Opacity="{x:Bind ViewModel.ContentOpacity, Mode=OneWay}" IsHitTestVisible="{x:Bind ViewModel.AppConnected, Mode=OneWay}">
-                <Grid MinHeight="96">
+                <Grid MinHeight="96" AllowDrop="True" DragOver="OnDragOver" Drop="OnDrop">
                     <Rectangle RadiusX="8" RadiusY="8" Stroke="{ThemeResource FenpoTextTertiaryBrush}" StrokeThickness="1.5" StrokeDashArray="4,3" Fill="{ThemeResource FenpoCardSecondaryBrush}" />
                     <Grid Padding="20,16" ColumnSpacing="16">
                         <Grid.ColumnDefinitions>
@@ -27,14 +28,44 @@
                             <TextBlock x:Uid="Files_DropTitle" FontSize="16" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" TextWrapping="Wrap" />
                             <TextBlock x:Uid="Files_DropHint" Style="{StaticResource FenpoSecondaryTextStyle}" TextWrapping="Wrap" />
                         </StackPanel>
-                        <Button Grid.Column="2" x:Uid="Files_Pick" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" />
+                        <Button Grid.Column="2" x:Uid="Files_Pick" Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" Click="OnPickClick" />
                     </Grid>
                 </Grid>
 
+                <InfoBar IsOpen="{x:Bind Files.HasNotice, Mode=OneWay}" Message="{x:Bind Files.Notice, Mode=OneWay}" Severity="Informational" IsClosable="False" />
+
                 <Border Style="{StaticResource FenpoCardStyle}">
                     <StackPanel Padding="16,14">
-                        <TextBlock x:Uid="Files_Transfers" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
-                        <TextBlock x:Uid="Files_NoTransfers" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" />
+                        <Grid>
+                            <TextBlock x:Uid="Files_Transfers" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" VerticalAlignment="Center" />
+                            <HyperlinkButton x:Uid="Files_OpenFolder" HorizontalAlignment="Right" Padding="4,0" Command="{x:Bind Files.OpenFolderCommand}" />
+                        </Grid>
+                        <TextBlock x:Uid="Files_NoTransfers" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" Visibility="{x:Bind Files.IsEmpty, Mode=OneWay}" />
+                        <ItemsControl ItemsSource="{x:Bind Files.Transfers}" Margin="0,4,0,0" IsTabStop="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:TransferRowViewModel">
+                                    <!-- Design ".xfer": file icon, name and state, progress or result, one action. -->
+                                    <Grid Padding="0,10" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="40" Height="40" CornerRadius="8" Background="{ThemeResource FenpoAccentSoftBrush}">
+                                            <TextBlock Text="{x:Bind Extension}" FontSize="11" FontWeight="SemiBold" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Name}" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{x:Bind Detail, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <ProgressBar Grid.Column="2" Width="120" VerticalAlignment="Center" Value="{x:Bind Progress, Mode=OneWay}" Visibility="{x:Bind ShowProgress, Mode=OneWay}" />
+                                        <TextBlock Grid.Column="2" Text="{x:Bind Status, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" VerticalAlignment="Center" Visibility="{x:Bind HasStatus, Mode=OneWay}" />
+                                        <Button Grid.Column="3" Content="{x:Bind ActionText, Mode=OneWay}" Command="{x:Bind ActCommand}" VerticalAlignment="Center" Visibility="{x:Bind HasAction, Mode=OneWay}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
 

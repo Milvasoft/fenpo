@@ -97,6 +97,12 @@ public sealed record PhoneStatus
     public bool AppConnected { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether a phone is paired with Fenpo on it (an Android phone has no Bluetooth link to
+    /// show otherwise).
+    /// </summary>
+    public bool HasAppPhone { get; init; }
+
+    /// <summary>
     /// Gets the clock difference phone minus PC, from Current Time Service.
     /// </summary>
     public TimeSpan? ClockOffset { get; init; }
