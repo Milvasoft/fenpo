@@ -15,14 +15,21 @@ option java_multiple_files = true;
 
 enum VideoCodec {
   VIDEO_CODEC_UNSPECIFIED = 0;
-  VIDEO_CODEC_H264 = 1;                  // Every phone and PC decodes it; the default.
-  VIDEO_CODEC_HEVC = 2;                  // Only when both sides say so.
+  VIDEO_CODEC_H264 = 1;                  // Annex-B, Baseline or Main, no B-frames; every PC decodes it; the default.
+  VIDEO_CODEC_HEVC = 2;                  // Only when the PC lists it: many PCs lack the decoder.
 }
 
 enum AudioCodec {
   AUDIO_CODEC_UNSPECIFIED = 0;           // No audio.
-  AUDIO_CODEC_OPUS = 1;
-  AUDIO_CODEC_AAC = 2;
+  AUDIO_CODEC_OPUS = 1;                  // Needs an optional decoder on Windows; not used by default.
+  AUDIO_CODEC_AAC = 2;                   // AAC-LC, raw access units (no ADTS); codec_config carries the AudioSpecificConfig.
+  AUDIO_CODEC_PCM_S16LE = 3;             // Uncompressed, little-endian 16-bit; the PC's first choice on a LAN.
+}
+
+// What the PC can decode, in its order of preference. Empty lists mean H.264 and no audio.
+message AcceptedFormats {
+  repeated VideoCodec video = 1;
+  repeated AudioCodec audio = 2;
 }
 
 message VideoFormat {
@@ -54,6 +61,11 @@ enum StreamTrack {
   STREAM_TRACK_UNSPECIFIED = 0;
   STREAM_TRACK_VIDEO = 1;
   STREAM_TRACK_AUDIO = 2;
+}
+
+// PC → phone: send a key frame (with codec_config) now, e.g. after a decode error.
+message RequestKeyFrame {
+  string stream_id = 1;
 }
 
 // One encoded access unit. The phone drops video frames rather than queue them when the

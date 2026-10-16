@@ -62,6 +62,7 @@ message Envelope {
     CameraStatus camera_status = 62;
     CameraSettingsChange camera_settings = 63;
     MediaStreamOpen media_stream_open = 64;
+    RequestKeyFrame request_key_frame = 65;
 
     // 80-89: screen mirroring (Android)
     ScreenStart screen_start = 80;
@@ -79,9 +80,9 @@ message Envelope {
     NotificationSnapshotDone notification_snapshot_done = 96;
   }
 
-  // 65-69 camera additions, 70-79 file provider, 84-89 screen mirror additions, 100-109 messages (Android).
+  // 66-69 camera additions, 70-79 file provider, 84-89 screen mirror additions, 100-109 messages (Android).
   // Defined in later phases.
-  reserved 65 to 79;
+  reserved 66 to 79;
   reserved 84 to 89;
   reserved 97 to 109;
 }
