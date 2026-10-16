@@ -57,6 +57,25 @@ A sealed message is split to fit the ATT MTU. Each write (`rx`) or notification 
 
 The phone sends `Hello` as soon as it subscribes to `tx`, which means the encrypted bond is up. The PC answers with its own `Hello`, then `PcStatus`. `Ping`/`Pong` work on both channels.
 
+## File transfer
+
+- The phone opens every data connection; the PC never connects to the phone and the phone never listens. A server
+  socket on the phone runs into Android's local network permission, NAT and iOS background limits.
+- Data connections go to the PC's control server port with the same mutual, pinned TLS 1.3 as the control connection.
+  The first frame tells the two apart: `Hello` or `PairingRequest` starts a control connection, `TransferStreamHeader`
+  starts a data connection.
+- `TransferAccept.data_port` is set only by the PC; 0 means the control server port. The phone always sends 0.
+- Phone to PC: the phone sends `TransferOffer` on the control connection, the PC answers `TransferAccept`, the phone
+  opens a data connection, writes `[uint32 length][TransferStreamHeader]` and then the bytes of each file in offer order.
+- PC to phone: the PC sends `TransferOffer`, the phone answers `TransferAccept`, the phone opens a data connection and
+  writes `[uint32 length][TransferStreamHeader]`, then the PC writes the bytes. The direction comes from which side
+  offered `transfer_id`.
+- The PC accepts a data connection only for an accepted transfer that has not started yet and that belongs to the
+  phone whose certificate opened the connection; anything else is closed. One data connection per transfer.
+- The phone opens the data connection within 30 seconds of the accept, otherwise both sides treat the transfer as
+  failed. The receiver reports `TransferProgress` on the control connection and `TRANSFER_STATE_COMPLETED` once every
+  byte arrived and every given `sha256` matched. The writer closes the data connection after the last byte.
+
 ## Rules
 
 - This is a draft of version 1. Until the first public release, fields may change; after that, only additive changes.
