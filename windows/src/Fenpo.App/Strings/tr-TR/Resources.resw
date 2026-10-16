@@ -864,6 +864,9 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
+  <data name="Shell_SendToPhone" xml:space="preserve">
+    <value>Fenpo ile telefona gönder</value>
+  </data>
   <data name="Size_Bytes" xml:space="preserve">
     <value>{0} B</value>
   </data>

@@ -107,11 +107,23 @@ public sealed class FileTransferService(
     }
 
     /// <summary>
+    /// Raised after every send attempt with its result, whoever started it (the Files page, a drop, File Explorer).
+    /// </summary>
+    public event EventHandler<SendFilesResult>? SendFinished;
+
+    /// <summary>
     /// Offers files to the phone; the transfer continues in the background.
     /// </summary>
     /// <param name="paths">Files on the PC. Folders are skipped.</param>
     /// <returns>Whether the offer went out, or why not.</returns>
     public async Task<SendFilesResult> SendAsync(IReadOnlyList<string> paths)
+    {
+        var result = await OfferAsync(paths);
+        SendFinished?.Invoke(this, result);
+        return result;
+    }
+
+    private async Task<SendFilesResult> OfferAsync(IReadOnlyList<string> paths)
     {
         if (!_channel.IsConnected || _channel.Phone is not { } phone)
         {

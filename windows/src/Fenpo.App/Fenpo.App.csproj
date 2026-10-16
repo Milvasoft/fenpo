@@ -22,6 +22,27 @@
     <Content Include="Assets\**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- File Explorer's right-click command is a Native AOT DLL (Fenpo.ShellExtension); it is published for this
+       platform and copied next to Fenpo.exe. Native AOT links with Visual Studio's tools, found through vswhere. -->
+  <PropertyGroup>
+    <ShellExtensionRid Condition="'$(Platform)' == 'ARM64'">win-arm64</ShellExtensionRid>
+    <ShellExtensionRid Condition="'$(Platform)' != 'ARM64'">win-x64</ShellExtensionRid>
+    <ShellExtensionProject>$(MSBuildThisFileDirectory)..\Fenpo.ShellExtension\Fenpo.ShellExtension.csproj</ShellExtensionProject>
+    <ShellExtensionOut>$(MSBuildThisFileDirectory)obj\shell\$(ShellExtensionRid)\</ShellExtensionOut>
+  </PropertyGroup>
+
+  <Target Name="PublishShellExtension" BeforeTargets="Build" Inputs="$(ShellExtensionProject);@(ShellExtensionSource)" Outputs="$(ShellExtensionOut)Fenpo.ShellExtension.dll">
+    <Exec Command="set &quot;PATH=%PATH%;$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer&quot; &amp;&amp; dotnet publish &quot;$(ShellExtensionProject)&quot; -c Release -r $(ShellExtensionRid) -o &quot;$(ShellExtensionOut).&quot; -nologo -v q" />
+  </Target>
+
+  <Target Name="CopyShellExtension" AfterTargets="Build">
+    <Copy SourceFiles="$(ShellExtensionOut)Fenpo.ShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <ItemGroup>
+    <ShellExtensionSource Include="..\Fenpo.ShellExtension\**\*.cs" Exclude="..\Fenpo.ShellExtension\obj\**;..\Fenpo.ShellExtension\bin\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />
     <ProjectCapability Include="Msix" />

@@ -864,6 +864,9 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Shell_SendToPhone" xml:space="preserve">
+    <value>Send to phone with Fenpo</value>
+  </data>
   <data name="Size_Bytes" xml:space="preserve">
     <value>{0} B</value>
   </data>
