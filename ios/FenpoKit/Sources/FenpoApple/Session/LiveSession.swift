@@ -105,7 +105,6 @@ public final class FenpoServices {
     public let hotspot: HotspotService
     public let photos: PhotoLibraryService
     public let screenshots: ScreenshotSender
-    public let unlock: UnlockService
     public let browser = PCBrowser()
 
     /// Called whenever the channel state, the PC's status or a transfer changes.
@@ -140,7 +139,6 @@ public final class FenpoServices {
         hotspot = HotspotService()
         photos = PhotoLibraryService(transfers: transfers)
         screenshots = ScreenshotSender(transfers: transfers)
-        unlock = UnlockService(store: pairedStore)
 
         central.onEnvelope = { [weak self] envelope in
             self?.route(envelope, from: .bluetooth)
@@ -168,12 +166,6 @@ public final class FenpoServices {
         }
         photos.reply = { [weak self] body, replyTo, channel in
             self?.reply(body, to: replyTo, on: channel)
-        }
-        unlock.send = { [weak self] body, replyTo, channel in
-            self?.deliver(body, replyTo: replyTo, preferring: channel)
-        }
-        unlock.onChange = { [weak self] in
-            self?.onChange?()
         }
         hotspot.openChannels = { [weak self] in
             guard let self else {
@@ -203,7 +195,6 @@ public final class FenpoServices {
         connectWiFiIfUseful()
         camera.appBecameActive()
         screenshots.check()
-        unlock.appBecameActive()
     }
 
     /// Fenpo went to the background: iOS suspends sockets, so close the channel unless a transfer runs.
@@ -273,21 +264,6 @@ public final class FenpoServices {
         hotspot.sendInfo(over: channel)
     }
 
-    /// Sends an answer that may come long after the request (after Face ID): on the channel the
-    /// request came on if it is still open, otherwise on the other one. Never anywhere else.
-    private func deliver(_ body: Fenpo_V1_Envelope.OneOf_Body, replyTo: UInt64, preferring channel: Channel) {
-        let bluetooth = central.state == .ready
-        let wifiUp = wifi.state == .connected
-        let chosen: Channel
-        switch channel {
-        case .bluetooth:
-            chosen = bluetooth || !wifiUp ? .bluetooth : .wifi
-        case .wifi:
-            chosen = wifiUp || !bluetooth ? .wifi : .bluetooth
-        }
-        reply(body, to: replyTo, on: chosen)
-    }
-
     /// Sends a message that is not a reply.
     private func send(_ body: Fenpo_V1_Envelope.OneOf_Body, on channel: Channel) {
         switch channel {
@@ -312,9 +288,6 @@ public final class FenpoServices {
             return
         }
         if photos.handle(envelope, from: channel) {
-            return
-        }
-        if unlock.handle(envelope, from: channel) {
             return
         }
         if transfers.handle(envelope) {
