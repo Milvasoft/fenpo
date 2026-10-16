@@ -618,6 +618,12 @@
   <data name="Notifications_Footnote.Text" xml:space="preserve">
     <value>iPhone’da WhatsApp gibi uygulamalara buradan yanıt yazılamıyor, iOS buna izin vermiyor. SMS ve iMessage’lar Mesajlar sayfasından yanıtlanabiliyor.</value>
   </data>
+  <data name="Notifications_Refused.Message" xml:space="preserve">
+    <value>Bu yüzden bildirimler ve gelen aramalar gelmiyor. iPhone'da Ayarlar › Bluetooth'u aç, bu bilgisayarın yanındaki (i) simgesine dokun ve Sistem Bildirimlerini Paylaş'ı aç. Fenpo birkaç saniye içinde kendiliğinden bağlanır.</value>
+  </data>
+  <data name="Notifications_Refused.Title" xml:space="preserve">
+    <value>iPhone bu bilgisayarla bildirim paylaşmıyor</value>
+  </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Bildirimler</value>
   </data>

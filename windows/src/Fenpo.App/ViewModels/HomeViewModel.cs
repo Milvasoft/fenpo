@@ -122,6 +122,10 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool UsbOn { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the iPhone in use refuses to share its notifications.</summary>
+    [ObservableProperty]
+    public partial bool NotificationsRefused { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the iPhone app is connected (app-only actions).</summary>
     [ObservableProperty]
     public partial bool AppConnected { get; set; }
@@ -276,6 +280,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         UsbOn = status.UsbConnected;
         UsbText = _localization.GetString(status.UsbConnected ? "Chip_UsbOn" : "Chip_UsbOff");
         AppConnected = status.AppConnected;
+        NotificationsRefused = _status.Active == PhoneKind.Iphone && status.NotificationsRefused;
         CanRing = _actions.CanRing;
         CanMirror = _mirror.CanMirror;
         var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);

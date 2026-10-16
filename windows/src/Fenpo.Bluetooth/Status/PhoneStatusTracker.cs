@@ -85,7 +85,8 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
         });
         _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
         _link.BrokenBondDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
-        _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available });
+        _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available, NotificationsRefused = !available && s.NotificationsRefused });
+        _ancs.RefusedChanged += (_, refused) => Update(s => s with { NotificationsRefused = refused });
 
         // A forgotten iPhone or a new choice can change the phone in use.
         _settings.Changed += (_, _) => Choose();
