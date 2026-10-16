@@ -127,7 +127,7 @@ public sealed class MapMessageSource(
             }
 
             var session = new MasClient(_masLogger);
-            var code = await session.ConnectAsync(device, timeout.Token);
+            var code = await ClassicConnectGate.RunAsync(() => session.ConnectAsync(device, timeout.Token), timeout.Token);
 
             if (code != ObexResponse.Success)
             {

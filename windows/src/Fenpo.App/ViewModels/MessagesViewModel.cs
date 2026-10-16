@@ -3,7 +3,9 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Fenpo.App.Services;
+using Fenpo.Core.Contacts;
 using Fenpo.Core.Messages;
+using Fenpo.Core.Notifications;
 using Microsoft.UI.Dispatching;
 
 namespace Fenpo.App.ViewModels;
@@ -15,10 +17,14 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
 {
     private const int _inboxCount = 150;
     private const int _sentCount = 50;
+    private const int _lookUpLimit = 20;
     private static readonly TimeSpan _separatorGap = TimeSpan.FromHours(1);
 
     private readonly IMessageSource _source;
     private readonly MessageContacts _contacts;
+    private readonly SentMessages _sentMessages;
+    private readonly IContactSource _phoneBook;
+    private readonly NotificationStore _notifications;
     private readonly LocalizationService _localization;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherQueueTimer _reload;
@@ -30,11 +36,17 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
     /// </summary>
     /// <param name="source">Phone messages.</param>
     /// <param name="contacts">Names and numbers learned from full messages.</param>
+    /// <param name="sentMessages">Messages sent from Fenpo, kept on this PC.</param>
+    /// <param name="phoneBook">Names from the phone's contacts.</param>
+    /// <param name="notifications">Phone notifications (Messages notifications name the sender).</param>
     /// <param name="localization">Strings.</param>
-    public MessagesViewModel(IMessageSource source, MessageContacts contacts, LocalizationService localization)
+    public MessagesViewModel(IMessageSource source, MessageContacts contacts, SentMessages sentMessages, IContactSource phoneBook, NotificationStore notifications, LocalizationService localization)
     {
         _source = source;
         _contacts = contacts;
+        _sentMessages = sentMessages;
+        _phoneBook = phoneBook;
+        _notifications = notifications;
         _localization = localization;
 
         // Event reports come in bursts (NewMessage, then MessageShift); one reload covers them.
@@ -45,6 +57,8 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
 
         _source.AvailabilityChanged += OnAvailabilityChanged;
         _source.MessagesChanged += OnMessagesChanged;
+        _phoneBook.ContactsChanged += OnContactsChanged;
+        _notifications.Changed += OnContactsChanged;
         ApplyAvailability(_source.Availability);
         _ = LoadAsync();
     }
@@ -130,6 +144,8 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         _reload.Stop();
         _source.AvailabilityChanged -= OnAvailabilityChanged;
         _source.MessagesChanged -= OnMessagesChanged;
+        _phoneBook.ContactsChanged -= OnContactsChanged;
+        _notifications.Changed -= OnContactsChanged;
     }
 
     /// <summary>
@@ -146,6 +162,11 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         }
 
         var sent = await _source.SendAsync(number.Trim(), text.Trim());
+
+        if (sent)
+        {
+            _sentMessages.Add(number.Trim(), text.Trim());
+        }
         SendError = sent ? string.Empty : _localization.GetString("Messages_SendFailed");
         return sent;
     }
@@ -165,7 +186,7 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         if (value is not null)
         {
             _ = MarkReadAsync(value.Conversation);
-            _ = LearnNumberAsync(value.Conversation);
+            _ = LearnContactAsync(value.Conversation);
         }
     }
 
@@ -186,6 +207,7 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
 
         if (sent)
         {
+            _sentMessages.Add(selected.Conversation.Address, text);
             Draft = string.Empty;
             SendError = string.Empty;
             Bubbles.Add(new BubbleItem(BubbleKind.Outgoing, text));
@@ -208,6 +230,8 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
             _ = LoadAsync();
         }
     });
+
+    private void OnContactsChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(Rebuild);
 
     private void OnMessagesChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(() =>
     {
@@ -237,14 +261,23 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
 
         var inbox = await _source.ListAsync(MessageFolder.Inbox, _inboxCount);
         var sent = await _source.ListAsync(MessageFolder.Sent, _sentCount);
-        _messages = [.. inbox, .. sent];
+        // The phone's sent folder may not keep what Fenpo sent; the local copies fill in, without doubles.
+        var local = _sentMessages.All.Where(m => !sent.Any(s => PhoneNumbers.Normalize(s.Address) == PhoneNumbers.Normalize(m.Address) && s.Text == m.Text && (s.Date - m.Date).Duration() < TimeSpan.FromMinutes(5)));
+        _messages = [.. inbox, .. sent, .. local];
         Rebuild();
+        await LearnContactsAsync();
     }
 
     private void Rebuild()
     {
         var selectedKey = Selected?.Key;
-        var conversations = Core.Messages.Conversations.Build(_messages, _contacts.All);
+
+        foreach (var (name, number) in SenderNames.Learn(_messages, _notifications.Items.Select(i => i.Notification)))
+        {
+            _contacts.Remember(name, number);
+        }
+
+        var conversations = Core.Messages.Conversations.Build(_messages, _contacts.All, _phoneBook.NamesByNumber);
         Conversations.Clear();
 
         foreach (var conversation in conversations)
@@ -292,7 +325,10 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         }
 
         CanReply = conversation.CanReply;
-        ThreadSubtitle = conversation.CanReply ? conversation.Address : _localization.GetString("Messages_Sms");
+        // The number goes under the name only when the name is a contact, not the number itself.
+        ThreadSubtitle = conversation.CanReply && PhoneNumbers.Normalize(conversation.Name) != PhoneNumbers.Normalize(conversation.Address)
+            ? conversation.Address
+            : _localization.GetString("Messages_Sms");
         ReplyHint = conversation.CanReply
             ? string.Empty
             : _lookedUp.Contains(conversation.Key) || conversation.Messages.All(m => m.IsOutgoing)
@@ -326,19 +362,33 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private async Task LearnNumberAsync(Conversation conversation)
+    private bool NeedsLookUp(Conversation conversation) => !conversation.CanReply || (PhoneNumbers.IsDialable(conversation.Name) && _phoneBook.Availability != ContactsAvailability.Ready);
+
+    private async Task LearnContactsAsync()
     {
-        // Received messages carry only the name; the full message has the number (S2). One look-up per conversation.
-        if (conversation.CanReply || !_lookedUp.Add(conversation.Key) || conversation.Messages.LastOrDefault(m => !m.IsOutgoing) is not { } received)
+        // Sequential: MAP runs one operation at a time anyway.
+        foreach (var conversation in Conversations.Select(c => c.Conversation).Where(NeedsLookUp).Take(_lookUpLimit).ToList())
+        {
+            await LearnContactAsync(conversation);
+        }
+    }
+
+    private async Task LearnContactAsync(Conversation conversation)
+    {
+        // The listing has either the contact's name without the number (S2) or the number without the name; the
+        // full message has both (vCard FN and TEL). One look-up per conversation.
+        if (!NeedsLookUp(conversation) || !_lookedUp.Add(conversation.Key) || conversation.Messages.LastOrDefault(m => !m.IsOutgoing) is not { } received)
         {
             return;
         }
 
         var content = await _source.GetAsync(received.Handle);
+        var name = content is not null && content.Name.Any(char.IsLetter) ? content.Name : conversation.Name;
+        var number = content is not null && PhoneNumbers.IsDialable(content.Address) ? content.Address : conversation.Address;
 
-        if (content is not null && PhoneNumbers.IsDialable(content.Address))
+        if (name.Any(char.IsLetter) && PhoneNumbers.IsDialable(number))
         {
-            _contacts.Remember(conversation.Name, content.Address);
+            _contacts.Remember(name, number);
             Rebuild();
         }
         else if (Selected?.Key == conversation.Key)

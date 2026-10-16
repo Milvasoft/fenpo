@@ -18,6 +18,7 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
     private readonly ILogger<PhoneStatusTracker> _logger = logger;
     private readonly Lock _lock = new();
     private PhoneStatus _current = PhoneStatus.Unknown;
+    private GattSubscription? _batterySubscription;
 
     /// <inheritdoc/>
     public event EventHandler<PhoneStatus>? Changed;
@@ -96,13 +97,15 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
                     Update(s => s with { BatteryPercent = levelValue[0] });
                 }
 
-                await level.SubscribeAsync(data =>
+                // Held until the next discovery: an unreferenced characteristic is collected and its notifications stop.
+                var subscription = await level.SubscribeAsync(data =>
                 {
                     if (data.Length > 0)
                     {
                         Update(s => s with { BatteryPercent = data[0] });
                     }
                 });
+                Interlocked.Exchange(ref _batterySubscription, subscription)?.Dispose();
             }
         }
         catch (Exception exception) when (exception is ObjectDisposedException or System.Runtime.InteropServices.COMException)
