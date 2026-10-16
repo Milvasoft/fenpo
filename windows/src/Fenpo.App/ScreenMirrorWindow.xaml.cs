@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices.WindowsRuntime;
+using Fenpo.App.Helpers;
 using Fenpo.App.Services;
 using Fenpo.Protocol.V1;
 using Microsoft.Extensions.Logging;
@@ -7,17 +7,13 @@ using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Input;
 using Windows.Foundation;
-using Windows.Media.Core;
-using Windows.Media.MediaProperties;
-using Windows.Media.Playback;
 using VirtualKey = Windows.System.VirtualKey;
 
 namespace Fenpo.App;
 
 /// <summary>
-/// The Android phone's screen in a window: H.264 from the media connection is decoded and shown by Windows' own player
-/// through a live <see cref="MediaStreamSource"/>; clicks become taps, holds long presses, drags swipes and the wheel
-/// a short swipe, all as points 0..1 on the streamed frame.
+/// The Android phone's screen in a window: the screen stream plays in a <see cref="LiveH264Player"/>; clicks become
+/// taps, holds long presses, drags swipes and the wheel a short swipe, all as points 0..1 on the streamed frame.
 /// </summary>
 public sealed partial class ScreenMirrorWindow : Window
 {
@@ -28,10 +24,8 @@ public sealed partial class ScreenMirrorWindow : Window
     private readonly LocalizationService _localization;
     private readonly ILogger _logger;
     private readonly DispatcherQueue _dispatcher;
-    private MediaPlayer? _player;
-    private MirrorStream? _stream;
-    private CancellationTokenSource? _feeding;
-    private (uint Width, uint Height) _playingSize;
+    private LiveH264Player? _player;
+    private MediaFeed? _stream;
     private Point _pressedAt;
     private DateTimeOffset _pressedTime;
 
@@ -78,7 +72,6 @@ public sealed partial class ScreenMirrorWindow : Window
     {
         _mirror.Changed -= OnMirrorChanged;
         _mirror.StreamOpened -= OnStreamOpened;
-        _feeding?.Cancel();
         _player?.Dispose();
         _player = null;
         _ = _mirror.StopMirroringAsync();
@@ -90,7 +83,7 @@ public sealed partial class ScreenMirrorWindow : Window
 
         // After a rotation the same connection carries a new size (new SPS/PPS and a key frame): the player starts
         // over at that key frame instead of relying on the decoder to change size on the fly.
-        if (_stream is { } stream && _mirror.Video is { Width: > 0 } video && (video.Width, video.Height) != _playingSize)
+        if (_stream is { } stream && _mirror.Video is { Width: > 0 } video && (video.Width, video.Height) != _player?.Size)
         {
             _logger.LogInformation("Screen size changed to {Width}x{Height}; restarting the player", video.Width, video.Height);
             Play(stream);
@@ -114,63 +107,21 @@ public sealed partial class ScreenMirrorWindow : Window
         NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable;
     }
 
-    private void OnStreamOpened(object? sender, MirrorStream stream) => _dispatcher.TryEnqueue(() => Play(stream));
+    private void OnStreamOpened(object? sender, MediaFeed stream) => _dispatcher.TryEnqueue(() => Play(stream));
 
-    // A live source: no buffering, samples handed over as they arrive, starting at a key frame with its SPS/PPS.
-    private void Play(MirrorStream stream)
+    private void Play(MediaFeed stream)
     {
         var video = _stream == stream && _mirror.Video is { Width: > 0 } current ? current : stream.Open.Video;
         _stream = stream;
-        var properties = VideoEncodingProperties.CreateH264();
-        properties.Width = video?.Width ?? 1080;
-        properties.Height = video?.Height ?? 1920;
-        _playingSize = (properties.Width, properties.Height);
-        var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-
-        // One reader at a time: the previous player's pending request ends here.
-        _feeding?.Cancel();
-        _feeding = new CancellationTokenSource();
-        var feeder = new SampleFeeder(stream, _feeding.Token);
-        source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
-        source.SampleRequested += async (sender, args) =>
-        {
-            var deferral = args.Request.GetDeferral();
-
-            try
-            {
-                args.Request.Sample = await feeder.NextAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                args.Request.Sample = null;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Feeding the screen stream failed");
-                args.Request.Sample = null;
-            }
-            finally
-            {
-                deferral.Complete();
-            }
-        };
-
         _player?.Dispose();
-        _player = new MediaPlayer { RealTimePlayback = true, IsMuted = true };
-        _player.MediaFailed += (sender, args) =>
-        {
-            _logger.LogWarning("Screen stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
-            _ = _mirror.RequestKeyFrameAsync();
-        };
-        _player.Source = MediaSource.CreateFromMediaStreamSource(source);
-        Player.SetMediaPlayer(_player);
-        _player.Play();
+        _player = new LiveH264Player(stream.Packets, video?.Width ?? 0, video?.Height ?? 0, _logger, () => _ = _mirror.RequestKeyFrameAsync());
+        Player.SetMediaPlayer(_player.Player);
     }
 
     // Where the frame is inside the element (letterboxed, Uniform) and a point on it as 0..1.
     private ScreenPoint? ToFrame(Point point)
     {
-        var session = _player?.PlaybackSession;
+        var session = _player?.Player.PlaybackSession;
         double frameWidth = session?.NaturalVideoWidth ?? 0;
         double frameHeight = session?.NaturalVideoHeight ?? 0;
 
@@ -273,45 +224,4 @@ public sealed partial class ScreenMirrorWindow : Window
     private void OnStopClick(object sender, RoutedEventArgs e) => Close();
 
     private void OnRestartClick(object sender, RoutedEventArgs e) => _ = _mirror.StartMirroringAsync();
-
-    // Turns stream packets into samples: video only, from the first key frame, SPS/PPS in front of every key frame,
-    // time from the phone's clock relative to the first sample.
-    private sealed class SampleFeeder(MirrorStream stream, CancellationToken cancellationToken)
-    {
-        private readonly MirrorStream _stream = stream;
-        private readonly CancellationToken _cancellationToken = cancellationToken;
-        private byte[] _config = [];
-        private ulong? _firstPts;
-
-        public async Task<MediaStreamSample?> NextAsync()
-        {
-            while (await _stream.Packets.WaitToReadAsync(_cancellationToken))
-            {
-                if (!_stream.Packets.TryRead(out var packet) || packet.Track != StreamTrack.Video)
-                {
-                    continue;
-                }
-
-                if (packet.CodecConfig)
-                {
-                    _config = packet.Data.ToByteArray();
-                    continue;
-                }
-
-                if (_firstPts is null && !packet.KeyFrame)
-                {
-                    continue;
-                }
-
-                _firstPts ??= packet.PtsUs;
-                var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
-                var time = TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10);
-                var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
-                sample.KeyFrame = packet.KeyFrame;
-                return sample;
-            }
-
-            return null;
-        }
-    }
 }

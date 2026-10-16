@@ -1,32 +1,17 @@
-using System.Threading.Channels;
-using Fenpo.Core.Channel;
 using Fenpo.Protocol.V1;
-using Fenpo.Transport;
-using Google.Protobuf;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Fenpo.App.Services;
 
 /// <summary>
-/// An open screen stream: what the phone said it sends and its packets as they arrive.
-/// </summary>
-/// <param name="Open">The stream's first frame.</param>
-/// <param name="Packets">Packets in arrival order; completes when the phone closes the stream.</param>
-public sealed record MirrorStream(MediaStreamOpen Open, ChannelReader<StreamPacket> Packets);
-
-/// <summary>
 /// The Android phone's screen on the PC (CAPABILITY_SCREEN_MIRROR, screen.proto): asks the phone to start, follows
-/// ScreenStatus, takes the media connection the phone opens and passes its packets to the mirror window, and sends
-/// touches, swipes and the global buttons back as ScreenInput.
+/// ScreenStatus, takes the screen stream from <see cref="MediaStreamRouter"/> for the mirror window, and sends touches,
+/// swipes and the global buttons back as ScreenInput.
 /// </summary>
-public sealed class ScreenMirrorService(PhoneChannel channel, ControlServer server, ILogger<ScreenMirrorService> logger) : IHostedService, IMediaStreamConnections
+public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirrorService> logger) : IHostedService
 {
-    // A backlog this long means the window is not keeping up; older video is dropped until the next key frame.
-    private const int _maxQueued = 90;
-
     private readonly PhoneChannel _channel = channel;
-    private readonly ControlServer _server = server;
     private readonly ILogger<ScreenMirrorService> _logger = logger;
     private string? _streamId;
 
@@ -36,9 +21,9 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ControlServer serv
     public event EventHandler? Changed;
 
     /// <summary>
-    /// Raised from a background thread when the phone opened the media connection.
+    /// Raised from a background thread when the phone opened the screen stream.
     /// </summary>
-    public event EventHandler<MirrorStream>? StreamOpened;
+    public event EventHandler<MediaFeed>? StreamOpened;
 
     /// <summary>
     /// Gets the latest state the phone reported.
@@ -63,7 +48,6 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ControlServer serv
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _server.UseMediaStreams(this);
         _channel.MessageReceived += (sender, message) => OnMessage(message);
         return Task.CompletedTask;
     }
@@ -131,46 +115,17 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ControlServer serv
     /// <returns>A task that completes when sent.</returns>
     public Task RequestKeyFrameAsync() => _streamId is { } id ? _channel.SendAsync(new Envelope { RequestKeyFrame = new RequestKeyFrame { StreamId = id } }) : Task.CompletedTask;
 
-    /// <inheritdoc/>
-    public async Task HandleAsync(PairedAppDevice device, MediaStreamOpen open, Stream stream, CancellationToken cancellationToken)
+    /// <summary>
+    /// Takes the screen stream the phone opened.
+    /// </summary>
+    /// <param name="feed">Stream.</param>
+    /// <returns>A task that completes when the phone was asked for a key frame.</returns>
+    public async Task AcceptAsync(MediaFeed feed)
     {
-        if (open.Kind != StreamKind.Screen)
-        {
-            _logger.LogInformation("{Kind} stream from {Phone} closed: not handled yet", open.Kind, device.Name);
-            return;
-        }
-
-        _streamId = open.StreamId;
-        Video = open.Video;
-        _logger.LogInformation("Screen stream from {Phone}: {Codec} {Width}x{Height} at {Fps} fps", device.Name, open.Video?.Codec, open.Video?.Width, open.Video?.Height, open.Video?.Fps);
-        var packets = Channel.CreateUnbounded<StreamPacket>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = true });
-        StreamOpened?.Invoke(this, new MirrorStream(open, packets.Reader));
+        _streamId = feed.Open.StreamId;
+        Video = feed.Open.Video;
+        StreamOpened?.Invoke(this, feed);
         await RequestKeyFrameAsync();
-
-        try
-        {
-            while (await EnvelopeFraming.ReadFrameAsync(stream, cancellationToken) is { } frame)
-            {
-                var packet = StreamPacket.Parser.ParseFrom(frame);
-
-                // Falling behind: drop queued video, the decoder restarts at the next key frame.
-                if (packets.Reader.Count > _maxQueued && !packet.KeyFrame)
-                {
-                    continue;
-                }
-
-                packets.Writer.TryWrite(packet);
-            }
-        }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidProtocolBufferException or OperationCanceledException or ObjectDisposedException)
-        {
-            _logger.LogInformation("Screen stream ended: {Reason}", exception.Message);
-        }
-        finally
-        {
-            packets.Writer.TryComplete();
-            _logger.LogInformation("Screen stream from {Phone} closed", device.Name);
-        }
     }
 
     private void OnMessage(ChannelMessage message)

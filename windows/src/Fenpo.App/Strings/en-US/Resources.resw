@@ -135,8 +135,14 @@
   <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Keep me centered</value>
   </data>
+  <data name="Camera_Failed" xml:space="preserve">
+    <value>The camera did not open. Close any other app using it and try again.</value>
+  </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Camera shows up as a regular webcam in Teams, Zoom, Meet and OBS. Keep Fenpo open on the phone, ideally on a stand in landscape.</value>
+    <value>The preview shows the phone's camera. For it to show up as a webcam in Teams, Zoom and Meet, the Fenpo Camera component is needed; it comes in a later version.</value>
+  </data>
+  <data name="Camera_Idle" xml:space="preserve">
+    <value>Preview the phone's camera here.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -164,6 +170,18 @@
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portrait blur</value>
+  </data>
+  <data name="Camera_Starting" xml:space="preserve">
+    <value>Opening the camera…</value>
+  </data>
+  <data name="Camera_StartPreview.Content" xml:space="preserve">
+    <value>Start preview</value>
+  </data>
+  <data name="Camera_StopPreview.Content" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Camera_WaitingTap" xml:space="preserve">
+    <value>On the phone, tap Fenpo's “Start camera” notification.</value>
   </data>
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Camera</value>
