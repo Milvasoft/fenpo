@@ -131,7 +131,26 @@ public sealed record PhoneNotification
     public string? NegativeActionLabel { get; init; }
 
     /// <summary>
+    /// Gets the phone's own action buttons (Android). ANCS has only <see cref="PositiveActionLabel"/> and
+    /// <see cref="NegativeActionLabel"/>.
+    /// </summary>
+    public IReadOnlyList<NotificationButton> Actions { get; init; } = [];
+
+    /// <summary>
+    /// Gets the sender photo or thumbnail as PNG (Android), or null.
+    /// </summary>
+    public byte[]? LargeIconPng { get; init; }
+
+    /// <summary>
     /// Gets when Fenpo learned about it.
     /// </summary>
     public DateTimeOffset ReceivedAt { get; init; } = DateTimeOffset.Now;
 }
+
+/// <summary>
+/// An action button the phone app put on a notification.
+/// </summary>
+/// <param name="Index">Index to send back.</param>
+/// <param name="Title">Button text as the app gave it.</param>
+/// <param name="AcceptsReply">True when the action takes typed text (a reply box).</param>
+public sealed record NotificationButton(int Index, string Title, bool AcceptsReply);

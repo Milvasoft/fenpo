@@ -142,9 +142,14 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | `common.proto` | `DevicePlatform` (WINDOWS, IOS, ANDROID), `Capability` |
 | `hello.proto` | `Hello` (işletim sistemi sürümü ve model dahil), `Ping`, `Pong`, `Error` |
 | `pairing.proto` | QR biçimi, `PairingRequest`, `PairingResult` (BLE kanal anahtarı dahil) |
-| `content.proto` | `ClipboardItem`, `ClipboardRequest`, `OpenUrl` |
+| `content.proto` | `ClipboardItem` (hassas işaretiyle), `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
-| `device.proto` | `DeviceState`, `PcStatus`, `RingDevice`, `LockPc` |
+| `device.proto` | `DeviceState` (Android'in ölçtüğü BLE RSSI dahil), `PcStatus`, `RingDevice`, `LockPc` |
+| `media.proto` | `MediaState`, `MediaCommand`: Android'in ve PC'nin şu an çalanı ve kontrolü |
+| `video.proto` | Görüntü ve ses bağlantıları: biçimler, PC'nin çözebildikleri (`AcceptedFormats`), `MediaStreamOpen`, `StreamPacket`, `RequestKeyFrame` |
+| `camera.proto` | Telefonun web kamerası olması: `CameraStart`, `CameraStop`, `CameraStatus`, `CameraSettingsChange` |
+| `screen.proto` | Android ekranının PC'de görünmesi ve PC'den kontrolü: `ScreenStart`, `ScreenStop`, `ScreenStatus`, `ScreenInput` |
+| `notification.proto` | Android bildirim aynalama: `PhoneNotification` (kategori ve sıra numarasıyla), `NotificationRemoved`, `NotificationSnapshotDone`, `DismissNotification`, `RunNotificationAction`, `AppIconRequest`, `AppIcon` |
 | `envelope.proto` | `Envelope` ve özellik gruplarına ayrılmış alan numarası aralıkları |
 
 **El sıkışma:** Her bağlantının ilk mesajı `Hello` (eşleşme bağlantısında `PairingRequest`). Cihaz türünü, işletim sistemi sürümünü, modeli ve yetenek listesini taşır; iki taraf sadece ikisinin de desteklediği özellikleri açar. Böylece Android veya başka bir istemci, Windows tarafında özel durum açmadan eklenebilir. iPhone'daki cihaz satırının iOS sürümü `Hello.os_version`'dan gelir (DECISIONS #30).
@@ -153,11 +158,13 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 
 Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler üzerinden beslenir (`INotificationSource`, `IMessageSource`, `IMediaSource`). iPhone için kaynak ANCS, MAP ve AMS; Android kendi kaynağını Fenpo kanalı üzerinden ekler.
 
-**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü, 50–59 cihaz ve PC durumu. Sonraki aşamalar için ayrılmış: 60–69 kamera, 70–79 PC klasörleri, 80–89 ekran yansıtma, 90–99 bildirim aynalama (Android), 100–109 mesajlar (Android).
+**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü (medya komutu dahil), 50–59 cihaz, PC ve medya durumu, 90–96 bildirim aynalama (Android). 60–65 kamera, görüntü bağlantısının ilk çerçevesi ve anahtar kare isteği, 80–83 ekran yansıtma (Android). Sonraki aşamalar için ayrılmış: 66–69 kamera eklemeleri, 70–79 PC klasörleri, 84–89 yansıtma eklemeleri, 97–99 bildirim aynalama eklemeleri, 100–109 mesajlar (Android).
+
+**Android bildirimleri:** Android telefon bildirimlerini `NotificationListenerService` ile okur ve Fenpo kanalından gönderir (`CAPABILITY_NOTIFICATION_MIRROR`): `Hello`'dan sonra o kanalda mevcut bildirimlerin hepsi (`pre_existing`, sonunda `NotificationSnapshotDone`), sonra her yeni, güncellenen ve kalkan bildirim. İki kanal arasında sırayı `seq` korur; gelen arama `INCOMING_CALL` kategorisiyle Ada'ya gider. PC kapatma ve eylem (yazılı yanıt dahil) isteğini geri yollar; uygulama simgesini sadece önbelleğinde yoksa ister. Windows'ta bu kaynak `INotificationSource` arayüzüne ANCS'nin yanına bağlanır. Ayrıntı `protocol/README.md`.
 
 ### Çerçeveleme
 
-- **④ TLS kanalı:** `[uint32 uzunluk, big-endian][Envelope bayt]`. Kontrol mesajları tek uzun ömürlü bağlantıda. Dosya gövdeleri ve video ayrı TLS bağlantılarında akar; kontrol kanalı tıkanmaz. Dosya bağlantısı `[uint32 uzunluk][TransferStreamHeader]` ile başlar, ardından dosyaların ham baytları teklif sırasıyla gelir.
+- **④ TLS kanalı:** `[uint32 uzunluk, big-endian][Envelope bayt]`. Kontrol mesajları tek uzun ömürlü bağlantıda. Dosya gövdeleri ve video ayrı TLS bağlantılarında akar; kontrol kanalı tıkanmaz. Dosya bağlantısı `[uint32 uzunluk][TransferStreamHeader]` ile başlar, ardından dosyaların ham baytları teklif sırasıyla gelir. Veri bağlantısını iki yönde de telefon açar, PC'nin kontrol sunucusu portuna; ilk çerçeve `Hello`/`PairingRequest` ise kontrol, `TransferStreamHeader` ise veri bağlantısıdır. PC'den telefona aktarımda başlığı telefon yazar, baytları PC. Alıcı, teklifteki boyutlara göre okur ve akışın bitmesini beklemeden sonucu bildirir; telefon bağlantıyı sonucu aldıktan sonra kapatır, çünkü okunmamış bayt varken kapanan TLS soketi TCP reset gönderir ve yoldaki son baytlar kaybolabilir. Telefonda dinleyen soket yok (Android yerel ağ izni, NAT, iOS arka plan sınırları).
 - **③ BLE kanalı:** Sabit bir Fenpo servisi ve iki karakteristik: `rx` (iPhone yazar, yanıtsız yazma) ve `tx` (PC bildirir), ikisi de şifreli bağlantı ister. UUID'ler her PC için aynı (`protocol/README.md`), çünkü AccessorySetupKit servis UUID'sinin iPhone uygulamasının Info.plist'inde önceden bildirilmesini istiyor. Yakında birden fazla Fenpo PC'si varsa ASK seçicisinde hangisinin hangisi olduğu S4'te netleşecek. Her Envelope önce AES-GCM ile mühürlenir (`nonce (12) || şifreli metin || etiket (16)`), sonra MTU'ya göre parçalanır: `[1 bayt bayrak: bit0 ilk, bit1 son][2 bayt sıra, big-endian, her mesajda 0'dan][parça]`. Mühürlü mesaj en fazla 4096 bayt; büyükler için ③ "Wi‑Fi'ye geç" sinyali verir. Telefon `tx` bildirimlerine abone olur olmaz `Hello` gönderir, PC `Hello` ve `PcStatus` ile cevap verir. Ayrıntı `protocol/README.md`.
 
 ### Eşleşme ve güvenlik

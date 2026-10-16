@@ -10,7 +10,8 @@ namespace Fenpo.Core.Channel;
 /// <param name="Name">Phone's name.</param>
 /// <param name="BleKey">PairingResult.ble_channel_key (32 bytes).</param>
 /// <param name="CertificateSha256">SHA-256 of the phone's TLS certificate (DER), lower-case hex.</param>
-public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "");
+/// <param name="Platform">The phone's platform from pairing or its Hello; unspecified for records from before.</param>
+public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "", DevicePlatform Platform = DevicePlatform.Unspecified);
 
 /// <summary>
 /// Phones paired with the Fenpo app.
@@ -49,6 +50,12 @@ public interface IBleCounters
     /// <param name="counter">Counter from the nonce.</param>
     /// <returns>False for a replayed or old message.</returns>
     bool TryAcceptReceived(string deviceId, ulong counter);
+
+    /// <summary>
+    /// Starts both counters over for a phone that just got a new key (nonces only have to be unique per key).
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    void Reset(string deviceId);
 }
 
 /// <summary>
@@ -78,7 +85,17 @@ public static class PcHello
         Platform = DevicePlatform.Windows,
         AppVersion = identity.AppVersion,
         ProtocolVersions = { 1 },
-        Capabilities = { Capability.DeviceState },
+        Capabilities =
+        {
+            Capability.DeviceState,
+            Capability.Clipboard,
+            Capability.OpenUrl,
+            Capability.Ring,
+            Capability.LockPc,
+            Capability.FileTransfer,
+            Capability.NotificationMirror,
+            Capability.Media,
+        },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
     };

@@ -59,6 +59,11 @@ public sealed class BleChunkAssembler
     private int _expected = -1;
 
     /// <summary>
+    /// Gets how many chunks were thrown away so far (out of order, too short, too long, or without a first chunk).
+    /// </summary>
+    public int Dropped { get; private set; }
+
+    /// <summary>
     /// Adds a chunk.
     /// </summary>
     /// <param name="chunk">Chunk as written or notified.</param>
@@ -70,6 +75,7 @@ public sealed class BleChunkAssembler
 
         if (chunk.Length < BleChunks.HeaderLength)
         {
+            Dropped++;
             Reset();
             return false;
         }
@@ -85,6 +91,7 @@ public sealed class BleChunkAssembler
 
         if (_expected < 0 || sequence != _expected || _buffer.Count + chunk.Length - BleChunks.HeaderLength > BleSeal.MaxSealedLength)
         {
+            Dropped++;
             Reset();
             return false;
         }

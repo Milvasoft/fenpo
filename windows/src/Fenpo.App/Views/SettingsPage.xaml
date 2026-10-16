@@ -225,6 +225,23 @@
                             <Button Grid.Column="2" x:Uid="Settings_Pair" VerticalAlignment="Center" Click="OnPairClick" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.IsPaired), Mode=OneWay}" />
                             <Button Grid.Column="2" x:Uid="Settings_ManagePairing" VerticalAlignment="Center" Click="OnManagePairingClick" Visibility="{x:Bind ViewModel.IsPaired, Mode=OneWay}" />
                         </Grid>
+                        <!-- The other paired phone: Fenpo uses one at a time. -->
+                        <StackPanel Visibility="{x:Bind ViewModel.HasOtherPhone, Mode=OneWay}">
+                            <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon Glyph="&#xE8EA;" Style="{StaticResource FenpoRowIconStyle}" Foreground="{ThemeResource FenpoTextTertiaryBrush}" />
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{x:Bind ViewModel.OtherDeviceTitle, Mode=OneWay}" Style="{StaticResource FenpoRowLabelStyle}" />
+                                    <TextBlock Text="{x:Bind ViewModel.OtherDeviceHint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                                </StackPanel>
+                                <Button Grid.Column="2" x:Uid="Settings_UsePhone" VerticalAlignment="Center" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" />
+                            </Grid>
+                        </StackPanel>
                         <Border Style="{StaticResource FenpoRowDividerStyle}" />
                         <Grid Style="{StaticResource FenpoSettingRowStyle}">
                             <Grid.ColumnDefinitions>

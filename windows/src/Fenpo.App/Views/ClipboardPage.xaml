@@ -3,7 +3,8 @@
     x:Class="Fenpo.App.Views.ClipboardPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:Fenpo.App.Controls">
+    xmlns:controls="using:Fenpo.App.Controls"
+    xmlns:vm="using:Fenpo.App.ViewModels">
 
     <ScrollViewer>
         <StackPanel Padding="32,28">
@@ -31,7 +32,35 @@
                 <Border Style="{StaticResource FenpoCardStyle}">
                     <StackPanel Padding="16,14">
                         <TextBlock x:Uid="Clipboard_History" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
-                        <TextBlock x:Uid="Clipboard_Empty" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Uid="Clipboard_Empty" Style="{StaticResource FenpoCaptionTextStyle}" Margin="0,8,0,0" TextWrapping="Wrap" Visibility="{x:Bind Clipboard.IsEmpty, Mode=OneWay}" />
+                        <ItemsControl ItemsSource="{x:Bind Clipboard.Items}" Margin="0,4,0,0" IsTabStop="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ClipboardRowViewModel">
+                                    <!-- Design ".clip": where it came from, the text or image, Copy. -->
+                                    <Grid Padding="0,10" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="32" Height="32" CornerRadius="16" Background="{ThemeResource FenpoCardSecondaryBrush}" VerticalAlignment="Top">
+                                            <FontIcon Glyph="{x:Bind SourceGlyph}" FontSize="14" Foreground="{ThemeResource FenpoTextSecondaryBrush}" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Text}" Foreground="{ThemeResource FenpoTextBrush}" TextWrapping="Wrap" MaxLines="3" TextTrimming="CharacterEllipsis" IsTextSelectionEnabled="True" Visibility="{x:Bind IsText}" />
+                                            <Image Source="{x:Bind Image}" MaxHeight="96" HorizontalAlignment="Left" Stretch="Uniform" Visibility="{x:Bind IsImage}" />
+                                            <TextBlock Text="{x:Bind Caption}" Style="{StaticResource FenpoCaptionTextStyle}" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" VerticalAlignment="Center" Command="{x:Bind CopyCommand}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                                                <TextBlock x:Uid="Clipboard_Copy" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                     </StackPanel>
                 </Border>
             </StackPanel>

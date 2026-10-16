@@ -40,6 +40,7 @@ public sealed class BluetoothHostedService(
     private readonly PhoneStatusTracker _status = status;
     private readonly ISettingsStore _settings = settings;
     private readonly ILogger<BluetoothHostedService> _logger = logger;
+    private readonly SemaphoreSlim _relocate = new(0, 1);
 
     /// <summary>
     /// Gets the phone in use, once found.
@@ -56,22 +57,33 @@ public sealed class BluetoothHostedService(
 
         // The Fenpo service is advertised all the time so the iPhone app can find and wake for this PC (S4).
         await _channel.StartAsync();
+        _channel.AndroidPhoneSeen += (sender, id) => OnAndroidPhoneSeen(id);
+        _link.ServicesReady += (sender, services) => OnServicesReady(services);
+        _status.ActiveChanged += (sender, kind) => _ = UseMessagesOfAsync(kind);
         _status.Attach();
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                var phone = await _locator.FindAsync(_settings.Current.PhoneDeviceId, stoppingToken);
+                var excluded = _settings.Current.NonApplePhoneIds;
+                var preferred = excluded.Contains(_settings.Current.PhoneDeviceId ?? string.Empty, StringComparer.OrdinalIgnoreCase) ? null : _settings.Current.PhoneDeviceId;
+                var phone = await _locator.FindAsync(preferred, excluded, stoppingToken);
 
                 if (phone is not null && await _link.StartAsync(phone.LeDeviceId, stoppingToken))
                 {
                     Phone = phone;
-                    _messages.UsePhone(phone.ClassicDeviceId);
-                    _contacts.UsePhone(phone.ClassicDeviceId);
+                    await UseMessagesOfAsync(_status.Active);
                     _settings.Update(s => s with { PhoneDeviceId = phone.LeDeviceId });
                     _status.Update(s => s with { Name = phone.Name, State = _link.IsConnected ? PhoneConnectionState.Connecting : PhoneConnectionState.Disconnected });
-                    return;
+
+                    // Stay with this phone until it turns out to be the wrong one.
+                    await _relocate.WaitAsync(stoppingToken);
+                    _logger.LogInformation("{Name} is not an iPhone; looking for the paired iPhone again", phone.Name);
+                    Phone = null;
+                    await _link.StopAsync();
+                    await UseMessagesOfAsync(_status.Active);
+                    continue;
                 }
 
                 _status.Update(s => s with { State = PhoneConnectionState.NotPaired });
@@ -82,6 +94,57 @@ public sealed class BluetoothHostedService(
             }
 
             await Task.Delay(_searchInterval, stoppingToken);
+        }
+    }
+
+    // MAP and PBAP run against the phone in use: the iPhone's classic record, or the Android phone's, found by the name
+    // Fenpo on it reported. The iPhone link keeps running either way (ANCS for later, proximity).
+    private async Task UseMessagesOfAsync(PhoneKind kind)
+    {
+        try
+        {
+            if (kind == PhoneKind.Iphone)
+            {
+                _messages.UsePhone(Phone?.ClassicDeviceId);
+                _contacts.UsePhone(Phone?.ClassicDeviceId);
+                return;
+            }
+
+            var name = _status.StatusOf(PhoneKind.Android).Name;
+            var classic = name.Length > 0 ? await _locator.FindClassicAsync(name) : null;
+            _logger.LogInformation("Messages from the Android phone (classic record {Classic})", classic is null ? "missing" : "present");
+            _messages.UsePhone(classic, PhoneKind.Android);
+            _contacts.UsePhone(null);
+        }
+        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or OperationCanceledException)
+        {
+            _logger.LogWarning(exception, "Switching messages to the {Phone} failed", kind);
+        }
+    }
+
+    // An Android phone bonded for the Fenpo channel is a paired LE phone too, and it bonds again with a new address
+    // after a lost bond. Whatever has none of the iPhone services is not the iPhone (S1 saw all three on the iPhone).
+    private void OnServicesReady(LinkServices services)
+    {
+        var apple = services.Services.ContainsKey(Gatt.GattUuids.Ancs) || services.Services.ContainsKey(Gatt.GattUuids.Ams) || services.Services.ContainsKey(Gatt.GattUuids.AppleContinuity);
+
+        if (!apple && Phone is { } phone)
+        {
+            _logger.LogInformation("{Name} has no iPhone services ({Count} services)", phone.Name, services.Services.Count);
+            OnAndroidPhoneSeen(phone.LeDeviceId);
+        }
+    }
+
+    private void OnAndroidPhoneSeen(string leDeviceId)
+    {
+        if (!_settings.Current.NonApplePhoneIds.Contains(leDeviceId, StringComparer.OrdinalIgnoreCase))
+        {
+            _settings.Update(s => s with { NonApplePhoneIds = [.. s.NonApplePhoneIds, leDeviceId] });
+        }
+
+        if (string.Equals(Phone?.LeDeviceId, leDeviceId, StringComparison.OrdinalIgnoreCase) && _relocate.CurrentCount == 0)
+        {
+            _relocate.Release();
         }
     }
 

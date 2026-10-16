@@ -106,6 +106,24 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     public partial string DeviceHint { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the other paired phone's name, or empty when there is only one.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOtherPhone))]
+    public partial string OtherDeviceTitle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the other phone's model and state.
+    /// </summary>
+    [ObservableProperty]
+    public partial string OtherDeviceHint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets a value indicating whether a second phone is paired.
+    /// </summary>
+    public bool HasOtherPhone => OtherDeviceTitle.Length > 0;
+
+    /// <summary>
     /// Gets or sets the folder for received files.
     /// </summary>
     [ObservableProperty]
@@ -256,16 +274,25 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
         _settings.Update(s => s with { IncomingFolder = path });
     }
 
+    [RelayCommand]
+    private void UseOtherPhone() => _status.Use(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+
     private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => ApplyStatus(status));
+
+    private string Hint(PhoneStatus status) => status.ModelName is { } model
+        ? _localization.Format("Settings_DeviceModelState", model, PhoneStatusText.State(status, _localization))
+        : PhoneStatusText.State(status, _localization);
 
     private void ApplyStatus(PhoneStatus status)
     {
         IsPaired = status.State != PhoneConnectionState.NotPaired;
+        var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+        var twoPhones = IsPaired && other.State != PhoneConnectionState.NotPaired;
         DeviceTitle = IsPaired ? PhoneStatusText.Name(status, _localization) : _localization.GetString("Settings_NoDevice");
         DeviceHint = !IsPaired
             ? _localization.GetString("Settings_NoDeviceHint")
-            : status.ModelName is { } model
-                ? _localization.Format("Settings_DeviceModelState", model, PhoneStatusText.State(status, _localization))
-                : PhoneStatusText.State(status, _localization);
+            : twoPhones ? _localization.Format("Settings_InUse", Hint(status)) : Hint(status);
+        OtherDeviceTitle = twoPhones ? PhoneStatusText.Name(other, _localization) : string.Empty;
+        OtherDeviceHint = twoPhones ? Hint(other) : string.Empty;
     }
 }

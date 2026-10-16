@@ -1,3 +1,5 @@
+using Fenpo.Core.Devices;
+
 namespace Fenpo.Core.Settings;
 
 /// <summary>
@@ -115,6 +117,17 @@ public sealed record AppSettings
     /// Gets the Bluetooth LE device id of the phone Fenpo uses, or null to pick the paired iPhone by itself.
     /// </summary>
     public string? PhoneDeviceId { get; init; }
+
+    /// <summary>
+    /// Gets the phone in use when both an iPhone and an Android phone are paired; null picks the iPhone first.
+    /// </summary>
+    public PhoneKind? ActivePhone { get; init; }
+
+    /// <summary>
+    /// Gets the Bluetooth LE ids of phones that said Hello as Android on the Fenpo channel. The iPhone link (ANCS, AMS)
+    /// never picks them, even though they are paired phones too.
+    /// </summary>
+    public IReadOnlyList<string> NonApplePhoneIds { get; init; } = [];
 
     /// <summary>
     /// Gets the TLS port of the Fenpo control server, kept so paired phones find it again; 0 until first start.
