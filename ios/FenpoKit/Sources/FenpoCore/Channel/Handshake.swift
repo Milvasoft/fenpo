@@ -72,6 +72,7 @@ public enum Handshake {
         .ring,
         .lockPc,
         .deviceState,
+        .camera,
     ]
 
     /// Builds this device's `Hello`.

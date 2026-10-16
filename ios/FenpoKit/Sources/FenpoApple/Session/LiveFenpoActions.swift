@@ -47,14 +47,33 @@ public final class LiveFenpoActions: FenpoActions {
         try await performReportFocus(isActive)
     }
 
-    /// Sends the Focus state again, for example when the channel comes back or the Settings
-    /// switch changes. Does nothing until the filter has reported once.
-    public func resendFocus() {
-        guard UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: FocusSync.stateKey) != nil, central.state == .ready else {
+    /// Sends the Focus state again after the PC's `Hello` on a channel: the PC forgets it when the
+    /// iPhone disconnects. Does nothing until the filter has reported once.
+    /// - Parameter channel: Channel that just finished its handshake.
+    public func resendFocus(over channel: FenpoServices.Channel) {
+        guard UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: FocusSync.stateKey) != nil else {
             return
         }
-        try? central.send(.deviceState(focusState()))
-        log.info("Sent Focus state over BLE")
+        let body = Fenpo_V1_Envelope.OneOf_Body.deviceState(focusState())
+        switch channel {
+        case .bluetooth:
+            guard central.state == .ready else {
+                return
+            }
+            try? central.send(body)
+            log.info("Sent Focus state over BLE")
+        case .wifi:
+            let wifi = wifi
+            let log = log
+            Task {
+                do {
+                    _ = try await wifi.send(body)
+                    log.info("Sent Focus state over Wi-Fi")
+                } catch {
+                    log.info("Focus state not sent over Wi-Fi: \(String(describing: error))")
+                }
+            }
+        }
     }
 
     private func performReportFocus(_ isActive: Bool) async throws {
