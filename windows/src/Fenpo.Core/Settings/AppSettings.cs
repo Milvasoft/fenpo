@@ -117,6 +117,11 @@ public sealed record AppSettings
     public string? PhoneDeviceId { get; init; }
 
     /// <summary>
+    /// Gets this PC's stable id for the Fenpo protocol (Hello.device_id, the QR's id), created on first run.
+    /// </summary>
+    public string? PcId { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether the first-run pairing wizard has been completed or skipped.
     /// </summary>
     public bool SetupCompleted { get; init; }

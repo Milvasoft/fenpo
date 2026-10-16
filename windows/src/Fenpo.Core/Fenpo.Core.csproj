@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Fenpo.Protocol\Fenpo.Protocol.csproj" />
     <ProjectReference Include="..\Fenpo.Sdk\Fenpo.Sdk.csproj" />
   </ItemGroup>
 
