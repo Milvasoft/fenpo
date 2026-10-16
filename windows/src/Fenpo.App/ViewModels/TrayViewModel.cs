@@ -102,8 +102,25 @@ public sealed partial class TrayViewModel : ObservableObject
     [ObservableProperty]
     public partial bool CanRing { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the ring just went out (the button says so for a moment).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(NotRinging))]
+    public partial bool IsRinging { get; set; }
+
+    /// <summary>Gets a value indicating whether the button shows its usual text.</summary>
+    public bool NotRinging => !IsRinging;
+
+    // The command stays busy (button disabled) while the button says the phone is ringing, so it is not pressed twice.
     [RelayCommand]
-    private Task RingAsync() => _actions.RingAsync();
+    private async Task RingAsync()
+    {
+        if (await _actions.RingAsync())
+        {
+            IsRinging = true;
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            IsRinging = false;
+        }
+    }
 
     [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);

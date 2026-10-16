@@ -173,10 +173,12 @@ public sealed class FileTransferService(
         received.SetState(FileTransferState.Completed);
         var failed = new FileTransfer("sample-3", "sample", incoming: false, [File("Bütçe_Ekim.xlsx", 48_128), File("Notlar.txt", 2_048)], []);
         failed.SetState(FileTransferState.Failed);
+        var sent = new FileTransfer("sample-4", "sample", incoming: false, [File("Sunum.pptx", 5_872_025)], []);
+        sent.SetState(FileTransferState.Completed);
 
         lock (_lock)
         {
-            _transfers.InsertRange(0, [sending, received, failed]);
+            _transfers.InsertRange(0, [sending, sent, received, failed]);
         }
 
         Changed?.Invoke(this, EventArgs.Empty);

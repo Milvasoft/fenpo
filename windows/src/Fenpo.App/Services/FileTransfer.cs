@@ -59,6 +59,9 @@ public sealed class FileTransfer
     /// <summary>Gets the transfer id.</summary>
     public string Id { get; }
 
+    /// <summary>Gets when the transfer was offered.</summary>
+    public DateTimeOffset StartedAt { get; } = DateTimeOffset.Now;
+
     /// <summary>Gets the phone id.</summary>
     public string DeviceId { get; }
 

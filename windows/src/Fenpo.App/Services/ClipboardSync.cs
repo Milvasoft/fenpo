@@ -204,6 +204,7 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
 
             if (await _channel.SendAsync(ItemEnvelope(content.Text, content.Image)))
             {
+                _logger.LogInformation("Clipboard {Kind} sent to the phone ({Length} characters or bytes)", content.Text is null ? "image" : "text", content.Text?.Length ?? content.Image!.Length);
                 Remember(new ClipboardEntry(content.Text, content.Image, FromPhone: false, DateTimeOffset.Now));
             }
             else
