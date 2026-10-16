@@ -21,7 +21,6 @@ Single source of truth for every message exchanged between Fenpo apps. Windows (
 | `fenpo/v1/files.proto` | The PC's shared folders on the phone (Files app, Android file picker) |
 | `fenpo/v1/photos.proto` | The phone's photo library browsed from the PC |
 | `fenpo/v1/hotspot.proto` | Joining the phone's hotspot from the PC |
-| `fenpo/v1/unlock.proto` | Unlocking the PC's locked session with the phone's Face ID or fingerprint |
 | `fenpo/v1/envelope.proto` | `Envelope`, field ranges per feature group |
 
 ## Generation
@@ -192,20 +191,6 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 - "Connect to hotspot" on the PC sends `HotspotRequest`. The phone answers `HotspotStatus`: `ASKED_USER` after showing
   a notification that opens its hotspot settings (Android) or says where it is (iOS), `ON` when it knows the hotspot is
   on, `NOT_SET_UP` without saved details. The PC joins as soon as the network is in range, for up to a minute.
-
-## Unlocking the PC
-
-- `CAPABILITY_UNLOCK`. Only a locked session; the first sign-in after a restart still takes the Windows password or PIN.
-- The PC keeps the Windows password encrypted with AES-256-GCM under a 32-byte key that only the phone keeps, behind
-  its biometrics (iOS keychain item with `biometryCurrentSet`, Android Keystore with user authentication). New
-  biometrics on the phone invalidate the key; the PC then asks for the password again.
-- Enrolment: `UnlockEnroll` → the phone makes a new random key for this PC, checks Face ID or the fingerprint, answers
-  `UnlockKey` with an empty `request_id`.
-- Unlock: `UnlockRequest` with a fresh `request_id` → the phone asks its user (a notification while in the background;
-  tapping it opens the biometric prompt) → `UnlockKey` with the same `request_id`, or `Error` `DECLINED` (cancelled) or
-  `NOT_PAIRED` (no key for this PC). The PC ignores keys for other request ids and gives up after a minute.
-- `UnlockRevoke` makes the phone delete this PC's key.
-- Only on the sealed BLE channel or the TLS channel.
 
 ## Screen mirroring from the iPhone
 
