@@ -98,6 +98,12 @@ extension FenpoActionError: @retroactive CustomLocalizedStringResourceConvertibl
             "action.error.nothingFromPC"
         case .unavailableHere:
             "action.error.unavailableHere"
+        case .unsupportedByPC:
+            "action.error.unsupportedByPC"
+        case .declinedByPC:
+            "action.error.declinedByPC"
+        case .transferFailed:
+            "action.error.transferFailed"
         }
     }
 }

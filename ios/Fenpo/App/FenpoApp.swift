@@ -11,6 +11,9 @@ struct FenpoApp: App {
 
     private let log = FenpoLog("App")
 
+    /// The real services, or `nil` in screenshot scenes.
+    @MainActor private static var services: FenpoServices?
+
     var body: some Scene {
         WindowGroup {
             RootView()
@@ -24,7 +27,10 @@ struct FenpoApp: App {
         .onChange(of: scenePhase) { _, phase in
             log.info("Scene \(String(describing: phase))")
             if phase == .active {
+                FenpoApp.services?.appBecameActive()
                 Task { await model.becameActive() }
+            } else if phase == .background {
+                FenpoApp.services?.appEnteredBackground()
             }
         }
     }
@@ -37,6 +43,7 @@ struct FenpoApp: App {
         }
         #endif
         let services = FenpoServices.shared
+        FenpoApp.services = services
         let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer)
         services.onChange = {
             Task { await model.refresh() }

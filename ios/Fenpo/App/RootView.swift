@@ -1,8 +1,10 @@
+import PhotosUI
 import SwiftUI
 
 /// Tab bar with Fenpo, Transfers, PC and Settings, plus the pairing flow on top.
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @State private var pickedItems: [PhotosPickerItem] = []
 
     var body: some View {
         @Bindable var model = model
@@ -32,6 +34,27 @@ struct RootView: View {
         .fullScreenCover(isPresented: $model.isRinging) {
             RingingView(pcName: model.snapshot.pc?.name) {
                 model.stopRinging()
+            }
+        }
+        .photosPicker(
+            isPresented: Bindable(model).isPhotoPickerPresented,
+            selection: $pickedItems,
+            maxSelectionCount: 50,
+            matching: .any(of: [.images, .videos])
+        )
+        .onChange(of: pickedItems) { _, items in
+            guard !items.isEmpty else {
+                return
+            }
+            pickedItems = []
+            Task {
+                var urls: [URL] = []
+                for item in items {
+                    if let file = try? await item.loadTransferable(type: PickedFile.self) {
+                        urls.append(file.url)
+                    }
+                }
+                model.sendFiles(urls)
             }
         }
         .fullScreenCover(isPresented: $model.isPairingPresented) {

@@ -13,6 +13,11 @@
 	<!-- Standard TLS and AES-GCM from Network.framework and CryptoKit only: exempt (Buğra's decision). -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- Received files live in Documents and show up in the Files app under Fenpo. -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UIPrefersShowingLanguageSettings</key>
 	<true/>
 	<key>UIBackgroundModes</key>

@@ -127,9 +127,32 @@ final class AppModel {
         }
     }
 
-    /// Sends the latest photos to the PC. Arrives with file transfer (Windows data channel pending).
+    /// The photo picker is on screen.
+    var isPhotoPickerPresented = false
+
+    /// Opens the photo picker.
     func sendPhotos() {
-        log.info("Send photos tapped; file transfer not available yet")
+        isPhotoPickerPresented = true
+    }
+
+    /// Sends picked or shared files to the PC and removes the temporary copies afterwards.
+    /// - Parameter urls: Local files.
+    func sendFiles(_ urls: [URL]) {
+        guard !urls.isEmpty else {
+            return
+        }
+        Task {
+            await run(success: "home.toast.filesSent") {
+                defer {
+                    for url in urls {
+                        try? FileManager.default.removeItem(at: url)
+                    }
+                }
+                let files = try urls.map(OutgoingFile.init(fileAt:))
+                try await self.actions.sendFiles(files)
+            }
+            await refresh()
+        }
     }
 
     /// Called when the pairing flow finishes.

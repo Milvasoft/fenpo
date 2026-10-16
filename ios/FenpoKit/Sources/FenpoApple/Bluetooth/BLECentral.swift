@@ -175,6 +175,14 @@ public final class BLECentral: NSObject {
         try send(envelope: sequencer.envelope(body))
     }
 
+    /// Sends an answer to a request from the PC.
+    /// - Parameters:
+    ///   - body: Answer.
+    ///   - replyTo: Id of the request.
+    public func send(_ body: Fenpo_V1_Envelope.OneOf_Body, replyTo: UInt64) throws {
+        try send(envelope: sequencer.envelope(body, replyTo: replyTo))
+    }
+
     /// Sends a request and waits for the Envelope whose `reply_to` matches it.
     /// Cancel the task (for example with `withTimeout`) to stop waiting.
     /// - Parameter body: Request to send.

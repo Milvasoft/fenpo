@@ -16,6 +16,8 @@ struct DeveloperView: View {
                 SectionCaption(title: "developer.section.status")
                 CardRows(separatorInset: 16) {
                     InfoRow(title: "developer.bluetooth", value: diagnostics?.bluetoothState ?? "…")
+                    InfoRow(title: "developer.wifi", value: diagnostics?.wifiState ?? "…")
+                    InfoRow(title: "developer.endpoints", value: diagnostics.map { $0.endpoints.isEmpty ? "—" : $0.endpoints.joined(separator: " ") } ?? "—")
                     InfoRow(title: "developer.peer", value: diagnostics?.peerName ?? "—")
                     InfoRow(title: "developer.capabilities", value: capabilitiesText)
                     InfoRow(title: "developer.pc", value: pcText)

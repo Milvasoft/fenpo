@@ -3,18 +3,22 @@ import FenpoCore
 import FenpoProtocol
 import Foundation
 
-/// `FenpoActions` over the BLE channel. Text that does not fit BLE waits for the Wi-Fi data channel
-/// (Windows side pending) and is reported as `tooLargeForBluetooth`.
+/// `FenpoActions` over the two channels: small messages go over BLE, which also works in the
+/// background; anything larger, or anything while BLE is down, goes over the Wi-Fi channel.
 @MainActor
 public final class LiveFenpoActions: FenpoActions {
     private let store: PairedPCStore
     private let central: BLECentral
+    private let wifi: WiFiChannel
+    private let transfers: FileTransferService
     private let log = FenpoLog("Actions")
 
     /// Creates the actions.
-    public init(store: PairedPCStore, central: BLECentral) {
+    public init(store: PairedPCStore, central: BLECentral, wifi: WiFiChannel, transfers: FileTransferService) {
         self.store = store
         self.central = central
+        self.wifi = wifi
+        self.transfers = transfers
     }
 
     public nonisolated func sendText(_ text: String) async throws {
@@ -26,35 +30,62 @@ public final class LiveFenpoActions: FenpoActions {
     }
 
     public nonisolated func lockPC() async throws {
-        try await performLockPC()
+        try await deliver(.lockPc(Fenpo_V1_LockPc()), what: "LockPc")
     }
 
     public nonisolated func openOnPC(_ url: URL) async throws {
-        try await performOpenOnPC(url)
+        var message = Fenpo_V1_OpenUrl()
+        message.url = url.absoluteString
+        try await deliver(.openURL(message), what: "OpenUrl")
+    }
+
+    public nonisolated func sendFiles(_ files: [OutgoingFile]) async throws {
+        try await performSendFiles(files)
+    }
+
+    private func performSendFiles(_ files: [OutgoingFile]) async throws {
+        guard store.load() != nil else {
+            throw FenpoActionError.notPaired
+        }
+        try await transfers.send(files)
     }
 
     private func performSendText(_ text: String) async throws {
         guard !text.isEmpty else {
             throw FenpoActionError.emptyText
         }
-        try await waitForChannel()
         var item = Fenpo_V1_ClipboardItem()
         item.itemID = UUID().uuidString
         item.text = text
-        do {
-            try central.send(.clipboard(item))
-            log.info("Sent clipboard text, \(text.count) characters")
-        } catch BLEChunking.Error.messageTooLarge {
-            log.info("Clipboard text of \(text.count) characters does not fit BLE")
-            throw FenpoActionError.tooLargeForBluetooth
-        }
+        try await deliver(.clipboard(item), what: "clipboard text, \(text.count) characters")
     }
 
     private func performFetchPCClipboard() async throws -> String {
-        try await waitForChannel()
-        let central = central
-        let reply = try await withTimeout(.seconds(5)) {
-            try await central.request(.clipboardRequest(Fenpo_V1_ClipboardRequest()))
+        guard store.load() != nil else {
+            throw FenpoActionError.notPaired
+        }
+        let reply: Fenpo_V1_Envelope
+        if await bluetoothReady() {
+            let central = central
+            reply = try await withTimeout(.seconds(5)) {
+                try await central.request(.clipboardRequest(Fenpo_V1_ClipboardRequest()))
+            }
+        } else {
+            try await connectWiFi()
+            let wifi = wifi
+            let answer = Task {
+                try await wifi.next(timeout: .seconds(5)) { envelope in
+                    if case .clipboard = envelope.body {
+                        return true
+                    }
+                    if case .error = envelope.body {
+                        return true
+                    }
+                    return false
+                }
+            }
+            try await wifi.send(.clipboardRequest(Fenpo_V1_ClipboardRequest()))
+            reply = try await answer.value
         }
         switch reply.body {
         case .clipboard(let item):
@@ -71,39 +102,45 @@ public final class LiveFenpoActions: FenpoActions {
         }
     }
 
-    private func performLockPC() async throws {
-        try await waitForChannel()
-        try central.send(.lockPc(Fenpo_V1_LockPc()))
-        log.info("Sent LockPc")
-    }
-
-    private func performOpenOnPC(_ url: URL) async throws {
-        try await waitForChannel()
-        var message = Fenpo_V1_OpenUrl()
-        message.url = url.absoluteString
-        do {
-            try central.send(.openURL(message))
-        } catch BLEChunking.Error.messageTooLarge {
-            throw FenpoActionError.tooLargeForBluetooth
-        }
-        log.info("Sent OpenUrl (\(url.scheme ?? "?"))")
-    }
-
-    /// Gives a just-launched app a few seconds to reconnect before giving up.
-    private func waitForChannel() async throws {
+    /// BLE first; Wi-Fi when BLE is down or the message is too large for it.
+    private func deliver(_ body: Fenpo_V1_Envelope.OneOf_Body, what: String) async throws {
         guard store.load() != nil else {
             throw FenpoActionError.notPaired
         }
-        guard central.state != .ready else {
-            return
+        if await bluetoothReady() {
+            do {
+                try central.send(body)
+                log.info("Sent \(what) over BLE")
+                return
+            } catch BLEChunking.Error.messageTooLarge {
+                log.info("Too large for BLE, using Wi-Fi")
+            }
+        }
+        try await connectWiFi()
+        do {
+            try await wifi.send(body)
+            log.info("Sent \(what) over Wi-Fi")
+        } catch {
+            throw FenpoActionError.notConnected
+        }
+    }
+
+    /// Gives a just-launched app a few seconds to reconnect BLE.
+    private func bluetoothReady() async -> Bool {
+        if central.state == .ready {
+            return true
         }
         let central = central
+        return (try? await withTimeout(.seconds(6)) {
+            try await central.waitUntilReady()
+        }) != nil
+    }
+
+    private func connectWiFi() async throws {
         do {
-            try await withTimeout(.seconds(8)) {
-                try await central.waitUntilReady()
-            }
+            try await wifi.connectIfNeeded()
         } catch {
-            log.info("Channel not ready: \(String(describing: error))")
+            log.info("Wi-Fi channel not available: \(String(describing: error))")
             throw FenpoActionError.notConnected
         }
     }

@@ -77,6 +77,27 @@ public struct DataChannelClient: Sendable {
         throw FenpoActionError.notConnected
     }
 
+    /// Opens a data or media connection to the same PC: same pinned TLS, no Hello. The caller writes
+    /// the first frame (`TransferStreamHeader` or `MediaStreamOpen`).
+    /// - Parameter endpoint: Address of the PC's control server.
+    @MainActor
+    public func openStream(to endpoint: Endpoint) async throws -> TLSControlConnection {
+        guard let record = store.load() else {
+            throw FenpoActionError.notPaired
+        }
+        let identity = try identityStore.loadOrCreate()
+        let connection = TLSControlConnection(endpoint: endpoint, pinnedServerSHA256: record.certificateSHA256, identity: identity)
+        do {
+            try await withTimeout(.seconds(10)) {
+                try await connection.start()
+            }
+        } catch {
+            await connection.cancel()
+            throw FenpoActionError.notConnected
+        }
+        return connection
+    }
+
     /// Sends `OpenUrl` over Wi-Fi ("Open on PC" from the share extension).
     /// - Parameter url: Link to open on the PC.
     @MainActor

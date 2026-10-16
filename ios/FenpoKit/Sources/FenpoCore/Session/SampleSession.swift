@@ -38,6 +38,9 @@ public actor SampleSession: SessionProviding {
                 TransferRecord(fileName: "IMG_4835.HEIC", direction: .toPC, date: now.addingTimeInterval(-3_600), folder: "Resimler"),
                 TransferRecord(fileName: "Bütçe_Ekim.xlsx", direction: .fromPC, date: now.addingTimeInterval(-86_400)),
                 TransferRecord(fileName: "Teklif v2.docx", direction: .toPC, date: now.addingTimeInterval(-172_800), folder: "Belgeler"),
+            ],
+            activeTransfers: [
+                ActiveTransfer(id: "sample", firstFileName: "IMG_4836.MOV", fileCount: 1, direction: .toPC, bytesDone: 123_731_968, totalBytes: 192_937_984),
             ]
         )
     }

@@ -93,6 +93,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.share
         TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
         INFOPLIST_FILE: FenpoShare/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoShare/FenpoShare.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo

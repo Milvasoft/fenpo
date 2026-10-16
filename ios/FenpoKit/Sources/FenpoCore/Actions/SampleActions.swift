@@ -21,4 +21,7 @@ public struct SampleActions: FenpoActions {
 
     public func openOnPC(_ url: URL) async throws {
     }
+
+    public func sendFiles(_ files: [OutgoingFile]) async throws {
+    }
 }

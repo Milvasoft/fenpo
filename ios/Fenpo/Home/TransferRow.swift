@@ -33,6 +33,14 @@ struct TransferRow: View {
 
     private var subtitle: Text {
         let when = record.date.formatted(.relative(presentation: .named, unitsStyle: .abbreviated).locale(locale))
+        switch record.outcome {
+        case .failed:
+            return Text("transfer.failed \(when)")
+        case .cancelled:
+            return Text("transfer.cancelled \(when)")
+        case .completed:
+            break
+        }
         switch (record.direction, record.folder) {
         case (.fromPC, _):
             return Text("transfer.fromPC \(when)")
