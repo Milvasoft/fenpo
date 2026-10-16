@@ -21,6 +21,12 @@ final class MediaSender: Sendable {
     private let tasks = Mutex<[Task<Void, Never>]>([])
     private let finished = Mutex(false)
     private let stats = Mutex(Stats())
+    /// When the write in progress started; `nil` between writes.
+    private let writeStarted = Mutex<ContinuousClock.Instant?>(nil)
+    /// A write that takes longer than this means the connection is stuck: give it up so the
+    /// service opens a new one, instead of freezing the PC's picture until TCP times out.
+    private static let stallLimit: Duration = .seconds(5)
+    private static let statsEvery: Duration = .seconds(10)
     private let onClosed: @Sendable (String) -> Void
     private let log = FenpoLog("Camera")
 
@@ -53,12 +59,14 @@ final class MediaSender: Sendable {
         let writer = Task.detached { [self] in
             for await _ in signals {
                 while let next = self.queue.withLock({ $0.pop() }) {
+                    self.writeStarted.withLock { $0 = .now }
                     do {
                         try await self.connection.sendRaw(next)
                     } catch {
                         self.fail("write failed: \(String(describing: error))")
                         return
                     }
+                    self.writeStarted.withLock { $0 = nil }
                     let first = self.stats.withLock { stats in
                         stats.packets += 1
                         stats.bytes += next.count
@@ -82,7 +90,28 @@ final class MediaSender: Sendable {
                 self.fail("read failed: \(String(describing: error))")
             }
         }
-        tasks.withLock { $0 = [writer, reader] }
+        let watchdog = Task.detached { [self] in
+            var lastStats = self.written
+            var lastDropped = 0
+            var sinceStats: Duration = .zero
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                if let started = self.writeStarted.withLock({ $0 }), ContinuousClock.now - started > Self.stallLimit {
+                    self.fail("a write was stuck for \(Self.stallLimit)")
+                    return
+                }
+                sinceStats += .seconds(1)
+                if sinceStats >= Self.statsEvery {
+                    sinceStats = .zero
+                    let now = self.written
+                    let dropped = self.droppedVideoFrames
+                    self.log.info("Media: \(now.packets - lastStats.packets) packets, \((now.bytes - lastStats.bytes) / 1024) KB, \(dropped - lastDropped) frames dropped in \(Self.statsEvery)")
+                    lastStats = now
+                    lastDropped = dropped
+                }
+            }
+        }
+        tasks.withLock { $0 = [writer, reader, watchdog] }
     }
 
     /// Queues a packet; safe from any thread.

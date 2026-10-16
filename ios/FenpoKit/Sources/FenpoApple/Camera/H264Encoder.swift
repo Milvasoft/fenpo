@@ -16,6 +16,8 @@ final class H264Encoder: @unchecked Sendable {
     private let session: VTCompressionSession
     private let output: Output
     private let forceKeyFrame = Mutex(true)
+    private let failures = Mutex(0)
+    private let log = FenpoLog("Camera")
 
     /// Creates an encoder.
     /// - Parameters:
@@ -87,9 +89,21 @@ final class H264Encoder: @unchecked Sendable {
             infoFlagsOut: nil
         ) { [weak self] status, _, buffer in
             guard status == noErr, let buffer else {
+                self?.failed(status)
                 return
             }
             self?.emit(buffer)
+        }
+    }
+
+    /// Logs the first encoder error and then every 30th, so a stuck encoder shows in the log.
+    private func failed(_ status: OSStatus) {
+        let count = failures.withLock { count in
+            count += 1
+            return count
+        }
+        if count == 1 || count % 30 == 0 {
+            log.error("Encoding failed (\(status)), \(count) frame(s) so far")
         }
     }
 

@@ -15,13 +15,19 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     /// The session, for the preview layer.
     let session = AVCaptureSession()
 
-    private let queue = DispatchQueue(label: "com.fenpo.camera")
+    // Every frame creates Core Image and Core Media objects; draining after each one keeps the
+    // camera's own buffers free and memory flat.
+    private let queue = DispatchQueue(label: "com.fenpo.camera", autoreleaseFrequency: .workItem)
     private let output = AVCaptureVideoDataOutput()
     private var input: AVCaptureDeviceInput?
     private let handler = Mutex<FrameHandler?>(nil)
     private let fitter = Mutex<FrameFitter?>(nil)
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
     private var rotationObservation: NSKeyValueObservation?
+    private var notificationTokens: [NSObjectProtocol] = []
+    private let lastAngle = Mutex<CGFloat>(-1)
+    private let droppedFrames = Mutex(0)
+    private let log = FenpoLog("Camera")
 
     /// What the current camera can do.
     struct Capabilities: Sendable {
@@ -136,6 +142,13 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     }
 
     private func apply(rotationAngle angle: CGFloat) {
+        let changed = lastAngle.withLock { last in
+            defer { last = angle }
+            return last != angle
+        }
+        if changed {
+            log.info("Capture rotation \(Int(angle))°")
+        }
         let output = output
         queue.async {
             guard let connection = output.connection(with: .video), connection.isVideoRotationAngleSupported(angle) else {
@@ -147,6 +160,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
 
     /// Starts capturing (off the main thread).
     func start() {
+        watchSession()
         let session = session
         queue.async {
             session.startRunning()
@@ -155,11 +169,40 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
 
     /// Stops capturing.
     func stop() {
+        for token in notificationTokens {
+            NotificationCenter.default.removeObserver(token)
+        }
+        notificationTokens = []
         setFrameHandler(nil)
         let session = session
         queue.async {
             session.stopRunning()
         }
+    }
+
+    /// Logs interruptions and errors of the capture session, and restarts it after a runtime error
+    /// (for example when the media server resets), so a frozen picture shows up in the log.
+    private func watchSession() {
+        let center = NotificationCenter.default
+        let session = session
+        let queue = queue
+        let log = log
+        notificationTokens = [
+            center.addObserver(forName: AVCaptureSession.wasInterruptedNotification, object: session, queue: nil) { notification in
+                let reason = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as? Int ?? -1
+                log.error("Capture interrupted, reason \(reason)")
+            },
+            center.addObserver(forName: AVCaptureSession.interruptionEndedNotification, object: session, queue: nil) { _ in
+                log.info("Capture interruption ended")
+            },
+            center.addObserver(forName: AVCaptureSession.runtimeErrorNotification, object: session, queue: nil) { notification in
+                let error = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError
+                log.error("Capture runtime error \(error?.code ?? 0); restarting")
+                queue.async {
+                    session.startRunning()
+                }
+            },
+        ]
     }
 
     private static func device(facing: Fenpo_V1_CameraFacing) -> AVCaptureDevice? {
@@ -173,14 +216,27 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
 
 extension CapturePipeline: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
-        guard
-            let handler = handler.withLock({ $0 }),
-            let image = CMSampleBufferGetImageBuffer(sampleBuffer),
-            let fitted = fitter.withLock({ $0 })?.fit(image)
-        else {
-            return
+        autoreleasepool {
+            guard
+                let handler = handler.withLock({ $0 }),
+                let image = CMSampleBufferGetImageBuffer(sampleBuffer),
+                let fitted = fitter.withLock({ $0 })?.fit(image)
+            else {
+                return
+            }
+            handler(fitted, CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
         }
-        handler(fitted, CMSampleBufferGetPresentationTimeStamp(sampleBuffer))
+    }
+
+    func captureOutput(_ output: AVCaptureOutput, didDrop sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        let count = droppedFrames.withLock { count in
+            count += 1
+            return count
+        }
+        if count == 1 || count % 100 == 0 {
+            let reason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String ?? "unknown"
+            log.info("Capture dropped a late frame (\(reason)), \(count) so far")
+        }
     }
 }
 #endif
