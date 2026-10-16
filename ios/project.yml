@@ -17,6 +17,7 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
+    # iPhone only. Also set per target: XcodeGen's application preset would add iPad ("1,2").
     TARGETED_DEVICE_FAMILY: "1"
     LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     SWIFT_EMIT_LOC_STRINGS: YES
@@ -40,6 +41,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: Fenpo/Info.plist
         CODE_SIGN_ENTITLEMENTS: Fenpo/Fenpo.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -90,6 +92,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.share
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: FenpoShare/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoShare/FenpoShare.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
@@ -109,6 +112,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.widgets
+        TARGETED_DEVICE_FAMILY: "1"
         INFOPLIST_FILE: FenpoWidgets/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoWidgets/FenpoWidgets.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
