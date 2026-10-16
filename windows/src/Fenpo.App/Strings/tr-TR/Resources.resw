@@ -19,7 +19,7 @@
     <value>Kamera olarak kullan</value>
   </data>
   <data name="Action_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefonun hotspot'una bağlan; ad ve şifre telefondaki Fenpo'dan gelir</value>
   </data>
   <data name="Action_HotspotText.Text" xml:space="preserve">
     <value>Hotspot’a bağlan</value>
@@ -126,6 +126,9 @@
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Aramalar</value>
   </data>
+  <data name="Camera_Apps.Text" xml:space="preserve">
+    <value>Uygulamalarda Fenpo Kamera</value>
+  </data>
   <data name="Camera_CenterStage.Text" xml:space="preserve">
     <value>Kişiyi ortala</value>
   </data>
@@ -139,10 +142,13 @@
     <value>Kamera açılamadı. Kamerayı kullanan başka bir uygulamayı kapatıp yeniden dene.</value>
   </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Önizleme telefonun kamerasını gösterir. Teams, Zoom ve Meet'te web kamerası olarak görünmesi için Fenpo Kamera bileşeni gerekiyor; o bir sonraki sürümde geliyor.</value>
+    <value>Önizleme telefonun kamerasını gösterir. Fenpo Kamera kuruluysa Teams, Zoom, Meet ve OBS'de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı; en iyisi telefonu yatay bir standa koymak.</value>
   </data>
   <data name="Camera_Idle" xml:space="preserve">
     <value>Telefonun kamerasını burada önizle.</value>
+  </data>
+  <data name="Camera_InUseBadge.Text" xml:space="preserve">
+    <value>Bir uygulama kullanıyor</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -173,6 +179,9 @@
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portre bulanıklığı</value>
+  </data>
+  <data name="Camera_Remove.Content" xml:space="preserve">
+    <value>Kaldır</value>
   </data>
   <data name="Camera_Starting" xml:space="preserve">
     <value>Kamera açılıyor…</value>
@@ -276,6 +285,15 @@
   <data name="Files_OpenFolder.Content" xml:space="preserve">
     <value>Klasörü aç</value>
   </data>
+  <data name="Files_PhotosDragHint.Text" xml:space="preserve">
+    <value>Sürükleyip bir klasöre bırakabilirsin</value>
+  </data>
+  <data name="Files_PhotosMore.Content" xml:space="preserve">
+    <value>Daha fazla göster</value>
+  </data>
+  <data name="Files_PhotosRefresh.Content" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
   <data name="Files_Pick.Content" xml:space="preserve">
     <value>Dosya seç</value>
   </data>
@@ -342,6 +360,9 @@
   <data name="Forget_Text" xml:space="preserve">
     <value>Bu bilgisayar telefonu artık tanımaz. Yeniden bağlamak için telefondaki Fenpo ile QR kodu okut.</value>
   </data>
+  <data name="Forget_TextIphone" xml:space="preserve">
+    <value>Bu bilgisayar iPhone'u artık tanımaz; Windows'taki Bluetooth eşleşmesi de kaldırılır. Yeniden bağlamak için Ayarlar › Telefon ekle'yi kullan. iPhone'da da Ayarlar › Bluetooth'tan bu bilgisayarı unutabilirsin.</value>
+  </data>
   <data name="Forget_Title" xml:space="preserve">
     <value>{0} eşleşmesi kaldırılsın mı?</value>
   </data>
@@ -381,6 +402,24 @@
   <data name="HomeTitle.Text" xml:space="preserve">
     <value>Telefonum</value>
   </data>
+  <data name="Hotspot_Connected" xml:space="preserve">
+    <value>Hotspot'a bağlı</value>
+  </data>
+  <data name="Hotspot_Failed" xml:space="preserve">
+    <value>Hotspot'a bağlanılamadı. Telefondaki Fenpo'da kayıtlı şifrenin hotspot şifresiyle aynı olduğuna bak.</value>
+  </data>
+  <data name="Hotspot_Join" xml:space="preserve">
+    <value>Hotspot’a bağlan</value>
+  </data>
+  <data name="Hotspot_Joining" xml:space="preserve">
+    <value>Hotspot'a bağlanılıyor…</value>
+  </data>
+  <data name="Hotspot_NotFound" xml:space="preserve">
+    <value>Hotspot bulunamadı. Telefonda hotspot'u aç (iPhone'da Ayarlar › Kişisel Erişim Noktası › Başkalarının Katılmasına İzin Ver), sonra yeniden dene.</value>
+  </data>
+  <data name="Hotspot_NotSetUp" xml:space="preserve">
+    <value>Telefonda hotspot adı ve şifresi kayıtlı değil. iPhone'da Fenpo › Ayarlar › Kişisel Erişim Noktası'na, Android'de Fenpo › Ayarlar › Hotspot'a bir kez gir, sonra yeniden dene.</value>
+  </data>
   <data name="Island_Answer.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yanıtla</value>
   </data>
@@ -416,6 +455,24 @@
   </data>
   <data name="LanguageRestart_Title.Text" xml:space="preserve">
     <value>Dil değişecek.</value>
+  </data>
+  <data name="LocalSend_Accept" xml:space="preserve">
+    <value>Kabul et</value>
+  </data>
+  <data name="LocalSend_AskText" xml:space="preserve">
+    <value>{0}, {1}. LocalSend ile, Gelen dosyalar klasörüne</value>
+  </data>
+  <data name="LocalSend_AskTitle" xml:space="preserve">
+    <value>{0} sana dosya göndermek istiyor</value>
+  </data>
+  <data name="LocalSend_Decline" xml:space="preserve">
+    <value>Reddet</value>
+  </data>
+  <data name="LocalSend_Files" xml:space="preserve">
+    <value>{0} dosya</value>
+  </data>
+  <data name="LocalSend_From" xml:space="preserve">
+    <value>LocalSend ile {0} cihazından</value>
   </data>
   <data name="Media_Next.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Sonraki</value>
@@ -564,6 +621,9 @@
   <data name="Mirror_WaitingConsent" xml:space="preserve">
     <value>Telefonda ekranı paylaşmaya izin ver.</value>
   </data>
+  <data name="Mirror_WaitingIphone" xml:space="preserve">
+    <value>iPhone'da Fenpo › PC › Ekranı PC'de göster'e dokun ya da Denetim Merkezi'nden ekran yayınını başlat.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Aramalar</value>
   </data>
@@ -711,6 +771,30 @@
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>{0} telefonuna geç</value>
   </data>
+  <data name="Photos_Denied" xml:space="preserve">
+    <value>Fenpo telefonda fotoğraflara erişemiyor. Telefonun ayarlarında Fenpo'ya fotoğraf izni ver.</value>
+  </data>
+  <data name="Photos_Empty" xml:space="preserve">
+    <value>Telefonda fotoğraf yok.</value>
+  </data>
+  <data name="Photos_FetchFailed" xml:space="preserve">
+    <value>Fotoğraf telefondan alınamadı. Telefonun Wi‑Fi'ye bağlı olduğuna bak ve yeniden dene.</value>
+  </data>
+  <data name="Photos_Limited" xml:space="preserve">
+    <value>Sadece telefonda Fenpo için seçtiğin fotoğraflar görünüyor.</value>
+  </data>
+  <data name="Photos_NeedsWifi" xml:space="preserve">
+    <value>Fotoğraflar Wi‑Fi ile gelir. Telefonu bu bilgisayarla aynı Wi‑Fi'ye bağla.</value>
+  </data>
+  <data name="Photos_NoAnswer" xml:space="preserve">
+    <value>Telefon cevap vermedi. Telefonda Fenpo'yu aç, sonra Yenile'ye bas.</value>
+  </data>
+  <data name="Photos_NotConnected" xml:space="preserve">
+    <value>Telefondaki Fenpo bağlı değil. Fotoğraflar telefon bağlanınca burada görünür.</value>
+  </data>
+  <data name="Photos_Unsupported" xml:space="preserve">
+    <value>Telefondaki Fenpo fotoğraflarını paylaşmıyor. Telefonda Fenpo'yu güncelle ve Ayarlar'da fotoğraf paylaşımını aç.</value>
+  </data>
   <data name="Ring_PcStop" xml:space="preserve">
     <value>Durdur</value>
   </data>
@@ -722,6 +806,15 @@
   </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
+  </data>
+  <data name="Settings_AddPhone.Text" xml:space="preserve">
+    <value>Telefon ekle</value>
+  </data>
+  <data name="Settings_AddPhoneButton.Content" xml:space="preserve">
+    <value>Telefon ekle</value>
+  </data>
+  <data name="Settings_AddPhoneHint.Text" xml:space="preserve">
+    <value>Başka bir telefonu eşleştir ya da telefondaki Fenpo'yu QR koduyla yeniden bağla</value>
   </data>
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Görünüm ve dil</value>
@@ -752,6 +845,9 @@
   </data>
   <data name="Settings_ClipboardToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Pano paylaşımı</value>
+  </data>
+  <data name="Settings_ConnectApp.Content" xml:space="preserve">
+    <value>QR koduyla bağla</value>
   </data>
   <data name="Settings_DeviceHeader.Text" xml:space="preserve">
     <value>Cihaz</value>
@@ -828,6 +924,9 @@
   <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Yakınlık kilidi</value>
   </data>
+  <data name="Settings_SharingHeader.Text" xml:space="preserve">
+    <value>Telefonla paylaşım</value>
+  </data>
   <data name="Settings_Startup.Text" xml:space="preserve">
     <value>Windows açılınca başlat</value>
   </data>
@@ -863,6 +962,54 @@
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
+  </data>
+  <data name="Sharing_AddFolder.Content" xml:space="preserve">
+    <value>Klasör ekle</value>
+  </data>
+  <data name="Sharing_Folders.Text" xml:space="preserve">
+    <value>Telefonla paylaşılan klasörler</value>
+  </data>
+  <data name="Sharing_FoldersHint.Text" xml:space="preserve">
+    <value>iPhone'da Dosyalar uygulamasında, Android'de dosya seçicide görünür. Başka klasörlere erişilemez.</value>
+  </data>
+  <data name="Sharing_LocalSend.Text" xml:space="preserve">
+    <value>LocalSend ile görün</value>
+  </data>
+  <data name="Sharing_LocalSendHint.Text" xml:space="preserve">
+    <value>LocalSend kullanan cihazlar bu bilgisayarı görür ve dosya gönderebilir; her gönderim önce sorulur</value>
+  </data>
+  <data name="Sharing_LocalSendToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>LocalSend ile görün</value>
+  </data>
+  <data name="Sharing_NoApps.Text" xml:space="preserve">
+    <value>Henüz bildirim gösteren bir uygulama yok. Bir uygulama bu bilgisayarda bildirim gösterince burada çıkar.</value>
+  </data>
+  <data name="Sharing_NoFolders.Text" xml:space="preserve">
+    <value>Henüz paylaşılan klasör yok.</value>
+  </data>
+  <data name="Sharing_NotificationsDenied" xml:space="preserve">
+    <value>Windows, Fenpo'nun bildirimleri okumasına izin vermedi. Ayarlar › Gizlilik ve güvenlik › Bildirimler'de Fenpo'ya izin ver, sonra yeniden aç.</value>
+  </data>
+  <data name="Sharing_PcNotifications.Text" xml:space="preserve">
+    <value>PC bildirimlerini telefona gönder</value>
+  </data>
+  <data name="Sharing_PcNotificationsHint.Text" xml:space="preserve">
+    <value>Seçtiğin uygulamaların bildirimleri telefonda da görünür</value>
+  </data>
+  <data name="Sharing_PcNotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>PC bildirimlerini telefona gönder</value>
+  </data>
+  <data name="Sharing_PickApps.Content" xml:space="preserve">
+    <value>Uygulamaları seç</value>
+  </data>
+  <data name="Sharing_PickAppsTitle.Text" xml:space="preserve">
+    <value>Bildirimleri telefona gidecek uygulamalar</value>
+  </data>
+  <data name="Sharing_RemoveFolder.Content" xml:space="preserve">
+    <value>Kaldır</value>
+  </data>
+  <data name="Shell_SendToPhone" xml:space="preserve">
+    <value>Fenpo ile telefona gönder</value>
   </data>
   <data name="Size_Bytes" xml:space="preserve">
     <value>{0} B</value>
@@ -925,7 +1072,7 @@
     <value>Odak</value>
   </data>
   <data name="Tray_Hotspot.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefonun hotspot'una bağlan</value>
   </data>
   <data name="Tray_HotspotText.Text" xml:space="preserve">
     <value>Hotspot</value>
@@ -971,5 +1118,26 @@
   </data>
   <data name="Tray_Summary" xml:space="preserve">
     <value>{0}, {1}</value>
+  </data>
+  <data name="VirtualCamera_Failed" xml:space="preserve">
+    <value>Kurulum tamamlanmadı. Yönetici onayını verip yeniden dene.</value>
+  </data>
+  <data name="VirtualCamera_Install" xml:space="preserve">
+    <value>Fenpo Kamera'yı kur</value>
+  </data>
+  <data name="VirtualCamera_Installed" xml:space="preserve">
+    <value>Uygulamanın kamera ayarında Fenpo Kamera'yı seç. Uygulama kamerayı açınca telefonun kamerası kendiliğinden başlar.</value>
+  </data>
+  <data name="VirtualCamera_InUse" xml:space="preserve">
+    <value>Bir uygulama Fenpo Kamera'yı kullanıyor. Görüntü telefonun kamerasından geliyor.</value>
+  </data>
+  <data name="VirtualCamera_NeedsUpdate" xml:space="preserve">
+    <value>Fenpo Kamera'nın yeni sürümü var. Güncelle'ye bas, Windows yönetici onayı ister.</value>
+  </data>
+  <data name="VirtualCamera_NotInstalled" xml:space="preserve">
+    <value>Teams, Zoom, Meet ve OBS'de telefonun kamerasını seçebilmek için Fenpo Kamera'yı kur. Windows bir kez yönetici onayı ister.</value>
+  </data>
+  <data name="VirtualCamera_Update" xml:space="preserve">
+    <value>Güncelle</value>
   </data>
 </root>

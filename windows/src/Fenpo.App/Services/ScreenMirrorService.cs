@@ -45,6 +45,17 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
     /// </summary>
     public bool CanMirror => _channel.IsConnected && _channel.Supports(Capability.ScreenMirror);
 
+    /// <summary>
+    /// Gets a value indicating whether the phone in use is an iPhone: its user starts the broadcast on the phone, and
+    /// the PC cannot control it (screen.proto).
+    /// </summary>
+    public bool FromIphone => _channel.Phone?.Platform == DevicePlatform.Ios;
+
+    /// <summary>
+    /// Gets the stream playing now, for a window that opens after it started (an iPhone broadcast started on the phone).
+    /// </summary>
+    public MediaFeed? Feed { get; private set; }
+
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -71,10 +82,9 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
         {
             Max = new VideoFormat { Codec = VideoCodec.H264, Width = 1920, Height = 1920, Fps = 60, BitrateKbps = 8000 },
             Control = true,
-            Accepted = new AcceptedFormats { Video = { VideoCodec.H264 } },
-
-            // The phone's sound needs a second track in the player; video comes first.
-            Audio = false,
+            // Sound uncompressed: the PC plays PCM without a decoder, and a LAN carries it easily.
+            Accepted = new AcceptedFormats { Video = { VideoCodec.H264 }, Audio = { AudioCodec.PcmS16Le } },
+            Audio = true,
         };
         SetState(ScreenState.WaitingForConsent);
         var sent = await _channel.SendAsync(new Envelope { ScreenStart = start });
@@ -125,6 +135,7 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
     {
         _streamId = feed.Open.StreamId;
         Video = feed.Open.Video;
+        Feed = feed;
         StreamOpened?.Invoke(this, feed);
         await RequestKeyFrameAsync();
     }

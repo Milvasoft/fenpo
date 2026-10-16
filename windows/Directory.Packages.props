@@ -25,6 +25,9 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.13" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.13" />
 
+    <!-- Fenpo Kamera (Native AOT media source); spike S7 -->
+    <PackageVersion Include="DirectNAot.Extensions" Version="1.7.0" />
+
     <!-- Tests -->
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="NSubstitute" Version="6.2.0" />

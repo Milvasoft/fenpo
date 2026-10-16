@@ -10,6 +10,48 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll")]
     internal static partial uint GetDpiForWindow(nint hwnd);
 
+    /// <summary>
+    /// Splits a command line the way Windows does for a program's arguments.
+    /// </summary>
+    /// <param name="commandLine">Command line, with or without the program.</param>
+    /// <returns>The parts.</returns>
+    internal static unsafe IReadOnlyList<string> SplitCommandLine(string commandLine)
+    {
+        if (string.IsNullOrWhiteSpace(commandLine))
+        {
+            return [];
+        }
+
+        var parts = CommandLineToArgvW(commandLine, out var count);
+
+        if (parts == 0)
+        {
+            return [];
+        }
+
+        try
+        {
+            var result = new List<string>(count);
+
+            for (var index = 0; index < count; index++)
+            {
+                result.Add(Marshal.PtrToStringUni(((nint*)parts)[index]) ?? string.Empty);
+            }
+
+            return result;
+        }
+        finally
+        {
+            LocalFree(parts);
+        }
+    }
+
+    [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial nint CommandLineToArgvW(string commandLine, out int count);
+
+    [LibraryImport("kernel32.dll")]
+    private static partial nint LocalFree(nint memory);
+
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool LockWorkStation();

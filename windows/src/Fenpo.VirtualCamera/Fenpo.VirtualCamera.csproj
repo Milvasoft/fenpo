@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Fenpo Kamera: the media source Windows' Frame Server loads for the "Fenpo Kamera" virtual camera
+       (MFCreateVirtualCamera). It reads the phone's H.264 frames that Fenpo.exe puts in shared memory (CameraRing),
+       decodes them to NV12 and hands them to the app using the camera. Native AOT, one DLL, registered in HKLM by an
+       administrator-approved install (spike S7). The COM structure follows smourier/VCamNetSample (MIT). -->
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Fenpo.VirtualCamera</RootNamespace>
+    <PublishAot>true</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DirectNAot.Extensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Fenpo.Core\Camera\CameraRing.cs" Link="Shared\CameraRing.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="DirectN" />
+    <Using Include="DirectN.Extensions" />
+    <Using Include="DirectN.Extensions.Com" />
+    <Using Include="DirectN.Extensions.Utilities" />
+    <Using Include="System.Runtime.InteropServices" />
+    <Using Include="System.Runtime.InteropServices.Marshalling" />
+    <Using Alias="ComObject" Include="DirectN.Extensions.Com.ComObject" />
+    <Using Alias="MF_EVENT_TYPE" Include="DirectN.__MIDL___MIDL_itf_mfobjects_0000_0013_0001" />
+  </ItemGroup>
+
+</Project>

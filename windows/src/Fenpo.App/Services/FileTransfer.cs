@@ -101,6 +101,17 @@ public sealed class FileTransfer
     /// <summary>Gets a value indicating whether the data connection was taken.</summary>
     internal bool Started { get; set; }
 
+    /// <summary>
+    /// Gets or sets the folder an incoming transfer is saved to; null for the incoming folder.
+    /// </summary>
+    internal string? Folder { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the transfer stays out of the Files list and its notifications (a file
+    /// the phone's Files app opened, a photo the PC asked for).
+    /// </summary>
+    internal bool Quiet { get; set; }
+
     /// <summary>Gets the cancellation source for the whole transfer.</summary>
     internal CancellationTokenSource Cancellation { get; } = new();
 
