@@ -243,6 +243,12 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Pano</value>
   </data>
+  <data name="Control_Active" xml:space="preserve">
+    <value>Klavye ve fare telefonda · Bilgisayara dönmek için Ctrl+Alt+I</value>
+  </data>
+  <data name="Control_Connecting" xml:space="preserve">
+    <value>Telefona bağlanıyor… İmleç için iPhone'da AssistiveTouch açık olmalı · Ctrl+Alt+I ile vazgeç</value>
+  </data>
   <data name="Files_AndMore" xml:space="preserve">
     <value>{0} ve {1} dosya daha</value>
   </data>
@@ -572,6 +578,12 @@
   </data>
   <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Geri</value>
+  </data>
+  <data name="Mirror_Control.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bilgisayarın klavye ve faresini iPhone'a ver (Ctrl+Alt+I)</value>
+  </data>
+  <data name="Mirror_ControlText.Text" xml:space="preserve">
+    <value>Klavye ve fare</value>
   </data>
   <data name="Mirror_Failed" xml:space="preserve">
     <value>Yansıtma başlamadı. Telefonda Fenpo açıkken yeniden başlat.</value>
@@ -947,15 +959,6 @@
   </data>
   <data name="Settings_ThemeHint.Text" xml:space="preserve">
     <value>Sistem seçiliyken Windows’un açık veya koyu ayarını izler</value>
-  </data>
-  <data name="Settings_Unlock.Text" xml:space="preserve">
-    <value>Telefonla kilit aç</value>
-  </data>
-  <data name="Settings_UnlockHint.Text" xml:space="preserve">
-    <value>Face ID onayıyla Windows oturumunu açar. Ayrı bir bileşen gerektirir (deneysel)</value>
-  </data>
-  <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Telefonla kilit aç</value>
   </data>
   <data name="Settings_UsePhone.Content" xml:space="preserve">
     <value>Bu telefonu kullan</value>

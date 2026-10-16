@@ -113,6 +113,9 @@ public partial class App : Application
                 .AddHostedService(sp => sp.GetRequiredService<ScreenMirrorService>())
                 .AddSingleton<CameraService>()
                 .AddHostedService(sp => sp.GetRequiredService<CameraService>())
+                .AddSingleton<Fenpo.Bluetooth.Hid.HidPeripheral>()
+                .AddSingleton<PhoneControlService>()
+                .AddHostedService(sp => sp.GetRequiredService<PhoneControlService>())
                 .AddSingleton<VirtualCameraService>()
                 .AddHostedService(sp => sp.GetRequiredService<VirtualCameraService>())
                 .AddHostedService<MediaStreamRouter>()
@@ -266,6 +269,19 @@ public partial class App : Application
         GetService<ClipboardSync>().AttachUi(dispatcher);
         GetService<PcInputService>().AttachUi(dispatcher);
         GetService<ScreenMirrorService>().StreamOpened += (sender, feed) => dispatcher.TryEnqueue(() => ShowScreenMirror(askPhone: false));
+        var control = GetService<PhoneControlService>();
+        var banner = new ControlBannerWindow();
+        control.Changed += (sender, e) => dispatcher.TryEnqueue(() =>
+        {
+            if (!control.Active)
+            {
+                banner.Hide();
+                return;
+            }
+
+            var localization = GetService<LocalizationService>();
+            banner.ShowText(localization.GetString(control.PhoneConnected ? "Control_Active" : "Control_Connecting"));
+        });
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() =>
         {
             // A second "fenpo --send ..." (File Explorer's right-click command) arrives here from the new process.

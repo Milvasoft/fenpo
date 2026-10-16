@@ -60,6 +60,7 @@ Alınmış kararların tek listesi. Bir karar değişirse eskisinin üstü çizi
 | 37 | 16 Ekim | Paket kimliği `Milvasoft.Fenpo`, yayıncı görünen adı "Milvasoft". Geliştirme sürümleri kendinden imzalı `CN=Fenpo Development` sertifikasıyla imzalanır; yayın sertifikası ayrıca belirlenir | Buğra'nın onayı |
 | 38 | 16 Ekim | Windows oturumu `design/desktop/desktop.html`'i günceller: uygulamasız (Windows Bluetooth) eşleşme sihirbazı eklenir; #31 ve #34'teki düzeltmeler uygulanır | Buğra'nın onayı; uygulama tasarıma birebir uymalı |
 | 39 | 16 Ekim | S5 protokol önerisi (1–11) `e185f5d` ile protokole girdi. 6 haneli yedek eşleşme kodu kaldırıldı; QR okunmazsa PC QR'ı yeniden gösterir. Sayı karşılaştırmalı (SAS) yöntem ileride düşünülebilir. PC, ANCS aboneliğini ve MAP bağlantısını telefona `PcStatus` ile bildirir | S5: kısa kod araya giren saldırgana karşı koruma sağlamıyor; iOS oturumunun ayrıntıları; Buğra'nın onayı |
+| 40 | 17 Ekim | Fenpo kimsenin Windows ya da Microsoft hesabı şifresini istemez, saklamaz. Bu yüzden telefonla PC kilidini açma (Face ID/parmak izi ile Credential Provider) yok; kod, protokol (`unlock.proto`, CAPABILITY_UNLOCK 17, Envelope 130–139 ayrıldı) ve üç uygulamadaki ayar kaldırıldı. Kabuk için Fenpo modülü de planda yok | Kilitli oturumu açmak hesabın gerçek şifresini gerektiriyor; Buğra: "kimsenin microsoft hesabının şifresini almayalım lütfen. bu özellik için bu required ise bu özelliği kaldır heryerden". Kabuk modülünü de istemedi |
 
 ## Açık konular
 

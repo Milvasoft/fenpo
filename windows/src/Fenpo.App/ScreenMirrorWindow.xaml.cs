@@ -54,6 +54,15 @@ public sealed partial class ScreenMirrorWindow : Window
         _mirror.Changed += OnMirrorChanged;
         _mirror.StreamOpened += OnStreamOpened;
         Closed += (sender, e) => OnClosed();
+
+        // Clicking into the iPhone's picture hands it the keyboard and mouse, as on a Mac.
+        Activated += (sender, e) =>
+        {
+            if (e.WindowActivationState == WindowActivationState.PointerActivated && _mirror.FromIphone && _mirror.State == ScreenState.Streaming)
+            {
+                App.GetService<PhoneControlService>().Set(true);
+            }
+        };
         ApplyState();
 
         // An iPhone broadcast started on the phone opens this window while its stream already runs.
@@ -122,12 +131,16 @@ public sealed partial class ScreenMirrorWindow : Window
         });
         NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable && !_mirror.FromIphone;
 
-        // The iPhone cannot be controlled from the PC: only Stop stays.
-        foreach (var control in Controls.Children.OfType<FrameworkElement>().Where(c => c != StopButton))
+        // The iPhone is not controlled through the stream: Stop, and handing it the PC's keyboard and mouse.
+        foreach (var control in Controls.Children.OfType<FrameworkElement>().Where(c => c != StopButton && c != ControlButton))
         {
             control.Visibility = _mirror.FromIphone ? Visibility.Collapsed : Visibility.Visible;
         }
+
+        ControlButton.Visibility = _mirror.FromIphone ? Visibility.Visible : Visibility.Collapsed;
     }
+
+    private void OnControlClick(object sender, RoutedEventArgs e) => App.GetService<PhoneControlService>().Set(true);
 
     private void OnStreamOpened(object? sender, MediaFeed stream) => _dispatcher.TryEnqueue(() => Play(stream));
 
