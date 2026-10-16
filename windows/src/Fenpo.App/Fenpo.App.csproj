@@ -35,11 +35,14 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <PackageReference Include="QRCoder" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Fenpo.Core\Fenpo.Core.csproj" />
     <ProjectReference Include="..\Fenpo.Bluetooth\Fenpo.Bluetooth.csproj" />
+    <ProjectReference Include="..\Fenpo.Transport\Fenpo.Transport.csproj" />
   </ItemGroup>
 
 </Project>

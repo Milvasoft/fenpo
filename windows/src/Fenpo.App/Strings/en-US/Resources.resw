@@ -45,6 +45,45 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Your phone and Windows, at the same desk.</value>
   </data>
+  <data name="AppPair_Intro.Text" xml:space="preserve">
+    <value>Pair once and Fenpo connects whenever the phone is near.</value>
+  </data>
+  <data name="AppPair_NoNetworkText.Text" xml:space="preserve">
+    <value>Connect this PC to the same Wi‑Fi as the phone and the code shows up.</value>
+  </data>
+  <data name="AppPair_NoNetworkTitle.Text" xml:space="preserve">
+    <value>This PC is not on a network</value>
+  </data>
+  <data name="AppPair_QrHint.Text" xml:space="preserve">
+    <value>The code is valid for 5 minutes, then renews itself</value>
+  </data>
+  <data name="AppPair_Step1.Hint" xml:space="preserve">
+    <value>Search for “Fenpo” in the App Store</value>
+  </data>
+  <data name="AppPair_Step1.Title" xml:space="preserve">
+    <value>Install Fenpo on the iPhone</value>
+  </data>
+  <data name="AppPair_Step2.Hint" xml:space="preserve">
+    <value>The phone and this PC need to be on the same Wi‑Fi</value>
+  </data>
+  <data name="AppPair_Step2.Title" xml:space="preserve">
+    <value>Scan the code with the iPhone camera</value>
+  </data>
+  <data name="AppPair_Step3.Hint" xml:space="preserve">
+    <value>The iPhone asks to share notifications, tap Allow</value>
+  </data>
+  <data name="AppPair_Step3.Title" xml:space="preserve">
+    <value>Confirm the Bluetooth pairing</value>
+  </data>
+  <data name="AppPair_Step4.Hint" xml:space="preserve">
+    <value>Settings &gt; Bluetooth &gt; this PC &gt; Show Notifications</value>
+  </data>
+  <data name="AppPair_Step4.Title" xml:space="preserve">
+    <value>Allow messages and calls</value>
+  </data>
+  <data name="AppPair_Title.Text" xml:space="preserve">
+    <value>Connect your iPhone</value>
+  </data>
   <data name="Battery_Percent" xml:space="preserve">
     <value>{0}%</value>
   </data>

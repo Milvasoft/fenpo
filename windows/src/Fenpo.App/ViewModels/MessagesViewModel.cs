@@ -167,6 +167,7 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         {
             _sentMessages.Add(number.Trim(), text.Trim());
         }
+
         SendError = sent ? string.Empty : _localization.GetString("Messages_SendFailed");
         return sent;
     }

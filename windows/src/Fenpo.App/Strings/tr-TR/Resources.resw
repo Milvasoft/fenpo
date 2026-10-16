@@ -45,6 +45,45 @@
   <data name="AppDescription" xml:space="preserve">
     <value>Telefonun ve Windows, aynı masada.</value>
   </data>
+  <data name="AppPair_Intro.Text" xml:space="preserve">
+    <value>Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</value>
+  </data>
+  <data name="AppPair_NoNetworkText.Text" xml:space="preserve">
+    <value>Bilgisayarı telefonla aynı Wi‑Fi ağına bağla, kod kendiliğinden çıkar.</value>
+  </data>
+  <data name="AppPair_NoNetworkTitle.Text" xml:space="preserve">
+    <value>Bu bilgisayar bir ağa bağlı değil</value>
+  </data>
+  <data name="AppPair_QrHint.Text" xml:space="preserve">
+    <value>Kod 5 dakika geçerli, sonra kendiliğinden yenilenir</value>
+  </data>
+  <data name="AppPair_Step1.Hint" xml:space="preserve">
+    <value>App Store’da “Fenpo” ara</value>
+  </data>
+  <data name="AppPair_Step1.Title" xml:space="preserve">
+    <value>iPhone’a Fenpo’yu yükle</value>
+  </data>
+  <data name="AppPair_Step2.Hint" xml:space="preserve">
+    <value>Telefon ve bilgisayar aynı Wi‑Fi ağında olmalı</value>
+  </data>
+  <data name="AppPair_Step2.Title" xml:space="preserve">
+    <value>Kodu iPhone kamerasıyla okut</value>
+  </data>
+  <data name="AppPair_Step3.Hint" xml:space="preserve">
+    <value>iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</value>
+  </data>
+  <data name="AppPair_Step3.Title" xml:space="preserve">
+    <value>Bluetooth eşleşmesini onayla</value>
+  </data>
+  <data name="AppPair_Step4.Hint" xml:space="preserve">
+    <value>Ayarlar &gt; Bluetooth &gt; Bu bilgisayar &gt; Bildirimleri göster</value>
+  </data>
+  <data name="AppPair_Step4.Title" xml:space="preserve">
+    <value>Mesajlar ve aramalar için izin ver</value>
+  </data>
+  <data name="AppPair_Title.Text" xml:space="preserve">
+    <value>iPhone’unu bağla</value>
+  </data>
   <data name="Battery_Percent" xml:space="preserve">
     <value>%{0}</value>
   </data>

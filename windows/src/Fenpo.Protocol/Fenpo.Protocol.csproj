@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Messages generated from protocol/fenpo/v1/*.proto (the single source); no gRPC services. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Fenpo.Protocol</RootNamespace>
+    <!-- Generated code carries no XML docs. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" />
+    <PackageReference Include="Grpc.Tools" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="..\..\..\protocol\fenpo\v1\*.proto" ProtoRoot="..\..\..\protocol" GrpcServices="None" />
+  </ItemGroup>
+
+</Project>
