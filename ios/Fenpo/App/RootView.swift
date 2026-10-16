@@ -70,6 +70,20 @@ struct RootView: View {
         .fullScreenCover(isPresented: $model.isPairingPresented) {
             PairingFlowView()
         }
+        .sheet(item: Binding(
+            get: { model.unlockPrompt },
+            set: { prompt in
+                if prompt == nil, model.unlockPrompt != nil {
+                    model.declineUnlock()
+                }
+            }
+        )) { prompt in
+            UnlockPromptView(prompt: prompt) {
+                Task { await model.approveUnlock() }
+            } decline: {
+                model.declineUnlock()
+            }
+        }
     }
 }
 
