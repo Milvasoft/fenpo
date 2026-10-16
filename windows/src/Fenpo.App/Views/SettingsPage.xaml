@@ -3,7 +3,8 @@
     x:Class="Fenpo.App.Views.SettingsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:helpers="using:Fenpo.App.Helpers">
+    xmlns:helpers="using:Fenpo.App.Helpers"
+    xmlns:vm="using:Fenpo.App.ViewModels">
 
     <ScrollViewer>
         <StackPanel Padding="32,28" Spacing="16" MaxWidth="900" HorizontalAlignment="Stretch">
@@ -165,6 +166,95 @@
                                 <TextBlock x:Uid="Settings_MediaHint" Style="{StaticResource FenpoCaptionTextStyle}" />
                             </StackPanel>
                             <ToggleSwitch Grid.Column="2" IsOn="{x:Bind ViewModel.MediaControl, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Settings_MediaToggle" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Sharing with the phone: the PC's notifications, shared folders, LocalSend -->
+            <StackPanel>
+                <TextBlock x:Uid="Settings_SharingHeader" Style="{StaticResource FenpoSectionHeaderStyle}" />
+                <Border Style="{StaticResource FenpoCardStyle}">
+                    <StackPanel>
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE7F4;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Sharing_PcNotifications" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Sharing_PcNotificationsHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <DropDownButton Grid.Column="2" x:Uid="Sharing_PickApps" Margin="0,0,12,0" VerticalAlignment="Center" IsEnabled="{x:Bind Sharing.PcNotificationsToPhone, Mode=OneWay}">
+                                <DropDownButton.Flyout>
+                                    <Flyout Placement="BottomEdgeAlignedRight">
+                                        <StackPanel Width="320" Spacing="4">
+                                            <TextBlock x:Uid="Sharing_PickAppsTitle" FontWeight="SemiBold" />
+                                            <TextBlock x:Uid="Sharing_NoApps" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" Visibility="{x:Bind Sharing.NoApps, Mode=OneWay}" />
+                                            <ScrollViewer MaxHeight="360">
+                                                <ItemsControl ItemsSource="{x:Bind Sharing.Apps}" IsTabStop="False">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate x:DataType="vm:PcNotificationAppItem">
+                                                            <CheckBox Content="{x:Bind Name}" IsChecked="{x:Bind Send, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </StackPanel>
+                                    </Flyout>
+                                </DropDownButton.Flyout>
+                            </DropDownButton>
+                            <ToggleSwitch Grid.Column="3" IsOn="{x:Bind Sharing.PcNotificationsToPhone, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Sharing_PcNotificationsToggle" />
+                        </Grid>
+                        <InfoBar IsOpen="{x:Bind Sharing.HasNotificationsNotice, Mode=OneWay}" Message="{x:Bind Sharing.NotificationsNotice, Mode=OneWay}" Severity="Warning" IsClosable="False" Margin="16,0,16,12" />
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE8B7;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Sharing_Folders" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Sharing_FoldersHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Button Grid.Column="2" x:Uid="Sharing_AddFolder" VerticalAlignment="Center" Click="OnAddSharedFolderClick" />
+                        </Grid>
+                        <TextBlock x:Uid="Sharing_NoFolders" Style="{StaticResource FenpoCaptionTextStyle}" Margin="56,0,16,12" Visibility="{x:Bind Sharing.NoFolders, Mode=OneWay}" />
+                        <ItemsControl ItemsSource="{x:Bind Sharing.Folders}" Margin="56,0,16,8" IsTabStop="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:SharedFolderItem">
+                                    <Grid Padding="0,6" ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{x:Bind Name}" Foreground="{ThemeResource FenpoTextBrush}" />
+                                            <TextBlock Text="{x:Bind Path}" Style="{StaticResource FenpoCaptionTextStyle}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                        <Button Grid.Column="1" x:Uid="Sharing_RemoveFolder" Tag="{x:Bind}" Click="OnRemoveSharedFolderClick" VerticalAlignment="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border Style="{StaticResource FenpoRowDividerStyle}" />
+                        <Grid Style="{StaticResource FenpoSettingRowStyle}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Glyph="&#xE968;" Style="{StaticResource FenpoRowIconStyle}" />
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock x:Uid="Sharing_LocalSend" Style="{StaticResource FenpoRowLabelStyle}" />
+                                <TextBlock x:Uid="Sharing_LocalSendHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="2" IsOn="{x:Bind Sharing.LocalSendVisible, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Sharing_LocalSendToggle" />
                         </Grid>
                     </StackPanel>
                 </Border>

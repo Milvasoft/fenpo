@@ -828,6 +828,9 @@
   <data name="Settings_ProximityLockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Proximity lock</value>
   </data>
+  <data name="Settings_SharingHeader.Text" xml:space="preserve">
+    <value>Sharing with the phone</value>
+  </data>
   <data name="Settings_Startup.Text" xml:space="preserve">
     <value>Start with Windows</value>
   </data>
@@ -863,6 +866,51 @@
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="Sharing_AddFolder.Content" xml:space="preserve">
+    <value>Add folder</value>
+  </data>
+  <data name="Sharing_Folders.Text" xml:space="preserve">
+    <value>Folders shared with the phone</value>
+  </data>
+  <data name="Sharing_FoldersHint.Text" xml:space="preserve">
+    <value>They show in the iPhone's Files app and Android's file picker. No other folder can be reached.</value>
+  </data>
+  <data name="Sharing_LocalSend.Text" xml:space="preserve">
+    <value>Visible to LocalSend</value>
+  </data>
+  <data name="Sharing_LocalSendHint.Text" xml:space="preserve">
+    <value>Devices with LocalSend see this PC and can send it files; every transfer is asked first</value>
+  </data>
+  <data name="Sharing_LocalSendToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Visible to LocalSend</value>
+  </data>
+  <data name="Sharing_NoApps.Text" xml:space="preserve">
+    <value>No app has shown a notification yet. An app appears here once it shows one on this PC.</value>
+  </data>
+  <data name="Sharing_NoFolders.Text" xml:space="preserve">
+    <value>No folder is shared yet.</value>
+  </data>
+  <data name="Sharing_NotificationsDenied" xml:space="preserve">
+    <value>Windows did not let Fenpo read notifications. Allow Fenpo in Settings › Privacy &amp; security › Notifications, then turn this on again.</value>
+  </data>
+  <data name="Sharing_PcNotifications.Text" xml:space="preserve">
+    <value>Send the PC's notifications to the phone</value>
+  </data>
+  <data name="Sharing_PcNotificationsHint.Text" xml:space="preserve">
+    <value>Notifications from the apps you pick also show on the phone</value>
+  </data>
+  <data name="Sharing_PcNotificationsToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Send the PC's notifications to the phone</value>
+  </data>
+  <data name="Sharing_PickApps.Content" xml:space="preserve">
+    <value>Pick apps</value>
+  </data>
+  <data name="Sharing_PickAppsTitle.Text" xml:space="preserve">
+    <value>Apps whose notifications go to the phone</value>
+  </data>
+  <data name="Sharing_RemoveFolder.Content" xml:space="preserve">
+    <value>Remove</value>
   </data>
   <data name="Shell_SendToPhone" xml:space="preserve">
     <value>Send to phone with Fenpo</value>
