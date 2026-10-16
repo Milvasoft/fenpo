@@ -3,8 +3,9 @@ import Foundation
 import ReplayKit
 
 /// "Ekranı PC'de göster": a ReplayKit broadcast the user starts from Fenpo or from Control Center
-/// (hold Screen Recording, pick Fenpo). Everything else is in `ScreenBroadcaster`.
-final class SampleHandler: RPBroadcastSampleHandler {
+/// (hold Screen Recording, pick Fenpo). Everything else is in `ScreenBroadcaster`. ReplayKit calls it
+/// from its own queues and `finishBroadcastWithError` may be called from any of them.
+final class SampleHandler: RPBroadcastSampleHandler, @unchecked Sendable {
     private lazy var broadcaster = ScreenBroadcaster { [weak self] reason in
         self?.end(reason)
     }
