@@ -53,4 +53,11 @@
     <string name="files_root_summary">Shared folders</string>
     <string name="files_error_offline">Connect to your PC on Wi‑Fi to see its folders.</string>
     <string name="files_error_failed">The PC did not answer. Pull down to try again.</string>
+    <string name="unlock_channel_name">Unlocking your PC</string>
+    <string name="unlock_request_title">Unlock %1$s</string>
+    <string name="unlock_request_subtitle">Your fingerprint unlocks %1$s.</string>
+    <string name="unlock_enrol_title">Set up unlocking %1$s</string>
+    <string name="unlock_enrol_subtitle">From now on your fingerprint on this phone unlocks %1$s.</string>
+    <string name="unlock_tap">Tap to confirm with your fingerprint</string>
+    <string name="unlock_cancel">Cancel</string>
 </resources>

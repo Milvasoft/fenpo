@@ -21,6 +21,8 @@ import com.fenpo.android.core.data.settings.LanguageController
 import com.fenpo.android.core.data.settings.SettingsRepository
 import com.fenpo.android.core.data.transfer.DataStoreTransferHistory
 import com.fenpo.android.core.data.transfer.TransferHistory
+import com.fenpo.android.core.data.unlock.DataStoreUnlockRepository
+import com.fenpo.android.core.data.unlock.UnlockRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -49,6 +51,9 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun transferHistory(impl: DataStoreTransferHistory): TransferHistory
+
+    @Binds
+    abstract fun unlockRepository(impl: DataStoreUnlockRepository): UnlockRepository
 
     @Binds
     abstract fun hotspotRepository(impl: DataStoreHotspotRepository): HotspotRepository

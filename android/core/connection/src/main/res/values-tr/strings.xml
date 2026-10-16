@@ -53,4 +53,11 @@
     <string name="files_root_summary">Paylaşılan klasörler</string>
     <string name="files_error_offline">Klasörleri görmek için PC’ne Wi‑Fi ile bağlan.</string>
     <string name="files_error_failed">PC yanıt vermedi. Yeniden denemek için aşağı çek.</string>
+    <string name="unlock_channel_name">PC kilidini açma</string>
+    <string name="unlock_request_title">%1$s kilidini aç</string>
+    <string name="unlock_request_subtitle">Parmak izin %1$s kilidini açar.</string>
+    <string name="unlock_enrol_title">%1$s için kilit açmayı kur</string>
+    <string name="unlock_enrol_subtitle">Bundan sonra bu telefondaki parmak izin %1$s kilidini açar.</string>
+    <string name="unlock_tap">Parmak izinle onaylamak için dokun</string>
+    <string name="unlock_cancel">Vazgeç</string>
 </resources>

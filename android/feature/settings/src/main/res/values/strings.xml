@@ -56,4 +56,11 @@
     <string name="hotspot_save">Save</string>
     <string name="hotspot_remove">Remove</string>
     <string name="hotspot_note">Android does not let apps read the hotspot’s name and password. Type them here once: they are kept encrypted on this phone and go only to your PC. When the PC wants to join, a notification opens the hotspot settings.</string>
+    <string name="unlock_row">Unlock your PC</string>
+    <string name="unlock_on">On for %1$s</string>
+    <string name="unlock_off">Turn it on in Fenpo on your PC</string>
+    <string name="unlock_remove_title">Remove unlocking?</string>
+    <string name="unlock_remove_text">This phone will no longer unlock %1$s. You can turn it on again in Fenpo on the PC.</string>
+    <string name="unlock_remove">Remove</string>
+    <string name="unlock_keep">Cancel</string>
 </resources>

@@ -54,4 +54,11 @@
     <string name="hotspot_save">Kaydet</string>
     <string name="hotspot_remove">Kaldır</string>
     <string name="hotspot_note">Android, uygulamaların hotspot adını ve şifresini okumasına izin vermiyor. Bir kez buraya yaz: bu telefonda şifreli saklanır ve sadece PC’ne gider. PC bağlanmak isteyince hotspot ayarlarını açan bir bildirim gelir.</string>
+    <string name="unlock_row">PC kilidini aç</string>
+    <string name="unlock_on">Açık: %1$s</string>
+    <string name="unlock_off">PC’deki Fenpo’dan açabilirsin</string>
+    <string name="unlock_remove_title">Kilit açma kaldırılsın mı?</string>
+    <string name="unlock_remove_text">Bu telefon artık %1$s kilidini açamaz. PC’deki Fenpo’dan yeniden açabilirsin.</string>
+    <string name="unlock_remove">Kaldır</string>
+    <string name="unlock_keep">Vazgeç</string>
 </resources>
