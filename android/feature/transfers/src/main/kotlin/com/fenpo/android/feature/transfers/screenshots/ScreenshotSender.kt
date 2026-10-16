@@ -23,8 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoSet
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -51,7 +50,12 @@ class ScreenshotSender
             settingsRepository.settings
                 .map { it.features.screenshotSharing }
                 .distinctUntilChanged()
-                .collectLatest { on -> if (on && canRead(context)) watch() }
+                .collectLatest { on ->
+                    if (!on) return@collectLatest
+                    // The permission can come after the switch (or be given back in system Settings).
+                    while (!canRead(context)) delay(PERMISSION_CHECK_MS)
+                    watch()
+                }
         }
 
         private suspend fun watch() {
@@ -108,6 +112,7 @@ class ScreenshotSender
             private const val TAG = "FenpoScreenshots"
             private const val MILLIS = 1000
             private const val RECENT_SECONDS = 60
+            private const val PERMISSION_CHECK_MS = 5_000L
             private const val ANDROID_13 = 33
 
             /** The permission that lets Fenpo read new screenshots on this Android version. */

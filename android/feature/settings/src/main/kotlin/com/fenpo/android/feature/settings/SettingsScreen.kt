@@ -60,17 +60,29 @@ fun SettingsRoute(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val stored by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    fun photosGranted() =
+        ContextCompat.checkSelfPermission(context, screenshotPermission()) == PackageManager.PERMISSION_GRANTED
+    var canReadPhotos by remember { mutableStateOf(photosGranted()) }
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
+        canReadPhotos = photosGranted()
         onPauseOrDispose {}
     }
-    val context = LocalContext.current
-    // "Send screenshots" needs the photo permission; ask for it when the switch goes on.
+    // "Send screenshots" needs the photo permission; ask for it when the switch goes on. Without
+    // it the switch shows off, so a stored "on" from before (or a permission taken back in system
+    // Settings) does not look like it works (device test, 16 October).
     val photos =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            canReadPhotos = granted
             if (granted) viewModel.setFeatureEnabled(Feature.SCREENSHOT_SHARING, true)
         }
+    val state =
+        stored.copy(
+            features = stored.features.copy(screenshotSharing = stored.features.screenshotSharing && canReadPhotos),
+        )
     val systemLanguage = remember(context) { systemLanguageName(LocaleManagerCompat.getSystemLocales(context).get(0)) }
     SettingsScreen(
         state = state,
@@ -79,9 +91,7 @@ fun SettingsRoute(
         onLanguageChange = viewModel::setLanguage,
         onFeatureChange = { feature, enabled ->
             val permission = screenshotPermission()
-            val needsPermission =
-                feature == Feature.SCREENSHOT_SHARING && enabled &&
-                    ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED
+            val needsPermission = feature == Feature.SCREENSHOT_SHARING && enabled && !photosGranted()
             if (needsPermission) photos.launch(permission) else viewModel.setFeatureEnabled(feature, enabled)
         },
         onOpenPermissions = onOpenPermissions,
