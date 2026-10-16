@@ -3,6 +3,7 @@ import FenpoCore
 import FenpoProtocol
 import Foundation
 import UIKit
+import UserNotifications
 
 /// Session state from the stored pairing, the BLE channel, the Wi-Fi channel and the transfers.
 @MainActor
@@ -113,6 +114,8 @@ public final class FenpoServices {
     public var extraHandlers: [(Fenpo_V1_Envelope, Channel) -> Bool] = []
 
     private var pcBattery: (percent: Int, charging: Bool)?
+    /// The PC name the Files location was last set up for (`.some(nil)`: removed).
+    private var filesDomainName: String??
     private var isActive = false
     private let log = FenpoLog("Services")
 
@@ -225,6 +228,13 @@ public final class FenpoServices {
     /// Writes the widget status and tells the app.
     public func publishStatus() {
         let record = pairedStore.load()
+        if filesDomainName != .some(record?.name) {
+            filesDomainName = .some(record?.name)
+            let name = record?.name
+            Task {
+                await PCFilesDomain.sync(pcName: name)
+            }
+        }
         statusStore.save(SharedStatus(
             pcName: record?.name,
             isConnected: record != nil && (central.state == .ready || wifi.state == .connected),
@@ -306,6 +316,18 @@ public final class FenpoServices {
             pcNotifications.remove(removed.id)
         case .hotspotRequest:
             reply(.hotspotStatus(hotspot.handleRequest()), to: envelope.id, on: channel)
+        case .screenStart:
+            // Only the user can start a broadcast: say how, and wait for the extension's STREAMING.
+            var status = Fenpo_V1_ScreenStatus()
+            status.state = .waitingForConsent
+            status.controlAvailable = false
+            reply(.screenStatus(status), to: envelope.id, on: channel)
+            notifyScreenRequested()
+        case .screenInput:
+            var error = Fenpo_V1_Error()
+            error.code = .unsupported
+            error.message = "The iPhone cannot be controlled from the PC"
+            reply(.error(error), to: envelope.id, on: channel)
         default:
             break
         }
@@ -322,6 +344,15 @@ public final class FenpoServices {
         log.info("PC state: battery \(state.hasBatteryPercent ? "\(state.batteryPercent)%" : "unknown"), \(state.addresses.count) address(es)")
         publishStatus()
         connectWiFiIfUseful()
+    }
+
+    private func notifyScreenRequested() {
+        log.info("PC asked for the screen")
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "screen.notification.title")
+        content.body = String(localized: "screen.notification.body")
+        content.interruptionLevel = .active
+        UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "com.fenpo.screen", content: content, trigger: nil))
     }
 
     /// "Open on iPhone": only possible while Fenpo is in front; iOS does not let a background app open links.

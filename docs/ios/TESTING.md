@@ -225,7 +225,28 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | R9 | Kısayollar'da **Sonraki slayt** eylemini Eylem Düğmesi'ne atayın, Fenpo kapalıyken basın | Sonraki slayta geçer; olmazsa kayıttaki `[Intents]` satırını yazın |
 | R10 | Wi‑Fi kapalı, sadece Bluetooth ile R1 ve R6 | Çalışır, imleç biraz daha seyrek güncellenir |
 
-Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`, `[Input]`.
+| N1 | Windows'ta Fenpo'da bildirimlerini paylaşacağın bir uygulama seç (ör. Outlook), PC'de bir bildirim gelsin; iPhone kilitli ve Fenpo kapalıyken de dene | iPhone'da aynı başlık ve metinle bildirim; PC'de kapatınca iPhone'dan da kalkar. Wi‑Fi varken uygulama simgesi görünür |
+| N2 | Fenpo Ayarlar → **PC bildirimleri** kapalıyken N1 | iPhone'da bildirim çıkmaz |
+| N3 | iOS Ayarlar → Bluetooth → PC ⓘ → **Sistem Bildirimlerini Paylaş** kapalı | Fenpo ana ekranında "PC, iPhone’un bildirimlerini almıyor" kartı ve nasıl açılacağı; açınca kart kalkar |
+| H1 | Fenpo Ayarlar → **Kişisel Erişim Noktası**: ad ve parolayı yaz, **Kaydet** | Windows'ta erişim noktası bilgisi görünür (PC `HotspotInfo` aldı) |
+| H2 | Windows'ta **Erişim noktasına bağlan** | iPhone'da "Bilgisayarın erişim noktana katılmak istiyor" bildirimi; Kişisel Erişim Noktası'nı açınca PC bir dakika içinde katılır |
+| H3 | **Kaldır**, sonra H2 | PC "ayarlanmadı" der |
+| P1 | Windows'ta telefonun fotoğraflarına göz at (Wi‑Fi) | En yeniler önce, küçük resimler gelir; aşağı kaydırınca sonraki sayfa. İzin hiç sorulmadıysa Fenpo Ayarlar → İzinler → **Fotoğraflar** ile izin ver |
+| P2 | PC'de birkaç fotoğraf ve bir video seç, indir | PC sormadan alır; HEIC ve MOV olduğu gibi gelir |
+| P3 | iOS Ayarlar → Fenpo → Fotoğraflar **Sınırlı** | PC sınırlı erişimi gösterir, sadece seçilenler listelenir |
+| S1 | Fenpo Ayarlar → **Ekran görüntülerini gönder** açık; başka uygulamada ekran görüntüsü al, Fenpo'ya dön | Görüntü PC'ye gider, Aktarımlar'da görünür; aynı görüntü ikinci kez gitmez |
+| D1 | Windows'ta Fenpo'da bir klasör paylaş. iPhone'da Dosyalar → Göz At → Konumlar | PC'nin adıyla bir konum; içinde paylaşılan klasör |
+| D2 | Bir belgeyi aç; bir resmin küçük resmine bak | Belge iner ve açılır; küçük resimler PC'den gelir |
+| D3 | Dosyalar'da bir dosyayı PC klasörüne kopyala; bir dosyanın adını değiştir; bir klasör oluştur; bir dosyayı sil | Hepsi PC'de olur (silinen Geri Dönüşüm Kutusu'nda); aynı ad varsa " (2)" eklenir |
+| D4 | PC'de klasöre dosya ekle, iPhone'da klasör açıkken bekle | Birkaç saniye içinde Dosyalar'da görünür (`FolderChanged`) |
+| D5 | Eşleştirmeyi kaldır | Dosyalar'daki konum kalkar |
+| E1 | PC sekmesi → **Ekranı PC’de göster** → **Yayını Başlat** | PC'de iPhone ekranı görünür (dik), 30 fps civarı; kontrol yok |
+| E2 | Denetim Merkezi → Ekran Kaydı'na basılı tut → Fenpo → Yayını Başlat | E1 ile aynı |
+| E3 | Windows'tan ekran yansıtmayı başlat (Fenpo kapalıyken de) | iPhone'da "Bilgisayarın ekranını göstermek istiyor" bildirimi; PC "onay bekleniyor" gösterir |
+| E4 | Yansıtma sürerken PC'den durdur; iPhone'da kırmızı durum çubuğundan durdur | İkisinde de yayın biter; PC'den durdurunca iPhone "Bilgisayar ekranı göstermeyi durdurdu" der |
+| E5 | 10 dakika yansıt | Yayın kendi kendine kesilmez (uzantı bellek sınırı) |
+
+Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`, `[Input]`, `[PcNotifications]`, `[Hotspot]`, `[Photos]`, `[Screenshots]`, `[Files]`, `[Screen]`. Uzantılar (Dosyalar, ekran yayını) da aynı kayda yazar. Uygulama ya da bir uzantı çökerse iOS Ayarlar → Gizlilik ve Güvenlik → Analiz ve İyileştirmeler → Analiz Verileri'nden `Fenpo` ile başlayan raporu gönderin.
 
 Geri bildirim kilometre taşı 1'deki gibi: tablo, iPhone kaydı (Geliştirici → Kayıt → Dışa aktar) ve Windows'un kaydı.
 

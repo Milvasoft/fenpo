@@ -62,6 +62,8 @@ targets:
         product: FenpoApple
       - target: FenpoShare
       - target: FenpoWidgets
+      - target: FenpoFiles
+      - target: FenpoBroadcast
     scheme:
       testTargets:
         - FenpoTests
@@ -119,6 +121,50 @@ targets:
         CODE_SIGN_ENTITLEMENTS: FenpoWidgets/FenpoWidgets.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
     dependencies:
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
+
+  # The PC's shared folders in the Files app (File Provider).
+  FenpoFiles:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FenpoFiles
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.files
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: FenpoFiles/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FenpoFiles/FenpoFiles.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Fenpo
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+    dependencies:
+      - package: FenpoKit
+        product: FenpoProtocol
+      - package: FenpoKit
+        product: FenpoCore
+      - package: FenpoKit
+        product: FenpoApple
+
+  # The iPhone's screen on the PC (ReplayKit broadcast upload extension).
+  FenpoBroadcast:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: FenpoBroadcast
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.broadcast
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_FILE: FenpoBroadcast/Info.plist
+        CODE_SIGN_ENTITLEMENTS: FenpoBroadcast/FenpoBroadcast.entitlements
+        INFOPLIST_KEY_CFBundleDisplayName: Fenpo
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+    dependencies:
+      - package: FenpoKit
+        product: FenpoProtocol
       - package: FenpoKit
         product: FenpoCore
       - package: FenpoKit
