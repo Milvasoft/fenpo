@@ -238,9 +238,12 @@ public final class CameraService {
             self.sender = sender
             slot.set(sender)
             self.encoder = encoder
-            pipeline.setFrameHandler { buffer in
-                encoder.encode(buffer)
+            pipeline.setFrameHandler { image, time in
+                encoder.encode(image, at: time)
             }
+            // The rotation coordinator follows the phone's physical orientation, also while the
+            // interface stays in portrait.
+            UIDevice.current.beginGeneratingDeviceOrientationNotifications()
             pipeline.start()
             UIApplication.shared.isIdleTimerDisabled = true
             current.isStreaming = true
@@ -322,6 +325,9 @@ public final class CameraService {
     private func stop(reason: String, sendStop: Bool, reportStopped: Bool = true) {
         generation += 1
         let wasRunning = pipeline != nil || sender != nil
+        if encoder != nil {
+            UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        }
         let oldStreamID = streamID
         streamID = nil
         pipeline?.stop()
