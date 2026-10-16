@@ -1,15 +1,15 @@
 import FenpoApple
 import FenpoCore
-import QuickLook
 import SwiftUI
 
 /// Transfers in progress, then every finished one, newest first. Received files open in Quick Look.
 struct TransfersView: View {
     @Environment(AppModel.self) private var model
-    @State private var previewURL: URL?
 
     var body: some View {
-        NavigationStack {
+        @Bindable var model = model
+
+        NavigationStack(path: $model.transfersPath) {
             Group {
                 if model.snapshot.transfers.isEmpty && model.snapshot.activeTransfers.isEmpty {
                     ContentUnavailableView {
@@ -33,17 +33,11 @@ struct TransfersView: View {
                                 SectionCaption(title: "transfers.section.done")
                                 CardRows(separatorInset: 64) {
                                     ForEach(model.snapshot.transfers) { record in
-                                        if record.localFileName != nil {
-                                            Button {
-                                                open(record)
-                                            } label: {
-                                                TransferRow(record: record)
-                                                    .contentShape(.rect)
-                                            }
-                                            .buttonStyle(.plain)
-                                        } else {
-                                            TransferRow(record: record, showsChevron: false)
+                                        NavigationLink(value: TransferRoute(id: record.id)) {
+                                            TransferRow(record: record)
+                                                .contentShape(.rect)
                                         }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             }
@@ -57,23 +51,15 @@ struct TransfersView: View {
                 }
             }
             .fenpoScreenBackground()
+            .navigationDestination(for: TransferRoute.self) { route in
+                TransferDetailView(recordID: route.id)
+            }
             .tabHeader("tab.transfers") {
                 GlassCircleButton(systemImage: "plus", label: "home.sendPhotos") {
                     model.sendPhotos()
                 }
                 .disabled(model.snapshot.pc == nil)
             }
-            .quickLookPreview($previewURL)
-        }
-    }
-
-    private func open(_ record: TransferRecord) {
-        guard let name = record.localFileName else {
-            return
-        }
-        let url = TransferStore.inboxURL.appendingPathComponent(name)
-        if FileManager.default.fileExists(atPath: url.path) {
-            previewURL = url
         }
     }
 }

@@ -21,7 +21,11 @@ struct HomeView: View {
                             SectionCaption(title: "home.recentTransfers")
                             CardRows(separatorInset: 64) {
                                 ForEach(model.snapshot.transfers.prefix(3)) { record in
-                                    TransferRow(record: record)
+                                    NavigationLink(value: TransferRoute(id: record.id)) {
+                                        TransferRow(record: record)
+                                            .contentShape(.rect)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }
@@ -35,6 +39,9 @@ struct HomeView: View {
                 .padding(.bottom, 24)
             }
             .fenpoScreenBackground()
+            .navigationDestination(for: TransferRoute.self) { route in
+                TransferDetailView(recordID: route.id)
+            }
             .tabHeader("app.name") {
                 GlassCircleButton(systemImage: "plus", label: "home.addPC.accessibility") {
                     model.isPairingPresented = true

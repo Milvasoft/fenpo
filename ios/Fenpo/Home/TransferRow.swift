@@ -5,9 +5,6 @@ import SwiftUI
 struct TransferRow: View {
     let record: TransferRecord
 
-    /// Shows the chevron; off for files that stayed on the PC and cannot be opened here.
-    var showsChevron = true
-
     @Environment(\.locale) private var locale
 
     var body: some View {
@@ -24,11 +21,9 @@ struct TransferRow: View {
                     .foregroundStyle(.textSecondary)
             }
             Spacer(minLength: 0)
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.textTertiary)
-            }
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.textTertiary)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 11)
