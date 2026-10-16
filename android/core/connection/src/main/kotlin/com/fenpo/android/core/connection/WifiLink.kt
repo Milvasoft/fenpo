@@ -47,7 +47,7 @@ internal class WifiLink(
     private val localHello: Hello,
     private val status: ConnectionStatus,
     private val pairedPcRepository: PairedPcRepository,
-    private val onOther: (Envelope) -> Unit,
+    private val onOther: (Envelope, LinkPath) -> Unit,
     private val onSession: (PcSession?) -> Unit,
 ) {
     private val connectivity = context.getSystemService(ConnectivityManager::class.java)

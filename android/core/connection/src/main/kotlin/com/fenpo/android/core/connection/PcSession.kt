@@ -17,7 +17,8 @@ enum class LinkPath { BLUETOOTH, WIFI }
  * `Ping`/`Pong`, `PcStatus` and the PC's addresses in `DeviceState`. Everything else goes to
  * [onOther] for the features.
  *
- * @param transport Sends one body on this channel, answering the envelope id given (0 if none).
+ * @param transport Sends one body on this channel, answering the envelope id given (0 if none), and
+ *   returns the new envelope's id.
  * @param onAddresses Called with the PC's current data channel addresses.
  * @param openData Opens a file transfer data connection to the PC on this path (Wi-Fi only);
  *   the argument is `TransferAccept.data_port`, 0 for the control port.
@@ -25,9 +26,9 @@ enum class LinkPath { BLUETOOTH, WIFI }
 internal class PcSession(
     val path: LinkPath,
     private val status: ConnectionStatus,
-    private val transport: suspend (Envelope.Body, Long) -> Unit,
+    private val transport: suspend (Envelope.Body, Long) -> Long,
     private val onAddresses: suspend (List<String>) -> Unit,
-    private val onOther: (Envelope) -> Unit = {},
+    private val onOther: (Envelope, LinkPath) -> Unit = { _, _ -> },
     val openData: (suspend (Int) -> DataConnection)? = null,
 ) {
     private val hello = CompletableDeferred<Hello>()
@@ -42,11 +43,11 @@ internal class PcSession(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun helloOrNull(): Hello? = if (hello.isCompleted) hello.getCompleted() else null
 
-    /** Sends [body] on this channel, answering [replyTo] (0 if none). */
+    /** Sends [body] on this channel, answering [replyTo] (0 if none); returns the envelope id. */
     suspend fun send(
         body: Envelope.Body,
         replyTo: Long = 0,
-    ) = transport(body, replyTo)
+    ): Long = transport(body, replyTo)
 
     suspend fun onEnvelope(envelope: Envelope) {
         when (val body = envelope.body) {
@@ -74,7 +75,7 @@ internal class PcSession(
             }
 
             else -> {
-                onOther(envelope)
+                onOther(envelope, path)
             }
         }
     }

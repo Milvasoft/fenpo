@@ -46,19 +46,22 @@ internal class AndroidLocalDeviceRepository
             )
 
         /**
-         * SMS over the Fenpo channel only when the user wants message sync and allowed SMS; with
-         * MAP on the phone the PC reads messages over Bluetooth instead (docs/ANDROID.md §7).
+         * Features the user can turn off. SMS over the Fenpo channel only when the user wants
+         * message sync and allowed SMS; with MAP on the phone the PC reads messages over Bluetooth
+         * instead (docs/ANDROID.md §7). The photo library is offered without the permission too: the
+         * PC is then told the access is denied and asks its user to allow it on the phone.
          */
         private suspend fun optionalCapabilities(): Set<Capability> {
             val sms =
                 listOf(Manifest.permission.READ_SMS, Manifest.permission.SEND_SMS).all {
                     ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
                 }
-            val wanted =
-                settingsRepository.settings
-                    .first()
-                    .features.messageSync
-            return if (sms && wanted) setOf(Capability.CAPABILITY_MESSAGES) else emptySet()
+            val features = settingsRepository.settings.first().features
+            return buildSet {
+                if (sms && features.messageSync) add(Capability.CAPABILITY_MESSAGES)
+                if (features.pcNotifications) add(Capability.CAPABILITY_PC_NOTIFICATIONS)
+                if (features.photoLibrary) add(Capability.CAPABILITY_PHOTOS)
+            }
         }
 
         /** Stable UUID created on first use. */
@@ -99,6 +102,9 @@ internal class AndroidLocalDeviceRepository
                     Capability.CAPABILITY_CAMERA,
                     Capability.CAPABILITY_SCREEN_MIRROR,
                     Capability.CAPABILITY_PC_INPUT,
+                    Capability.CAPABILITY_FILE_PROVIDER,
+                    // Answered NOT_SET_UP until the user types the hotspot's name and password.
+                    Capability.CAPABILITY_HOTSPOT,
                 )
         }
     }

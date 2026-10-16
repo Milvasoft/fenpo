@@ -43,6 +43,8 @@ import com.fenpo.android.feature.remote.PresenterKey
 import com.fenpo.android.feature.remote.PresenterRoute
 import com.fenpo.android.feature.remote.TouchpadKey
 import com.fenpo.android.feature.remote.TouchpadRoute
+import com.fenpo.android.feature.settings.HotspotKey
+import com.fenpo.android.feature.settings.HotspotRoute
 import com.fenpo.android.feature.settings.NotificationAppsKey
 import com.fenpo.android.feature.settings.NotificationAppsRoute
 import com.fenpo.android.feature.settings.SettingsKey
@@ -124,10 +126,12 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                             SettingsRoute(
                                 onOpenPermissions = { backStack.add(PermissionsKey) },
                                 onOpenNotificationApps = { backStack.add(NotificationAppsKey) },
+                                onOpenHotspot = { backStack.add(HotspotKey) },
                             )
                         }
                     }
                     entry<NotificationAppsKey> { Inset(bottom = true) { NotificationAppsRoute(onBack = pop) } }
+                    entry<HotspotKey> { Inset(bottom = true) { HotspotRoute(onBack = pop) } }
                     entry<ScannerKey> {
                         ScannerRoute(
                             onBack = pop,

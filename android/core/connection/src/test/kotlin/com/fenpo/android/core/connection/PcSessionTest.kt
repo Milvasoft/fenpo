@@ -23,7 +23,10 @@ class PcSessionTest {
         PcSession(
             LinkPath.WIFI,
             status,
-            transport = { body, replyTo -> sent += body to replyTo },
+            transport = { body, replyTo ->
+                sent += body to replyTo
+                sent.size.toLong()
+            },
             onAddresses = { addresses += it },
         )
 

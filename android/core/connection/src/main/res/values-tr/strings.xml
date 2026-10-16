@@ -43,4 +43,14 @@
     <string name="notification_listener_label">Fenpo: bildirimler PC’ye</string>
     <string name="clipboard_turned_off">Pano paylaşımı kapalı. Ayarlar’dan aç.</string>
     <string name="clipboard_sensitive">Gizli içerik</string>
+    <string name="pc_notifications_channel_name">PC’den bildirimler</string>
+    <string name="pc_notifications_channel_description">PC’deki Fenpo’da seçtiğin uygulamaların bildirimleri.</string>
+    <string name="hotspot_channel_name">Hotspot</string>
+    <string name="hotspot_request_title">Hotspot’u aç</string>
+    <string name="hotspot_request_text">%1$s bağlanmak istiyor. Hotspot ayarlarını açmak için dokun.</string>
+    <string name="hotspot_request_open">Ayarları aç</string>
+    <string name="files_root_title">PC</string>
+    <string name="files_root_summary">Paylaşılan klasörler</string>
+    <string name="files_error_offline">Klasörleri görmek için PC’ne Wi‑Fi ile bağlan.</string>
+    <string name="files_error_failed">PC yanıt vermedi. Yeniden denemek için aşağı çek.</string>
 </resources>

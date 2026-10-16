@@ -42,6 +42,8 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fenpo.android.core.data.permissions.PhotoLibraryAccess
+import com.fenpo.android.core.data.permissions.PhotoPermissions
 import com.fenpo.android.core.data.settings.AppLanguage
 import com.fenpo.android.core.data.settings.Feature
 import com.fenpo.android.core.data.settings.ThemeMode
@@ -58,6 +60,7 @@ fun SettingsRoute(
     onOpenPermissions: () -> Unit,
     onOpenNotificationApps: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenHotspot: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val stored by viewModel.uiState.collectAsStateWithLifecycle()
@@ -66,11 +69,21 @@ fun SettingsRoute(
     fun photosGranted() =
         ContextCompat.checkSelfPermission(context, screenshotPermission()) == PackageManager.PERMISSION_GRANTED
     var canReadPhotos by remember { mutableStateOf(photosGranted()) }
+
+    fun libraryReadable() = PhotoPermissions.access(context) != PhotoLibraryAccess.DENIED
+    var canReadLibrary by remember { mutableStateOf(libraryReadable()) }
     LifecycleResumeEffect(Unit) {
         viewModel.refresh()
         canReadPhotos = photosGranted()
+        canReadLibrary = libraryReadable()
         onPauseOrDispose {}
     }
+    // "Photos on your PC" works the same way with the photo and video permissions.
+    val library =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+            canReadLibrary = libraryReadable()
+            if (canReadLibrary) viewModel.setFeatureEnabled(Feature.PHOTO_LIBRARY, true)
+        }
     // "Send screenshots" needs the photo permission; ask for it when the switch goes on. Without
     // it the switch shows off, so a stored "on" from before (or a permission taken back in system
     // Settings) does not look like it works (device test, 16 October).
@@ -81,7 +94,11 @@ fun SettingsRoute(
         }
     val state =
         stored.copy(
-            features = stored.features.copy(screenshotSharing = stored.features.screenshotSharing && canReadPhotos),
+            features =
+                stored.features.copy(
+                    screenshotSharing = stored.features.screenshotSharing && canReadPhotos,
+                    photoLibrary = stored.features.photoLibrary && canReadLibrary,
+                ),
         )
     val systemLanguage = remember(context) { systemLanguageName(LocaleManagerCompat.getSystemLocales(context).get(0)) }
     SettingsScreen(
@@ -92,8 +109,23 @@ fun SettingsRoute(
         onFeatureChange = { feature, enabled ->
             val permission = screenshotPermission()
             val needsPermission = feature == Feature.SCREENSHOT_SHARING && enabled && !photosGranted()
-            if (needsPermission) photos.launch(permission) else viewModel.setFeatureEnabled(feature, enabled)
+            when {
+                needsPermission -> {
+                    photos.launch(permission)
+                }
+
+                feature == Feature.PHOTO_LIBRARY && enabled && !libraryReadable() -> {
+                    library.launch(
+                        PhotoPermissions.request,
+                    )
+                }
+
+                else -> {
+                    viewModel.setFeatureEnabled(feature, enabled)
+                }
+            }
         },
+        onOpenHotspot = onOpenHotspot,
         onOpenPermissions = onOpenPermissions,
         onOpenNotificationApps = onOpenNotificationApps,
         modifier = modifier,
@@ -117,6 +149,7 @@ fun SettingsScreen(
     onOpenPermissions: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenNotificationApps: () -> Unit = {},
+    onOpenHotspot: () -> Unit = {},
     showLanguageDialog: Boolean = false,
 ) {
     var languageDialog by rememberSaveable { mutableStateOf(showLanguageDialog) }
@@ -196,6 +229,28 @@ fun SettingsScreen(
             R.string.feature_dnd_summary,
             state,
             onFeatureChange,
+        )
+        FeatureRow(
+            Feature.PC_NOTIFICATIONS,
+            FenpoIcons.Pc,
+            R.string.feature_pc_notifications,
+            R.string.feature_pc_notifications_summary,
+            state,
+            onFeatureChange,
+        )
+        FeatureRow(
+            Feature.PHOTO_LIBRARY,
+            FenpoIcons.Photo,
+            R.string.feature_photos,
+            R.string.feature_photos_summary,
+            state,
+            onFeatureChange,
+        )
+        FenpoListRow(
+            title = stringResource(R.string.hotspot_row),
+            supporting = state.hotspotName ?: stringResource(R.string.hotspot_not_set_up),
+            leading = { LeadingIcon(FenpoIcons.Hotspot) },
+            modifier = Modifier.clickable(onClick = onOpenHotspot),
         )
 
         SectionLabel(stringResource(R.string.section_permissions))
@@ -278,6 +333,8 @@ private fun FeatureRow(
                 Feature.CLIPBOARD_SHARING -> clipboardSharing
                 Feature.SCREENSHOT_SHARING -> screenshotSharing
                 Feature.DO_NOT_DISTURB_SYNC -> doNotDisturbSync
+                Feature.PC_NOTIFICATIONS -> pcNotifications
+                Feature.PHOTO_LIBRARY -> photoLibrary
             }
         }
     FenpoListRow(

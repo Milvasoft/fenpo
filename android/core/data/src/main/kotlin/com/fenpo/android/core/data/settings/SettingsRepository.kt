@@ -51,6 +51,8 @@ internal class DataStoreSettingsRepository
                                 prefs[Keys.feature(Feature.SCREENSHOT_SHARING)] ?: defaults.screenshotSharing,
                             doNotDisturbSync =
                                 prefs[Keys.feature(Feature.DO_NOT_DISTURB_SYNC)] ?: defaults.doNotDisturbSync,
+                            pcNotifications = prefs[Keys.feature(Feature.PC_NOTIFICATIONS)] ?: defaults.pcNotifications,
+                            photoLibrary = prefs[Keys.feature(Feature.PHOTO_LIBRARY)] ?: defaults.photoLibrary,
                         ),
                 )
             }

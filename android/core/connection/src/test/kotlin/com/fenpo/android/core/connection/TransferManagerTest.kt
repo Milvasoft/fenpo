@@ -73,8 +73,12 @@ class TransferManagerTest {
                                 if (body is Envelope.Body.TransferOffer) {
                                     offer = body.value
                                     val accept = TransferAccept(transfer_id = body.value.transfer_id, accepted = true)
-                                    messenger.deliver(Envelope(id = 2, body = Envelope.Body.TransferAccept(accept)))
+                                    messenger.deliver(
+                                        Envelope(id = 2, body = Envelope.Body.TransferAccept(accept)),
+                                        LinkPath.WIFI,
+                                    )
                                 }
+                                1L
                             },
                             onAddresses = {},
                             openData = { TlsConnector(phone).connectData(server.endpoint, pc.certificate.sha256()) },
@@ -106,6 +110,7 @@ class TransferManagerTest {
                                     ),
                                 ),
                         ),
+                        LinkPath.WIFI,
                     )
                     val record = withTimeout(10.seconds) { history.records.first { it.isNotEmpty() } }.single()
                     handler.cancel()
@@ -124,7 +129,7 @@ class TransferManagerTest {
     fun filesNeedWifi() =
         runBlocking {
             val manager = TransferManager(context, messenger, history)
-            val session = PcSession(LinkPath.BLUETOOTH, ConnectionStatus(), { _, _ -> }, {})
+            val session = PcSession(LinkPath.BLUETOOTH, ConnectionStatus(), { _, _ -> 1L }, {})
             session.onEnvelope(
                 Envelope(
                     id = 1,

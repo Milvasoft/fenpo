@@ -41,4 +41,17 @@
     <string name="notification_apps_off">Kapalı</string>
     <string name="notification_apps_empty">Uygulamalar ilk bildirimlerinden sonra burada görünür.</string>
     <string name="notification_apps_otp_note">Android, tek kullanımlık kod içeren bildirimlerin içeriğini gizleyebilir. O zaman bildirim PC’de sadece uygulama adıyla görünür; kodu telefondan oku.</string>
+    <string name="feature_pc_notifications">PC’den bildirimler</string>
+    <string name="feature_pc_notifications_summary">PC’deki Fenpo’da seçtiğin uygulamalar</string>
+    <string name="feature_photos">Fotoğraflar PC’de</string>
+    <string name="feature_photos_summary">PC fotoğraf ve videolarına göz atabilir</string>
+    <string name="hotspot_row">Hotspot</string>
+    <string name="hotspot_not_set_up">PC’den tek tıkla bağlanmak için adını ve şifresini gir</string>
+    <string name="hotspot_title">Hotspot</string>
+    <string name="hotspot_name">Ağ adı</string>
+    <string name="hotspot_password">Şifre</string>
+    <string name="hotspot_password_hint">En az 8 karakter</string>
+    <string name="hotspot_save">Kaydet</string>
+    <string name="hotspot_remove">Kaldır</string>
+    <string name="hotspot_note">Android, uygulamaların hotspot adını ve şifresini okumasına izin vermiyor. Bir kez buraya yaz: bu telefonda şifreli saklanır ve sadece PC’ne gider. PC bağlanmak isteyince hotspot ayarlarını açan bir bildirim gelir.</string>
 </resources>

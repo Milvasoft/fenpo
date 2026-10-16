@@ -43,4 +43,14 @@
     <string name="notification_listener_label">Fenpo: notifications to your PC</string>
     <string name="clipboard_turned_off">Clipboard sharing is off. Turn it on in Settings.</string>
     <string name="clipboard_sensitive">Hidden content</string>
+    <string name="pc_notifications_channel_name">Notifications from your PC</string>
+    <string name="pc_notifications_channel_description">Notifications of the apps you picked in Fenpo on your PC.</string>
+    <string name="hotspot_channel_name">Hotspot</string>
+    <string name="hotspot_request_title">Turn on your hotspot</string>
+    <string name="hotspot_request_text">%1$s wants to join it. Tap to open the hotspot settings.</string>
+    <string name="hotspot_request_open">Open settings</string>
+    <string name="files_root_title">PC</string>
+    <string name="files_root_summary">Shared folders</string>
+    <string name="files_error_offline">Connect to your PC on Wi‑Fi to see its folders.</string>
+    <string name="files_error_failed">The PC did not answer. Pull down to try again.</string>
 </resources>

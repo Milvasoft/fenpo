@@ -86,6 +86,7 @@ class TransferManager
         private val accepts = ConcurrentHashMap<String, CompletableDeferred<TransferAccept>>()
         private val outcomes = ConcurrentHashMap<String, CompletableDeferred<TransferState>>()
         private val jobs = ConcurrentHashMap<String, Job>()
+        private val fetches = ConcurrentHashMap<String, Fetch>()
         private val notifications = TransferNotifications(context)
         private val _active = MutableStateFlow<List<ActiveTransfer>>(emptyList())
 
@@ -100,7 +101,10 @@ class TransferManager
             messenger.incoming.collect { envelope ->
                 when (val body = envelope.body) {
                     is Envelope.Body.TransferOffer -> {
-                        jobs[body.value.transfer_id] = scope.launch { receive(body.value) }
+                        val id = body.value.transfer_id
+                        val fetch = fetches.remove(id)
+                        jobs[id] =
+                            scope.launch { if (fetch != null) receiveFetch(body.value, fetch) else receive(body.value) }
                     }
 
                     is Envelope.Body.TransferAccept -> {
@@ -126,18 +130,47 @@ class TransferManager
         /**
          * Starts sending [uris] to the PC. The files are opened here, while the caller (a share
          * target) still holds the read grant; the transfer itself continues in the background.
+         *
+         * @param transferId The PC's id when it asked for these files (photos.proto), else a new one.
+         * @param destinationPath A folder in the PC's shared folders (files.proto) instead of its
+         *   download folder.
          */
-        suspend fun send(uris: List<Uri>): SendResult {
+        suspend fun send(
+            uris: List<Uri>,
+            transferId: String = UUID.randomUUID().toString(),
+            destinationPath: String = "",
+        ): SendResult {
             if (uris.isEmpty()) return SendResult.NOTHING_TO_SEND
             if (!messenger.connected) return SendResult.NOT_CONNECTED
             if (Capability.CAPABILITY_FILE_TRANSFER !in messenger.capabilities.value) return SendResult.UNSUPPORTED
             if (!messenger.wifiOpen) return SendResult.NEEDS_WIFI
             val files = withContext(Dispatchers.IO) { uris.mapNotNull(::openOutgoing) }
             if (files.isEmpty()) return SendResult.NOTHING_TO_SEND
-            val id = UUID.randomUUID().toString()
-            jobs[id] = scope.launch { sendFiles(id, files) }
+            jobs[transferId] = scope.launch { sendFiles(transferId, files, destinationPath) }
             return SendResult.STARTED
         }
+
+        /**
+         * Receives the file the phone asked for with `FileFetch` (files.proto) into [target], without
+         * asking the user or listing it in Downloads: the PC answers with an offer carrying
+         * [transferId]. Call before sending the request.
+         *
+         * @return `true` once the whole file is in [target]; `false` if it failed or did not come.
+         */
+        fun expect(
+            transferId: String,
+            target: File,
+        ): CompletableDeferred<Boolean> {
+            val done = CompletableDeferred<Boolean>()
+            fetches[transferId] = Fetch(target, done)
+            done.invokeOnCompletion { fetches.remove(transferId) }
+            return done
+        }
+
+        private class Fetch(
+            val target: File,
+            val done: CompletableDeferred<Boolean>,
+        )
 
         /** Stops a transfer from this side, e.g. the notification's "Cancel". */
         fun cancel(id: String) {
@@ -189,6 +222,7 @@ class TransferManager
         private suspend fun sendFiles(
             id: String,
             files: List<Outgoing>,
+            destinationPath: String,
         ) {
             val total = files.sumOf { it.info.size }
             val first = files.first().info.name
@@ -198,7 +232,13 @@ class TransferManager
             try {
                 val accepted = CompletableDeferred<TransferAccept>().also { accepts[id] = it }
                 val done = CompletableDeferred<TransferState>().also { outcomes[id] = it }
-                val offer = TransferOffer(transfer_id = id, files = files.map { it.info }, total_bytes = total)
+                val offer =
+                    TransferOffer(
+                        transfer_id = id,
+                        files = files.map { it.info },
+                        total_bytes = total,
+                        destination_path = destinationPath,
+                    )
                 if (!messenger.send(Envelope.Body.TransferOffer(offer), Capability.CAPABILITY_FILE_TRANSFER)) {
                     Log.w(TAG, "Offer $id not sent")
                     return
@@ -347,6 +387,64 @@ class TransferManager
             }
         }
 
+        /** A file the phone asked for: one file, into the asker's own place, no history or notification. */
+        private suspend fun receiveFetch(
+            offer: TransferOffer,
+            fetch: Fetch,
+        ) {
+            val id = offer.transfer_id
+            val file = offer.files.singleOrNull()
+            if (file == null || !messenger.wifiOpen) {
+                messenger.send(Envelope.Body.TransferAccept(TransferAccept(transfer_id = id, accepted = false)))
+                fetch.done.complete(false)
+                return
+            }
+            var data: DataConnection? = null
+            val partial = File(fetch.target.path + PARTIAL)
+            try {
+                messenger.send(
+                    Envelope.Body.TransferAccept(TransferAccept(transfer_id = id, accepted = true, data_port = 0)),
+                )
+                data = withTimeout(CONNECT_TIMEOUT) { messenger.openDataConnection(0) } ?: throw IOException("No Wi-Fi")
+                data.setReadTimeout(READ_TIMEOUT)
+                TransferStream.writeHeader(data.sink, TransferStreamHeader(transfer_id = id))
+                fetch.target.parentFile?.mkdirs()
+                val hashing = HashingSink.sha256(partial.sink())
+                hashing.buffer().use { sink -> TransferStream.copyExactly(data.source, sink, file.size) {} }
+                if (file.sha256.size > 0 &&
+                    hashing.hash != file.sha256
+                ) {
+                    throw IOException("SHA-256 mismatch for ${file.name}")
+                }
+                if (!partial.renameTo(fetch.target)) throw IOException("Cannot keep ${fetch.target.name}")
+                messenger.send(
+                    Envelope.Body.TransferProgress(
+                        TransferProgress(
+                            transfer_id = id,
+                            bytes_done = file.size,
+                            state = TransferState.TRANSFER_STATE_COMPLETED,
+                        ),
+                    ),
+                )
+                fetch.done.complete(true)
+            } catch (e: CancellationException) {
+                fetch.done.complete(false)
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Fetching $id failed: ${e.message}")
+                messenger.send(
+                    Envelope.Body.TransferProgress(
+                        TransferProgress(transfer_id = id, state = TransferState.TRANSFER_STATE_FAILED),
+                    ),
+                )
+                fetch.done.complete(false)
+            } finally {
+                data?.close()
+                partial.delete()
+                jobs.remove(id)
+            }
+        }
+
         private fun createDownload(
             name: String,
             mimeType: String,
@@ -430,6 +528,7 @@ class TransferManager
             const val TAG = "FenpoTransfer"
             const val FOLDER = "Fenpo"
             const val OUTGOING_FOLDER = "outgoing"
+            const val PARTIAL = ".part"
             const val PROGRESS_INTERVAL_MS = 500L
             const val FREE_SPACE_MARGIN = 200L * 1024 * 1024
             val ACCEPT_TIMEOUT = 120.seconds

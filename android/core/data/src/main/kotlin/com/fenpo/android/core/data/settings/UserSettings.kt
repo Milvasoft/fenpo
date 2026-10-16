@@ -15,6 +15,8 @@ data class FeatureSettings(
     val clipboardSharing: Boolean = true,
     val screenshotSharing: Boolean = false,
     val doNotDisturbSync: Boolean = true,
+    val pcNotifications: Boolean = true,
+    val photoLibrary: Boolean = true,
 )
 
 /** Everything the user chose in Settings, except the language (stored by the system, see [AppLanguage]). */
@@ -30,4 +32,10 @@ enum class Feature {
     CLIPBOARD_SHARING,
     SCREENSHOT_SHARING,
     DO_NOT_DISTURB_SYNC,
+
+    /** The PC's notifications shown on the phone (pc_notification.proto). */
+    PC_NOTIFICATIONS,
+
+    /** The phone's photos browsed from the PC (photos.proto). */
+    PHOTO_LIBRARY,
 }

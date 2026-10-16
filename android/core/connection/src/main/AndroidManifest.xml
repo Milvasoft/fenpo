@@ -19,11 +19,23 @@
     <!-- "Find my phone" vibrates with the alarm sound. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- App names and icons of mirrored notifications: apps people get notifications from have a launcher entry. -->
+    <!-- The photo library from the PC (photos.proto); asked for when the user turns it on. -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- App names and icons of mirrored notifications: apps people get notifications from have a launcher entry.
+         The hotspot screen has no public action; its notification opens it when the phone has it. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <intent>
+            <action android:name="android.settings.TETHER_SETTINGS" />
         </intent>
     </queries>
 
@@ -91,6 +103,18 @@
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
         </service>
+
+        <!-- The PC's shared folders in the file picker (files.proto). -->
+        <provider
+            android:name=".files.PcDocumentsProvider"
+            android:authorities="${applicationId}.pcfolders"
+            android:exported="true"
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <intent-filter>
+                <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
+            </intent-filter>
+        </provider>
 
         <provider
             android:name="androidx.core.content.FileProvider"

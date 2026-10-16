@@ -1,6 +1,7 @@
 package com.fenpo.android.feature.settings
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.fenpo.android.core.data.hotspot.HotspotDetails
 import com.fenpo.android.core.data.notifications.NotificationApp
 import com.fenpo.android.core.data.notifications.NotificationAppSettings
 import com.fenpo.android.core.testing.captureScreenVariants
@@ -60,6 +61,17 @@ class SettingsScreenshotTest {
                 onBack = {},
                 onMirrorNewApps = {},
                 onAppEnable = { _, _ -> },
+            )
+        }
+
+    @Test
+    fun hotspot() =
+        captureScreenVariants("settings_hotspot") {
+            HotspotScreen(
+                state = HotspotUiState(HotspotDetails(ssid = "Buğra’nın telefonu", passphrase = "kayısı-2026")),
+                onBack = {},
+                onSave = { _, _ -> },
+                onClear = {},
             )
         }
 }

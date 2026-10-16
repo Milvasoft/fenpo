@@ -6,6 +6,7 @@ import com.fenpo.android.core.transport.tls.DataConnection
 import com.fenpo.protocol.v1.Capability
 import com.fenpo.protocol.v1.Envelope
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -13,8 +14,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.updateAndGet
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * How features talk to the PC without knowing which path is open: sends go on Wi-Fi when it is up,
@@ -72,6 +76,42 @@ class PcMessenger
             return false
         }
 
+        private val waiting = HashMap<Long, CompletableDeferred<Envelope>>()
+        private val earlyAnswers = LinkedHashMap<Long, Envelope>()
+
+        /**
+         * Sends [body] on Wi-Fi and waits for the PC's answer (the envelope whose `reply_to` is this
+         * one's id): folder listings, previews and the like.
+         *
+         * @return the answer, which may be an `Error`; `null` when Wi-Fi is not open, the PC does not
+         *   offer [capability], or nothing came back within [timeout].
+         */
+        suspend fun request(
+            body: Envelope.Body,
+            capability: Capability,
+            timeout: Duration = REQUEST_TIMEOUT,
+        ): Envelope? {
+            if (capability !in _capabilities.value) return null
+            val session = sessions.value[LinkPath.WIFI] ?: return null
+            val id =
+                try {
+                    session.send(body)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.d(TAG, "Request not sent: ${e.message}")
+                    return null
+                }
+            val answer = CompletableDeferred<Envelope>()
+            // The answer can come back before send() returned the id.
+            synchronized(waiting) { earlyAnswers.remove(id)?.let { return it } ?: waiting.put(id, answer) }
+            return try {
+                withTimeoutOrNull(timeout) { answer.await() }
+            } finally {
+                synchronized(waiting) { waiting.remove(id) }
+            }
+        }
+
         /**
          * Opens a file transfer data connection on Wi-Fi, or returns `null` when Wi-Fi is not open:
          * Bluetooth cannot carry files.
@@ -96,7 +136,24 @@ class PcMessenger
             _capabilities.value = emptySet()
         }
 
-        internal fun deliver(envelope: Envelope) {
+        internal fun deliver(
+            envelope: Envelope,
+            path: LinkPath,
+        ) {
+            if (path == LinkPath.WIFI && envelope.reply_to != 0L) {
+                val waiter =
+                    synchronized(waiting) {
+                        waiting.remove(envelope.reply_to) ?: run {
+                            earlyAnswers[envelope.reply_to] = envelope
+                            if (earlyAnswers.size > EARLY_ANSWERS) earlyAnswers.remove(earlyAnswers.keys.first())
+                            null
+                        }
+                    }
+                if (waiter != null) {
+                    waiter.complete(envelope)
+                    return
+                }
+            }
             if (!_incoming.tryEmit(
                     envelope,
                 )
@@ -108,6 +165,8 @@ class PcMessenger
         private companion object {
             const val TAG = "FenpoMessenger"
             const val INCOMING_BUFFER = 64
+            const val EARLY_ANSWERS = 32
+            val REQUEST_TIMEOUT = 15.seconds
             val PREFERENCE = listOf(LinkPath.WIFI, LinkPath.BLUETOOTH)
         }
     }

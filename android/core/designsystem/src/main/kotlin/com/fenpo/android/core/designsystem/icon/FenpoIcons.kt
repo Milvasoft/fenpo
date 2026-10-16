@@ -44,6 +44,8 @@ object FenpoIcons {
 
     @DrawableRes val House = R.drawable.ic_house
 
+    @DrawableRes val Hotspot = R.drawable.ic_hotspot
+
     @DrawableRes val Info = R.drawable.ic_info
 
     @DrawableRes val Lock = R.drawable.ic_lock

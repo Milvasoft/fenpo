@@ -36,7 +36,11 @@ class FeatureMessagesTest {
 
     /** A Wi-Fi session whose PC offered [capabilities] in its Hello. */
     private suspend fun connect(vararg capabilities: Capability) {
-        val session = PcSession(LinkPath.WIFI, ConnectionStatus(), { body, replyTo -> sent += body to replyTo }, {})
+        val session =
+            PcSession(LinkPath.WIFI, ConnectionStatus(), { body, replyTo ->
+                sent += body to replyTo
+                sent.size.toLong()
+            }, {})
         session.onEnvelope(Envelope(id = 1, body = Envelope.Body.Hello(Hello(capabilities = capabilities.toList()))))
         messenger.onSession(LinkPath.WIFI, session)
     }
@@ -62,7 +66,7 @@ class FeatureMessagesTest {
             runCurrent()
             val item = ClipboardItem(item_id = "a", content = ClipboardItem.Content.Text("docker compose up -d"))
 
-            messenger.deliver(Envelope(id = 5, body = Envelope.Body.Clipboard(item)))
+            messenger.deliver(Envelope(id = 5, body = Envelope.Body.Clipboard(item)), LinkPath.WIFI)
             runCurrent()
 
             assertEquals(
@@ -84,7 +88,10 @@ class FeatureMessagesTest {
             val job = launch { sync.run() }
             runCurrent()
 
-            messenger.deliver(Envelope(id = 9, body = Envelope.Body.ClipboardRequest(ClipboardRequest())))
+            messenger.deliver(
+                Envelope(id = 9, body = Envelope.Body.ClipboardRequest(ClipboardRequest())),
+                LinkPath.WIFI,
+            )
             runCurrent()
 
             val (body, replyTo) = sent.single()
@@ -127,7 +134,7 @@ class FeatureMessagesTest {
             val job = launch { sync.run() }
             runCurrent()
 
-            messenger.deliver(Envelope(id = 3, body = echoed))
+            messenger.deliver(Envelope(id = 3, body = echoed), LinkPath.WIFI)
             runCurrent()
 
             assertNull(sync.fromPc.value)
@@ -153,6 +160,7 @@ class FeatureMessagesTest {
                             ClipboardItem(item_id = "x", content = ClipboardItem.Content.Text("from pc")),
                         ),
                 ),
+                LinkPath.WIFI,
             )
             runCurrent()
 
@@ -183,7 +191,7 @@ class FeatureMessagesTest {
             val job = launch { sync.run() }
             runCurrent()
             val fromPc = ClipboardItem(item_id = "p", sensitive = true, content = ClipboardItem.Content.Text("s3cret"))
-            messenger.deliver(Envelope(id = 6, body = Envelope.Body.Clipboard(fromPc)))
+            messenger.deliver(Envelope(id = 6, body = Envelope.Body.Clipboard(fromPc)), LinkPath.WIFI)
             runCurrent()
 
             assertEquals(

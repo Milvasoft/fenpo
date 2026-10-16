@@ -43,4 +43,17 @@
     <string name="notification_apps_off">Off</string>
     <string name="notification_apps_empty">Apps show up here after their first notification.</string>
     <string name="notification_apps_otp_note">Android can hide the content of notifications with one-time codes. Then the notification shows only the app’s name on the PC; read the code on the phone.</string>
+    <string name="feature_pc_notifications">Notifications from your PC</string>
+    <string name="feature_pc_notifications_summary">The apps you picked in Fenpo on the PC</string>
+    <string name="feature_photos">Photos on your PC</string>
+    <string name="feature_photos_summary">Your PC can browse your photos and videos</string>
+    <string name="hotspot_row">Hotspot</string>
+    <string name="hotspot_not_set_up">Type its name and password to join it from the PC in one click</string>
+    <string name="hotspot_title">Hotspot</string>
+    <string name="hotspot_name">Network name</string>
+    <string name="hotspot_password">Password</string>
+    <string name="hotspot_password_hint">At least 8 characters</string>
+    <string name="hotspot_save">Save</string>
+    <string name="hotspot_remove">Remove</string>
+    <string name="hotspot_note">Android does not let apps read the hotspot’s name and password. Type them here once: they are kept encrypted on this phone and go only to your PC. When the PC wants to join, a notification opens the hotspot settings.</string>
 </resources>
