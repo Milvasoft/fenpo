@@ -6,33 +6,43 @@ import com.fenpo.protocol.v1.Envelope
 import com.fenpo.protocol.v1.Hello
 import com.fenpo.protocol.v1.Pong
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** The two ways the phone reaches the PC (docs/ARCHITECTURE.md, ③ and ④). */
 enum class LinkPath { BLUETOOTH, WIFI }
 
 /**
  * What every channel to the PC does with the PC's messages, whichever path it runs on: `Hello`,
- * `Ping`/`Pong`, `PcStatus` and the PC's addresses in `DeviceState`.
+ * `Ping`/`Pong`, `PcStatus` and the PC's addresses in `DeviceState`. Everything else goes to
+ * [onOther] for the features.
  *
- * @param send Sends one body on this channel, answering the envelope id given (0 if none).
+ * @param transport Sends one body on this channel, answering the envelope id given (0 if none).
  * @param onAddresses Called with the PC's current data channel addresses.
  */
 internal class PcSession(
     val path: LinkPath,
     private val status: ConnectionStatus,
-    private val send: suspend (Envelope.Body, Long) -> Unit,
+    private val transport: suspend (Envelope.Body, Long) -> Unit,
     private val onAddresses: suspend (List<String>) -> Unit,
+    private val onOther: (Envelope) -> Unit = {},
 ) {
     private val hello = CompletableDeferred<Hello>()
 
     /** Started by the link once the PC's `Hello` arrived; only answered Pings keep the channel. */
-    val heartbeat = Heartbeat { send(it, 0) }
+    val heartbeat = Heartbeat { transport(it, 0) }
 
     /** Waits for the PC's `Hello` on this channel. */
     suspend fun awaitHello(): Hello = hello.await()
 
-    /** Sends [body] on this channel. */
-    suspend fun send(body: Envelope.Body) = send(body, 0)
+    /** The PC's `Hello` on this channel, if it arrived. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun helloOrNull(): Hello? = if (hello.isCompleted) hello.getCompleted() else null
+
+    /** Sends [body] on this channel, answering [replyTo] (0 if none). */
+    suspend fun send(
+        body: Envelope.Body,
+        replyTo: Long = 0,
+    ) = transport(body, replyTo)
 
     suspend fun onEnvelope(envelope: Envelope) {
         when (val body = envelope.body) {
@@ -43,7 +53,7 @@ internal class PcSession(
             }
 
             is Envelope.Body.Ping -> {
-                send(Envelope.Body.Pong(Pong(nonce = body.value.nonce)), envelope.id)
+                transport(Envelope.Body.Pong(Pong(nonce = body.value.nonce)), envelope.id)
             }
 
             is Envelope.Body.Pong -> {
@@ -59,7 +69,7 @@ internal class PcSession(
             }
 
             else -> {
-                Log.d(TAG, "Unhandled ${body?.javaClass?.simpleName} on $path")
+                onOther(envelope)
             }
         }
     }

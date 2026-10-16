@@ -64,6 +64,13 @@ internal class AndroidLocalDeviceRepository
             val DEVICE_ID = stringPreferencesKey("device_id")
 
             /** Only what this build really does; grows as features land. */
-            val IMPLEMENTED_CAPABILITIES = setOf(Capability.CAPABILITY_DEVICE_STATE)
+            val IMPLEMENTED_CAPABILITIES =
+                setOf(
+                    Capability.CAPABILITY_DEVICE_STATE,
+                    Capability.CAPABILITY_CLIPBOARD,
+                    Capability.CAPABILITY_OPEN_URL,
+                    Capability.CAPABILITY_RING,
+                    Capability.CAPABILITY_LOCK_PC,
+                )
         }
     }

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files Fenpo hands to other apps: clipboard images from the PC. -->
+<paths>
+    <cache-path name="clipboard" path="clipboard/" />
+</paths>

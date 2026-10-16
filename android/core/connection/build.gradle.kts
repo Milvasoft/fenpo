@@ -12,6 +12,8 @@ dependencies {
     api(project(":core:data"))
     implementation(project(":core:designsystem"))
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.ext.junit)

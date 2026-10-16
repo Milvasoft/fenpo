@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fenpo.android.core.connection.ConnectionStatus
 import com.fenpo.android.core.connection.LinkState
+import com.fenpo.android.core.connection.clipboard.ClipboardSync
 import com.fenpo.android.core.data.pc.PairedPcRepository
 import com.fenpo.protocol.v1.DevicePlatform
 import com.fenpo.protocol.v1.Hello
@@ -16,8 +17,8 @@ import java.time.Instant
 import javax.inject.Inject
 
 /**
- * State for the home and PC screens: the paired PC and the live connection paths. Transfers,
- * clipboard and mirroring stay empty until those features exist.
+ * State for the home and PC screens: the paired PC, the live connection paths and the last
+ * clipboard items each way. Transfers and mirroring stay empty until those features exist.
  */
 @HiltViewModel
 class HomeViewModel
@@ -25,9 +26,15 @@ class HomeViewModel
     constructor(
         pairedPcRepository: PairedPcRepository,
         connectionStatus: ConnectionStatus,
+        private val clipboardSync: ClipboardSync,
     ) : ViewModel() {
         val uiState: StateFlow<HomeUiState> =
-            combine(pairedPcRepository.pairedPc, connectionStatus.snapshot) { pc, connection ->
+            combine(
+                pairedPcRepository.pairedPc,
+                connectionStatus.snapshot,
+                clipboardSync.toPc,
+                clipboardSync.fromPc,
+            ) { pc, connection, toPc, fromPc ->
                 HomeUiState(
                     pc =
                         pc?.let {
@@ -39,9 +46,14 @@ class HomeViewModel
                                 wifi = connection.wifi == LinkState.CONNECTED,
                             )
                         },
+                    phoneClipboardPreview = toPc,
+                    pcClipboardPreview = fromPc,
                     now = Instant.now(),
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+        /** "Paste from PC": asks the PC for its clipboard; `false` if it cannot be asked. */
+        suspend fun requestPcClipboard(): Boolean = clipboardSync.requestFromPc()
 
         /** "Windows 11 26300" from Hello; just "Windows" from a PC that does not send the version yet. */
         private fun Hello.osLabel(): String? =

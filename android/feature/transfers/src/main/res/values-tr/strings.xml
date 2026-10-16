@@ -3,4 +3,10 @@
     <string name="transfers_title">Aktarımlar</string>
     <string name="transfers_empty_title">Henüz aktarım yok</string>
     <string name="transfers_empty_body">PC’ye gönderdiğin ve PC’den gelen dosyalar burada görünür.</string>
+    <string name="share_send_to_pc">PC’ye gönder</string>
+    <string name="share_open_on_pc">PC’de aç</string>
+    <string name="share_sent_text">PC’nin panosuna gönderildi</string>
+    <string name="share_opened">PC’de açılıyor</string>
+    <string name="share_no_link">Paylaştığın şeyde bağlantı yok. Bir sayfa ya da bağlantı paylaş.</string>
+    <string name="share_nothing">Gönderilecek bir şey yok. Metin ya da bağlantı paylaş.</string>
 </resources>

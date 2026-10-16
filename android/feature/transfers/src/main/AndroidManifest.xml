@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!-- Share sheet targets (docs/ANDROID.md §9). Files join with file transfer. -->
+        <activity
+            android:name=".share.ShareToPcActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity-alias
+            android:name=".share.SendToPc"
+            android:exported="true"
+            android:icon="@drawable/ic_fenpo_logo"
+            android:label="@string/share_send_to_pc"
+            android:targetActivity=".share.ShareToPcActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".share.OpenOnPc"
+            android:exported="true"
+            android:icon="@drawable/ic_open"
+            android:label="@string/share_open_on_pc"
+            android:targetActivity=".share.ShareToPcActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+</manifest>

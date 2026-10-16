@@ -47,6 +47,7 @@ internal class WifiLink(
     private val localHello: Hello,
     private val status: ConnectionStatus,
     private val pairedPcRepository: PairedPcRepository,
+    private val onOther: (Envelope) -> Unit,
     private val onSession: (PcSession?) -> Unit,
 ) {
     private val connectivity = context.getSystemService(ConnectivityManager::class.java)
@@ -98,10 +99,11 @@ internal class WifiLink(
             PcSession(
                 LinkPath.WIFI,
                 status,
-                send = { body, replyTo -> connection.send(body, replyTo) },
+                transport = { body, replyTo -> connection.send(body, replyTo) },
                 onAddresses = { addresses ->
                     pairedPcRepository.saveAddresses(addresses)
                 },
+                onOther = onOther,
             )
         try {
             status.update { it.copy(wifi = LinkState.CONNECTED) }

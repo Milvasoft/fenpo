@@ -3,4 +3,10 @@
     <string name="transfers_title">Transfers</string>
     <string name="transfers_empty_title">Nothing transferred yet</string>
     <string name="transfers_empty_body">Files and photos you send to your PC or receive from it show up here.</string>
+    <string name="share_send_to_pc">Send to PC</string>
+    <string name="share_open_on_pc">Open on PC</string>
+    <string name="share_sent_text">Sent to your PC’s clipboard</string>
+    <string name="share_opened">Opening on your PC</string>
+    <string name="share_no_link">There is no link in what you shared. Share a web page or a link.</string>
+    <string name="share_nothing">There is nothing to send. Share text or a link.</string>
 </resources>

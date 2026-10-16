@@ -6,4 +6,25 @@
     <string name="connection_connected_bluetooth">Connected, Bluetooth</string>
     <string name="connection_connected_wifi">Connected, Wi‑Fi</string>
     <string name="connection_connected_both">Connected, Bluetooth and Wi‑Fi</string>
+    <string name="connection_action_send_clipboard">Send clipboard</string>
+    <string name="connection_action_lock_pc">Lock PC</string>
+    <string name="tile_send_clipboard">Send clipboard</string>
+    <string name="tile_lock_pc">Lock PC</string>
+    <string name="tile_subtitle">Fenpo</string>
+    <string name="clipboard_channel_name">Clipboard</string>
+    <string name="clipboard_received">Copied from your PC</string>
+    <string name="clipboard_image">Image</string>
+    <string name="clipboard_sent">Clipboard sent to your PC</string>
+    <string name="clipboard_empty">The clipboard is empty. Copy something first.</string>
+    <string name="clipboard_too_large">This image is too large for the clipboard, or Wi‑Fi is off. Send it as a photo.</string>
+    <string name="lock_pc_sent">Locking your PC</string>
+    <string name="pc_not_connected">Not connected to your PC. Bring the phone closer or join the same Wi‑Fi.</string>
+    <string name="pc_update_needed">Fenpo on your PC does not do this yet. Update Fenpo on Windows.</string>
+    <string name="ring_channel_name">Find my phone</string>
+    <string name="ring_title">Your PC is ringing this phone</string>
+    <string name="ring_text">Tap to stop the sound.</string>
+    <string name="ring_stop">Stop</string>
+    <string name="link_channel_name">Links from your PC</string>
+    <string name="link_title">Link from your PC</string>
+    <string name="link_open">Open</string>
 </resources>

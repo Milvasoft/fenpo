@@ -6,7 +6,8 @@ import java.time.Instant
  * Everything the home screen shows.
  *
  * @property pc The paired PC, or `null` before pairing.
- * @property phoneClipboardPreview Start of the text that "Send clipboard" would send, if known.
+ * @property phoneClipboardPreview Start of the text "Send clipboard" sent last. The current
+ *   clipboard is not read for this: Android announces every read with a message.
  * @property pcClipboardPreview Start of the PC's latest clipboard item.
  * @property recentPhotoCount Photos taken since the last transfer, offered by "Send photos".
  * @property mirroring Notification mirroring summary, or `null` when mirroring is off.

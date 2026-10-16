@@ -1,5 +1,6 @@
 package com.fenpo.android.feature.home
 
+import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +26,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fenpo.android.core.connection.clipboard.ClipboardSendActivity
 import com.fenpo.android.core.designsystem.component.FenpoCard
 import com.fenpo.android.core.designsystem.component.FenpoListRow
 import com.fenpo.android.core.designsystem.component.FenpoRootTopBar
@@ -46,8 +50,10 @@ import com.fenpo.android.core.designsystem.component.SectionLabel
 import com.fenpo.android.core.designsystem.format.relativeTime
 import com.fenpo.android.core.designsystem.icon.FenpoIcons
 import com.fenpo.android.core.designsystem.theme.FenpoTheme
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.util.Locale
+import com.fenpo.android.core.connection.R as ConnectionR
 
 /** Home tab with its view model. */
 @Composable
@@ -58,11 +64,33 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     HomeScreen(
         state = state,
         onPair = onPair,
         onOpenNotificationSettings = onOpenNotificationSettings,
         modifier = modifier,
+        onQuickAction = { action ->
+            when (action) {
+                QuickAction.SEND_CLIPBOARD -> {
+                    context.startActivity(ClipboardSendActivity.intent(context))
+                }
+
+                QuickAction.PASTE_FROM_PC -> {
+                    scope.launch {
+                        if (!viewModel.requestPcClipboard()) {
+                            Toast.makeText(context, ConnectionR.string.pc_not_connected, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+                // Photos come with file transfer, the webcam with phase 4.
+                QuickAction.SEND_PHOTOS, QuickAction.CAMERA -> {
+                    Unit
+                }
+            }
+        },
     )
 }
 

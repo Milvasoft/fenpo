@@ -6,4 +6,25 @@
     <string name="connection_connected_bluetooth">Bağlı, Bluetooth</string>
     <string name="connection_connected_wifi">Bağlı, Wi‑Fi</string>
     <string name="connection_connected_both">Bağlı, Bluetooth ve Wi‑Fi</string>
+    <string name="connection_action_send_clipboard">Panoyu gönder</string>
+    <string name="connection_action_lock_pc">PC’yi kilitle</string>
+    <string name="tile_send_clipboard">Panoyu gönder</string>
+    <string name="tile_lock_pc">PC’yi kilitle</string>
+    <string name="tile_subtitle">Fenpo</string>
+    <string name="clipboard_channel_name">Pano</string>
+    <string name="clipboard_received">PC’den panoya alındı</string>
+    <string name="clipboard_image">Görsel</string>
+    <string name="clipboard_sent">Pano PC’ye gönderildi</string>
+    <string name="clipboard_empty">Pano boş. Önce bir şey kopyala.</string>
+    <string name="clipboard_too_large">Bu görsel panoyla gitmiyor ya da Wi‑Fi kapalı. Fotoğraf olarak gönder.</string>
+    <string name="lock_pc_sent">PC kilitleniyor</string>
+    <string name="pc_not_connected">PC’ye bağlı değil. Telefonu yaklaştır ya da aynı Wi‑Fi’ye bağlan.</string>
+    <string name="pc_update_needed">PC’deki Fenpo bunu henüz yapmıyor. Windows’taki Fenpo’yu güncelle.</string>
+    <string name="ring_channel_name">Telefonumu bul</string>
+    <string name="ring_title">PC bu telefonu çaldırıyor</string>
+    <string name="ring_text">Sesi durdurmak için dokun.</string>
+    <string name="ring_stop">Durdur</string>
+    <string name="link_channel_name">PC’den gelen bağlantılar</string>
+    <string name="link_title">PC’den bağlantı</string>
+    <string name="link_open">Aç</string>
 </resources>

@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.fenpo.android.feature.transfers"
 }
+
+dependencies {
+    implementation(project(":core:connection"))
+}

@@ -16,6 +16,9 @@
     <!-- The Wi-Fi channel follows the Wi-Fi network; INTERNET and ACCESS_LOCAL_NETWORK are in the app (§3). -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- "Find my phone" vibrates with the alarm sound. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
     <application>
         <service
             android:name=".ConnectionService"
@@ -30,5 +33,46 @@
                 <action android:name="android.companion.CompanionDeviceService" />
             </intent-filter>
         </service>
+
+        <!-- Clipboard to the PC (§8): only a focused activity may read the clipboard. -->
+        <activity
+            android:name=".clipboard.ClipboardSendActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <service
+            android:name=".tile.ClipboardTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_clip"
+            android:label="@string/tile_send_clipboard"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".tile.LockPcTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_lock"
+            android:label="@string/tile_lock_pc"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fenpo_files" />
+        </provider>
     </application>
 </manifest>

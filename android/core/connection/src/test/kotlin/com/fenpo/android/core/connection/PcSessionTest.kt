@@ -23,7 +23,7 @@ class PcSessionTest {
         PcSession(
             LinkPath.WIFI,
             status,
-            send = { body, replyTo -> sent += body to replyTo },
+            transport = { body, replyTo -> sent += body to replyTo },
             onAddresses = { addresses += it },
         )
 
