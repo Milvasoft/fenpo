@@ -1,12 +1,16 @@
+using Fenpo.Protocol.V1;
+
 namespace Fenpo.Core.Channel;
 
 /// <summary>
-/// A phone paired with the Fenpo app (Wi‑Fi pairing, S5): its id, name and the BLE channel key the PC gave it.
+/// A phone paired with the Fenpo app (Wi‑Fi pairing, S5): its id, name, the BLE channel key the PC gave it and the
+/// fingerprint of the certificate it used, pinned for every later TLS connection.
 /// </summary>
-/// <param name="DeviceId">Phone's Hello.device_id.</param>
+/// <param name="DeviceId">Phone's PairingRequest.device_id.</param>
 /// <param name="Name">Phone's name.</param>
 /// <param name="BleKey">PairingResult.ble_channel_key (32 bytes).</param>
-public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey);
+/// <param name="CertificateSha256">SHA-256 of the phone's TLS certificate (DER), lower-case hex.</param>
+public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "");
 
 /// <summary>
 /// Phones paired with the Fenpo app.
@@ -17,6 +21,12 @@ public interface IPairedAppDevices
     /// Gets the paired phones.
     /// </summary>
     IReadOnlyList<PairedAppDevice> All { get; }
+
+    /// <summary>
+    /// Adds or replaces a paired phone.
+    /// </summary>
+    /// <param name="device">Phone.</param>
+    void Save(PairedAppDevice device);
 }
 
 /// <summary>
@@ -50,3 +60,26 @@ public interface IBleCounters
 /// <param name="OsVersion">Windows version.</param>
 /// <param name="Model">Hardware model, if known.</param>
 public sealed record PcIdentity(string DeviceId, string DeviceName, string AppVersion, string OsVersion, string Model);
+
+/// <summary>
+/// Builds the PC's Hello, the same on the BLE and the Wi‑Fi channel.
+/// </summary>
+public static class PcHello
+{
+    /// <summary>
+    /// Creates the PC's Hello.
+    /// </summary>
+    /// <param name="identity">PC identity.</param>
+    /// <returns>The Hello message.</returns>
+    public static Hello Create(PcIdentity identity) => new()
+    {
+        DeviceId = identity.DeviceId,
+        DeviceName = identity.DeviceName,
+        Platform = DevicePlatform.Windows,
+        AppVersion = identity.AppVersion,
+        ProtocolVersions = { 1 },
+        Capabilities = { Capability.DeviceState },
+        OsVersion = identity.OsVersion,
+        Model = identity.Model,
+    };
+}

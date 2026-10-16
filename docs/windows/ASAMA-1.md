@@ -21,7 +21,8 @@
 | Aramalar (Ada, Yanıtla/Reddet, son aramalar, aramada PC medyasını duraklat) | Bitti, cihazda denendi: Ada çıkıyor, Yanıtla ve Reddet telefona gidiyor. Aramada PC medyasını duraklatma denenmedi |
 | Dosyalar, Pano, Kamera | Sayfalar ve "iPhone'da Fenpo gerekiyor" bandı hazır; işlevler iPhone uygulamasını bekliyor |
 | Yerel API ve Fenpo.Sdk | Bitti, gerçek pipe üzerinden uçtan uca testli, paketli uygulamaya dışarıdan bağlanıldı |
-| Fenpo BLE ve Wi‑Fi kanalları | Bekliyor: protokol commit'i (beede75) main'e alınmadı, TLS tarafı Defender kararını bekliyor, iPhone uygulaması yok |
+| Fenpo BLE kanalı (③) | Bitti: GATT sunucusu, AES-GCM mühürleme, parçalama, Hello/PcStatus/Ping. Testli, PC'de yayında. iPhone uygulamasıyla uçtan uca denenmedi |
+| Wi‑Fi eşleşmesi ve kontrol kanalı (④) | Bitti: P-256 sertifika (DPAPI), TLS 1.3 karşılıklı sertifika, QR ve tek kullanımlık token, sertifika sabitleme, DNS-SD, QR ekranı. S5 senaryoları ürün sunucusuna karşı testli (loopback). iPhone uygulamasıyla denenmedi. Defender: S5 ikili dosyası Microsoft'a yanlış alarm olarak gönderildi |
 | Sağlamlaştırma, TESTING.md | Yapılmadı |
 
 Plandan sapmalar:

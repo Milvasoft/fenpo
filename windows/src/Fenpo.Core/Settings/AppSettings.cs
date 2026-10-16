@@ -117,6 +117,11 @@ public sealed record AppSettings
     public string? PhoneDeviceId { get; init; }
 
     /// <summary>
+    /// Gets the TLS port of the Fenpo control server, kept so paired phones find it again; 0 until first start.
+    /// </summary>
+    public int ControlPort { get; init; }
+
+    /// <summary>
     /// Gets this PC's stable id for the Fenpo protocol (Hello.device_id, the QR's id), created on first run.
     /// </summary>
     public string? PcId { get; init; }

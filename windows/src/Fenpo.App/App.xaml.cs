@@ -4,7 +4,9 @@ using Fenpo.Bluetooth;
 using Fenpo.Core.Api;
 using Fenpo.Core.Channel;
 using Fenpo.Core.Notifications;
+using Fenpo.Core.Pairing;
 using Fenpo.Core.Settings;
+using Fenpo.Transport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -70,6 +72,10 @@ public partial class App : Application
                 .AddSingleton<PairedAppDeviceStore>()
                 .AddSingleton<IPairedAppDevices>(sp => sp.GetRequiredService<PairedAppDeviceStore>())
                 .AddSingleton<IBleCounters, BleCounterStore>()
+                .AddSingleton(sp => PcCertificate.LoadOrCreate(Path.Combine(localFolder, "pc-certificate.pfx"), Environment.MachineName))
+                .AddSingleton(new PairingTokens())
+                .AddSingleton<ControlServer>()
+                .AddHostedService<TransportHostedService>()
                 .AddSingleton(new PcIdentity(settings.Current.PcId!, Environment.MachineName, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0", $"Windows {Environment.OSVersion.Version}", string.Empty))
                 .AddSingleton<SentMessages>()
                 .AddSingleton<NotificationRouter>()
@@ -90,6 +96,7 @@ public partial class App : Application
                 .AddTransient<CallsViewModel>()
                 .AddTransient<AppFeatureViewModel>()
                 .AddTransient<PairingViewModel>()
+                .AddTransient<AppPairingViewModel>()
                 .AddTransient<SettingsViewModel>())
             .Build();
 
@@ -179,6 +186,10 @@ public partial class App : Application
         var dispatcher = _window.DispatcherQueue;
         var calls = GetService<CallService>();
         calls.AttachUi(dispatcher);
+
+        // The Wi-Fi channel's state shows in the phone status (the "Same Wi-Fi" chip, the app-only actions).
+        var tracker = GetService<Fenpo.Bluetooth.Status.PhoneStatusTracker>();
+        GetService<ControlServer>().SessionChanged += (sender, change) => tracker.Update(s => s with { WifiConnected = change.Connected, AppConnected = change.Connected || s.AppConnected });
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 
