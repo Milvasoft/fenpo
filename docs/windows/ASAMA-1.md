@@ -4,7 +4,7 @@
 >
 > Buğra planı onayladı ve kapsamı genişletti: aşama aşama değil, uygulamasız çalışan her şey baştan sona (DECISIONS #36–38). Menüler gizlenmez, ne gerektiğini söyler.
 
-## Durum (16 Ekim 2026, akşam)
+## Durum (16 Ekim 2026, gece)
 
 | Parça | Durum |
 |---|---|
@@ -22,16 +22,21 @@
 | Telefondaki Fenpo ile özellikler (PhoneChannel: Wi‑Fi önce, yoksa BLE) | Bitti, Android (Galaxy S10+) ile uçtan uca denendi: pano iki yönde ve ClipboardRequest, PC'yi kilitle, PC'de aç, telefonu çaldır, dosya aktarımı iki yönde (veri bağlantısını telefon açar), DeviceState (pil, adresler). iPhone uygulamasıyla denenmedi |
 | Android bildirim ve medya aynalama | Bitti, Galaxy ile denendi: ilk liste, yeni bildirimler, uygulama simgeleri, YouTube Music. Yanıt kutusu, "Kapat" ve arama Android bildirimiyle henüz denenmedi |
 | İki telefon (iPhone ve Android eşli) | Bitti, ikisi bağlıyken denendi: tek telefon kullanılır; Ayarlar > Cihaz, Telefonum ve tepside geçiş; mesajlar Android'de kendi MAP'inden |
-| Ekran yansıtma (Android) | Kod bitti: pencere, H.264 (Windows çözücüsü), dokunma, kaydırma, tuşlar, dönüşte yeniden başlatma. Telefonda izin ve erişilebilirlik onayı gerektiği için denenmedi. Ses henüz istenmiyor |
-| Kamera | Önizleme kodu bitti (Kamera sayfası, mercek, ortalama, ayarların iki yönlü eşitlenmesi), denenmedi. Teams/Zoom'da web kamerası olması için Fenpo Kamera bileşeni (S7: yönetici onaylı ayrı kurulum) yapılmadı; kurulum yolu Buğra ile kararlaştırılacak |
-| Telefondan PC: dokunmatik yüzey, klavye, sunum kumandası, lazer, ekranı açık tut | Kod bitti, denenmedi |
+| Ekran yansıtma | Android: pencere, H.264, dokunma, kaydırma, tuşlar; cihazda geçti (Android oturumu). Telefonun sesi (PCM 48 kHz) kod bitti, cihazda denenmedi. iPhone: yayını telefon başlatınca pencere kendiliğinden açılır, kontrol yok; iPhone build'i bekleniyor |
+| Kamera | Önizleme iki telefonda da cihazda çalışıyor (gecikme ~0,1–0,2 sn). Fenpo Kamera (sanal kamera, `Fenpo.VirtualCamera`): Kamera sayfasından yönetici onayıyla kurulur, uygulama açınca telefonun kamerası başlar. Derleniyor, kurulup bir uygulamayla denenmedi |
+| Telefondan PC: dokunmatik yüzey, klavye, sunum kumandası, lazer, ekranı açık tut | Android ile cihazda geçti; iPhone build 31'den itibaren var |
 | PC'nin medyası ve ses düzeyi telefondan, PC'yi çaldır | Kod bitti, denenmedi |
 | Odak eşitleme, Android yakınlık kilidi, Android eşleşmesini kaldırma | Kod bitti, denenmedi |
 | SMS (MAP olmayan Android, Fenpo kanalı) | Kod bitti, MAP'i olmayan telefonla denenmedi |
 | Yerel API ve Fenpo.Sdk | Bitti, gerçek pipe üzerinden uçtan uca testli, paketli uygulamaya dışarıdan bağlanıldı |
 | Fenpo BLE kanalı (③) | Bitti: GATT sunucusu, AES-GCM mühürleme, parçalama, Hello/PcStatus/Ping. Testli, PC'de yayında. iPhone uygulamasıyla uçtan uca denenmedi |
 | Wi‑Fi eşleşmesi ve kontrol kanalı (④) | Bitti: P-256 sertifika (DPAPI), TLS 1.3 karşılıklı sertifika, QR ve tek kullanımlık token, sertifika sabitleme, DNS-SD, QR ekranı. S5 senaryoları ürün sunucusuna karşı testli (loopback). iPhone uygulamasıyla denenmedi. Defender: S5 ikili dosyası Microsoft'a yanlış alarm olarak gönderildi |
-| Sağlamlaştırma, TESTING.md | Yapılmadı |
+| PC bildirimleri telefonda, PC klasörleri telefonda, telefonun fotoğrafları PC'de, hotspot | Kod bitti (protokol `a8d0d98`), iki telefon tarafı da yazıldı; uçtan uca denenmedi |
+| Dosya Gezgini sağ tık "Fenpo ile telefona gönder" | Bitti (`Fenpo.ShellExtension`, Native AOT, paketli COM); COM sınıfı Windows'ta oluşuyor, menüden denenmedi |
+| LocalSend v2 | Bitti: görünme, kabul/ret bildirimi, alma; testli (HTTPS istemciyle). Gerçek bir LocalSend uygulamasıyla denenmedi. Bilgisayardan LocalSend cihazına gönderme yok |
+| Aramada PC'de zil, animasyonlu ada | Bitti, iki temada ve iki dilde kontrol edildi; gerçek aramayla denenmedi |
+| Ayarlar › Cihaz: telefon ekle, iPhone eşleşmesini kaldırma | Bitti |
+| Sağlamlaştırma | `docs/windows/TESTING.md` cihaz listesi yazıldı; 8 saatlik deneme yapılmadı |
 
 Plandan sapmalar:
 
