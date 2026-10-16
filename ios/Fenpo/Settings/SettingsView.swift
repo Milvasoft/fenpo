@@ -116,7 +116,7 @@ struct SettingsView: View {
                 .padding(.bottom, 24)
             }
             .fenpoScreenBackground()
-            .navigationTitle("tab.settings")
+            .tabHeader("tab.settings")
             .navigationDestination(isPresented: $isDeveloperPresented) {
                 DeveloperView()
             }

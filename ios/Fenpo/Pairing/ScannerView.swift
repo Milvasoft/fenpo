@@ -119,6 +119,8 @@ struct GlassCircleButton: View {
     let label: LocalizedStringKey
     let action: () -> Void
 
+    @Environment(\.isEnabled) private var isEnabled
+
     var body: some View {
         Button(action: action) {
             Image(systemName: systemImage)
@@ -126,6 +128,7 @@ struct GlassCircleButton: View {
                 .foregroundStyle(.textPrimary)
                 .frame(width: 44, height: 44)
                 .fenpoGlass(in: .circle)
+                .opacity(isEnabled ? 1 : 0.4)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)

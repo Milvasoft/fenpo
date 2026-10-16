@@ -35,15 +35,9 @@ struct HomeView: View {
                 .padding(.bottom, 24)
             }
             .fenpoScreenBackground()
-            .navigationTitle("app.name")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        model.isPairingPresented = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .accessibilityLabel("home.addPC.accessibility")
+            .tabHeader("app.name") {
+                GlassCircleButton(systemImage: "plus", label: "home.addPC.accessibility") {
+                    model.isPairingPresented = true
                 }
             }
             .refreshable {

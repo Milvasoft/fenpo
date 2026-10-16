@@ -57,17 +57,11 @@ struct TransfersView: View {
                 }
             }
             .fenpoScreenBackground()
-            .navigationTitle("tab.transfers")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        model.sendPhotos()
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .accessibilityLabel("home.sendPhotos")
-                    .disabled(model.snapshot.pc == nil)
+            .tabHeader("tab.transfers") {
+                GlassCircleButton(systemImage: "plus", label: "home.sendPhotos") {
+                    model.sendPhotos()
                 }
+                .disabled(model.snapshot.pc == nil)
             }
             .quickLookPreview($previewURL)
         }
