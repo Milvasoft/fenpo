@@ -113,6 +113,8 @@ public partial class App : Application
                 .AddHostedService(sp => sp.GetRequiredService<ScreenMirrorService>())
                 .AddSingleton<CameraService>()
                 .AddHostedService(sp => sp.GetRequiredService<CameraService>())
+                .AddSingleton<UnlockService>()
+                .AddHostedService(sp => sp.GetRequiredService<UnlockService>())
                 .AddSingleton<VirtualCameraService>()
                 .AddHostedService(sp => sp.GetRequiredService<VirtualCameraService>())
                 .AddHostedService<MediaStreamRouter>()

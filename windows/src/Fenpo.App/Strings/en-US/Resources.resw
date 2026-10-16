@@ -952,7 +952,7 @@
     <value>Unlock with the phone</value>
   </data>
   <data name="Settings_UnlockHint.Text" xml:space="preserve">
-    <value>Unlocks Windows after Face ID approval. Needs a separate component (experimental)</value>
+    <value>On the locked PC pick "Unlock with Fenpo" in the sign-in options and approve on the phone with Face ID or your fingerprint. The first sign-in after a restart still takes your password.</value>
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Unlock with the phone</value>
@@ -1118,6 +1118,39 @@
   </data>
   <data name="Tray_Summary" xml:space="preserve">
     <value>{0}, {1}</value>
+  </data>
+  <data name="Unlock_Declined" xml:space="preserve">
+    <value>Not approved on the phone. Turn it on again and approve.</value>
+  </data>
+  <data name="Unlock_Done" xml:space="preserve">
+    <value>Ready. On the locked PC, pick "Unlock with Fenpo" in the sign-in options.</value>
+  </data>
+  <data name="Unlock_Failed" xml:space="preserve">
+    <value>Could not set it up. The phone needs Face ID or a fingerprint set up; try again.</value>
+  </data>
+  <data name="Unlock_InstallDeclined" xml:space="preserve">
+    <value>The lock screen component was not installed. Give administrator approval and try again.</value>
+  </data>
+  <data name="Unlock_NotAvailable" xml:space="preserve">
+    <value>Fenpo on the phone is not connected or cannot unlock. Update Fenpo on the phone and open it.</value>
+  </data>
+  <data name="Unlock_PasswordConfirm" xml:space="preserve">
+    <value>Approve on the phone</value>
+  </data>
+  <data name="Unlock_PasswordLabel" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Unlock_PasswordText" xml:space="preserve">
+    <value>Fenpo keeps your password encrypted on this PC; the key that opens it stays on your phone and comes only after Face ID or your fingerprint. Type your account's password, not your Windows Hello PIN.</value>
+  </data>
+  <data name="Unlock_PasswordTitle" xml:space="preserve">
+    <value>Your Windows password</value>
+  </data>
+  <data name="Unlock_Waiting" xml:space="preserve">
+    <value>Approve on the phone with Face ID or your fingerprint. Fenpo on the phone showed a notification.</value>
+  </data>
+  <data name="Unlock_WrongPassword" xml:space="preserve">
+    <value>Windows did not accept this password. Type your account's password again.</value>
   </data>
   <data name="VirtualCamera_Failed" xml:space="preserve">
     <value>The install did not finish. Give administrator approval and try again.</value>

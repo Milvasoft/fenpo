@@ -109,6 +109,7 @@ public static class PcHello
             Capability.FileProvider,
             Capability.Photos,
             Capability.Hotspot,
+            Capability.Unlock,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,
