@@ -107,6 +107,10 @@ public sealed class LiveH264Player : IDisposable
 
         private static readonly TimeSpan MinLead = TimeSpan.FromMilliseconds(30);
 
+        // A frame this far ahead of the picture means the phone's clock jumped (its camera restarted, say); waiting
+        // for it would freeze the picture, so the timeline starts again from here.
+        private static readonly TimeSpan MaxLead = TimeSpan.FromSeconds(1);
+
         private readonly Func<TimeSpan> _position = position;
         private readonly ChannelReader<StreamPacket> _packets = packets;
         private readonly CancellationToken _cancellationToken = cancellationToken;
@@ -171,6 +175,13 @@ public sealed class LiveH264Player : IDisposable
                 {
                     time = position;
                     _skipped++;
+                }
+                else if (time > position + MaxLead)
+                {
+                    _logger.LogInformation("Live stream: the phone's clock jumped {Jump} ms ahead; the timeline starts again", (int)(time - position).TotalMilliseconds);
+                    time = position + MinLead;
+                    _leastEarly = TimeSpan.MaxValue;
+                    _spareSince = now;
                 }
                 else if (time < position + MinLead)
                 {
