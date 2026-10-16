@@ -52,23 +52,6 @@
         }
       }
     },
-    "NSFaceIDUsageDescription": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenpo uses Face ID before it unlocks your PC."
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fenpo, bilgisayarının kilidini açmadan önce Face ID kullanır."
-          }
-        }
-      }
-    },
     "NSLocalNetworkUsageDescription": {
       "extractionState": "manual",
       "localizations": {
