@@ -84,6 +84,7 @@ public partial class App : Application
                 .AddSingleton(sp => new CombinedMediaSource([sp.GetRequiredService<AmsClient>(), sp.GetRequiredService<AndroidMediaSource>()]))
                 .AddSingleton<IMediaSource>(sp => sp.GetRequiredService<CombinedMediaSource>())
                 .AddHostedService<ActivePhoneSync>()
+                .AddHostedService<PcMediaShare>()
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
