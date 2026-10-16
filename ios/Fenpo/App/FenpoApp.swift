@@ -37,7 +37,7 @@ struct FenpoApp: App {
         }
         #endif
         let services = FenpoServices.shared
-        let model = AppModel(session: services.session, pairing: services.pairing)
+        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions)
         services.central.onStateChange = { _ in
             Task { await model.refresh() }
         }

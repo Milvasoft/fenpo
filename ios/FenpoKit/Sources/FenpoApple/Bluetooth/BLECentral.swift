@@ -94,6 +94,7 @@ public final class BLECentral: NSObject {
     private var reassembler = BLEReassembler()
     private var outbox: [[UInt8]] = []
     private var changeWaiters: [CheckedContinuation<Void, Never>] = []
+    private var pendingReplies: [UInt64: CheckedContinuation<Fenpo_V1_Envelope, Swift.Error>] = [:]
 
     private let log = FenpoLog("BLE")
 
@@ -174,6 +175,28 @@ public final class BLECentral: NSObject {
         try send(envelope: sequencer.envelope(body))
     }
 
+    /// Sends a request and waits for the Envelope whose `reply_to` matches it.
+    /// Cancel the task (for example with `withTimeout`) to stop waiting.
+    /// - Parameter body: Request to send.
+    public func request(_ body: Fenpo_V1_Envelope.OneOf_Body) async throws -> Fenpo_V1_Envelope {
+        let envelope = sequencer.envelope(body)
+        let id = envelope.id
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { continuation in
+                pendingReplies[id] = continuation
+                do {
+                    try send(envelope: envelope)
+                } catch {
+                    pendingReplies.removeValue(forKey: id)?.resume(throwing: error)
+                }
+            }
+        } onCancel: {
+            Task { @MainActor [weak self] in
+                self?.pendingReplies.removeValue(forKey: id)?.resume(throwing: CancellationError())
+            }
+        }
+    }
+
     // MARK: - Private
 
     private func connectTarget() {
@@ -205,6 +228,11 @@ public final class BLECentral: NSObject {
         sequencer = EnvelopeSequencer()
         session = nil
         pcStatus = nil
+        let replies = pendingReplies
+        pendingReplies.removeAll()
+        for reply in replies.values {
+            reply.resume(throwing: Error.notReady)
+        }
     }
 
     private func send(envelope: Fenpo_V1_Envelope) throws {
@@ -248,6 +276,10 @@ public final class BLECentral: NSObject {
             } catch {
                 log.error("BLE handshake failed: \(String(describing: error))")
             }
+            return
+        }
+        if envelope.replyTo != 0, let reply = pendingReplies.removeValue(forKey: envelope.replyTo) {
+            reply.resume(returning: envelope)
             return
         }
         if case .pcStatus(let status) = envelope.body {

@@ -21,6 +21,14 @@ struct RootView: View {
                 SettingsView()
             }
         }
+        .overlay(alignment: .bottom) {
+            if let toast = model.toast {
+                ToastView(toast: toast)
+                    .padding(.bottom, 96)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
+        .animation(.snappy, value: model.toast?.id)
         .fullScreenCover(isPresented: $model.isPairingPresented) {
             PairingFlowView()
         }

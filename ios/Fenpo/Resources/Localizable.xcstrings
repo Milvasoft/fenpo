@@ -1,6 +1,125 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "action.error.emptyText": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The clipboard is empty. Copy something first."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pano boş. Önce bir şey kopyala."
+          }
+        }
+      }
+    },
+    "action.error.generic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That didn’t work. Check the connection to your PC and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Olmadı. PC bağlantısını kontrol edip yeniden dene."
+          }
+        }
+      }
+    },
+    "action.error.notConnected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t reach your PC. Make sure it’s on and nearby."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye ulaşılamıyor. Açık ve yakında olduğundan emin ol."
+          }
+        }
+      }
+    },
+    "action.error.notPaired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair Fenpo with your PC first."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önce Fenpo’yu bilgisayarınla eşleştir."
+          }
+        }
+      }
+    },
+    "action.error.nothingFromPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC’s clipboard has no text."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’nin panosunda metin yok."
+          }
+        }
+      }
+    },
+    "action.error.tooLarge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The text is too long for Bluetooth. Copy a shorter part."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metin Bluetooth için çok uzun. Daha kısa bir parça kopyala."
+          }
+        }
+      }
+    },
+    "action.error.unavailableHere": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo couldn’t do this in the background. Open Fenpo and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo bunu arka planda yapamadı. Fenpo’yu açıp yeniden dene."
+          }
+        }
+      }
+    },
     "app.name": {
       "extractionState": "manual",
       "localizations": {
@@ -843,6 +962,312 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "home.toast.locked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC is locked."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC kilitlendi."
+          }
+        }
+      }
+    },
+    "home.toast.pasted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied from your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’den kopyalandı."
+          }
+        }
+      }
+    },
+    "home.toast.sent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye gönderildi."
+          }
+        }
+      }
+    },
+    "intent.lockPC.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locks your Windows session."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windows oturumunu kilitler."
+          }
+        }
+      }
+    },
+    "intent.lockPC.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC is locked."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC kilitlendi."
+          }
+        }
+      }
+    },
+    "intent.lockPC.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’yi kilitle"
+          }
+        }
+      }
+    },
+    "intent.lockPC.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’yi kilitle"
+          }
+        }
+      }
+    },
+    "intent.pasteFromPC.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copies your PC’s latest clipboard text to the iPhone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın panosundaki son metni iPhone’a kopyalar."
+          }
+        }
+      }
+    },
+    "intent.pasteFromPC.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied from your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’den kopyalandı."
+          }
+        }
+      }
+    },
+    "intent.pasteFromPC.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste from PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’den yapıştır"
+          }
+        }
+      }
+    },
+    "intent.pasteFromPC.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste from PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’den yapıştır"
+          }
+        }
+      }
+    },
+    "intent.sendClipboard.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Fenpo briefly and sends what you copied to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo’yu kısa bir an açar ve kopyaladığını bilgisayara gönderir."
+          }
+        }
+      }
+    },
+    "intent.sendClipboard.short": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send clipboard"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panoyu gönder"
+          }
+        }
+      }
+    },
+    "intent.sendClipboard.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send clipboard to PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panoyu PC’ye gönder"
+          }
+        }
+      }
+    },
+    "intent.sendText.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puts the text on your PC’s clipboard. Use it after “Get Clipboard” in a shortcut."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metni bilgisayarın panosuna koyar. Bir kısayolda “Panoyu Al”dan sonra kullan."
+          }
+        }
+      }
+    },
+    "intent.sendText.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye gönderildi."
+          }
+        }
+      }
+    },
+    "intent.sendText.parameter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metin"
+          }
+        }
+      }
+    },
+    "intent.sendText.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send text to PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metni PC’ye gönder"
           }
         }
       }
