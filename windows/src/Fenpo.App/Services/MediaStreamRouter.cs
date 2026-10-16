@@ -13,7 +13,8 @@ namespace Fenpo.App.Services;
 /// </summary>
 /// <param name="Open">The stream's first frame.</param>
 /// <param name="Packets">Packets in arrival order; completes when the phone closes the stream.</param>
-public sealed record MediaFeed(MediaStreamOpen Open, ChannelReader<StreamPacket> Packets);
+/// <param name="Audio">The stream's sound packets, apart from the picture's; completes with <paramref name="Packets"/>.</param>
+public sealed record MediaFeed(MediaStreamOpen Open, ChannelReader<StreamPacket> Packets, ChannelReader<StreamPacket> Audio);
 
 /// <summary>
 /// Takes the phone's media connections (video.proto) from the control server, reads their packets and hands the
@@ -45,7 +46,10 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
         _logger.LogInformation("{Kind} stream from {Phone}: {Codec} {Width}x{Height} at {Fps} fps", open.Kind, device.Name, open.Video?.Codec, open.Video?.Width, open.Video?.Height, open.Video?.Fps);
         // Not single-reader: that variant cannot count its backlog, which the drop below needs.
         var packets = Channel.CreateUnbounded<StreamPacket>(new UnboundedChannelOptions { SingleWriter = true });
-        var feed = new MediaFeed(open, packets.Reader);
+
+        // Sound has its own player; about a second of it is kept, the oldest dropped, so a feed nobody plays does not grow.
+        var audio = Channel.CreateBounded<StreamPacket>(new BoundedChannelOptions(100) { SingleWriter = true, FullMode = BoundedChannelFullMode.DropOldest });
+        var feed = new MediaFeed(open, packets.Reader, audio.Reader);
 
         try
         {
@@ -69,7 +73,11 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
                 var dropped = packets.Reader.Count > _maxQueued && !packet.KeyFrame && !packet.CodecConfig;
                 traffic.Add(frame.Length, packets.Reader.Count, dropped);
 
-                if (!dropped)
+                if (packet.Track == StreamTrack.Audio)
+                {
+                    audio.Writer.TryWrite(packet);
+                }
+                else if (!dropped)
                 {
                     packets.Writer.TryWrite(packet);
                 }
@@ -86,6 +94,7 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
         finally
         {
             packets.Writer.TryComplete();
+            audio.Writer.TryComplete();
             _logger.LogInformation("{Kind} stream from {Phone} closed", open.Kind, device.Name);
         }
     }
