@@ -92,7 +92,7 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 - Medya: şu an çalıyor kartı, klavye medya tuşları (`SystemMediaTransportControls`)
 - Pil ve bağlantı durumu
 - Yakınlık kilidi (RSSI + `LockWorkStation`)
-- Yerel API (named pipe) üzerinden durum yayını, kabuk bar'ı için
+- Yerel API (named pipe) üzerinden durum yayını, başka programlar için
 
 **Bitti sayılması için:** Uygulama 8 saat kesintisiz çalışıyor, iPhone uzaklaşıp gelince kendiliğinden yeniden bağlanıyor, bildirim gecikmesi 1 saniyenin altında.
 
@@ -130,7 +130,7 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 
 - Face ID ile Windows kilidini açma (C++ Credential Provider, ayrı kurulum)
 - PC'nin iPhone için klavye ve fare olması (HID over GATT) → yansıtma ile birlikte "iPhone Mirroring"
-- Kabuk (kabuk) bar modülü ve üçüncü taraf eklenti SDK'sı
+- Üçüncü taraf programlar için yerel API ve `Fenpo.Sdk` (Kabuk modülü planda yok; Buğra 17 Ekim'de istemedi)
 
 ## Kapsam dışı
 
