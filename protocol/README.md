@@ -81,7 +81,9 @@ The phone sends `Hello` as soon as it subscribes to `tx`, which means the encryp
 
 Only Android phones send their notifications over the Fenpo channel (`CAPABILITY_NOTIFICATION_MIRROR`); the iPhone's come through ANCS.
 
-- After `Hello` the phone sends `PhoneNotification` for every current notification, then one for each new or updated notification. The `key` identifies it; a message with a known key replaces the earlier one. `NotificationRemoved` says it is gone.
+- After `Hello`, on that channel, the phone sends a snapshot: `PhoneNotification` with `pre_existing` for every current notification, then `NotificationSnapshotDone`. The PC removes that phone's keys it did not receive since the snapshot started and does not pop up `pre_existing` ones. The snapshot is idempotent; the phone may skip it on BLE while Wi‑Fi is up.
+- Then the phone sends one `PhoneNotification` for each new or updated notification and `NotificationRemoved` when one is gone, on its best open channel. The `key` identifies a notification. `seq` grows with every such message across both channels; the PC ignores a message for a key whose `seq` is not newer than the last it saw and remembers removed keys for a few minutes, so a late update cannot bring a removed notification back.
+- `category` comes from Android's `Notification.category`: `call` is `INCOMING_CALL` (the PC shows it in the Island with its actions), `missed_call` `MISSED_CALL`, `msg` and `social` `SOCIAL`, `email` `EMAIL`, `event`, `reminder` and `alarm` `SCHEDULE`, `navigation` `LOCATION`, anything else `UNSPECIFIED`.
 - The PC answers with `DismissNotification` (only for `dismissible` ones) or `RunNotificationAction` (`reply_text` for actions with `accepts_reply`). A notification or action that no longer exists is answered with `Error` `INVALID_REQUEST`.
 - `content_hidden` means Android withheld the content (one-time codes, lock screen privacy); the PC says so instead of showing an empty notification.
 - App icons are not repeated in every notification: the PC sends `AppIconRequest` for an `app_id` it has not cached and the phone answers with `AppIcon` (64x64 PNG).
