@@ -167,9 +167,19 @@ public sealed class PhoneChannel(
     /// again takes the QR code.
     /// </summary>
     /// <returns>A task that completes when done.</returns>
-    public async Task ForgetAndroidAsync()
+    public Task ForgetAndroidAsync() => ForgetAsync(PhoneKind.Android);
+
+    /// <summary>
+    /// Forgets Fenpo on the phone of <paramref name="kind"/>: its pairing record and its connections. Bluetooth pairings
+    /// are removed by the caller.
+    /// </summary>
+    /// <param name="kind">Which phone.</param>
+    /// <returns>A task that completes when its connections are closed.</returns>
+    public async Task ForgetAsync(PhoneKind kind)
     {
-        foreach (var device in _devices.All.Where(d => d.Platform == DevicePlatform.Android || KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android).ToList())
+        var platform = kind == PhoneKind.Android ? DevicePlatform.Android : DevicePlatform.Ios;
+
+        foreach (var device in _devices.All.Where(d => d.Platform == platform || KindOf(HelloOf(d.DeviceId)) == kind).ToList())
         {
             _logger.LogInformation("Forgetting {Phone}", device.Name);
             _devices.Remove(device.DeviceId);
@@ -180,7 +190,7 @@ public sealed class PhoneChannel(
             _bleHellos.TryRemove(device.DeviceId, out _);
         }
 
-        _status.Update(PhoneKind.Android, s => PhoneStatus.Unknown);
+        _status.Update(kind, s => kind == PhoneKind.Android ? PhoneStatus.Unknown : s with { AppConnected = false, HasAppPhone = false });
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
