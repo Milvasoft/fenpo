@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Fenpo.App.Controls.WizardStep"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Fenpo.App.Helpers">
+
+    <Grid ColumnSpacing="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="28" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Width="28" Height="28" VerticalAlignment="Top">
+            <Grid Visibility="{x:Bind helpers:BindHelpers.IfPending(State), Mode=OneWay}">
+                <Ellipse Fill="{ThemeResource FenpoCardBrush}" Stroke="{ThemeResource FenpoStrokeBrush}" />
+                <TextBlock Text="{x:Bind Number, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <Grid Visibility="{x:Bind helpers:BindHelpers.IfCurrent(State), Mode=OneWay}">
+                <Ellipse Fill="{ThemeResource FenpoAccentBrush}" />
+                <TextBlock Text="{x:Bind Number, Mode=OneWay}" FontSize="13" FontWeight="SemiBold" Foreground="{ThemeResource FenpoOnAccentBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+            <Grid Visibility="{x:Bind helpers:BindHelpers.IfDone(State), Mode=OneWay}">
+                <Ellipse Fill="{ThemeResource FenpoOkBrush}" />
+                <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="White" />
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="{x:Bind Title, Mode=OneWay}" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" TextWrapping="Wrap" />
+            <TextBlock Text="{x:Bind Hint, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" />
+            <ContentPresenter Content="{x:Bind Extra, Mode=OneWay}" Margin="0,10,0,0" />
+        </StackPanel>
+    </Grid>
+</UserControl>

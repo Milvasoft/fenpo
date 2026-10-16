@@ -67,5 +67,8 @@
 *.wav binary
 *.mp3 binary
 
-# Recorded Bluetooth byte sequences used as test fixtures
+# Recorded Bluetooth byte sequences used as test fixtures. Protocol payloads (bMessage, vCard)
+# use CRLF on the wire, so fixture files keep their exact bytes.
 *.bin binary
+**/fixtures/** -text
+**/Fixtures/** -text
