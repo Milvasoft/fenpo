@@ -149,7 +149,8 @@
                                         </Grid>
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Hotspot">
+                                <!-- Hotspot needs Fenpo on the phone to share its Wi-Fi details; not there yet (DECISIONS #36: shown, not hidden). -->
+                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="False" x:Uid="Action_Hotspot">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE704;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_HotspotText" FontSize="13" TextWrapping="Wrap" />
@@ -161,7 +162,7 @@
                                         <TextBlock x:Uid="Action_SendFileText" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Camera">
+                                <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" Click="OnCameraClick" x:Uid="Action_Camera">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE722;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_CameraText" FontSize="13" TextWrapping="Wrap" />
