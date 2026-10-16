@@ -42,6 +42,26 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
   2. Dosyayı Microsoft'a yanlış alarm olarak göndermek: <https://www.microsoft.com/wdsi/filesubmission>. Yanıt günler sürebilir.
 - Henüz ölçülmeyenler: TLS 1.3 el sıkışma süresi ve şifre takımı, Schannel'ın bu sertifikayla sunucu olarak çalışıp çalışmadığı, DNS-SD kaydının aynı makineden görünüp görünmediği, QR boyutu. Tahmini URI uzunluğu ~190 karakter (QR sürüm 9–10, ECC M).
 
+## Çalıştırma (16 Ekim 2026, 13:45)
+
+Buğra dosyayı Microsoft'a yanlış alarm olarak gönderdi (tespit `Backdoor:Win32/Farfli!pz`, tanım `1.461.43.0`) ve karantinadan geri yükledi. Önceden derlenmiş ikili dosyalar yeniden derlenmeden çalıştırıldı; protokol değişikliği (`e185f5d`) sonrası spike'ın yeniden derlenmesi gerekmedi.
+
+| # | Senaryo | Sonuç |
+|---|---|---|
+| 1 | DNS-SD kaydı görünüyor | **Kaldı.** `DnsServiceRegister` 0 ile tamamlandı, ama aynı makinedeki WinRT `DeviceInformation` izleyicisi 10 saniyede `_fenpo._tcp` örneğini bulamadı. iPhone'dan Bonjour ile görünüp görünmediği iOS uygulamasıyla denenecek. Asıl adres yolu zaten ③ kanalı (ARCHITECTURE "Keşif") |
+| 2 | QR'daki parmak izi yanlış | Geçti: telefon el sıkışmayı kesiyor |
+| 3 | Sadece TLS 1.2 | Geçti: reddediliyor |
+| 4 | İstemci sertifikası yok | Geçti: reddediliyor |
+| 5 | Yanlış token | Geçti: `TOKEN_INVALID` |
+| 6 | Doğru QR | Geçti: TLS 1.3, `TLS_AES_256_GCM_SHA384`, el sıkışma 2–73 ms, eşleşme + `Hello` + `Ping` toplam 53 ms |
+| 7 | Kullanılmış token | Geçti: `TOKEN_INVALID` |
+| 8 | Eşleşmiş sertifikayla yeniden bağlanma | Geçti: 3 ms |
+| 9 | Bilinmeyen sertifika | Geçti: `Error NOT_PAIRED` |
+
+- Schannel, DPAPI ile saklanan P-256 sertifikayla TLS 1.3 sunucusu olarak çalışıyor.
+- QR URI'si 180 karakter, QR sürüm 9.
+- Geri yüklenen `PcServer.dll` bu çalıştırmada yeniden işaretlenmedi.
+
 ## Ürün koduna etkisi
 
 1. **Defender yanlış alarmı ürün için de risk.** `Fenpo.exe` bu kodun hepsini taşıyacak. Yayından önce: imzalı ikili dosyalar ve MSIX, yayınlanacak her sürümü Microsoft'a önceden göndermek, CI'da Defender taraması. PLAN'ın dağıtım maddesine eklenmeli.
