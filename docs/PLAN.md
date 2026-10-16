@@ -25,7 +25,7 @@ Windows kullanan bir iPhone sahibi bilgisayarına oturduğunda telefonuna dokunm
 | Continuity Camera | Fenpo Kamera | iPhone videoyu HEVC/H.264 ile yollar, Windows'ta sanal kamera (`MFCreateVirtualCamera`) | Yüksek. iPhone'da uygulama ön planda olmalı |
 | iPhone Mirroring | Ekran yansıtma + kontrol | ReplayKit yayın uzantısı (veya ayrı GPL UxPlay alıcısı) + PC'nin BLE klavye/fare olması (HID over GATT, AssistiveTouch) | Deneysel ama en "vay be" özellik |
 | Instant Hotspot | Hotspot'a bağlan | iPhone'da Kişisel Erişim Noktası açıksa Windows WLAN API ile tek tık bağlanma | Orta. Hotspot uzaktan açılamaz |
-| Auto Unlock (Apple Watch) | Yakınlık kilidi + Face ID ile kilit açma | BLE RSSI ile `LockWorkStation`. Kilit açma için özel Credential Provider | Kilitleme tam, kilit açma deneysel |
+| Auto Unlock (Apple Watch) | Yakınlık kilidi | BLE RSSI ile `LockWorkStation`. Kilit açma yok: hesap şifresi gerektiriyor (DECISIONS #40) | Kilitleme tam |
 | Find My (sesi çal) | Telefonu çaldır | Fenpo BLE kanalı uygulamayı uyandırır, bildirim + ses | Orta. Sessiz modda kısıtlı |
 | Odak eşitleme | Odak | iOS Focus Filter uzantısı → PC'de gösterge ve Fenpo bildirimlerini susturma | Orta. Windows'ta Rahatsız Etme'yi açmanın genel API'si yok |
 | Pil durumu | Pil | BLE Battery Service, uygulama gerekmez | Tam |
@@ -128,7 +128,6 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 
 ### Aşama 5: Deneysel
 
-- Face ID ile Windows kilidini açma (C++ Credential Provider, ayrı kurulum)
 - PC'nin iPhone için klavye ve fare olması (HID over GATT) → yansıtma ile birlikte "iPhone Mirroring"
 - Üçüncü taraf programlar için yerel API ve `Fenpo.Sdk` (Kabuk modülü planda yok; Buğra 17 Ekim'de istemedi)
 
