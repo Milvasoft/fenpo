@@ -6,11 +6,11 @@ public enum PermissionState: Equatable, Sendable {
     /// Denied; the user has to change it in iOS Settings.
     case denied
 
-    /// iOS asks every time (paste from other apps).
-    case ask
-
     /// Not asked yet.
     case notDetermined
+
+    /// iOS does not tell apps (paste from other apps, local network before it was used).
+    case unknown
 }
 
 /// The permissions Fenpo depends on.
@@ -36,5 +36,5 @@ public struct PermissionsSnapshot: Equatable, Sendable {
     }
 
     /// The state shown in the design.
-    public static let sample = PermissionsSnapshot(bluetooth: .allowed, localNetwork: .allowed, paste: .ask)
+    public static let sample = PermissionsSnapshot(bluetooth: .allowed, localNetwork: .allowed, paste: .unknown)
 }

@@ -1,6 +1,7 @@
 import FenpoApple
 import FenpoCore
 import AVFoundation
+import CoreBluetooth
 import Foundation
 import Observation
 import UIKit
@@ -29,6 +30,7 @@ final class AppModel {
     private let ringer: PhoneRinger?
     private let camera: CameraService?
     private let transferActivities: TransferActivities?
+    private let readsPermissions: Bool
 
     /// Runs the pairing steps.
     let pairing: any PairingProviding
@@ -63,13 +65,15 @@ final class AppModel {
     ///   - ringer: Plays the ring the PC asks for; `nil` in previews.
     ///   - camera: Fenpo Kamera; `nil` in previews.
     ///   - transferActivities: Live Activities of large transfers; `nil` in previews.
+    ///   - readsPermissions: Reads the real permissions; previews keep the sample.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
         actions: any FenpoActions = SampleActions(),
         ringer: PhoneRinger? = nil,
         camera: CameraService? = nil,
-        transferActivities: TransferActivities? = nil
+        transferActivities: TransferActivities? = nil,
+        readsPermissions: Bool = false
     ) {
         self.session = session
         self.pairing = pairing
@@ -77,6 +81,7 @@ final class AppModel {
         self.ringer = ringer
         self.camera = camera
         self.transferActivities = transferActivities
+        self.readsPermissions = readsPermissions
     }
 
     /// The camera's live picture.
@@ -121,6 +126,28 @@ final class AppModel {
             cameraState = camera.state
         }
         transferActivities?.update(snapshot.activeTransfers, pcName: snapshot.pc?.name ?? "")
+        if readsPermissions {
+            permissions = PermissionsSnapshot(
+                bluetooth: Self.bluetoothPermission,
+                // iOS has no API for these: local network is known only once the Wi-Fi channel
+                // worked, and the paste setting never.
+                localNetwork: snapshot.links.wifi ? .allowed : .unknown,
+                paste: .unknown
+            )
+        }
+    }
+
+    private static var bluetoothPermission: PermissionState {
+        switch CBManager.authorization {
+        case .allowedAlways:
+            .allowed
+        case .denied, .restricted:
+            .denied
+        case .notDetermined:
+            .notDetermined
+        @unknown default:
+            .unknown
+        }
     }
 
     /// The Focus switch in Settings changed: tells the PC the state that now applies.

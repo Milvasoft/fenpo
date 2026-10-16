@@ -77,11 +77,12 @@ struct SettingsView: View {
                         permissionRow(icon: .wifi, color: .green, title: "settings.permission.localNetwork", state: model.permissions.localNetwork)
                         permissionRow(icon: .paste, color: .slate, title: "settings.permission.paste", state: model.permissions.paste)
                     }
-                    if model.permissions.paste == .ask {
-                        PasteHint()
-                            .padding(.top, 10)
-                            .padding(.horizontal, 4)
-                    }
+                    Text("settings.permission.paste.note")
+                        .font(.footnote)
+                        .foregroundStyle(.textSecondary)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     if isDeveloperUnlocked {
                         SectionCaption(title: "developer.title")
@@ -151,7 +152,8 @@ struct SettingsView: View {
         if state == .allowed {
             ValueRow(icon: icon, color: color, title: title, value: value)
         } else {
-            DisclosureRow(icon: icon, color: color, title: title, value: value, valueColor: .accent) {
+            // Only a known problem is in the accent color; an unknown state just leads to Settings.
+            DisclosureRow(icon: icon, color: color, title: title, value: value, valueColor: state == .unknown ? .textSecondary : .accent) {
                 openAppSettings()
             }
         }
@@ -161,24 +163,6 @@ struct SettingsView: View {
         if let url = URL(string: UIApplication.openSettingsURLString) {
             openURL(url)
         }
-    }
-}
-
-/// Explains the paste permission when iOS asks every time.
-struct PasteHint: View {
-    var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "bell")
-                .font(.subheadline)
-                .foregroundStyle(.accent)
-            Text("settings.permission.paste.hint")
-                .font(.footnote)
-                .foregroundStyle(.textPrimary)
-        }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.bloom.opacity(0.1), in: .rect(cornerRadius: 18, style: .continuous))
     }
 }
 
@@ -204,10 +188,10 @@ extension PermissionState {
             "permission.allowed"
         case .denied:
             "permission.denied"
-        case .ask:
-            "permission.ask"
         case .notDetermined:
             "permission.notDetermined"
+        case .unknown:
+            "permission.unknown"
         }
     }
 }
