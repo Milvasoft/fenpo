@@ -1,5 +1,5 @@
+import FenpoApple
 import FenpoCore
-import OSLog
 import SwiftUI
 
 /// Pairing from start to end: scan the QR code (or type the code), then the setup steps.
@@ -18,7 +18,7 @@ struct PairingFlowView: View {
     @State private var pcName = ""
     @State private var input: PairingInput?
 
-    private let logger = Logger(subsystem: "com.fenpo.app", category: "Pairing")
+    private let log = FenpoLog("Pairing")
 
     var body: some View {
         content
@@ -84,7 +84,7 @@ struct PairingFlowView: View {
                 pcName = pc.name
                 progress.complete(.dataChannel)
             } catch {
-                logger.error("Data channel failed: \(error.localizedDescription, privacy: .public)")
+                log.error("Data channel failed: \(error.localizedDescription)")
                 progress.fail(.dataChannel)
             }
         }
@@ -96,7 +96,7 @@ struct PairingFlowView: View {
                 try await model.pairing.bondBluetooth()
                 progress.complete(.bluetooth)
             } catch {
-                logger.error("Bluetooth bond failed: \(error.localizedDescription, privacy: .public)")
+                log.error("Bluetooth bond failed: \(error.localizedDescription)")
                 progress.fail(.bluetooth)
                 return
             }
@@ -104,7 +104,7 @@ struct PairingFlowView: View {
                 try await model.pairing.waitForNotificationSharing()
                 progress.complete(.notifications)
             } catch {
-                logger.error("Notification sharing failed: \(error.localizedDescription, privacy: .public)")
+                log.error("Notification sharing failed: \(error.localizedDescription)")
                 progress.fail(.notifications)
             }
         }

@@ -2,7 +2,6 @@
 import AccessorySetupKit
 @preconcurrency import CoreBluetooth
 import FenpoCore
-import OSLog
 import UIKit
 
 /// Adds the PC as an accessory through AccessorySetupKit, which lets iOS relaunch Fenpo after a
@@ -24,7 +23,7 @@ public final class AccessorySetup {
     private let session = ASAccessorySession()
     private var isActivated = false
     private var pickerContinuation: CheckedContinuation<ASAccessory, Swift.Error>?
-    private let logger = Logger(subsystem: "com.fenpo.kit", category: "AccessorySetup")
+    private let log = FenpoLog("AccessorySetup")
 
     /// Accessories this app has added.
     public private(set) var accessories: [ASAccessory] = []
@@ -86,7 +85,7 @@ public final class AccessorySetup {
         switch event.eventType {
         case .activated:
             accessories = session.accessories
-            logger.info("Accessory session active with \(self.accessories.count) accessory(ies)")
+            log.info("Accessory session active with \(self.accessories.count) accessory(ies)")
         case .accessoryAdded:
             accessories = session.accessories
             if let accessory = event.accessory, let continuation = pickerContinuation {
