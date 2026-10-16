@@ -343,4 +343,17 @@ Hepsi protokole göre yazıldı ve birim testleriyle doğrulandı. **Windows tar
 | Yakınlık kilidi | Telefon PC'yi BLE bağlantısında ölçer, `DeviceState.ble_rssi_dbm` 4 dB değişince ya da 30 saniyede bir gider. | Aynı protokol commit'i. Eşik ve kilit kararı PC'de. |
 | Hassas pano | Şifre yöneticisinin `IS_SENSITIVE` işaretli kopyası `sensitive` gider; PC'den gelen hassas içerik panoya işaretli yazılır, bildirimde ve ana ekranda "Gizli içerik" görünür. | Aynı protokol commit'i. |
 
+**Uçtan uca (16 Ekim 16:15–17:03, Galaxy S10+ ↔ Windows Fenpo, Wi‑Fi ve BLE açık):**
+
+| Deneme | Sonuç |
+|---|---|
+| PC'nin `Hello`'su | `DEVICE_STATE`, `CLIPBOARD`, `OPEN_URL`, `RING`, `LOCK_PC`, `FILE_TRANSFER` sunuyor; iki yolda da cevap geliyor. |
+| PC → telefon | Pano (metin, görsel), telefonu çaldırma, dosya (`Download/Fenpo`), `DeviceState.addresses`: **geçti**. |
+| Telefon → PC | Pano (bildirim düğmesi, metin ve görsel), "PC'de aç" (Chrome'dan, PC'de varsayılan tarayıcı açıldı), "PC'yi kilitle" (kalıcı bildirim), dosya (fotoğraf seçici ve Galeri): **geçti**. |
+| Galeri paylaşımı ilk denemede düştü | Telefon veri bağlantısını son bayttan hemen sonra kapatıyordu; PC'nin TLS 1.3 oturum biletleri okunmadığı için Android TCP RST gönderdi, PC son baytları kaybetti. Telefon artık bağlantıyı boşaltıp PC'nin `COMPLETED`'ından sonra kapatıyor; protokol notu Windows'ta `2194f63`. Ayrıca boru veren sağlayıcılar önce önbelleğe kopyalanıyor. |
+| PC adres listesi | 169.254 (Tailscale) ve Hyper‑V adresleri önce geliyordu, her biri 5 saniye kaybettiriyordu. PC listeyi düzeltti; telefon da kendi alt ağını öne alıyor. |
+| Medya | Bildirim erişimi açıkken YouTube Music oturumu okundu. PC henüz `MEDIA` sunmuyor. |
+
+Kurulumdan sonraki "Paired with" kayıtları QR'ın elle yeniden okutulmasından; uygulama kendiliğinden eşleşmiyor.
+
 **Cihazda denenebilenler (PC'siz):** paylaşım hedefleri ve Hızlı Ayarlar kutucukları sisteme kayıtlı (`query-activities`, `query-services`). Wi‑Fi yolu 17 dakika kesintisiz kaldı, pil değiştikçe `DeviceState` gitti.
