@@ -87,6 +87,12 @@ public sealed record PhoneStatus
     public bool NotificationsAvailable { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether the iPhone refuses notification access to this PC ("Share System Notifications"
+    /// is off for it), so neither notifications nor calls arrive.
+    /// </summary>
+    public bool NotificationsRefused { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether message access works (MAP).
     /// </summary>
     public bool MessagesAvailable { get; init; }
