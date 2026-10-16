@@ -37,24 +37,43 @@ internal static partial class NativeMethods
         _ = SetWindowLongPtr(hwnd, exStyle, (GetWindowLongPtr(hwnd, exStyle) | toolWindow) & ~appWindow);
     }
 
+    private static nint _systemQueueController;
+
     /// <summary>
-    /// Clips a window to a pill (rounded ends), for the island. WinUI windows cannot be transparent.
+    /// Creates a Windows.System dispatcher queue on this thread if it has none (the system compositor needs one).
     /// </summary>
-    /// <param name="hwnd">Window handle.</param>
-    /// <param name="width">Width in pixels.</param>
-    /// <param name="height">Height in pixels.</param>
-    internal static void ClipToPill(nint hwnd, int width, int height)
+    internal static void EnsureSystemDispatcherQueue()
     {
-        // The system owns the region after SetWindowRgn succeeds.
-        var region = CreateRoundRectRgn(0, 0, width + 1, height + 1, height, height);
-        _ = SetWindowRgn(hwnd, region, true);
+        if (Windows.System.DispatcherQueue.GetForCurrentThread() is not null || _systemQueueController != 0)
+        {
+            return;
+        }
+
+        // DQTYPE_THREAD_CURRENT, DQTAT_COM_NONE. The controller is kept for the life of the process.
+        var options = new DispatcherQueueOptions { Size = Marshal.SizeOf<DispatcherQueueOptions>(), ThreadType = 2, ApartmentType = 0 };
+        _ = CreateDispatcherQueueController(options, out _systemQueueController);
     }
 
-    [LibraryImport("gdi32.dll")]
-    private static partial nint CreateRoundRectRgn(int left, int top, int right, int bottom, int widthEllipse, int heightEllipse);
+    /// <summary>
+    /// Turns off the DWM border and rounded corners, for windows that set their own shape.
+    /// </summary>
+    /// <param name="hwnd">Window handle.</param>
+    internal static void RemoveFrame(nint hwnd)
+    {
+        const int cornerPreference = 33; // DWMWA_WINDOW_CORNER_PREFERENCE
+        const int borderColor = 34; // DWMWA_BORDER_COLOR
+        var doNotRound = 1; // DWMWCP_DONOTROUND
+        var none = unchecked((int)0xFFFFFFFE); // DWMWA_COLOR_NONE
+        _ = DwmSetWindowAttribute(hwnd, cornerPreference, ref doNotRound, sizeof(int));
+        _ = DwmSetWindowAttribute(hwnd, borderColor, ref none, sizeof(int));
 
-    [LibraryImport("user32.dll")]
-    private static partial int SetWindowRgn(nint hwnd, nint region, [MarshalAs(UnmanagedType.Bool)] bool redraw);
+        // The frame across the whole client area lets transparent composition show the desktop instead of black.
+        var margins = new Margins { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+        _ = DwmExtendFrameIntoClientArea(hwnd, ref margins);
+    }
+
+    [LibraryImport("CoreMessaging.dll")]
+    private static partial int CreateDispatcherQueueController(DispatcherQueueOptions options, out nint controller);
 
     [LibraryImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
     private static partial nint GetWindowLongPtr(nint hwnd, int index);
@@ -64,4 +83,24 @@ internal static partial class NativeMethods
 
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmSetWindowAttribute(nint hwnd, int attribute, ref int value, int size);
+
+    [LibraryImport("dwmapi.dll")]
+    private static partial int DwmExtendFrameIntoClientArea(nint hwnd, ref Margins margins);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Margins
+    {
+        public int Left;
+        public int Right;
+        public int Top;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct DispatcherQueueOptions
+    {
+        public int Size;
+        public int ThreadType;
+        public int ApartmentType;
+    }
 }

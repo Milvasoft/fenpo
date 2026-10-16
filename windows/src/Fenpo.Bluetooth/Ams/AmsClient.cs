@@ -15,6 +15,7 @@ public sealed class AmsClient(IphoneLink link, ILogger<AmsClient> logger) : IMed
     private readonly ILogger<AmsClient> _logger = logger;
     private readonly Lock _lock = new();
     private GattCharacteristic? _remoteCommand;
+    private GattSubscription[] _subscriptions = [];
     private GattCharacteristic? _entityAttribute;
     private NowPlaying _current = NowPlaying.Empty;
 
@@ -89,9 +90,15 @@ public sealed class AmsClient(IphoneLink link, ILogger<AmsClient> logger) : IMed
                 return;
             }
 
-            await remoteCommand.SubscribeAsync(data => Publish(Current with { SupportedCommands = AmsProtocol.ParseSupportedCommands(data) }));
-            await entityUpdate.SubscribeAsync(data => _ = OnEntityUpdateAsync(data, DateTimeOffset.Now));
+            var commands = await remoteCommand.SubscribeAsync(data => Publish(Current with { SupportedCommands = AmsProtocol.ParseSupportedCommands(data) }));
+            var updates = await entityUpdate.SubscribeAsync(data => _ = OnEntityUpdateAsync(data, DateTimeOffset.Now));
             _remoteCommand = remoteCommand;
+
+            // Held for the session: an unreferenced characteristic is collected and its notifications stop.
+            foreach (var old in Interlocked.Exchange(ref _subscriptions, [.. new[] { commands, updates }.OfType<GattSubscription>()]))
+            {
+                old.Dispose();
+            }
 
             foreach (var registration in AmsProtocol.Registrations)
             {
