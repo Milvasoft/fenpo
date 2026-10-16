@@ -23,6 +23,9 @@ public struct SessionSnapshot: Equatable, Sendable {
     /// Latest transfers, newest first.
     public var transfers: [TransferRecord]
 
+    /// Transfers in progress.
+    public var activeTransfers: [ActiveTransfer]
+
     /// Creates a snapshot.
     public init(
         pc: PairedPC?,
@@ -31,7 +34,8 @@ public struct SessionSnapshot: Equatable, Sendable {
         phoneClipboardPreview: String?,
         pcClipboardPreview: String?,
         readyPhotoCount: Int,
-        transfers: [TransferRecord]
+        transfers: [TransferRecord],
+        activeTransfers: [ActiveTransfer] = []
     ) {
         self.pc = pc
         self.links = links
@@ -40,6 +44,7 @@ public struct SessionSnapshot: Equatable, Sendable {
         self.pcClipboardPreview = pcClipboardPreview
         self.readyPhotoCount = readyPhotoCount
         self.transfers = transfers
+        self.activeTransfers = activeTransfers
     }
 
     /// State before any pairing.
@@ -56,6 +61,42 @@ public struct SessionSnapshot: Equatable, Sendable {
     /// The PC is paired and at least one path is up.
     public var isConnected: Bool {
         pc != nil && links.isConnected
+    }
+}
+
+/// A transfer that is still moving.
+public struct ActiveTransfer: Equatable, Sendable, Identifiable {
+    /// Transfer id from the offer.
+    public let id: String
+
+    /// First file name.
+    public let firstFileName: String
+
+    /// Number of files.
+    public let fileCount: Int
+
+    /// Which way the files go.
+    public let direction: TransferRecord.Direction
+
+    /// Bytes moved so far.
+    public var bytesDone: UInt64
+
+    /// Bytes in the offer.
+    public let totalBytes: UInt64
+
+    /// Creates a summary.
+    public init(id: String, firstFileName: String, fileCount: Int, direction: TransferRecord.Direction, bytesDone: UInt64 = 0, totalBytes: UInt64) {
+        self.id = id
+        self.firstFileName = firstFileName
+        self.fileCount = fileCount
+        self.direction = direction
+        self.bytesDone = bytesDone
+        self.totalBytes = totalBytes
+    }
+
+    /// Progress between 0 and 1.
+    public var fraction: Double {
+        totalBytes == 0 ? 1 : min(1, Double(bytesDone) / Double(totalBytes))
     }
 }
 

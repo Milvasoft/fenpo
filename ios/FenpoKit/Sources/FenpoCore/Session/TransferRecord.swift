@@ -1,9 +1,9 @@
 import Foundation
 
 /// A file that was sent to or received from the PC.
-public struct TransferRecord: Equatable, Sendable, Identifiable {
+public struct TransferRecord: Equatable, Codable, Sendable, Identifiable {
     /// Which way the file went.
-    public enum Direction: Equatable, Sendable {
+    public enum Direction: String, Equatable, Codable, Sendable {
         /// The PC sent it to the phone.
         case fromPC
 
@@ -26,6 +26,22 @@ public struct TransferRecord: Equatable, Sendable, Identifiable {
     /// Folder the file landed in on the PC, when known.
     public var folder: String?
 
+    /// How the transfer ended.
+    public var outcome: Outcome
+
+    /// Size in bytes, when known.
+    public var size: UInt64?
+
+    /// Name of the received file in the app's Documents folder.
+    public var localFileName: String?
+
+    /// How a transfer ended.
+    public enum Outcome: String, Equatable, Codable, Sendable {
+        case completed
+        case failed
+        case cancelled
+    }
+
     /// Creates a record.
     /// - Parameters:
     ///   - id: Unique id.
@@ -33,12 +49,27 @@ public struct TransferRecord: Equatable, Sendable, Identifiable {
     ///   - direction: Which way the file went.
     ///   - date: When the transfer finished.
     ///   - folder: Folder the file landed in on the PC.
-    public init(id: UUID = UUID(), fileName: String, direction: Direction, date: Date, folder: String? = nil) {
+    ///   - outcome: How the transfer ended.
+    ///   - size: Size in bytes.
+    ///   - localFileName: Name of the received file in Documents.
+    public init(
+        id: UUID = UUID(),
+        fileName: String,
+        direction: Direction,
+        date: Date,
+        folder: String? = nil,
+        outcome: Outcome = .completed,
+        size: UInt64? = nil,
+        localFileName: String? = nil
+    ) {
         self.id = id
         self.fileName = fileName
         self.direction = direction
         self.date = date
         self.folder = folder
+        self.outcome = outcome
+        self.size = size
+        self.localFileName = localFileName
     }
 
     /// Upper-cased extension such as "PDF", or an empty string.

@@ -20,6 +20,10 @@ public protocol FenpoActions: Sendable {
     /// Opens a link in the PC's default browser or app ("Open on PC").
     /// - Parameter url: Link to open.
     func openOnPC(_ url: URL) async throws
+
+    /// Sends files to the PC over the Wi-Fi data channel.
+    /// - Parameter files: Files in the order to send.
+    func sendFiles(_ files: [OutgoingFile]) async throws
 }
 
 /// Why an action could not be done. Each case has a user-facing message in the app.
@@ -41,6 +45,15 @@ public enum FenpoActionError: Error, Equatable, Sendable {
 
     /// This process cannot reach the PC (for example a widget extension).
     case unavailableHere
+
+    /// The PC's Fenpo does not offer this feature yet.
+    case unsupportedByPC
+
+    /// The PC declined, for example its user said no.
+    case declinedByPC
+
+    /// The transfer stopped before every byte arrived.
+    case transferFailed
 }
 
 /// Holds the app's `FenpoActions` for intents that run in the app process.

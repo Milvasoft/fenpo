@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "action.error.declinedByPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC declined."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayar kabul etmedi."
+          }
+        }
+      }
+    },
     "action.error.emptyText": {
       "extractionState": "manual",
       "localizations": {
@@ -103,6 +120,23 @@
         }
       }
     },
+    "action.error.transferFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The transfer stopped. Keep both on the same Wi‑Fi and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım yarıda kaldı. İkisini aynı Wi‑Fi’da tutup yeniden dene."
+          }
+        }
+      }
+    },
     "action.error.unavailableHere": {
       "extractionState": "manual",
       "localizations": {
@@ -116,6 +150,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenpo bunu arka planda yapamadı. Fenpo’yu açıp yeniden dene."
+          }
+        }
+      }
+    },
+    "action.error.unsupportedByPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo on your PC can’t do this yet. Update Fenpo on Windows."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’deki Fenpo bunu henüz yapamıyor. Windows’ta Fenpo’yu güncelle."
           }
         }
       }
@@ -337,6 +388,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cihaz kimliği"
+          }
+        }
+      }
+    },
+    "developer.endpoints": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC addresses"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC adresleri"
           }
         }
       }
@@ -698,6 +766,23 @@
         }
       }
     },
+    "developer.wifi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wi‑Fi channel"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wi‑Fi kanalı"
+          }
+        }
+      }
+    },
     "home.addPC.accessibility": {
       "extractionState": "manual",
       "localizations": {
@@ -962,6 +1047,23 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "home.toast.filesSent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye gönderildi."
           }
         }
       }
@@ -2394,6 +2496,75 @@
         }
       }
     },
+    "transfer.cancelled %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancelled, %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İptal edildi, %@"
+          }
+        }
+      }
+    },
+    "transfer.failed %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Didn’t finish, %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tamamlanmadı, %@"
+          }
+        }
+      }
+    },
+    "transfer.files %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld file"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld files"
+                }
+              }
+            }
+          }
+        },
+        "tr": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld dosya"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "transfer.fromPC %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2407,6 +2578,75 @@
           "stringUnit": {
             "state": "translated",
             "value": "PC’den geldi, %@"
+          }
+        }
+      }
+    },
+    "transfer.notification.body %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld file is in Files › Fenpo."
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld files are in Files › Fenpo."
+                }
+              }
+            }
+          }
+        },
+        "tr": {
+          "variations": {
+            "plural": {
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld dosya Dosyalar › Fenpo’da."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "transfer.notification.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Files from your PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayardan dosya geldi"
+          }
+        }
+      }
+    },
+    "transfer.progress %@ %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ of %2$@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ / %2$@"
           }
         }
       }
@@ -2475,6 +2715,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Henüz aktarım yok"
+          }
+        }
+      }
+    },
+    "transfers.section.active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In progress"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sürüyor"
+          }
+        }
+      }
+    },
+    "transfers.section.done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finished"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biten"
           }
         }
       }

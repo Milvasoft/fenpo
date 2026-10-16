@@ -113,12 +113,61 @@ public actor TLSControlConnection {
         return try Fenpo_V1_Envelope(serializedBytes: pending.removeFirst())
     }
 
+    /// Writes bytes as they are, for data connections (file bodies, media frames).
+    /// - Parameter data: Bytes to write.
+    public func sendRaw(_ data: Data) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Swift.Error>) in
+            connection.send(content: data, completion: .contentProcessed { error in
+                if let error {
+                    continuation.resume(throwing: TLSConnectionError.network(String(describing: error)))
+                } else {
+                    continuation.resume()
+                }
+            })
+        }
+    }
+
+    /// Reads whatever bytes arrive next; `nil` when the other side closed the connection.
+    public func receiveRaw() async throws -> Data? {
+        do {
+            return try await receiveBytes()
+        } catch TLSConnectionError.closed {
+            return nil
+        }
+    }
+
+    /// Reads and discards until the other side closes, or the timeout passes. Closing a TLS socket
+    /// with unread bytes resets it and can lose the last bytes in flight (protocol/README.md).
+    /// - Parameter timeout: Longest wait.
+    public func drain(timeout: Duration) async {
+        let deadline = ContinuousClock.now + timeout
+        while ContinuousClock.now < deadline {
+            let remaining = deadline - ContinuousClock.now
+            let result = try? await withTimeout(remaining) {
+                try await self.receiveRaw()
+            }
+            guard result != nil else {
+                return
+            }
+        }
+    }
+
     /// Closes the connection.
     public func cancel() {
         connection.cancel()
     }
 
+    /// A cancelled read (for example by `withTimeout`) cancels the connection: Network.framework
+    /// cannot abandon a single receive, and a read that timed out leaves the stream unusable anyway.
     private func receiveBytes() async throws -> Data {
+        try await withTaskCancellationHandler {
+            try await receiveBytesUncancellable()
+        } onCancel: {
+            connection.cancel()
+        }
+    }
+
+    private func receiveBytesUncancellable() async throws -> Data {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Data, Swift.Error>) in
             connection.receive(minimumIncompleteLength: 1, maximumLength: 64 * 1024) { data, _, isComplete, error in
                 if let error {

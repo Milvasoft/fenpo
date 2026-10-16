@@ -1,8 +1,7 @@
 import FenpoCore
 import SwiftUI
 
-/// The share extension: "Open on PC" for links. Sending files and photos arrives with the Wi-Fi
-/// transfer (Windows data channel pending).
+/// The share extension: "Open on PC" for links, "Send to PC" for files and photos. Both go over Wi-Fi.
 struct ShareView: View {
     @State var model: ShareModel
     let close: () -> Void
@@ -27,6 +26,27 @@ struct ShareView: View {
                                     .foregroundStyle(.textSecondary)
                                     .lineLimit(1)
                             }
+                        }
+                    }
+
+                    if !model.files.isEmpty {
+                        Button {
+                            Task { await model.sendFiles() }
+                        } label: {
+                            HStack {
+                                if model.state == .sending {
+                                    ProgressView()
+                                        .tint(.onAccent)
+                                }
+                                Text("share.sendFiles \(model.files.count)")
+                            }
+                        }
+                        .buttonStyle(SharePillButtonStyle())
+                        .disabled(model.state == .sending || model.state == .done)
+
+                        if let progress = model.progress, model.state == .sending {
+                            ProgressView(value: Double(progress.done), total: Double(max(progress.total, 1)))
+                                .tint(.bloom)
                         }
                     }
 
@@ -85,14 +105,14 @@ struct ShareView: View {
     private var status: some View {
         switch model.state {
         case .done:
-            Label("share.openOnPC.done", systemImage: "checkmark.circle.fill")
+            Label(model.files.isEmpty ? "share.openOnPC.done" : "share.sendFiles.done", systemImage: "checkmark.circle.fill")
                 .foregroundStyle(.leaf)
         case .failed(let error):
             Text(error.shareMessage)
                 .foregroundStyle(.red)
         case .idle, .sending:
-            if model.url == nil {
-                Text(model.hasFiles ? "share.files.later" : "share.nothing")
+            if model.url == nil && model.files.isEmpty && !model.isLoading {
+                Text("share.nothing")
                     .foregroundStyle(.textSecondary)
             }
         }
@@ -121,6 +141,12 @@ extension FenpoActionError {
             "action.error.notPaired"
         case .notConnected:
             "share.error.wifi"
+        case .unsupportedByPC:
+            "action.error.unsupportedByPC"
+        case .declinedByPC:
+            "action.error.declinedByPC"
+        case .transferFailed:
+            "action.error.transferFailed"
         default:
             "share.error.generic"
         }

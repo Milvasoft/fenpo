@@ -1,14 +1,17 @@
+import FenpoApple
 import FenpoCore
+import QuickLook
 import SwiftUI
 
-/// Every finished transfer, newest first.
+/// Transfers in progress, then every finished one, newest first. Received files open in Quick Look.
 struct TransfersView: View {
     @Environment(AppModel.self) private var model
+    @State private var previewURL: URL?
 
     var body: some View {
         NavigationStack {
             Group {
-                if model.snapshot.transfers.isEmpty {
+                if model.snapshot.transfers.isEmpty && model.snapshot.activeTransfers.isEmpty {
                     ContentUnavailableView {
                         Label("transfers.empty.title", systemImage: "arrow.up.arrow.down")
                     } description: {
@@ -17,13 +20,33 @@ struct TransfersView: View {
                     .foregroundStyle(.textPrimary)
                 } else {
                     ScrollView {
-                        CardRows(separatorInset: 64) {
-                            ForEach(model.snapshot.transfers) { record in
-                                TransferRow(record: record)
+                        VStack(spacing: 0) {
+                            if !model.snapshot.activeTransfers.isEmpty {
+                                SectionCaption(title: "transfers.section.active")
+                                CardRows(separatorInset: 64) {
+                                    ForEach(model.snapshot.activeTransfers) { transfer in
+                                        ActiveTransferRow(transfer: transfer)
+                                    }
+                                }
+                            }
+                            if !model.snapshot.transfers.isEmpty {
+                                SectionCaption(title: "transfers.section.done")
+                                CardRows(separatorInset: 64) {
+                                    ForEach(model.snapshot.transfers) { record in
+                                        Button {
+                                            open(record)
+                                        } label: {
+                                            TransferRow(record: record)
+                                                .contentShape(.rect)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .disabled(record.localFileName == nil)
+                                    }
+                                }
                             }
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .padding(.bottom, 24)
                     }
                     .refreshable {
                         await model.refresh()
@@ -32,7 +55,72 @@ struct TransfersView: View {
             }
             .fenpoScreenBackground()
             .navigationTitle("tab.transfers")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        model.sendPhotos()
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("home.sendPhotos")
+                    .disabled(model.snapshot.pc == nil)
+                }
+            }
+            .quickLookPreview($previewURL)
         }
+    }
+
+    private func open(_ record: TransferRecord) {
+        guard let name = record.localFileName else {
+            return
+        }
+        let url = TransferStore.inboxURL.appendingPathComponent(name)
+        if FileManager.default.fileExists(atPath: url.path) {
+            previewURL = url
+        }
+    }
+}
+
+/// A transfer still moving: file, direction, progress bar and sizes.
+struct ActiveTransferRow: View {
+    let transfer: ActiveTransfer
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: transfer.direction == .toPC ? "arrow.up" : "arrow.down")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.onAccent)
+                .frame(width: 36, height: 36)
+                .background(.dusk, in: .rect(cornerRadius: 9, style: .continuous))
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                title
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                ProgressView(value: transfer.fraction)
+                    .tint(.bloom)
+                Text("transfer.progress \(sizeText(transfer.bytesDone)) \(sizeText(transfer.totalBytes))")
+                    .font(.caption)
+                    .foregroundStyle(.textSecondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 11)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var title: Text {
+        if transfer.fileCount == 1 {
+            Text(verbatim: transfer.firstFileName)
+        } else {
+            Text("transfer.files \(transfer.fileCount)")
+        }
+    }
+
+    private func sizeText(_ bytes: UInt64) -> String {
+        ByteCountFormatter.string(fromByteCount: Int64(bytes), countStyle: .file)
     }
 }
 

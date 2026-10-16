@@ -1,6 +1,23 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "action.error.declinedByPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC declined."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayar kabul etmedi."
+          }
+        }
+      }
+    },
     "action.error.emptyText": {
       "extractionState": "manual",
       "localizations": {
@@ -86,6 +103,23 @@
         }
       }
     },
+    "action.error.transferFailed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The transfer stopped. Keep both on the same Wi‑Fi and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktarım yarıda kaldı. İkisini aynı Wi‑Fi’da tutup yeniden dene."
+          }
+        }
+      }
+    },
     "action.error.unavailableHere": {
       "extractionState": "manual",
       "localizations": {
@@ -99,6 +133,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenpo bunu arka planda yapamadı. Fenpo’yu açıp yeniden dene."
+          }
+        }
+      }
+    },
+    "action.error.unsupportedByPC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo on your PC can’t do this yet. Update Fenpo on Windows."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’deki Fenpo bunu henüz yapamıyor. Windows’ta Fenpo’yu güncelle."
           }
         }
       }

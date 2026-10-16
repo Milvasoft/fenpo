@@ -4,21 +4,24 @@ import FenpoProtocol
 import Foundation
 import UIKit
 
-/// Session state from the stored pairing and the BLE channel.
-///
-/// The Wi-Fi control connection, clipboard previews and transfer history arrive with their
-/// features; until then those parts of the snapshot stay empty.
+/// Session state from the stored pairing, the BLE channel, the Wi-Fi channel and the transfers.
 @MainActor
 public final class LiveSession: SessionProviding {
     private let store: PairedPCStore
     private let central: BLECentral
+    private let wifi: WiFiChannel
+    private let transfers: FileTransferService
+    private let transferStore: TransferStore
     private let accessories: AccessorySetup
     private let log = FenpoLog("Session")
 
     /// Creates the session.
-    public init(store: PairedPCStore, central: BLECentral, accessories: AccessorySetup) {
+    public init(store: PairedPCStore, central: BLECentral, wifi: WiFiChannel, transfers: FileTransferService, transferStore: TransferStore, accessories: AccessorySetup) {
         self.store = store
         self.central = central
+        self.wifi = wifi
+        self.transfers = transfers
+        self.transferStore = transferStore
         self.accessories = accessories
     }
 
@@ -40,12 +43,13 @@ public final class LiveSession: SessionProviding {
         }
         return SessionSnapshot(
             pc: PairedPC(id: record.pcID, name: record.name, systemName: "Windows"),
-            links: ChannelLinks(bluetooth: central.state == .ready, wifi: false, usb: false),
+            links: ChannelLinks(bluetooth: central.state == .ready, wifi: wifi.state == .connected, usb: false),
             proximity: .unknown,
             phoneClipboardPreview: nil,
             pcClipboardPreview: nil,
             readyPhotoCount: 0,
-            transfers: []
+            transfers: transferStore.load(),
+            activeTransfers: transfers.active.values.sorted { $0.id < $1.id }
         )
     }
 
@@ -56,6 +60,7 @@ public final class LiveSession: SessionProviding {
     private func removePairing() async throws {
         let identifier = store.load()?.bluetoothIdentifier
         central.disconnect()
+        wifi.disconnect()
         try store.remove()
         if let identifier {
             do {
@@ -70,12 +75,21 @@ public final class LiveSession: SessionProviding {
 /// Everything that must exist once per process: created at launch so BLE state restoration works.
 @MainActor
 public final class FenpoServices {
+    /// Which channel a message came in on, so replies go back the same way.
+    public enum Channel: Sendable {
+        case bluetooth
+        case wifi
+    }
+
     /// The one instance.
     public static let shared = FenpoServices()
 
     public let identityStore: DeviceIdentityStore
     public let pairedStore: PairedPCStore
     public let central: BLECentral
+    public let wifi: WiFiChannel
+    public let transfers: FileTransferService
+    public let transferStore: TransferStore
     public let accessories: AccessorySetup
     public let pairing: LivePairing
     public let session: LiveSession
@@ -85,32 +99,48 @@ public final class FenpoServices {
     public let statusStore: SharedStatusStore
     public let browser = PCBrowser()
 
-    /// Called whenever the channel state or the PC's status changes.
+    /// Called whenever the channel state, the PC's status or a transfer changes.
     public var onChange: (() -> Void)?
 
+    /// Handlers for messages other services own (for example the camera), tried before the defaults.
+    public var extraHandlers: [(Fenpo_V1_Envelope, Channel) -> Bool] = []
+
     private var pcBattery: (percent: Int, charging: Bool)?
+    private var isActive = false
     private let log = FenpoLog("Services")
 
     private init() {
         identityStore = DeviceIdentityStore()
         pairedStore = PairedPCStore()
         central = BLECentral()
+        wifi = WiFiChannel(client: DataChannelClient(store: pairedStore, identityStore: identityStore))
+        transferStore = TransferStore()
+        transfers = FileTransferService(wifi: wifi, store: transferStore)
         accessories = AccessorySetup()
         pairing = LivePairing(identityStore: identityStore, store: pairedStore, central: central, accessories: accessories)
-        session = LiveSession(store: pairedStore, central: central, accessories: accessories)
+        session = LiveSession(store: pairedStore, central: central, wifi: wifi, transfers: transfers, transferStore: transferStore, accessories: accessories)
         clipboard = PCClipboardReceiver()
-        actions = LiveFenpoActions(store: pairedStore, central: central)
+        actions = LiveFenpoActions(store: pairedStore, central: central, wifi: wifi, transfers: transfers)
         ringer = PhoneRinger()
         statusStore = SharedStatusStore()
 
         central.onEnvelope = { [weak self] envelope in
-            self?.route(envelope)
+            self?.route(envelope, from: .bluetooth)
         }
         central.onStateChange = { [weak self] state in
             if state != .ready {
                 self?.pcBattery = nil
             }
             self?.publishStatus()
+        }
+        wifi.onEnvelope = { [weak self] envelope in
+            self?.route(envelope, from: .wifi)
+        }
+        wifi.onStateChange = { [weak self] _ in
+            self?.onChange?()
+        }
+        transfers.onChange = { [weak self] in
+            self?.onChange?()
         }
     }
 
@@ -122,22 +152,80 @@ public final class FenpoServices {
         publishStatus()
     }
 
+    /// Fenpo came to the front: open the Wi-Fi channel so the PC can send files and start the camera.
+    public func appBecameActive() {
+        isActive = true
+        connectWiFiIfUseful()
+    }
+
+    /// Fenpo went to the background: iOS suspends sockets, so close the channel unless a transfer runs.
+    public func appEnteredBackground() {
+        isActive = false
+        if transfers.active.isEmpty {
+            wifi.disconnect()
+        }
+    }
+
+    /// Sends a message on a channel, for replies.
+    /// - Parameters:
+    ///   - body: Message.
+    ///   - replyTo: Id of the request it answers.
+    ///   - channel: Channel the request came on.
+    public func reply(_ body: Fenpo_V1_Envelope.OneOf_Body, to replyTo: UInt64, on channel: Channel) {
+        switch channel {
+        case .bluetooth:
+            try? central.send(body, replyTo: replyTo)
+        case .wifi:
+            Task {
+                _ = try? await wifi.send(body, replyTo: replyTo)
+            }
+        }
+    }
+
     /// Writes the widget status and tells the app.
     public func publishStatus() {
         let record = pairedStore.load()
         statusStore.save(SharedStatus(
             pcName: record?.name,
-            isConnected: record != nil && central.state == .ready,
+            isConnected: record != nil && (central.state == .ready || wifi.state == .connected),
             pcBatteryPercent: pcBattery?.percent,
-            pcCharging: pcBattery?.charging
+            pcCharging: pcBattery?.charging,
+            lastTransferName: transferStore.load().first?.fileName
         ))
         onChange?()
     }
 
-    private func route(_ envelope: Fenpo_V1_Envelope) {
+    private func connectWiFiIfUseful() {
+        guard isActive, pairedStore.load()?.endpoints.isEmpty == false, wifi.state == .idle else {
+            return
+        }
+        Task {
+            do {
+                try await wifi.connectIfNeeded()
+            } catch {
+                log.info("Wi-Fi channel not available: \(String(describing: error))")
+            }
+        }
+    }
+
+    private func route(_ envelope: Fenpo_V1_Envelope, from channel: Channel) {
+        for handler in extraHandlers where handler(envelope, channel) {
+            return
+        }
+        if transfers.handle(envelope) {
+            publishStatus()
+            return
+        }
         switch envelope.body {
         case .clipboard(let item):
             clipboard.handle(item)
+        case .clipboardRequest:
+            // iOS does not let a background app read the pasteboard; the iPhone sends its
+            // clipboard on purpose instead (App Intents, controls).
+            var error = Fenpo_V1_Error()
+            error.code = .unsupported
+            error.message = "The iPhone sends its clipboard on request from the phone only"
+            reply(.error(error), to: envelope.id, on: channel)
         case .deviceState(let state):
             apply(state)
         case .ring(let request):
@@ -153,12 +241,13 @@ public final class FenpoServices {
         if state.hasBatteryPercent {
             pcBattery = (Int(state.batteryPercent), state.hasCharging && state.charging)
         }
-        if !state.addresses.isEmpty, var record = pairedStore.load() {
+        if !state.addresses.isEmpty, var record = pairedStore.load(), record.endpoints != state.addresses {
             record.endpoints = state.addresses
             try? pairedStore.update(record)
         }
         log.info("PC state: battery \(state.hasBatteryPercent ? "\(state.batteryPercent)%" : "unknown"), \(state.addresses.count) address(es)")
         publishStatus()
+        connectWiFiIfUseful()
     }
 
     /// "Open on iPhone": only possible while Fenpo is in front; iOS does not let a background app open links.
@@ -208,13 +297,16 @@ public final class FenpoServices {
     public func diagnostics() -> Diagnostics {
         let record = pairedStore.load()
         let counters = record.flatMap { try? pairedStore.counters(for: $0.pcID) }
+        let capabilities = (wifi.session ?? central.session).map { $0.capabilities.map { String(describing: $0) }.sorted() } ?? []
         return Diagnostics(
             bluetoothState: String(describing: central.state),
-            peerName: central.session?.peerName,
-            capabilities: central.session.map { $0.capabilities.map { String(describing: $0) }.sorted() } ?? [],
+            wifiState: String(describing: wifi.state),
+            peerName: central.session?.peerName ?? wifi.session?.peerName,
+            capabilities: capabilities,
             pcName: record?.name,
             pcID: record?.pcID,
             bluetoothIdentifier: record?.bluetoothIdentifier?.uuidString,
+            endpoints: record?.endpoints ?? [],
             counters: counters,
             deviceID: LocalDevice.deviceID,
             appVersion: LocalDevice.appVersion,
@@ -225,11 +317,13 @@ public final class FenpoServices {
     /// Snapshot for the Developer menu.
     public struct Diagnostics: Equatable, Sendable {
         public let bluetoothState: String
+        public let wifiState: String
         public let peerName: String?
         public let capabilities: [String]
         public let pcName: String?
         public let pcID: String?
         public let bluetoothIdentifier: String?
+        public let endpoints: [String]
         public let counters: BLEChannelCounters?
         public let deviceID: String
         public let appVersion: String
