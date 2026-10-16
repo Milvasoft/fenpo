@@ -161,6 +161,18 @@ public sealed class FenpoGattServer(
     }
 
     /// <summary>
+    /// Drops a forgotten phone's connections; its next message finds no key that opens it.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    public void Forget(string deviceId)
+    {
+        foreach (var id in _connections.Where(c => c.Value.Session.Device?.DeviceId == deviceId).Select(c => c.Key).ToList())
+        {
+            Close(id);
+        }
+    }
+
+    /// <summary>
     /// Gets a value indicating whether a phone is on the Bluetooth channel.
     /// </summary>
     /// <param name="deviceId">Phone id.</param>

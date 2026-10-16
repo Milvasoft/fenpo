@@ -96,8 +96,7 @@ public sealed class BleChannelSessionTests
         return (session, sent);
     }
 
-    private static IReadOnlyList<byte[]> ChunkFromPhone(PairedAppDevice device, ulong counter, Envelope envelope, int payloadLength = 512) =>
-        BleChunks.Split(BleSeal.Seal(device.BleKey, BleSender.Phone, counter, envelope.ToByteArray()), payloadLength);
+    private static IReadOnlyList<byte[]> ChunkFromPhone(PairedAppDevice device, ulong counter, Envelope envelope, int payloadLength = 512) => BleChunks.Split(BleSeal.Seal(device.BleKey, BleSender.Phone, counter, envelope.ToByteArray()), payloadLength);
 
     private static List<Envelope> Open(List<byte[]> chunks, int payloadLength = 512)
     {
@@ -117,6 +116,10 @@ public sealed class BleChannelSessionTests
 
     private sealed class Devices : IPairedAppDevices
     {
+        public void Remove(string deviceId)
+        {
+        }
+
         public IReadOnlyList<PairedAppDevice> All { get; } = [_phone, _other];
 
         public void Save(PairedAppDevice device) => throw new NotSupportedException();

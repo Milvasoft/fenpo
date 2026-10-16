@@ -124,6 +124,30 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     public bool HasOtherPhone => OtherDeviceTitle.Length > 0;
 
     /// <summary>
+    /// Gets or sets a value indicating whether the phone in use is the Android phone (paired in Fenpo, not in Windows
+    /// Bluetooth settings: "Remove pairing" instead of "Bluetooth settings").
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActiveIsIphone))]
+    public partial bool ActiveIsAndroid { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the phone in use is the iPhone (or none is paired).
+    /// </summary>
+    public bool ActiveIsIphone => !ActiveIsAndroid;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the other paired phone is the Android phone.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool OtherIsAndroid { get; set; }
+
+    /// <summary>
+    /// Gets the Android phone's name, for the confirmation.
+    /// </summary>
+    public string AndroidName => PhoneStatusText.Name(_status.StatusOf(PhoneKind.Android), _localization);
+
+    /// <summary>
     /// Gets or sets the folder for received files.
     /// </summary>
     [ObservableProperty]
@@ -293,6 +317,8 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
             ? _localization.GetString("Settings_NoDeviceHint")
             : twoPhones ? _localization.Format("Settings_InUse", Hint(status)) : Hint(status);
         OtherDeviceTitle = twoPhones ? PhoneStatusText.Name(other, _localization) : string.Empty;
+        ActiveIsAndroid = IsPaired && _status.Active == PhoneKind.Android;
+        OtherIsAndroid = twoPhones && _status.Active == PhoneKind.Iphone;
         OtherDeviceHint = twoPhones ? Hint(other) : string.Empty;
     }
 }

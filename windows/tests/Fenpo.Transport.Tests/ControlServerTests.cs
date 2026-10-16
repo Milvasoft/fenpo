@@ -268,6 +268,10 @@ public sealed class ControlServerTests : IAsyncLifetime
 
     private sealed class MemoryDevices : IPairedAppDevices
     {
+        public void Remove(string deviceId)
+        {
+        }
+
         private readonly List<PairedAppDevice> _devices = [];
 
         public IReadOnlyList<PairedAppDevice> All

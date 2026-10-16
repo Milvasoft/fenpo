@@ -37,5 +37,14 @@ public sealed partial class HomePage : Page
 
     private void OnSendFileClick(object sender, RoutedEventArgs e) => _ = App.GetService<MainWindow>().SendFilesAsync();
 
+    private void OnMirrorClick(object sender, RoutedEventArgs e) => ((App)Application.Current).ShowScreenMirror();
+
+    // "Use as camera": the Camera page with its preview started.
+    private void OnCameraClick(object sender, RoutedEventArgs e)
+    {
+        App.GetService<MainWindow>().Navigate("Camera");
+        _ = App.GetService<Services.CameraService>().StartCameraAsync("Fenpo");
+    }
+
     private void OnPairClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowPairing();
 }

@@ -38,8 +38,10 @@ public sealed class ControlServer(
     private readonly IBleCounters _counters = counters;
     private readonly PcIdentity _identity = identity;
     private readonly ILogger<ControlServer> _logger = logger;
-    private readonly ConcurrentDictionary<string, Session> _sessions = new();
+    // A phone may hold several sessions at once: the app's own and short ones from its extensions (share sheet).
+    private readonly ConcurrentDictionary<Session, byte> _sessions = new();
     private ITransferDataConnections? _transfers;
+    private IMediaStreamConnections? _mediaStreams;
     private TcpListener? _listener;
     private CancellationTokenSource? _stop;
 
@@ -49,7 +51,7 @@ public sealed class ControlServer(
     public event EventHandler<(PairedAppDevice Device, DevicePlatform Platform)>? Paired;
 
     /// <summary>
-    /// Raised when a paired phone's session opens (true) or closes (false).
+    /// Raised when a paired phone's first session opens (true) or its last one closes (false).
     /// </summary>
     public event EventHandler<(PairedAppDevice Device, bool Connected)>? SessionChanged;
 
@@ -59,9 +61,10 @@ public sealed class ControlServer(
     public event EventHandler<(PairedAppDevice Device, Hello Hello)>? HelloReceived;
 
     /// <summary>
-    /// Raised for session messages the server does not answer itself.
+    /// Raised for session messages the server does not answer itself, with the session to answer on
+    /// (<see cref="ReplyAsync"/>).
     /// </summary>
-    public event EventHandler<(PairedAppDevice Device, Envelope Envelope)>? MessageReceived;
+    public event EventHandler<(PairedAppDevice Device, Envelope Envelope, object Session)>? MessageReceived;
 
     /// <summary>
     /// Gets the port the server listens on, or 0 before it started.
@@ -79,6 +82,12 @@ public sealed class ControlServer(
     /// </summary>
     /// <param name="transfers">File transfers.</param>
     public void UseTransfers(ITransferDataConnections transfers) => _transfers = transfers;
+
+    /// <summary>
+    /// Sets who takes media connections (camera, screen); without one they are closed. Set before <see cref="Start"/>.
+    /// </summary>
+    /// <param name="mediaStreams">Media streams.</param>
+    public void UseMediaStreams(IMediaStreamConnections mediaStreams) => _mediaStreams = mediaStreams;
 
     /// <summary>
     /// Starts listening on every interface.
@@ -117,11 +126,26 @@ public sealed class ControlServer(
     /// <returns>False when the phone is not connected.</returns>
     public async Task<bool> SendAsync(string deviceId, Envelope envelope, CancellationToken cancellationToken = default)
     {
-        if (!_sessions.TryGetValue(deviceId, out var session))
+        // The longest-lived session is the app's own; extensions come and go.
+        if (SessionsOf(deviceId).OrderBy(s => s.Opened).FirstOrDefault() is not { } session)
         {
             return false;
         }
 
+        return await SendOnAsync(session, envelope, cancellationToken);
+    }
+
+    /// <summary>
+    /// Answers on the session a message came on (an extension's request goes back to the extension).
+    /// </summary>
+    /// <param name="session">Session from <see cref="MessageReceived"/>.</param>
+    /// <param name="envelope">Answer.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>False when that session is gone.</returns>
+    public Task<bool> ReplyAsync(object session, Envelope envelope, CancellationToken cancellationToken = default) => session is Session open && _sessions.ContainsKey(open) ? SendOnAsync(open, envelope, cancellationToken) : Task.FromResult(false);
+
+    private async Task<bool> SendOnAsync(Session session, Envelope envelope, CancellationToken cancellationToken)
+    {
         try
         {
             await session.SendAsync(envelope, cancellationToken);
@@ -135,11 +159,33 @@ public sealed class ControlServer(
     }
 
     /// <summary>
+    /// Closes a phone's session (after it was forgotten).
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    /// <returns>A task that completes when closed.</returns>
+    public async Task DisconnectAsync(string deviceId)
+    {
+        PairedAppDevice? device = null;
+
+        foreach (var session in SessionsOf(deviceId).ToList())
+        {
+            _sessions.TryRemove(session, out _);
+            await session.DisposeAsync();
+            device = session.Device;
+        }
+
+        if (device is not null)
+        {
+            SessionChanged?.Invoke(this, (device, false));
+        }
+    }
+
+    /// <summary>
     /// Gets a value indicating whether a phone's session is open.
     /// </summary>
     /// <param name="deviceId">Phone id.</param>
     /// <returns>True when connected over Wi-Fi.</returns>
-    public bool IsConnected(string deviceId) => _sessions.ContainsKey(deviceId);
+    public bool IsConnected(string deviceId) => SessionsOf(deviceId).Any();
 
     /// <summary>
     /// Gets the LAN IPv4 addresses phones can reach: adapters that are up, not loopback, tunnels or virtual switches
@@ -154,6 +200,8 @@ public sealed class ControlServer(
         .Select(a => a.Address)
         .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a) && !IsLinkLocal(a))
         .Distinct()];
+
+    private IEnumerable<Session> SessionsOf(string deviceId) => _sessions.Keys.Where(s => s.Device.DeviceId == deviceId);
 
     private static bool IsLinkLocal(IPAddress address) => address.GetAddressBytes() is [169, 254, ..];
 
@@ -173,7 +221,7 @@ public sealed class ControlServer(
         _listener?.Stop();
         _listener = null;
 
-        foreach (var session in _sessions.Values)
+        foreach (var session in _sessions.Keys)
         {
             await session.DisposeAsync();
         }
@@ -262,6 +310,14 @@ public sealed class ControlServer(
                     }
 
                     break;
+                case Envelope.BodyOneofCase.MediaStreamOpen:
+                    // A camera or screen stream: its own connection, so video never holds up the control messages.
+                    if (_devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint) is { } streaming && _mediaStreams is not null)
+                    {
+                        await _mediaStreams.HandleAsync(streaming, first.MediaStreamOpen, ssl, cancellationToken);
+                    }
+
+                    return;
                 case Envelope.BodyOneofCase.Hello:
                     device = _devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint);
 
@@ -278,17 +334,16 @@ public sealed class ControlServer(
             }
 
             session = new Session(device, ssl);
-
-            if (_sessions.TryRemove(device.DeviceId, out var older))
-            {
-                await older.DisposeAsync();
-            }
-
-            _sessions[device.DeviceId] = session;
+            var firstSession = !SessionsOf(device.DeviceId).Any();
+            _sessions[session] = 0;
             await session.SendAsync(new Envelope { ReplyTo = first.Id, Hello = PcHello.Create(_identity) }, cancellationToken);
-            _logger.LogInformation("Fenpo app on {Phone} connected over Wi-Fi ({Platform} {Os})", device.Name, first.Hello.Platform, first.Hello.OsVersion);
+            _logger.LogInformation("Fenpo app on {Phone} connected over Wi-Fi ({Platform} {Os}, {Count} sessions)", device.Name, first.Hello.Platform, first.Hello.OsVersion, SessionsOf(device.DeviceId).Count());
             HelloReceived?.Invoke(this, (device, first.Hello));
-            SessionChanged?.Invoke(this, (device, true));
+
+            if (firstSession)
+            {
+                SessionChanged?.Invoke(this, (device, true));
+            }
 
             while (await EnvelopeFraming.ReadAsync(ssl, cancellationToken) is { } envelope)
             {
@@ -298,7 +353,7 @@ public sealed class ControlServer(
                 }
                 else if (envelope.BodyCase != Envelope.BodyOneofCase.Pong)
                 {
-                    MessageReceived?.Invoke(this, (device, envelope));
+                    MessageReceived?.Invoke(this, (device, envelope, session));
                 }
             }
         }
@@ -308,9 +363,8 @@ public sealed class ControlServer(
         }
         finally
         {
-            if (session is not null && _sessions.TryGetValue(session.Device.DeviceId, out var current) && ReferenceEquals(current, session))
+            if (session is not null && _sessions.TryRemove(session, out _) && !SessionsOf(session.Device.DeviceId).Any())
             {
-                _sessions.TryRemove(session.Device.DeviceId, out _);
                 SessionChanged?.Invoke(this, (session.Device, false));
             }
 
@@ -399,6 +453,8 @@ public sealed class ControlServer(
         private ulong _nextId = 2;
 
         public PairedAppDevice Device { get; } = device;
+
+        public DateTimeOffset Opened { get; } = DateTimeOffset.Now;
 
         public async Task SendAsync(Envelope envelope, CancellationToken cancellationToken)
         {

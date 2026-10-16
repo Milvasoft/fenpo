@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// The phone as the PC's touchpad, keyboard and presentation remote (CAPABILITY_PC_INPUT).
+// Phone → PC only; the PC injects the input into the current Windows session. Events go on the
+// best open channel in order; pointer moves are sent at most 60 times a second, already summed.
+
+enum PcButton {
+  PC_BUTTON_UNSPECIFIED = 0;
+  PC_BUTTON_LEFT = 1;
+  PC_BUTTON_RIGHT = 2;
+  PC_BUTTON_MIDDLE = 3;
+}
+
+enum PcClickKind {
+  PC_CLICK_KIND_UNSPECIFIED = 0;
+  PC_CLICK_KIND_CLICK = 1;
+  PC_CLICK_KIND_DOUBLE = 2;
+  PC_CLICK_KIND_PRESS = 3;               // Button held for a drag; a RELEASE follows.
+  PC_CLICK_KIND_RELEASE = 4;
+}
+
+// Keys that are not text. Letters and digits go as text.
+enum PcKeyCode {
+  PC_KEY_CODE_UNSPECIFIED = 0;
+  PC_KEY_CODE_ENTER = 1;
+  PC_KEY_CODE_BACKSPACE = 2;
+  PC_KEY_CODE_DELETE = 3;
+  PC_KEY_CODE_TAB = 4;
+  PC_KEY_CODE_ESCAPE = 5;
+  PC_KEY_CODE_SPACE = 6;
+  PC_KEY_CODE_LEFT = 7;
+  PC_KEY_CODE_RIGHT = 8;
+  PC_KEY_CODE_UP = 9;
+  PC_KEY_CODE_DOWN = 10;
+  PC_KEY_CODE_PAGE_UP = 11;
+  PC_KEY_CODE_PAGE_DOWN = 12;
+  PC_KEY_CODE_HOME = 13;
+  PC_KEY_CODE_END = 14;
+  PC_KEY_CODE_F5 = 15;                   // Start a slideshow.
+  PC_KEY_CODE_SHIFT_F5 = 16;             // Start a slideshow from the current slide.
+  PC_KEY_CODE_BLACK_SCREEN = 17;         // "B" in slideshows.
+  PC_KEY_CODE_WINDOWS = 18;              // The Start menu.
+}
+
+message PcPointerMove {
+  float dx = 1;                          // In the phone's pixels, after its speed setting; the PC adds its own acceleration.
+  float dy = 2;
+}
+
+message PcClick {
+  PcButton button = 1;
+  PcClickKind kind = 2;
+}
+
+message PcScroll {
+  float dx = 1;                          // In wheel notches; fractions accumulate on the PC.
+  float dy = 2;                          // Positive scrolls the content down.
+}
+
+enum PcKeyPhase {
+  PC_KEY_PHASE_TAP = 0;                  // Down and up.
+  PC_KEY_PHASE_DOWN = 1;
+  PC_KEY_PHASE_UP = 2;
+}
+
+message PcKey {
+  PcKeyCode code = 1;
+  bool ctrl = 2;
+  bool alt = 3;
+  bool shift = 4;
+  bool win = 5;
+  uint32 virtual_key = 6;                // A Windows virtual-key code, used when code is UNSPECIFIED.
+  PcKeyPhase phase = 7;
+}
+
+enum PcPresenterAction {
+  PC_PRESENTER_ACTION_UNSPECIFIED = 0;
+  PC_PRESENTER_ACTION_NEXT = 1;
+  PC_PRESENTER_ACTION_PREVIOUS = 2;
+  PC_PRESENTER_ACTION_START = 3;
+  PC_PRESENTER_ACTION_END = 4;
+  PC_PRESENTER_ACTION_BLACK = 5;
+}
+
+// A dot the PC draws over its primary screen while active.
+message PcLaser {
+  bool active = 1;
+  float x = 2;                           // 0..1 of the PC's primary screen, from the left.
+  float y = 3;                           // 0..1 from the top.
+}
+
+message PcInput {
+  oneof action {
+    PcPointerMove move = 1;
+    PcClick click = 2;
+    PcScroll scroll = 3;
+    PcKey key = 4;
+    string text = 5;                     // Typed as Unicode, whatever the PC's keyboard layout.
+    PcPresenterAction presenter = 6;     // The PC maps it to Right, Left, F5, Esc, B.
+    PcLaser laser = 7;
+    bool keep_awake = 8;                 // Keep the PC's screen on (presenting); dropped when the phone disconnects.
+  }
+}

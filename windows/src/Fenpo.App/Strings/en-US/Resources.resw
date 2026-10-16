@@ -25,7 +25,7 @@
     <value>Join hotspot</value>
   </data>
   <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Needs Fenpo on the phone</value>
+    <value>Works with Fenpo on an Android phone</value>
   </data>
   <data name="Action_MirrorText.Text" xml:space="preserve">
     <value>Mirror screen</value>
@@ -135,8 +135,14 @@
   <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Keep me centered</value>
   </data>
+  <data name="Camera_Failed" xml:space="preserve">
+    <value>The camera did not open. Close any other app using it and try again.</value>
+  </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Camera shows up as a regular webcam in Teams, Zoom, Meet and OBS. Keep Fenpo open on the phone, ideally on a stand in landscape.</value>
+    <value>The preview shows the phone's camera. For it to show up as a webcam in Teams, Zoom and Meet, the Fenpo Camera component is needed; it comes in a later version.</value>
+  </data>
+  <data name="Camera_Idle" xml:space="preserve">
+    <value>Preview the phone's camera here.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -159,11 +165,26 @@
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Open the app to use the phone as a camera.</value>
   </data>
+  <data name="Camera_NotOffered" xml:space="preserve">
+    <value>Fenpo on the phone does not share its camera. Update Fenpo on the phone and keep it open.</value>
+  </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portrait blur</value>
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portrait blur</value>
+  </data>
+  <data name="Camera_Starting" xml:space="preserve">
+    <value>Opening the camera…</value>
+  </data>
+  <data name="Camera_StartPreview.Content" xml:space="preserve">
+    <value>Start preview</value>
+  </data>
+  <data name="Camera_StopPreview.Content" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Camera_WaitingTap" xml:space="preserve">
+    <value>On the phone, tap Fenpo's “Start camera” notification.</value>
   </data>
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Camera</value>
@@ -311,6 +332,18 @@
   </data>
   <data name="Filter_Other.Content" xml:space="preserve">
     <value>Other</value>
+  </data>
+  <data name="Forget_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Forget_Confirm" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Forget_Text" xml:space="preserve">
+    <value>This PC will no longer know the phone. To connect again, scan the QR code with Fenpo on the phone.</value>
+  </data>
+  <data name="Forget_Title" xml:space="preserve">
+    <value>Remove {0}?</value>
   </data>
   <data name="Home_Files.Content" xml:space="preserve">
     <value>Files</value>
@@ -477,6 +510,60 @@
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Messages</value>
   </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Mirror_Failed" xml:space="preserve">
+    <value>Mirroring did not start. Start again with Fenpo open on the phone.</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Mirror_Locked" xml:space="preserve">
+    <value>The phone locked. Unlock it, then start again.</value>
+  </data>
+  <data name="Mirror_NoControl.Message" xml:space="preserve">
+    <value>To control the phone from here, turn on Settings &gt; Accessibility &gt; Fenpo on the phone.</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Recent apps</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Recent apps</value>
+  </data>
+  <data name="Mirror_Restart.Content" xml:space="preserve">
+    <value>Start again</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Stop mirroring</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Stop mirroring</value>
+  </data>
+  <data name="Mirror_Stopped" xml:space="preserve">
+    <value>Mirroring stopped.</value>
+  </data>
+  <data name="Mirror_Title" xml:space="preserve">
+    <value>Phone screen</value>
+  </data>
+  <data name="Mirror_Type.PlaceholderText" xml:space="preserve">
+    <value>Type on the phone, Enter sends</value>
+  </data>
+  <data name="Mirror_WaitingConsent" xml:space="preserve">
+    <value>Allow screen sharing on the phone.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Calls</value>
   </data>
@@ -618,6 +705,15 @@
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>Switch to {0}</value>
   </data>
+  <data name="Ring_PcStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Ring_PcText" xml:space="preserve">
+    <value>Ringing so you can find the PC.</value>
+  </data>
+  <data name="Ring_PcTitle" xml:space="preserve">
+    <value>{0} is ringing this PC</value>
+  </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Search messages, people or files</value>
   </data>
@@ -659,6 +755,9 @@
   </data>
   <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Sync Focus</value>
+  </data>
+  <data name="Settings_ForgetPhone.Content" xml:space="preserve">
+    <value>Remove pairing</value>
   </data>
   <data name="Settings_IncomingFiles.Text" xml:space="preserve">
     <value>Incoming files</value>
