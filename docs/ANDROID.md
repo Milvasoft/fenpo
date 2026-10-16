@@ -371,4 +371,15 @@ Kurulumdan sonraki "Paired with" kayıtları QR'ın elle yeniden okutulmasından
 | Ekran yansıtma | PC `ScreenStart` gönderince "Ekranı paylaş" bildirimi (`WAITING_FOR_CONSENT`), Android'in onayı, `mediaProjection` FGS'si, VirtualDisplay → kodlayıcı; uzun kenar en fazla 1920; döndürmede aynı bağlantıda yeni boyut ve anahtar kare; kilitlenince `PAUSED_LOCKED`; istenirse telefonun sesi (playback capture). | **Cihazda denenmedi:** Windows tarafı yok. |
 | PC'den kontrol | `FenpoAccessibilityService` (`isAccessibilityTool=false`): dokunma, uzun basma, kaydırma, Geri/Ana ekran/Son uygulamalar/Bildirimler, odaktaki alana yazma. Kapalıyken `ScreenInput` `UNSUPPORTED` ile cevaplanır; PC kontrol isterse paylaşım bildiriminde "Kontrole izin ver" düğmesi erişilebilirlik ayarını açar. | İzinler ekranına eklenmedi: kontrol istemeyen için sürekli "eksik izin" olurdu. Mağaza dışı kurulumda Android 13+ kısıtlanmış ayar adımı gerekir. |
 
+**Akşam eklenenler (16 Ekim):**
+
+| Özellik | Telefonda | Durum |
+|---|---|---|
+| Ekran görüntülerini gönder | Ayar açıkken yeni ekran görüntüsü dosya aktarımıyla PC'ye gider; anahtar açılınca fotoğraf izni istenir. | Cihazda denenmedi (izin telefonda verilmeli). |
+| Kamera döndürme | GL adımı kareyi sensör ve tutuş yönüne göre diker; dikey tutuşta yatay kareye kırpar. | Formül testli. Görüntünün PC'de dik olup olmadığı Buğra'dan bekleniyor. |
+| Web kamerası uçtan uca | 21:05:42–21:06:12 akış PC'ye gitti, çözücü hatası yok. | **Geçti** (PC tarafındaki kuyruk hatası düzeltildikten sonra). |
+| PC sekmesi | PC'nin `MediaState`'i ("PC'de çalıyor": önceki, oynat/duraklat, sonraki, ses), PC'yi çaldır, kilitle, pano. | Windows `PcMediaShare` ve çaldırmayı ekledi; uçtan uca deneme bekliyor. |
+| SMS (MAP'siz telefonlar) | `messages.proto` (`5e454cb`), `SmsBridge`; `MESSAGES` ayar ve izinle sunulur. | S10+'da MAP olduğu için PC MAP'i tercih ediyor; onay bekliyor. |
+| Fare, klavye, sunum kumandası | `pc_input.proto` (`b49f148`, `de07378`), `feature:remote`. | Windows uyguladı; ilk açılışta donma (ANR) vardı, düzeltildi; deneme sürüyor. |
+
 **Cihazda denenebilenler (PC'siz):** paylaşım hedefleri ve Hızlı Ayarlar kutucukları sisteme kayıtlı (`query-activities`, `query-services`). Wi‑Fi yolu 17 dakika kesintisiz kaldı, pil değiştikçe `DeviceState` gitti.
