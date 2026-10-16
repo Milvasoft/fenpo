@@ -42,7 +42,7 @@ final class FolderEnumerator: NSObject, NSFileProviderEnumerator {
                 let gone = ListingCache.load(for: path).filter { !now.contains($0) }
                 ListingCache.store(Array(now), for: path)
                 if !gone.isEmpty {
-                    observer.value.didDeleteItems(withIdentifiers: gone.map(NSFileProviderItemIdentifier.init))
+                    observer.value.didDeleteItems(withIdentifiers: gone.map { NSFileProviderItemIdentifier($0) })
                 }
                 observer.value.didUpdate(items)
                 observer.value.finishEnumeratingChanges(upTo: ListingCache.anchor(), moreComing: false)
