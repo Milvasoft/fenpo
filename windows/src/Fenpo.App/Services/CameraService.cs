@@ -59,7 +59,8 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     }
 
     /// <inheritdoc/>
-    Task IHostedService.StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+    // Closing Fenpo is a stop, not a lost connection: the phone says so instead of reporting a failure.
+    Task IHostedService.StopAsync(CancellationToken cancellationToken) => StopCameraAsync().WaitAsync(TimeSpan.FromSeconds(1), cancellationToken);
 
     /// <summary>
     /// Asks the phone to start its camera for an app; Android first asks for a tap on the phone.
