@@ -117,6 +117,37 @@ public final class WiFiChannel {
         return envelope.id
     }
 
+    /// Sends a request and waits for the Envelope that answers it (`reply_to` is its id). The wait
+    /// is registered before the request leaves, so a fast answer is not missed.
+    /// - Parameters:
+    ///   - body: The request.
+    ///   - timeout: Longest wait for the answer.
+    public func request(_ body: Fenpo_V1_Envelope.OneOf_Body, timeout: Duration = .seconds(15)) async throws -> Fenpo_V1_Envelope {
+        guard let connection, state == .connected else {
+            throw FenpoActionError.notConnected
+        }
+        let envelope = sequencer.envelope(body)
+        let requestID = envelope.id
+        let waiterID = UUID()
+        let timer = Task { [weak self] in
+            try? await Task.sleep(for: timeout)
+            self?.fail(waiter: waiterID, with: TimeoutError(duration: timeout))
+        }
+        defer {
+            timer.cancel()
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            waiters[waiterID] = ({ $0.replyTo == requestID }, continuation)
+            Task {
+                do {
+                    try await connection.send(envelope)
+                } catch {
+                    self.fail(waiter: waiterID, with: error)
+                }
+            }
+        }
+    }
+
     /// Waits for the first incoming Envelope that matches. Register before sending the request.
     /// - Parameters:
     ///   - timeout: Longest wait.

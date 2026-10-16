@@ -22,7 +22,16 @@ public final class FileTransferService {
     private let wifi: WiFiChannel
     private let store: TransferStore
     private var cancelled: Set<String> = []
+    /// Files the phone asked for (`FileFetch`), by the transfer id it chose: where each goes and who
+    /// waits for it.
+    private var requested: [String: Requested] = [:]
     private let log = FenpoLog("Transfer")
+
+    private struct Requested {
+        let destination: URL
+        let continuation: CheckedContinuation<Void, any Error>
+        var offered = false
+    }
 
     private static let chunkSize = 256 * 1024
     private static let reportEvery: UInt64 = 1024 * 1024
@@ -135,6 +144,51 @@ public final class FileTransferService {
         }
     }
 
+    // MARK: - Files the phone asks for
+
+    /// Asks the PC for a file in its shared folders and waits until it is written to `destination`.
+    /// Not in the history and without a notification: the File Provider shows it.
+    /// - Parameters:
+    ///   - path: Path in the PC's shared folders.
+    ///   - destination: Where the file goes.
+    public func fetch(path: String, to destination: URL) async throws {
+        try await wifi.connectIfNeeded()
+        let id = UUID().uuidString
+        let wifi = wifi
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+            requested[id] = Requested(destination: destination, continuation: continuation)
+            Task {
+                var fetch = Fenpo_V1_FileFetch()
+                fetch.path = path
+                fetch.transferID = id
+                do {
+                    _ = try await wifi.send(.fileFetch(fetch))
+                } catch {
+                    self.finishRequested(id, error: FenpoActionError.notConnected)
+                }
+            }
+            Task {
+                // The offer must come soon; the transfer itself may take as long as it takes.
+                try? await Task.sleep(for: .seconds(30))
+                if self.requested[id]?.offered == false {
+                    self.log.error("No offer for a requested file")
+                    self.finishRequested(id, error: FenpoActionError.transferFailed)
+                }
+            }
+        }
+    }
+
+    private func finishRequested(_ id: String, error: (any Error)?) {
+        guard let request = requested.removeValue(forKey: id) else {
+            return
+        }
+        if let error {
+            request.continuation.resume(throwing: error)
+        } else {
+            request.continuation.resume()
+        }
+    }
+
     // MARK: - PC to phone
 
     /// Handles transfer messages from the PC; returns whether it took the message.
@@ -174,14 +228,22 @@ public final class FileTransferService {
             cancelled.remove(id)
         }
 
-        let inbox = TransferStore.inboxURL
+        // A file the phone asked for goes where the asker wants it, and only that one file.
+        requested[id]?.offered = true
+        let destination = requested[id]?.destination
+        let inbox = destination?.deletingLastPathComponent() ?? TransferStore.inboxURL
         var taken = Set((try? FileManager.default.contentsOfDirectory(atPath: inbox.path)) ?? [])
         let names = files.map { file in
             let name = TransferPlan.safeFileName(file.name, existing: taken)
             taken.insert(name)
             return name
         }
-        let urls = names.map { inbox.appendingPathComponent($0) }
+        let urls = destination.map { [$0] } ?? names.map { inbox.appendingPathComponent($0) }
+        guard urls.count == files.count else {
+            log.error("A requested transfer offered \(files.count) files")
+            finishRequested(id, error: FenpoActionError.transferFailed)
+            return
+        }
 
         var stream: TLSControlConnection?
         do {
@@ -239,6 +301,11 @@ public final class FileTransferService {
             try await report(id, bytes: splitter.bytesDone, state: .completed)
             await connection.drain(timeout: .seconds(5))
             await connection.cancel()
+            if destination != nil {
+                log.info("Received a requested file")
+                finishRequested(id, error: nil)
+                return
+            }
             store.add(zip(files, names).reversed().map { file, name in
                 TransferRecord(fileName: name, direction: .fromPC, date: Date(), outcome: .completed, size: file.size, localFileName: name)
             })
@@ -252,6 +319,10 @@ public final class FileTransferService {
             }
             for url in urls {
                 try? FileManager.default.removeItem(at: url)
+            }
+            if destination != nil {
+                finishRequested(id, error: FenpoActionError.transferFailed)
+                return
             }
             record(names, sizes: files.map(\.size), direction: .fromPC, outcome: .failed)
         }

@@ -2938,6 +2938,40 @@
         }
       }
     },
+    "remote.screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show screen on PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekranı PC’de göster"
+          }
+        }
+      }
+    },
+    "remote.screen.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can also start it in Control Center: hold Screen Recording and pick Fenpo. Your PC can’t control the iPhone."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denetim Merkezi’nden de başlatabilirsin: Ekran Kaydı’na basılı tut ve Fenpo’yu seç. Bilgisayar iPhone’u kontrol edemez."
+          }
+        }
+      }
+    },
     "remote.touchpad": {
       "extractionState": "manual",
       "localizations": {
@@ -3053,6 +3087,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fenpo çalıyor"
+          }
+        }
+      }
+    },
+    "screen.notification.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Fenpo, tap PC › Show screen on PC, or hold Screen Recording in Control Center and pick Fenpo."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo’da PC › Ekranı PC’de göster’e dokun ya da Denetim Merkezi’nde Ekran Kaydı’na basılı tutup Fenpo’yu seç."
+          }
+        }
+      }
+    },
+    "screen.notification.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC wants to show your screen"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayarın ekranını göstermek istiyor"
           }
         }
       }

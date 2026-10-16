@@ -1,0 +1,57 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "broadcast.error.unreachable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t reach your PC over Wi‑Fi. Keep both on the same network and try again."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’ye Wi‑Fi üzerinden ulaşılamıyor. İkisini aynı ağda tutup yeniden dene."
+          }
+        }
+      }
+    },
+    "broadcast.error.unsupported": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo on your PC can’t show the iPhone’s screen yet. Update Fenpo on Windows."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PC’deki Fenpo iPhone’un ekranını henüz gösteremiyor. Windows’ta Fenpo’yu güncelle."
+          }
+        }
+      }
+    },
+    "broadcast.stopped.pc": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your PC stopped showing the screen."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayar ekranı göstermeyi durdurdu."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

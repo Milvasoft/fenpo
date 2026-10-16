@@ -33,7 +33,14 @@ struct PCView: View {
                                     LinkRow(icon: .symbol("play.rectangle"), color: .bloom, title: "remote.presenter")
                                 }
                                 .buttonStyle(.plain)
+                                BroadcastPickerRow()
                             }
+                            Text("remote.screen.hint")
+                                .font(.footnote)
+                                .foregroundStyle(.textSecondary)
+                                .padding(.horizontal, 16)
+                                .padding(.top, 6)
+                                .frame(maxWidth: .infinity, alignment: .leading)
 
                             SectionCaption(title: "pc.section.actions")
                             CardRows {
