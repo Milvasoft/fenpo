@@ -265,6 +265,17 @@ jobs:
           grep -E "Upload succeeded|EXPORT SUCCEEDED|Uploaded" "$log" | tail -5
           echo "Uploaded Fenpo $(grep -m1 MARKETING_VERSION ios/Config/Base.xcconfig | cut -d= -f2 | tr -d ' ') (${{ github.run_number }}) from ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
 
+      # Every run creates a development certificate on its fresh runner; revoke it so the team
+      # does not reach Apple's certificate limit.
+      - name: Revoke this run's development certificate
+        if: always()
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          python3 -m pip install --quiet --break-system-packages pyjwt cryptography
+          python3 ios/scripts/revoke-run-certificates.py
+
       - name: Delete the API key
         if: always()
         run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
