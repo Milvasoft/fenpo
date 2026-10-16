@@ -90,6 +90,8 @@ public partial class App : Application
                 .AddHostedService<PcMediaShare>()
                 .AddSingleton<PcNotificationForwarder>()
                 .AddHostedService<SharedFolderService>()
+                .AddSingleton<Fenpo.Transport.LocalSend.LocalSendServer>()
+                .AddHostedService<LocalSendBridge>()
                 .AddHostedService(sp => sp.GetRequiredService<PcNotificationForwarder>())
                 .AddSingleton<PcInputService>()
                 .AddHostedService(sp => sp.GetRequiredService<PcInputService>())
