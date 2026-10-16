@@ -43,6 +43,12 @@ Kaynaklar: [iphone-companion](https://github.com/312arjun/iphone-companion), [an
 - Okundu işaretleme, MNS bildirim kaydı (iPhone 260 ms'de bizim RFCOMM sunucumuza bağlanıyor) ve **gönderme çalışıyor**: PushMessage 1,8 saniyede `Success` döndü, sonra `MessageShift` ve `SendingSuccess` olayları geldi, mesaj karşıya ulaştı.
 - Olay raporları MAP 1.0 biçiminde: gönderen ve metin yok. `NewMessage` sonrası `GetMessage` bir kez 33 saniye gecikti; yeni mesajın ilk gösterimi ANCS'den yapılmalı.
 
+**Ürün cihaz testi (16 Ekim öğlen, aynı iPhone, S3'teki yeniden eşleşmeden sonra):**
+- "Mesaj Bildirimlerini Göster" açık olduğu hâlde iPhone MAS kaydını SDP'de göstermedi (paketli Fenpo'da da paketsiz S2 programında da 0 kayıt). iPhone'da Bluetooth kapatılıp açılınca klasik bağlantı yeniden kuruldu ve MAS geri geldi. Fenpo bu durumu "izin gerekiyor" olarak gösteriyor; sihirbaz ve Mesajlar sayfasının metnine Bluetooth'u kapatıp açma adımı eklenmeli.
+- Rehberdeki bir kişiden gelen SMS listede `sender_name` olarak numarayla geldi, bMessage'daki `FN` de boştu (S2'de doluydu). Ad, aynı mesajın ANCS bildiriminin başlığından alınıyor (`SenderNames`: metin ve saat eşleşmesi). Bildirimi görülmemiş eski mesajlar numarayla kalıyor.
+- Fenpo'dan gönderilen mesaj karşıya ulaştı, ama `sent` klasörü boş kaldı (S2'de oradaydı). Fenpo gönderdiklerini bu bilgisayarda saklıyor (`SentMessages`).
+- **PBAP:** SDP'de PSE (0x112F) var, ama RFCOMM bağlantısını iPhone reddediyor ("destination host was down"). Bilgisayar PBAP istemci (PCE, 0x112E) kaydı yayınlasa ve iPhone'dan unutulup yeniden eşleşse de "Kişileri Eşzamanla" anahtarı çıkmadı. Tahmin (doğrulanmadı): iOS rehberi sadece eller serbest (HFP) bağlı cihazlarla paylaşıyor; HFP bu makinede kullanılamıyor (S3).
+
 Kaynaklar: [Apple HT204387](https://support.apple.com/HT204387), [MyPhone](https://github.com/BestOwl/MyPhone), [RfcommServiceId](https://learn.microsoft.com/en-us/uwp/api/windows.devices.bluetooth.rfcomm.rfcommserviceid.phonebookaccesspse?view=winrt-20348), [imsg-map](https://docs.rs/crate/imsg-map/0.3.1)
 
 ## 4. Aramalar: HFP
