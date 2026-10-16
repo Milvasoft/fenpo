@@ -2,6 +2,7 @@ using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
 using Fenpo.Core.Api;
+using Fenpo.Core.Channel;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,11 @@ public partial class App : Application
         var localFolder = ApplicationData.Current.LocalFolder.Path;
         var settings = new JsonSettingsStore(Path.Combine(localFolder, "settings.json"));
 
+        if (settings.Current.PcId is null)
+        {
+            settings.Update(s => s with { PcId = Guid.NewGuid().ToString() });
+        }
+
         // Resources load with the first XAML, so the language override has to come before InitializeComponent.
         LocalizationService.ApplyAtStartup(settings.Current.Language);
         _crashLog = Path.Combine(localFolder, "crash.log");
@@ -61,6 +67,10 @@ public partial class App : Application
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
+                .AddSingleton<PairedAppDeviceStore>()
+                .AddSingleton<IPairedAppDevices>(sp => sp.GetRequiredService<PairedAppDeviceStore>())
+                .AddSingleton<IBleCounters, BleCounterStore>()
+                .AddSingleton(new PcIdentity(settings.Current.PcId!, Environment.MachineName, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0", $"Windows {Environment.OSVersion.Version}", string.Empty))
                 .AddSingleton<SentMessages>()
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())

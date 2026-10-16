@@ -1,4 +1,5 @@
 using Fenpo.Bluetooth.Ams;
+using Fenpo.Bluetooth.AppChannel;
 using Fenpo.Bluetooth.Ancs;
 using Fenpo.Bluetooth.Link;
 using Fenpo.Bluetooth.Map;
@@ -22,6 +23,7 @@ public sealed class BluetoothHostedService(
     AmsClient ams,
     MapMessageSource messages,
     PhonebookSource contacts,
+    FenpoGattServer channel,
     PhoneStatusTracker status,
     ISettingsStore settings,
     ILogger<BluetoothHostedService> logger) : BackgroundService
@@ -34,6 +36,7 @@ public sealed class BluetoothHostedService(
     private readonly AmsClient _ams = ams;
     private readonly MapMessageSource _messages = messages;
     private readonly PhonebookSource _contacts = contacts;
+    private readonly FenpoGattServer _channel = channel;
     private readonly PhoneStatusTracker _status = status;
     private readonly ISettingsStore _settings = settings;
     private readonly ILogger<BluetoothHostedService> _logger = logger;
@@ -50,6 +53,9 @@ public sealed class BluetoothHostedService(
         _ams.Attach();
         _messages.Attach();
         _contacts.Attach();
+
+        // The Fenpo service is advertised all the time so the iPhone app can find and wake for this PC (S4).
+        await _channel.StartAsync();
         _status.Attach();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -83,6 +89,7 @@ public sealed class BluetoothHostedService(
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         await base.StopAsync(cancellationToken);
+        await _channel.DisposeAsync();
         await _messages.DisposeAsync();
         await _link.DisposeAsync();
     }
