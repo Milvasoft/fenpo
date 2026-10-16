@@ -27,4 +27,7 @@ public struct SampleActions: FenpoActions {
 
     public func reportFocus(_ isActive: Bool) async throws {
     }
+
+    public func presenter(_ command: PresenterCommand) async throws {
+    }
 }

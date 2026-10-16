@@ -7,7 +7,9 @@ struct PCView: View {
     @State private var isConfirmingUnpair = false
 
     var body: some View {
-        NavigationStack {
+        @Bindable var model = model
+
+        NavigationStack(path: $model.pcPath) {
             Group {
                 if let pc = model.snapshot.pc {
                     ScrollView {
@@ -19,6 +21,18 @@ struct PCView: View {
                                 StatusRow(icon: .bluetooth, color: .blue, title: "link.bluetooth", isUp: model.snapshot.links.bluetooth)
                                 StatusRow(icon: .wifi, color: .green, title: "link.wifi", isUp: model.snapshot.links.wifi)
                                 StatusRow(icon: .usb, color: .slate, title: "link.usb", isUp: model.snapshot.links.usb)
+                            }
+
+                            SectionCaption(title: "pc.section.remote")
+                            CardRows {
+                                NavigationLink(value: AppModel.PCScreen.touchpad) {
+                                    LinkRow(icon: .symbol("rectangle.and.hand.point.up.left"), color: .dusk, title: "remote.touchpad")
+                                }
+                                .buttonStyle(.plain)
+                                NavigationLink(value: AppModel.PCScreen.presenter) {
+                                    LinkRow(icon: .symbol("play.rectangle"), color: .bloom, title: "remote.presenter")
+                                }
+                                .buttonStyle(.plain)
                             }
 
                             SectionCaption(title: "pc.section.actions")
@@ -59,7 +73,31 @@ struct PCView: View {
             }
             .fenpoScreenBackground()
             .navigationTitle("tab.pc")
+            .navigationDestination(for: AppModel.PCScreen.self) { screen in
+                switch screen {
+                case .touchpad:
+                    TouchpadView()
+                case .presenter:
+                    PresenterView()
+                }
+            }
         }
+    }
+}
+
+/// A row that opens another screen.
+struct LinkRow: View {
+    let icon: FenpoIcon
+    let color: Color
+    let title: LocalizedStringKey
+
+    var body: some View {
+        SettingsRowLayout(icon: icon, color: color, title: title) {
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.textTertiary)
+        }
+        .contentShape(.rect)
     }
 }
 

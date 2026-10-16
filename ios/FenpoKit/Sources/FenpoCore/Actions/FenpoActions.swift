@@ -28,6 +28,19 @@ public protocol FenpoActions: Sendable {
     /// Tells the PC whether a Focus is on, so it can silence Fenpo notifications.
     /// - Parameter isActive: The Focus filter's state; the Settings switch is applied on top.
     func reportFocus(_ isActive: Bool) async throws
+
+    /// A presentation remote step, for Shortcuts and the Action button.
+    /// - Parameter command: Next or previous slide.
+    func presenter(_ command: PresenterCommand) async throws
+}
+
+/// What the presentation remote intents send.
+public enum PresenterCommand: Sendable {
+    /// The next slide.
+    case next
+
+    /// The previous slide.
+    case previous
 }
 
 /// Why an action could not be done. Each case has a user-facing message in the app.

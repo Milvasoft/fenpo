@@ -324,6 +324,40 @@
         }
       }
     },
+    "intent.nextSlide.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the presentation on your PC to the next slide."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayardaki sunumu sonraki slayta geçirir."
+          }
+        }
+      }
+    },
+    "intent.nextSlide.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Next slide"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonraki slayt"
+          }
+        }
+      }
+    },
     "intent.openOnPC.description": {
       "extractionState": "manual",
       "localizations": {
@@ -456,6 +490,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "PC’den yapıştır"
+          }
+        }
+      }
+    },
+    "intent.previousSlide.description": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moves the presentation on your PC back one slide."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilgisayardaki sunumu bir önceki slayta döndürür."
+          }
+        }
+      }
+    },
+    "intent.previousSlide.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Previous slide"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önceki slayt"
           }
         }
       }

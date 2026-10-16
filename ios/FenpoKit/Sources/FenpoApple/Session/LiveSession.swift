@@ -98,6 +98,7 @@ public final class FenpoServices {
     public let ringer: PhoneRinger
     public let statusStore: SharedStatusStore
     public let camera: CameraService
+    public let pcInput: PcInputService
     public let browser = PCBrowser()
 
     /// Called whenever the channel state, the PC's status or a transfer changes.
@@ -125,6 +126,7 @@ public final class FenpoServices {
         ringer = PhoneRinger()
         statusStore = SharedStatusStore()
         camera = CameraService(wifi: wifi)
+        pcInput = PcInputService(central: central, wifi: wifi)
 
         central.onEnvelope = { [weak self] envelope in
             self?.route(envelope, from: .bluetooth)
