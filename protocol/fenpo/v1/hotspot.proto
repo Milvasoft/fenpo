@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Joining the phone's hotspot from the PC in one click (CAPABILITY_HOTSPOT).
+//
+// Neither iOS nor Android lets an app read the phone's hotspot name and password or turn the hotspot on. So the phone's
+// user types them into Fenpo once; the phone keeps them in its keychain (iOS) or encrypted storage (Android) and sends
+// HotspotInfo over the encrypted channel after Hello and whenever they change. The PC keeps them protected (DPAPI) and,
+// when its user presses "Connect to hotspot", sends HotspotRequest and joins the network as soon as it is in range.
+
+// Phone → PC.
+message HotspotInfo {
+  string ssid = 1;
+  string passphrase = 2;                 // WPA2 or WPA3 personal.
+  bool cleared = 3;                      // The user removed them; the PC forgets its copy.
+}
+
+// PC → phone: its user wants to join. The phone helps its user turn the hotspot on and answers HotspotStatus.
+message HotspotRequest {
+}
+
+enum HotspotState {
+  HOTSPOT_STATE_UNSPECIFIED = 0;
+  HOTSPOT_STATE_ASKED_USER = 1;          // The phone showed how to turn the hotspot on (a notification that opens it).
+  HOTSPOT_STATE_ON = 2;                  // The phone knows its hotspot is on.
+  HOTSPOT_STATE_NOT_SET_UP = 3;          // No name and password saved on the phone yet.
+}
+
+// Phone → PC.
+message HotspotStatus {
+  HotspotState state = 1;
+}
