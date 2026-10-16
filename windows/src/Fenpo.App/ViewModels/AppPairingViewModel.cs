@@ -27,6 +27,9 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
     private readonly DispatcherQueueTimer _refresh;
     private bool _closing;
 
+    // The phone that paired on this screen; until then no step after the scan is done, whatever other phone is connected.
+    private PhoneKind? _pairedKind;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AppPairingViewModel"/> class.
     /// </summary>
@@ -46,7 +49,7 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
         _server.Paired += OnPaired;
         _status.Changed += OnStatusChanged;
         _tokens.Rotate();
-        ApplyStatus(_status.Current);
+        ApplySteps();
     }
 
     /// <summary>
@@ -107,13 +110,23 @@ public sealed partial class AppPairingViewModel : ObservableObject, IDisposable
     {
         IsPaired = true;
         ShowAudioNotice = paired.Platform == DevicePlatform.Android;
-        ApplyStatus(_status.Current);
+        _pairedKind = paired.Platform == DevicePlatform.Android ? PhoneKind.Android : PhoneKind.Iphone;
+        ApplySteps();
     });
 
-    private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => ApplyStatus(status));
+    private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(ApplySteps);
 
-    private void ApplyStatus(PhoneStatus status)
+    private void ApplySteps()
     {
+        if (_pairedKind is not { } kind)
+        {
+            ScanStep = StepState.Current;
+            BluetoothStep = StepState.Pending;
+            MessagesStep = StepState.Pending;
+            return;
+        }
+
+        var status = _status.StatusOf(kind);
         var bluetoothDone = status.AppConnected && status.NotificationsAvailable;
         ScanStep = IsPaired ? StepState.Done : StepState.Current;
         BluetoothStep = bluetoothDone ? StepState.Done : IsPaired ? StepState.Current : StepState.Pending;
