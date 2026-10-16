@@ -42,9 +42,9 @@
     --tertiary: #4E54C8; --on-tertiary: #FFFFFF; --tertiary-container: #E0E0FF; --on-tertiary-container: #0A0E68;
     --success: #2F8F6B; --on-success: #FFFFFF; --success-container: #C9F0DD; --on-success-container: #00382A;
     --error: #BA1A1A; --error-container: #FFDAD6; --on-error-container: #410002;
-    --surface: #F6F7FB; --surface-lowest: #FFFFFF; --surface-low: #F0F2F8; --surface-container: #EAEDF5; --surface-high: #E4E8F2; --surface-highest: #DCE6F5;
-    --on-surface: #1B1F3B; --on-surface-variant: #5D6382; --outline: #8A8FA8; --outline-variant: #D5DAE7;
-    --inverse-surface: #1B1F3B; --inverse-on-surface: #F6F7FB; --scrim: rgba(0,0,0,.32);
+    --surface: #F2F3F8; --surface-lowest: #FFFFFF; --surface-low: #F7F8FB; --surface-container: #EAEDF5; --surface-high: #E4E8F2; --surface-highest: #DCE6F5;
+    --on-surface: #1B1F3B; --on-surface-variant: #6B7090; --outline: #8A8FA8; --outline-variant: #E2E3EA;
+    --inverse-surface: #1B1F3B; --inverse-on-surface: #F2F3F8; --scrim: rgba(0,0,0,.32);
     width: 412px; height: 892px; border-radius: 42px; overflow: hidden; position: relative; background: var(--surface); color: var(--on-surface);
     font-family: Roboto, "Google Sans Text", system-ui, sans-serif; font-size: 14px; letter-spacing: .01em;
   }
@@ -54,9 +54,9 @@
     --tertiary: #BEC2FF; --on-tertiary: #1B2084; --tertiary-container: #353BAF; --on-tertiary-container: #E0E0FF;
     --success: #7DD8B0; --on-success: #00382A; --success-container: #005139; --on-success-container: #C9F0DD;
     --error: #FFB4AB; --error-container: #93000A; --on-error-container: #FFDAD6;
-    --surface: #11132A; --surface-lowest: #0C0E22; --surface-low: #171A33; --surface-container: #1C1F3A; --surface-high: #232744; --surface-highest: #2A2E4D;
-    --on-surface: #EEF0F8; --on-surface-variant: #A3A8C3; --outline: #6F7493; --outline-variant: #2C3152;
-    --inverse-surface: #EEF0F8; --inverse-on-surface: #1B1F3B; --scrim: rgba(0,0,0,.5);
+    --surface: #000000; --surface-lowest: #000000; --surface-low: #121216; --surface-container: #1C1C22; --surface-high: #26262E; --surface-highest: #303039;
+    --on-surface: #F4F5FA; --on-surface-variant: #A2A6BD; --outline: #6D7190; --outline-variant: #333338;
+    --inverse-surface: #F4F5FA; --inverse-on-surface: #1B1F3B; --scrim: rgba(0,0,0,.5);
   }
   .cutout { position: absolute; top: 13px; left: 50%; transform: translateX(-50%); width: 13px; height: 13px; border-radius: 50%; background: #05060C; z-index: 30; }
   .status { position: absolute; top: 0; left: 0; right: 0; height: 40px; display: flex; align-items: center; justify-content: space-between; padding: 2px 26px 0 28px; font-size: 14px; font-weight: 500; z-index: 29; }
@@ -674,16 +674,16 @@
     ["success (genişletilmiş)", "#2F8F6B", "#7DD8B0", "Yaprak: bağlı durumu"],
     ["successContainer (genişletilmiş)", "#C9F0DD", "#005139", "Yaprak"],
     ["error", "#BA1A1A", "#FFB4AB", "Sadece reddet ve hata"],
-    ["surface", "#F6F7FB", "#11132A", "Pervaz"],
-    ["surfaceContainerLowest", "#FFFFFF", "#0C0E22", "Kartlar (açık)"],
-    ["surfaceContainer", "#EAEDF5", "#1C1F3A", "Gezinme çubuğu, kartlar (koyu)"],
-    ["surfaceContainerHigh", "#E4E8F2", "#232744", "Pencereler"],
-    ["surfaceContainerHighest", "#DCE6F5", "#2A2E4D", "Cam"],
-    ["onSurface", "#1B1F3B", "#EEF0F8", "Mürekkep"],
-    ["onSurfaceVariant", "#5D6382", "#A3A8C3", ""],
-    ["outline", "#8A8FA8", "#6F7493", ""],
-    ["outlineVariant", "#D5DAE7", "#2C3152", ""],
-    ["inverseSurface", "#1B1F3B", "#EEF0F8", "Mürekkep"],
+    ["surface", "#F2F3F8", "#000000", "Zemin (iOS Canvas)"],
+    ["surfaceContainerLowest", "#FFFFFF", "#000000", "Kartlar (açık, iOS Card)"],
+    ["surfaceContainer", "#EAEDF5", "#1C1C22", "Gezinme çubuğu, kartlar (koyu, iOS Card)"],
+    ["surfaceContainerHigh", "#E4E8F2", "#26262E", "Pencereler"],
+    ["surfaceContainerHighest", "#DCE6F5", "#303039", "Cam"],
+    ["onSurface", "#1B1F3B", "#F4F5FA", "Mürekkep (iOS TextPrimary)"],
+    ["onSurfaceVariant", "#6B7090", "#A2A6BD", "iOS TextSecondary"],
+    ["outline", "#8A8FA8", "#6D7190", ""],
+    ["outlineVariant", "#E2E3EA", "#333338", "Ayırıcı çizgi (iOS Hairline)"],
+    ["inverseSurface", "#1B1F3B", "#F4F5FA", "Mürekkep"],
   ];
   document.getElementById("roleRows").innerHTML = roles.map(([n, l, d, s]) =>
     `<tr><td><code>${n}</code></td><td><span class="sw8" style="background:${l}"></span><code>${l}</code></td><td><span class="sw8" style="background:${d}"></span><code>${d}</code></td><td class="n">${s}</td></tr>`).join("");

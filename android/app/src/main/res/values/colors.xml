@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Window and launcher colours; the in-app colours live in core/designsystem (Color.kt). -->
-    <color name="fenpo_surface">#F6F7FB</color>
+    <color name="fenpo_surface">#F2F3F8</color>
     <color name="ic_launcher_background">#E8577E</color>
 </resources>
