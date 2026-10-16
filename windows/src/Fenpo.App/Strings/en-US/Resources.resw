@@ -243,6 +243,12 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Clipboard</value>
   </data>
+  <data name="Control_Active" xml:space="preserve">
+    <value>Keyboard and mouse on the phone · Ctrl+Alt+I to come back</value>
+  </data>
+  <data name="Control_Connecting" xml:space="preserve">
+    <value>Connecting to the phone… The iPhone needs AssistiveTouch on for the pointer · Ctrl+Alt+I to cancel</value>
+  </data>
   <data name="Files_AndMore" xml:space="preserve">
     <value>{0} and {1} more</value>
   </data>
@@ -572,6 +578,12 @@
   </data>
   <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Back</value>
+  </data>
+  <data name="Mirror_Control.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Hand the PC's keyboard and mouse to the iPhone (Ctrl+Alt+I)</value>
+  </data>
+  <data name="Mirror_ControlText.Text" xml:space="preserve">
+    <value>Keyboard and mouse</value>
   </data>
   <data name="Mirror_Failed" xml:space="preserve">
     <value>Mirroring did not start. Start again with Fenpo open on the phone.</value>
@@ -1138,10 +1150,10 @@
     <value>Approve on the phone</value>
   </data>
   <data name="Unlock_PasswordLabel" xml:space="preserve">
-    <value>Password</value>
+    <value>Windows password (not the PIN)</value>
   </data>
   <data name="Unlock_PasswordText" xml:space="preserve">
-    <value>Fenpo keeps your password encrypted on this PC; the key that opens it stays on your phone and comes only after Face ID or your fingerprint. Type your account's password, not your Windows Hello PIN.</value>
+    <value>Fenpo keeps your password encrypted on this PC; the key that opens it stays on your phone and comes only after Face ID or your fingerprint. A Windows Hello PIN will not do: type your account's password, for a Microsoft account its Microsoft password.</value>
   </data>
   <data name="Unlock_PasswordTitle" xml:space="preserve">
     <value>Your Windows password</value>
@@ -1150,7 +1162,7 @@
     <value>Approve on the phone with Face ID or your fingerprint. Fenpo on the phone showed a notification.</value>
   </data>
   <data name="Unlock_WrongPassword" xml:space="preserve">
-    <value>Windows did not accept this password. Type your account's password again.</value>
+    <value>Windows did not accept this password. A PIN will not do; type your account's password, for a Microsoft account its Microsoft password.</value>
   </data>
   <data name="VirtualCamera_Failed" xml:space="preserve">
     <value>The install did not finish. Give administrator approval and try again.</value>
