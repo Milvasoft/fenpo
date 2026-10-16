@@ -51,6 +51,8 @@ dotnet run --project spikes/S5-tls-pairing/PhoneSim -- scenarios
 
 ## Önerilen protokol değişikliği (DECISIONS #23, #30)
 
+> Uygulandı: `e185f5d`, yedek kod için (a) seçildi (DECISIONS #39).
+
 `beede75` (iOS oturumunun UUID commit'i) `main`'e alındıktan sonra, Buğra'nın onayıyla tek bir `protocol: ...` commit'i ve aynı commit'te `docs/ARCHITECTURE.md` güncellemesi:
 
 1. **`PairingRequest.certificate_sha256` (5) kaldırılır, `reserved` olur.** PC telefonun parmak izini TLS'ten hesaplar; iddia edilen değer hiçbir şey kanıtlamaz.

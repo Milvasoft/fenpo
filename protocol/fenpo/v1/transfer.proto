@@ -7,8 +7,8 @@ option java_package = "com.fenpo.protocol.v1";
 option java_multiple_files = true;
 
 // File transfer negotiation runs on the control connection. File bodies move on a
-// separate TLS connection that starts with TransferStreamHeader, followed by the raw
-// bytes of each file in offer order.
+// separate TLS connection that starts with [uint32 big-endian length][TransferStreamHeader],
+// followed by the raw bytes of each file in offer order, sum of FileInfo.size in total.
 
 message TransferOffer {
   string transfer_id = 1;
