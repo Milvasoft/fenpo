@@ -75,7 +75,11 @@ The phone sends `Hello` as soon as it subscribes to `tx`, which means the encryp
   phone whose certificate opened the connection; anything else is closed. One data connection per transfer.
 - The phone opens the data connection within 30 seconds of the accept, otherwise both sides treat the transfer as
   failed. The receiver reports `TransferProgress` on the control connection and `TRANSFER_STATE_COMPLETED` once every
-  byte arrived and every given `sha256` matched. The writer closes the data connection after the last byte.
+  byte arrived and every given `sha256` matched, counting by the sizes in the offer, without waiting for the end of
+  the stream.
+- The phone reads its data connection to the end and closes it only after the PC's `COMPLETED` or `FAILED` (or a
+  timeout). Closing a TLS socket that still holds unread bytes, such as TLS 1.3 session tickets, sends a TCP reset,
+  which can throw away the last bytes still on their way to the PC. The PC closes after its last byte or its report.
 
 ## Notification mirroring (Android)
 
