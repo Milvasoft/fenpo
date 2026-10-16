@@ -9,6 +9,7 @@ import "fenpo/v1/transfer.proto";
 import "fenpo/v1/device.proto";
 import "fenpo/v1/media.proto";
 import "fenpo/v1/messages.proto";
+import "fenpo/v1/pc_input.proto";
 import "fenpo/v1/camera.proto";
 import "fenpo/v1/screen.proto";
 import "fenpo/v1/video.proto";
@@ -51,6 +52,7 @@ message Envelope {
     RingDevice ring = 40;
     LockPc lock_pc = 41;
     MediaCommand media_command = 42;
+    PcInput pc_input = 43;
 
     // 50-59: device state
     DeviceState device_state = 50;
