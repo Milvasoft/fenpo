@@ -18,7 +18,7 @@ Sürümler Ekim 2026 itibarıyla. Her seçimin yanında neden seçildiği ve ney
 | Veri | SQLite, Microsoft.Data.Sqlite (EF Core 10 isteğe bağlı) | Mesaj önbelleği, bildirim geçmişi, ikon önbelleği, pano geçmişi |
 | Protokol | Google.Protobuf + Grpc.Tools (sadece mesaj üretimi) | iOS ile tek şema; gRPC yükü yok |
 | TLS | `SslStream`, TLS 1.3, karşılıklı sertifika sabitleme | Yerleşik, ek bağımlılık yok |
-| Keşif | WinRT `DnssdServiceInstance` | Windows'ta yerleşik mDNS, Bonjour kurmaya gerek yok |
+| Keşif | `DnsServiceRegister` (dnsapi.dll) | Windows'ta yerleşik mDNS, Bonjour kurmaya gerek yok. WinRT `DnssdServiceInstance` WinRT soket dinleyicisi istiyor; TLS sunucusu .NET `TcpListener` + `SslStream` olduğu için dnsapi kullanılıyor (S5) |
 | Dosya aktarımı (uyumluluk) | LocalSend v2.2 protokolü | iOS, Android, macOS'taki LocalSend uygulamalarıyla Fenpo iOS uygulaması olmadan da çalışır |
 | QR | QRCoder | Küçük, bağımlılıksız |
 | Tema | Sistem / Açık / Koyu. Kök `FrameworkElement.RequestedTheme` + `AppWindowTitleBar` renkleri; "Sistem" seçiliyken `UISettings.ColorValuesChanged` dinlenir. Ana pencere, tepsi paneli ve Ada aynı servisten beslenir | WinUI 3'te `Application.RequestedTheme` çalışırken değiştirilemiyor, kök eleman üzerinden değiştirmek anında çalışıyor |

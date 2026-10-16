@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="Fenpo.App.Views.AppPairingView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Fenpo.App.Controls"
+    xmlns:helpers="using:Fenpo.App.Helpers">
+
+    <!-- Design "iPhone’unu bağla" with the Fenpo app: steps on the left, the QR code on the right (DECISIONS #39: no code). -->
+    <Grid Background="{ThemeResource FenpoSolidBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Padding="48,40,48,32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <Image Source="ms-appx:///Assets/AppLogo.png" Width="48" Height="48" HorizontalAlignment="Left" />
+                <TextBlock x:Uid="AppPair_Title" FontSize="30" FontWeight="SemiBold" Margin="0,18,0,8" Foreground="{ThemeResource FenpoTextBrush}" />
+                <TextBlock x:Uid="AppPair_Intro" Style="{StaticResource FenpoSecondaryTextStyle}" FontSize="14" TextWrapping="Wrap" />
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1" Margin="0,24,0,16" VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <controls:WizardStep Number="1" x:Uid="AppPair_Step1" State="Done" />
+                    <controls:WizardStep Number="2" x:Uid="AppPair_Step2" State="{x:Bind ViewModel.ScanStep, Mode=OneWay}" />
+                    <controls:WizardStep Number="3" x:Uid="AppPair_Step3" State="{x:Bind ViewModel.BluetoothStep, Mode=OneWay}" />
+                    <controls:WizardStep Number="4" x:Uid="AppPair_Step4" State="{x:Bind ViewModel.MessagesStep, Mode=OneWay}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Uid="Pair_Later" Command="{x:Bind ViewModel.LaterCommand}" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Column="1" Background="{ThemeResource FenpoCardSecondaryBrush}" BorderBrush="{ThemeResource FenpoStrokeBrush}" BorderThickness="1,0,0,0">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch" Spacing="18">
+                <!-- The QR stays black on white in both themes so every camera reads it. -->
+                <!-- Scales down with a narrow window instead of being cut off. -->
+                <Viewbox MaxWidth="260" Margin="24,0" Visibility="{x:Bind ViewModel.HasNetwork, Mode=OneWay}">
+                    <Grid Width="260" Height="260" CornerRadius="16" Background="White" Padding="18">
+                        <Image Source="{x:Bind ViewModel.QrImage, Mode=OneWay}" Stretch="Uniform" />
+                        <Border Width="52" Height="52" CornerRadius="14" Background="White" Padding="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image Source="ms-appx:///Assets/AppLogo.png" />
+                        </Border>
+                    </Grid>
+                </Viewbox>
+                <TextBlock x:Uid="AppPair_QrHint" Style="{StaticResource FenpoCaptionTextStyle}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="280" Visibility="{x:Bind ViewModel.HasNetwork, Mode=OneWay}" />
+                <StackPanel MaxWidth="320" Spacing="8" Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.HasNetwork), Mode=OneWay}">
+                    <FontIcon Glyph="&#xE871;" FontSize="32" Foreground="{ThemeResource FenpoTextTertiaryBrush}" />
+                    <TextBlock x:Uid="AppPair_NoNetworkTitle" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Foreground="{ThemeResource FenpoTextBrush}" />
+                    <TextBlock x:Uid="AppPair_NoNetworkText" Style="{StaticResource FenpoSecondaryTextStyle}" TextAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
