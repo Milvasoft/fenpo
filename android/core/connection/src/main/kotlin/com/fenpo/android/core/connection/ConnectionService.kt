@@ -42,6 +42,7 @@ import com.fenpo.protocol.v1.Hello
 import com.fenpo.protocol.v1.LockPc
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -100,7 +101,13 @@ class ConnectionService : Service() {
 
     @Inject lateinit var features: Set<@JvmSuppressWildcards PcFeature>
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    // A failed BLE write in the heartbeat or RSSI loop must not take the app down (device test,
+    // 16 October: "write rx could not start"); the link loop notices the disconnect and reconnects.
+    private val scope =
+        CoroutineScope(
+            SupervisorJob() + Dispatchers.Main.immediate +
+                CoroutineExceptionHandler { _, e -> Log.w(TAG, "Connection task failed: ${e.message}") },
+        )
     private var link: Job? = null
     private var pcName = ""
     private var wifiLink: WifiLink? = null

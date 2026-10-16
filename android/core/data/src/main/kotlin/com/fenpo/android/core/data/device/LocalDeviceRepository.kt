@@ -95,6 +95,10 @@ internal class AndroidLocalDeviceRepository
                     Capability.CAPABILITY_FILE_TRANSFER,
                     Capability.CAPABILITY_NOTIFICATION_MIRROR,
                     Capability.CAPABILITY_MEDIA,
+                    // Asked for when the PC starts them: a tap (camera) or Android's consent (screen).
+                    Capability.CAPABILITY_CAMERA,
+                    Capability.CAPABILITY_SCREEN_MIRROR,
+                    Capability.CAPABILITY_PC_INPUT,
                 )
         }
     }

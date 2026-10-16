@@ -33,6 +33,8 @@ class VideoEncoder(
     private val encoder = MediaCodec.createEncoderByType(mime(codec))
     private var config: ByteString? = null
 
+    @Volatile private var stopped = false
+
     /** Where the camera or the virtual display draws. Valid until [stop]. */
     val surface: Surface
 
@@ -89,6 +91,7 @@ class VideoEncoder(
     }
 
     fun stop() {
+        stopped = true
         runCatching { encoder.stop() }
         encoder.release()
         surface.release()
@@ -102,6 +105,20 @@ class VideoEncoder(
         ) = Unit
 
         override fun onOutputBufferAvailable(
+            codec: MediaCodec,
+            index: Int,
+            info: MediaCodec.BufferInfo,
+        ) {
+            // A callback can still arrive while stop() runs on another thread; the buffers are gone then.
+            if (stopped) return
+            try {
+                emit(codec, index, info)
+            } catch (e: IllegalStateException) {
+                Log.d(TAG, "Encoder output after stop: ${e.message}")
+            }
+        }
+
+        private fun emit(
             codec: MediaCodec,
             index: Int,
             info: MediaCodec.BufferInfo,

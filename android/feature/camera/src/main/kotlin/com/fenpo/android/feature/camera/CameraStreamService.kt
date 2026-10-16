@@ -61,6 +61,7 @@ class CameraStreamService :
     private var rotator: GlFrameRotator? = null
     private var orientation: OrientationEventListener? = null
     private var streamId = ""
+    private var format: VideoFormat? = null
     private var started = false
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -104,6 +105,7 @@ class CameraStreamService :
             }
         streamId = UUID.randomUUID().toString()
         val video = VideoFormat(codec = codec, width = width, height = height, fps = fps, bitrate_kbps = TARGET_KBPS)
+        format = video
 
         lateinit var videoEncoder: VideoEncoder
         val mediaSender =
@@ -175,7 +177,7 @@ class CameraStreamService :
         session?.apply(settings) ?: return
         scope.launch {
             delay(SETTINGS_REPORT_MS)
-            coordinator.report(CameraState.CAMERA_STATE_STREAMING, streamId, null, session)
+            coordinator.report(CameraState.CAMERA_STATE_STREAMING, streamId, format, session)
         }
     }
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="touchpad_title">Fare ve klavye</string>
+    <string name="touchpad_hint">Tek parmakla imleci oynat, dokunarak tıkla. İki parmakla kaydır ya da sağ tık için dokun. Sürüklemek için basılı tut, sonra oynat.</string>
+    <string name="touchpad_left">Sol tık</string>
+    <string name="touchpad_right">Sağ tık</string>
+    <string name="touchpad_type">PC’ye yaz</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_left">←</string>
+    <string name="key_up">↑</string>
+    <string name="key_down">↓</string>
+    <string name="key_right">→</string>
+    <string name="key_backspace">⌫</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_windows">Başlat</string>
+    <string name="presenter_title">Sunum kumandası</string>
+    <string name="presenter_next">Sonraki</string>
+    <string name="presenter_previous">Önceki</string>
+    <string name="presenter_start">Başlat</string>
+    <string name="presenter_end">Bitir</string>
+    <string name="presenter_black">Siyah ekran</string>
+    <string name="presenter_laser_hint">PC’de lazer işaretçi için basılı tut ve kaydır</string>
+</resources>

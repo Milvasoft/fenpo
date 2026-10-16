@@ -47,6 +47,8 @@ import com.fenpo.android.core.connection.R as ConnectionR
 fun PcRoute(
     onPair: () -> Unit,
     modifier: Modifier = Modifier,
+    onOpenTouchpad: () -> Unit = {},
+    onOpenPresenter: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
     pcViewModel: PcViewModel = hiltViewModel(),
 ) {
@@ -78,6 +80,8 @@ fun PcRoute(
         onSendClipboard = { context.startActivity(ClipboardSendActivity.intent(context)) },
         onMedia = { action -> run(0) { pcViewModel.media(action) } },
         onVolume = { up -> run(0) { pcViewModel.volume(up) } },
+        onOpenTouchpad = onOpenTouchpad,
+        onOpenPresenter = onOpenPresenter,
         modifier = modifier,
     )
 }
@@ -97,6 +101,8 @@ fun PcScreen(
     onSendClipboard: () -> Unit = {},
     onMedia: (MediaAction) -> Unit = {},
     onVolume: (Boolean) -> Unit = {},
+    onOpenTouchpad: () -> Unit = {},
+    onOpenPresenter: () -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         FenpoRootTopBar(title = stringResource(R.string.pc_title))
@@ -132,6 +138,10 @@ fun PcScreen(
                 R.string.pc_clipboard_summary,
                 onClick = onSendClipboard,
             )
+            RowDivider()
+            ActionRow(FenpoIcons.Pc, R.string.pc_touchpad, R.string.pc_touchpad_summary, onClick = onOpenTouchpad)
+            RowDivider()
+            ActionRow(FenpoIcons.Next, R.string.pc_presenter, R.string.pc_presenter_summary, onClick = onOpenPresenter)
         }
         Spacer(Modifier.height(16.dp))
     }

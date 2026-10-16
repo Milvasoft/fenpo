@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:camera"))
     implementation(project(":feature:mirror"))
+    implementation(project(":feature:remote"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)

@@ -53,4 +53,8 @@
     <string name="pc_previous">Önceki</string>
     <string name="pc_volume_up">Sesi aç</string>
     <string name="pc_volume_down">Sesi kıs</string>
+    <string name="pc_touchpad">Fare ve klavye</string>
+    <string name="pc_touchpad_summary">Telefon dokunmatik yüzey olur</string>
+    <string name="pc_presenter">Sunum kumandası</string>
+    <string name="pc_presenter_summary">Sonraki, önceki ve lazer işaretçi</string>
 </resources>

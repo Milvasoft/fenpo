@@ -107,8 +107,16 @@ class GlFrameRotator(
         inputSurface = Surface(texture)
     }
 
+    @Volatile private var released = false
+
     private fun draw() {
-        texture.updateTexImage()
+        // The camera can still deliver a frame after release(); the texture is gone by then.
+        if (released) return
+        try {
+            texture.updateTexImage()
+        } catch (e: RuntimeException) {
+            return
+        }
         texture.getTransformMatrix(transform)
         GLES20.glViewport(0, 0, width, height)
         GLES20.glUseProgram(program)
@@ -137,6 +145,7 @@ class GlFrameRotator(
     }
 
     fun release() {
+        released = true
         handler.post {
             inputSurface.release()
             texture.release()

@@ -54,4 +54,8 @@
     <string name="pc_previous">Previous</string>
     <string name="pc_volume_up">Volume up</string>
     <string name="pc_volume_down">Volume down</string>
+    <string name="pc_touchpad">Mouse and keyboard</string>
+    <string name="pc_touchpad_summary">The phone as a touchpad</string>
+    <string name="pc_presenter">Presentation remote</string>
+    <string name="pc_presenter_summary">Next, previous and a laser pointer</string>
 </resources>

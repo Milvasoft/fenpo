@@ -39,6 +39,10 @@ import com.fenpo.android.feature.pairing.PermissionsKey
 import com.fenpo.android.feature.pairing.PermissionsRoute
 import com.fenpo.android.feature.pairing.ScannerKey
 import com.fenpo.android.feature.pairing.ScannerRoute
+import com.fenpo.android.feature.remote.PresenterKey
+import com.fenpo.android.feature.remote.PresenterRoute
+import com.fenpo.android.feature.remote.TouchpadKey
+import com.fenpo.android.feature.remote.TouchpadRoute
 import com.fenpo.android.feature.settings.NotificationAppsKey
 import com.fenpo.android.feature.settings.NotificationAppsRoute
 import com.fenpo.android.feature.settings.SettingsKey
@@ -104,7 +108,17 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                         }
                     }
                     entry<TransfersKey> { Inset { TransfersRoute() } }
-                    entry<PcKey> { Inset { PcRoute(onPair = { backStack.add(ScannerKey) }) } }
+                    entry<PcKey> {
+                        Inset {
+                            PcRoute(
+                                onPair = { backStack.add(ScannerKey) },
+                                onOpenTouchpad = { backStack.add(TouchpadKey) },
+                                onOpenPresenter = { backStack.add(PresenterKey) },
+                            )
+                        }
+                    }
+                    entry<TouchpadKey> { Inset(bottom = true) { TouchpadRoute(onBack = pop) } }
+                    entry<PresenterKey> { Inset(bottom = true) { PresenterRoute(onBack = pop) } }
                     entry<SettingsKey> {
                         Inset {
                             SettingsRoute(

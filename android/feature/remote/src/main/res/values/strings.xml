@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="touchpad_title">Mouse and keyboard</string>
+    <string name="touchpad_hint">Move the pointer with one finger and tap to click. Two fingers scroll, or tap for a right click. Hold, then move, to drag.</string>
+    <string name="touchpad_left">Left click</string>
+    <string name="touchpad_right">Right click</string>
+    <string name="touchpad_type">Type on the PC</string>
+    <string name="key_esc">Esc</string>
+    <string name="key_tab">Tab</string>
+    <string name="key_left">←</string>
+    <string name="key_up">↑</string>
+    <string name="key_down">↓</string>
+    <string name="key_right">→</string>
+    <string name="key_backspace">⌫</string>
+    <string name="key_enter">Enter</string>
+    <string name="key_windows">Start</string>
+    <string name="presenter_title">Presentation remote</string>
+    <string name="presenter_next">Next</string>
+    <string name="presenter_previous">Previous</string>
+    <string name="presenter_start">Start</string>
+    <string name="presenter_end">End</string>
+    <string name="presenter_black">Black screen</string>
+    <string name="presenter_laser_hint">Hold and move for a laser pointer on the PC</string>
+</resources>
