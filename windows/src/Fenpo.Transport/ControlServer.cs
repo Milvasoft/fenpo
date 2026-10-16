@@ -21,6 +21,7 @@ public sealed class ControlServer(
     PcCertificate certificate,
     PairingTokens tokens,
     IPairedAppDevices devices,
+    IBleCounters counters,
     PcIdentity identity,
     ILogger<ControlServer> logger) : IAsyncDisposable
 {
@@ -29,6 +30,7 @@ public sealed class ControlServer(
     private readonly PcCertificate _certificate = certificate;
     private readonly PairingTokens _tokens = tokens;
     private readonly IPairedAppDevices _devices = devices;
+    private readonly IBleCounters _counters = counters;
     private readonly PcIdentity _identity = identity;
     private readonly ILogger<ControlServer> _logger = logger;
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
@@ -272,6 +274,9 @@ public sealed class ControlServer(
 
         var device = new PairedAppDevice(pairing.DeviceId, pairing.DeviceName, RandomNumberGenerator.GetBytes(BleSeal.KeyLength), fingerprint);
         _devices.Save(device);
+
+        // A new key: the phone starts its BLE counter over, and so does the PC.
+        _counters.Reset(device.DeviceId);
         await EnvelopeFraming.WriteAsync(
             ssl,
             new Envelope

@@ -49,6 +49,12 @@ public interface IBleCounters
     /// <param name="counter">Counter from the nonce.</param>
     /// <returns>False for a replayed or old message.</returns>
     bool TryAcceptReceived(string deviceId, ulong counter);
+
+    /// <summary>
+    /// Starts both counters over for a phone that just got a new key (nonces only have to be unique per key).
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    void Reset(string deviceId);
 }
 
 /// <summary>

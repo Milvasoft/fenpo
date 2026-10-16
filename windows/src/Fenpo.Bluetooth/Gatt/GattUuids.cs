@@ -20,6 +20,9 @@ public static class GattUuids
     /// <summary>Apple Media Service.</summary>
     public static readonly Guid Ams = new("89D3502B-0F36-433A-8EF4-C502AD55F8DC");
 
+    /// <summary>Apple Continuity, offered by every iPhone (ANCS hides itself while notification sharing is off).</summary>
+    public static readonly Guid AppleContinuity = new("D0611E78-BBB4-4591-A5F8-487910AE4366");
+
     /// <summary>AMS Remote Command.</summary>
     public static readonly Guid AmsRemoteCommand = new("9B3C81D8-57B1-4A8A-B8DF-0E56F7CA51C2");
 

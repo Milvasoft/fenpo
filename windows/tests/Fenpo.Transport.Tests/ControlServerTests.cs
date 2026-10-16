@@ -25,7 +25,7 @@ public sealed class ControlServerTests : IAsyncLifetime
     public ValueTask InitializeAsync()
     {
         _pcCertificate = PcCertificate.LoadOrCreate(Path.Combine(_folder, "pc.pfx"), "TEST-PC");
-        _server = new ControlServer(_pcCertificate, _tokens, _devices, new PcIdentity("pc-1", "TEST-PC", "0.1.0", "Windows test", string.Empty), NullLogger<ControlServer>.Instance);
+        _server = new ControlServer(_pcCertificate, _tokens, _devices, new NoCounters(), new PcIdentity("pc-1", "TEST-PC", "0.1.0", "Windows test", string.Empty), NullLogger<ControlServer>.Instance);
         _server.Start(0);
         return ValueTask.CompletedTask;
     }
@@ -192,6 +192,17 @@ public sealed class ControlServerTests : IAsyncLifetime
         request.Version = 1;
         await EnvelopeFraming.WriteAsync(phone, request);
         return await EnvelopeFraming.ReadAsync(phone) ?? throw new EndOfStreamException("The PC closed the connection");
+    }
+
+    private sealed class NoCounters : IBleCounters
+    {
+        public ulong NextSend(string deviceId) => 1;
+
+        public bool TryAcceptReceived(string deviceId, ulong counter) => true;
+
+        public void Reset(string deviceId)
+        {
+        }
     }
 
     private sealed class MemoryDevices : IPairedAppDevices
