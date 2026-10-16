@@ -241,7 +241,17 @@ public partial class App : Application
         calls.AttachUi(dispatcher);
         GetService<ClipboardSync>().AttachUi(dispatcher);
         GetService<PcInputService>().AttachUi(dispatcher);
-        AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
+        AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() =>
+        {
+            // A second "fenpo --send ..." (File Explorer's right-click command) arrives here from the new process.
+            if (e.Data is Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs launch && SendArguments(NativeMethods.SplitCommandLine(launch.Arguments)) is { Count: > 0 } paths)
+            {
+                SendFromExplorer(paths);
+                return;
+            }
+
+            ShowMainWindow();
+        });
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 
         // Started with Windows: stay in the tray. Started by a notification click: the router opens the right page.
@@ -270,6 +280,12 @@ public partial class App : Application
             return;
         }
 
+        if (SendArguments(arguments) is { Count: > 0 } sendPaths)
+        {
+            SendFromExplorer(sendPaths);
+            return;
+        }
+
         // "--sample" fills the Files and Clipboard lists for the same checks.
         if (arguments.Contains("--sample"))
         {
@@ -278,6 +294,20 @@ public partial class App : Application
         }
 
         ShowMainWindow(page);
+    }
+
+    // "--send <file> <file> ...": the files after the switch.
+    private static List<string> SendArguments(IReadOnlyList<string> arguments)
+    {
+        var index = arguments.ToList().IndexOf("--send");
+        return index < 0 ? [] : [.. arguments.Skip(index + 1).Where(argument => !argument.StartsWith("--", StringComparison.Ordinal))];
+    }
+
+    // The Files page shows the transfer and, when it cannot start, why.
+    private void SendFromExplorer(IReadOnlyList<string> paths)
+    {
+        ShowMainWindow("Files");
+        _ = GetService<FileTransferService>().SendAsync(paths);
     }
 
     private void WriteCrash(string message, Exception exception) => File.AppendAllText(_crashLog, $"{DateTimeOffset.Now:O} {message}{Environment.NewLine}{exception}{Environment.NewLine}");

@@ -33,6 +33,7 @@ public sealed partial class FilesViewModel : ObservableObject, IDisposable
         _refresh.IsRepeating = false;
         _refresh.Tick += (sender, e) => Refresh();
         _transfers.Changed += OnChanged;
+        _transfers.SendFinished += OnSendFinished;
         Refresh();
     }
 
@@ -81,15 +82,7 @@ public sealed partial class FilesViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var result = await _transfers.SendAsync(paths);
-        Notice = result switch
-        {
-            SendFilesResult.Started => string.Empty,
-            SendFilesResult.NothingToSend => _localization.GetString("Files_NothingToSend"),
-            SendFilesResult.Unsupported => _localization.GetString("Files_Unsupported"),
-            SendFilesResult.NeedsWifi => _localization.GetString("Files_NeedsWifi"),
-            _ => _localization.GetString("Files_NotConnected"),
-        };
+        await _transfers.SendAsync(paths);
     }
 
     /// <inheritdoc/>
@@ -97,10 +90,20 @@ public sealed partial class FilesViewModel : ObservableObject, IDisposable
     {
         _refresh.Stop();
         _transfers.Changed -= OnChanged;
+        _transfers.SendFinished -= OnSendFinished;
     }
 
     [RelayCommand]
     private void OpenFolder() => _transfers.Reveal(null);
+
+    private void OnSendFinished(object? sender, SendFilesResult result) => _dispatcher.TryEnqueue(() => Notice = result switch
+    {
+        SendFilesResult.Started => string.Empty,
+        SendFilesResult.NothingToSend => _localization.GetString("Files_NothingToSend"),
+        SendFilesResult.Unsupported => _localization.GetString("Files_Unsupported"),
+        SendFilesResult.NeedsWifi => _localization.GetString("Files_NeedsWifi"),
+        _ => _localization.GetString("Files_NotConnected"),
+    });
 
     private void OnChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(() =>
     {
