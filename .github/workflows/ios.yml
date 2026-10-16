@@ -90,6 +90,9 @@ jobs:
             > "$log" 2>&1 || { grep -E "error:|failed|✘" "$log"; tail -60 "$log"; exit 1; }
           grep -E "✔|✘|Test run|\*\* TEST" "$log" | tail -40
 
+      - name: Build test peripheral (macOS tool)
+        run: swift build --package-path ios/Tools/FenpoTestPeripheral 2>&1 | grep -E "error:|warning:|Compiling|Build complete" | tail -20; test "${PIPESTATUS[0]}" -eq 0
+
       - name: Build app
         working-directory: ios
         run: |

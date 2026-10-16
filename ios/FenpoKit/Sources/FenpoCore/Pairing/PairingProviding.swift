@@ -1,23 +1,15 @@
-/// What the user gave to start pairing.
-public enum PairingInput: Equatable, Sendable {
-    /// Contents of the QR code on the PC (`fenpo://pair?...`).
-    case qrCode(String)
-
-    /// The 6 digit fallback code shown under the QR code.
-    case manualCode(String)
-}
-
 /// Runs the pairing steps. The real implementation sits on the TLS and BLE channels; `SamplePairing` stands in until then.
 public protocol PairingProviding: Sendable {
     /// Opens the TLS data channel and exchanges `PairingRequest` / `PairingResult`.
-    /// - Parameter input: QR contents or manual code.
+    /// There is no numeric fallback code (DECISIONS #39); without the QR there is no fingerprint to pin.
+    /// - Parameter scannedCode: Contents of the QR code on the PC (`fenpo://pair?...`).
     /// - Returns: The PC that accepted the pairing.
-    func startDataChannel(_ input: PairingInput) async throws -> PairedPC
+    func startDataChannel(scannedCode: String) async throws -> PairedPC
 
     /// Bonds over Bluetooth through AccessorySetupKit.
     func bondBluetooth() async throws
 
-    /// Waits until iOS has asked about notification sharing and the PC sees ANCS.
+    /// Waits until the PC reports `PcStatus.notifications_subscribed`.
     func waitForNotificationSharing() async throws
 }
 
@@ -27,7 +19,7 @@ public struct SamplePairing: PairingProviding {
     public init() {
     }
 
-    public func startDataChannel(_ input: PairingInput) async throws -> PairedPC {
+    public func startDataChannel(scannedCode: String) async throws -> PairedPC {
         try await Task.sleep(for: .milliseconds(800))
         return SampleSession.pairedSnapshot().pc ?? PairedPC(id: "sample-pc", name: "BUGRA-PC", systemName: "Windows 11")
     }

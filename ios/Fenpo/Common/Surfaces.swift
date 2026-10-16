@@ -75,14 +75,3 @@ struct PrimaryPillButtonStyle: ButtonStyle {
             .opacity(isEnabled ? (configuration.isPressed ? 0.8 : 1) : 0.4)
     }
 }
-
-/// Full width capsule button with a faint fill, for secondary actions on dark or glass surfaces.
-struct GhostPillButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .foregroundStyle(.textPrimary)
-            .frame(maxWidth: .infinity, minHeight: 52)
-            .background(Color.textPrimary.opacity(configuration.isPressed ? 0.2 : 0.12), in: .capsule)
-    }
-}

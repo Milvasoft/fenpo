@@ -79,11 +79,15 @@ public enum Handshake {
     ///   - deviceID: Stable id created at first launch.
     ///   - deviceName: User visible name.
     ///   - appVersion: Semantic version of the app.
+    ///   - osVersion: e.g. "iOS 27.0.1".
+    ///   - model: Hardware model identifier, e.g. "iPhone14,5".
     ///   - capabilities: Offered features.
     public static func makeHello(
         deviceID: String,
         deviceName: String,
         appVersion: String,
+        osVersion: String = "",
+        model: String = "",
         capabilities: [Fenpo_V1_Capability] = phoneCapabilities
     ) -> Fenpo_V1_Hello {
         var hello = Fenpo_V1_Hello()
@@ -93,6 +97,8 @@ public enum Handshake {
         hello.appVersion = appVersion
         hello.protocolVersions = supportedVersions
         hello.capabilities = capabilities
+        hello.osVersion = osVersion
+        hello.model = model
         return hello
     }
 

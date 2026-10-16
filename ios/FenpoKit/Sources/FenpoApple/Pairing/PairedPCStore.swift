@@ -133,6 +133,22 @@ public enum LocalDevice {
         return id
     }
 
+    /// Operating system and version, e.g. "iOS 27.0.1", for `Hello.os_version`.
+    public static var osVersion: String {
+        let version = ProcessInfo.processInfo.operatingSystemVersion
+        let patch = version.patchVersion > 0 ? ".\(version.patchVersion)" : ""
+        return "iOS \(version.majorVersion).\(version.minorVersion)\(patch)"
+    }
+
+    /// Hardware model identifier, e.g. "iPhone14,5", for `Hello.model`.
+    public static var model: String {
+        var info = utsname()
+        uname(&info)
+        return withUnsafeBytes(of: &info.machine) { bytes in
+            String(decoding: bytes.prefix { $0 != 0 }, as: UTF8.self)
+        }
+    }
+
     /// Marketing version of the running app.
     public static var appVersion: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"

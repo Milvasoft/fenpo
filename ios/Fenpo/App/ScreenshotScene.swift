@@ -10,7 +10,7 @@ enum ScreenshotScene: String {
     case pc
     case settings
     case scan
-    case code
+    case developer
     case steps
 
     /// The scene requested by the launch arguments, if any.
@@ -29,9 +29,9 @@ enum ScreenshotScene: String {
             model.selectedTab = .transfers
         case .pc:
             model.selectedTab = .pc
-        case .settings:
+        case .settings, .developer:
             model.selectedTab = .settings
-        case .scan, .code, .steps:
+        case .scan, .steps:
             model.isPairingPresented = true
         }
         return model

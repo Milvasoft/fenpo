@@ -166,6 +166,15 @@ struct HandshakeTests {
     }
 
     @Test
+    func helloCarriesPlatformOSVersionAndModel() {
+        let hello = Handshake.makeHello(deviceID: "phone", deviceName: "iPhone", appVersion: "0.1.0", osVersion: "iOS 27.0.1", model: "iPhone14,5")
+        #expect(hello.platform == .ios)
+        #expect(hello.osVersion == "iOS 27.0.1")
+        #expect(hello.model == "iPhone14,5")
+        #expect(hello.protocolVersions == [1])
+    }
+
+    @Test
     func picksTheHighestCommonVersion() throws {
         var local = Handshake.makeHello(deviceID: "phone", deviceName: "iPhone", appVersion: "0.1.0")
         local.protocolVersions = [1, 2, 3]

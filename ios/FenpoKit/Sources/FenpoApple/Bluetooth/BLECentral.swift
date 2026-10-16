@@ -62,6 +62,13 @@ public final class BLECentral: NSObject {
     }
 
     /// What the PC agreed to in its `Hello` on this connection.
+    /// Latest `PcStatus` from the PC on this connection.
+    public private(set) var pcStatus: Fenpo_V1_PcStatus? {
+        didSet {
+            notifyChange()
+        }
+    }
+
     public private(set) var session: NegotiatedSession? {
         didSet {
             notifyChange()
@@ -142,6 +149,14 @@ public final class BLECentral: NSObject {
         }
     }
 
+    /// Waits until the PC reports that it is subscribed to ANCS (notification sharing allowed).
+    public func waitForNotificationsSubscribed() async throws {
+        while pcStatus?.notificationsSubscribed != true {
+            try Task.checkCancellation()
+            await nextChange()
+        }
+    }
+
     /// Waits for the PC's `Hello` on the current connection.
     public func waitForPeerHello() async throws -> NegotiatedSession {
         while true {
@@ -189,6 +204,7 @@ public final class BLECentral: NSObject {
         reassembler = BLEReassembler()
         sequencer = EnvelopeSequencer()
         session = nil
+        pcStatus = nil
     }
 
     private func send(envelope: Fenpo_V1_Envelope) throws {
@@ -232,6 +248,11 @@ public final class BLECentral: NSObject {
             } catch {
                 log.error("BLE handshake failed: \(String(describing: error))")
             }
+            return
+        }
+        if case .pcStatus(let status) = envelope.body {
+            log.info("PcStatus: notifications \(status.notificationsSubscribed), messages \(status.messagesAvailable)")
+            pcStatus = status
             return
         }
         if let reply = Handshake.automaticReply(to: envelope, sequencer: &sequencer) {

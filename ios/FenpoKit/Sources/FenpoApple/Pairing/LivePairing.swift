@@ -10,9 +10,6 @@ import UIKit
 public final class LivePairing: PairingProviding {
     /// Why pairing stopped.
     public enum Error: Swift.Error, Equatable, Sendable {
-        /// The 6 digit code waits for the decision in DECISIONS #23 (S5 recommends removing it).
-        case manualCodeUnavailable
-
         /// None of the QR code's addresses answered.
         case noReachableAddress
 
@@ -43,8 +40,8 @@ public final class LivePairing: PairingProviding {
         self.accessories = accessories
     }
 
-    public nonisolated func startDataChannel(_ input: PairingInput) async throws -> PairedPC {
-        try await runDataChannel(input)
+    public nonisolated func startDataChannel(scannedCode: String) async throws -> PairedPC {
+        try await runDataChannel(scannedCode)
     }
 
     public nonisolated func bondBluetooth() async throws {
@@ -52,11 +49,10 @@ public final class LivePairing: PairingProviding {
     }
 
     public nonisolated func waitForNotificationSharing() async throws {
-        // The PC has no message yet that says "ANCS is subscribed". Until the protocol has one,
-        // the PC's Hello on the bonded BLE channel stands for it: the PC finds ANCS on the same bond.
+        // The PC sends PcStatus after its Hello and again when the user allows notification sharing.
         let central = central
-        _ = try await withTimeout(.seconds(60)) {
-            try await central.waitForPeerHello()
+        try await withTimeout(.seconds(180)) {
+            try await central.waitForNotificationsSubscribed()
         }
     }
 
@@ -75,11 +71,8 @@ public final class LivePairing: PairingProviding {
 
     // MARK: - Steps
 
-    private func runDataChannel(_ input: PairingInput) async throws -> PairedPC {
-        guard case .qrCode(let text) = input else {
-            throw Error.manualCodeUnavailable
-        }
-        let code = try PairingQRCode(parsing: text)
+    private func runDataChannel(_ scannedCode: String) async throws -> PairedPC {
+        let code = try PairingQRCode(parsing: scannedCode)
         let identity = try identityStore.loadOrCreate()
 
         var lastError: Swift.Error = Error.noReachableAddress
@@ -192,7 +185,13 @@ public final class LivePairing: PairingProviding {
     }
 
     private func makeHello() -> Fenpo_V1_Hello {
-        Handshake.makeHello(deviceID: LocalDevice.deviceID, deviceName: UIDevice.current.name, appVersion: LocalDevice.appVersion)
+        Handshake.makeHello(
+            deviceID: LocalDevice.deviceID,
+            deviceName: UIDevice.current.name,
+            appVersion: LocalDevice.appVersion,
+            osVersion: LocalDevice.osVersion,
+            model: LocalDevice.model
+        )
     }
 }
 #endif

@@ -5,7 +5,6 @@ import UIKit
 /// Always dark, like the camera.
 struct ScannerView: View {
     let onCode: (String) -> Void
-    let onManualEntry: () -> Void
     let onClose: () -> Void
 
     @State private var camera: CameraAccess.State = .checking
@@ -83,11 +82,14 @@ struct ScannerView: View {
                 }
                 .buttonStyle(PrimaryPillButtonStyle())
                 .padding(.top, 12)
+            } else {
+                // No numeric fallback (DECISIONS #39): the PC shows the code again instead.
+                Text("pairing.scan.hint")
+                    .font(.footnote)
+                    .foregroundStyle(.textTertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
             }
-
-            Button("pairing.manualEntry", action: onManualEntry)
-                .buttonStyle(GhostPillButtonStyle())
-                .padding(.top, camera == .denied ? 8 : 12)
         }
         .padding(.horizontal, 24)
         .padding(.top, 26)
@@ -141,11 +143,11 @@ struct ScannerFinder: Shape {
 }
 
 #Preview("Türkçe") {
-    ScannerView(onCode: { _ in }, onManualEntry: {}, onClose: {})
+    ScannerView(onCode: { _ in }, onClose: {})
         .preview(.light, "tr")
 }
 
 #Preview("English") {
-    ScannerView(onCode: { _ in }, onManualEntry: {}, onClose: {})
+    ScannerView(onCode: { _ in }, onClose: {})
         .preview(.dark, "en")
 }
