@@ -165,6 +165,9 @@
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Open the app to use the phone as a camera.</value>
   </data>
+  <data name="Camera_NotOffered" xml:space="preserve">
+    <value>Fenpo on the phone does not share its camera. Update Fenpo on the phone and keep it open.</value>
+  </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portrait blur</value>
   </data>

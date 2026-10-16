@@ -17,7 +17,8 @@ namespace Fenpo.App.Services;
 /// <param name="Device">Phone.</param>
 /// <param name="Envelope">Message.</param>
 /// <param name="OverWifi">True for the Wi‑Fi control connection, false for the BLE channel.</param>
-public sealed record ChannelMessage(PairedAppDevice Device, Envelope Envelope, bool OverWifi);
+/// <param name="WifiSession">The Wi‑Fi session it came on, to answer on; null over BLE.</param>
+public sealed record ChannelMessage(PairedAppDevice Device, Envelope Envelope, bool OverWifi, object? WifiSession = null);
 
 /// <summary>
 /// Fenpo on the phone over both channels as one: the Wi‑Fi control connection (④) and the BLE channel (③). Messages go
@@ -100,7 +101,7 @@ public sealed class PhoneChannel(
                 OnLeft(e.Device, overWifi: true);
             }
         };
-        _wifi.MessageReceived += (sender, e) => OnMessage(new ChannelMessage(e.Device, e.Envelope, OverWifi: true));
+        _wifi.MessageReceived += (sender, e) => OnMessage(new ChannelMessage(e.Device, e.Envelope, OverWifi: true, e.Session));
         _wifi.Paired += (sender, e) => OnPaired(e.Device);
         _status.ActiveChanged += (sender, kind) => Changed?.Invoke(this, EventArgs.Empty);
         _ble.HelloReceived += (sender, e) => OnHello(e.Device, e.Hello, overWifi: false);
@@ -206,7 +207,8 @@ public sealed class PhoneChannel(
 
         if (request.OverWifi)
         {
-            return await _wifi.SendAsync(deviceId, reply, cancellationToken) || _ble.Send(deviceId, reply);
+            var answered = request.WifiSession is { } session ? await _wifi.ReplyAsync(session, reply, cancellationToken) : await _wifi.SendAsync(deviceId, reply, cancellationToken);
+            return answered || _ble.Send(deviceId, reply);
         }
 
         return _ble.Send(deviceId, reply) || await _wifi.SendAsync(deviceId, reply, cancellationToken);
@@ -240,6 +242,7 @@ public sealed class PhoneChannel(
     {
         (overWifi ? _wifiHellos : _bleHellos)[device.DeviceId] = hello;
         _connected[device.DeviceId] = device;
+        _logger.LogInformation("{Phone} offers {Capabilities} over {Channel}", device.Name, string.Join(", ", hello.Capabilities), overWifi ? "Wi-Fi" : "Bluetooth");
 
         // Records from before platforms were kept learn theirs here.
         if (device.Platform != hello.Platform && hello.Platform != DevicePlatform.Unspecified)
