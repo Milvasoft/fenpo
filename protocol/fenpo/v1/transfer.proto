@@ -9,6 +9,7 @@ option java_multiple_files = true;
 // File transfer negotiation runs on the control connection. File bodies move on a
 // separate TLS connection that starts with [uint32 big-endian length][TransferStreamHeader],
 // followed by the raw bytes of each file in offer order, sum of FileInfo.size in total.
+// The phone opens the data connection in both directions (protocol/README.md, File transfer).
 
 message TransferOffer {
   string transfer_id = 1;
@@ -27,7 +28,7 @@ message FileInfo {
 message TransferAccept {
   string transfer_id = 1;
   bool accepted = 2;
-  uint32 data_port = 3;                  // Port for the data connection when the receiver listens.
+  uint32 data_port = 3;                  // Set by the PC only; 0 = the control server port.
 }
 
 message TransferStreamHeader {
