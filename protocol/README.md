@@ -153,7 +153,10 @@ Only Android phones send their notifications over the Fenpo channel (`CAPABILITY
 
 - `CAPABILITY_PC_INPUT`, phone → PC only. The PC injects `PcInput` into the current Windows session; it ignores input while the session is locked (the phone can still send `LockPc`).
 - Pointer moves are relative, in the PC's pixels after the phone's speed setting, summed on the phone and sent at most 60 times a second. A drag is `PRESS`, moves, `RELEASE`. Scrolls are in wheel notches and may be fractional.
-- Text goes as Unicode, so it does not depend on the PC's keyboard layout; `PcKey` is for keys that are not text, with modifiers. The presentation remote uses `RIGHT`/`LEFT` (next/previous), `F5`, `SHIFT_F5` and `BLACK_SCREEN`.
+- Pointer moves are in the phone's pixels after its speed setting; the PC adds its own acceleration.
+- Text goes as Unicode, so it does not depend on the PC's keyboard layout; `PcKey` is for keys that are not text, with modifiers, a phase (tap, down, up) and optionally a Windows virtual-key code.
+- The presentation remote sends `presenter` (next, previous, start, end, black; the PC maps them to Right, Left, F5, Esc, B), `laser` (a dot the PC draws at a point of its primary screen) and `keep_awake` (the PC's screen stays on until it is turned off or the phone disconnects).
+- Only the paired phone in use is accepted. Input does not reach elevated windows or the secure desktop (Windows UIPI).
 - Input goes on the best open channel in order; over Bluetooth only, the phone may send fewer moves.
 
 ## Proximity
