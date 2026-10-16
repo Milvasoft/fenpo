@@ -82,7 +82,7 @@
                     </StackPanel>
                 </ToggleButton>
                 <!-- These need the iPhone app (DECISIONS #36): visible, with what they need. -->
-                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource QuickToggleStyle}" IsEnabled="False" x:Uid="Tray_Hotspot">
+                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource QuickToggleStyle}" IsEnabled="{x:Bind ViewModel.CanHotspot, Mode=OneWay}" IsChecked="{x:Bind ViewModel.HotspotOn, Mode=OneWay}" Command="{x:Bind ViewModel.JoinHotspotCommand}" x:Uid="Tray_Hotspot">
                     <StackPanel Spacing="6">
                         <FontIcon Glyph="&#xE704;" FontSize="16" />
                         <TextBlock x:Uid="Tray_HotspotText" HorizontalAlignment="Center" />

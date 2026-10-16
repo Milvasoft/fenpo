@@ -49,6 +49,7 @@
     <ScrollViewer>
         <StackPanel Padding="32,28" Spacing="16">
             <InfoBar x:Uid="Notifications_Refused" IsOpen="{x:Bind ViewModel.NotificationsRefused, Mode=OneWay}" Severity="Warning" IsClosable="False" />
+            <InfoBar IsOpen="{x:Bind ViewModel.HasHotspotNotice, Mode=OneWay}" Message="{x:Bind ViewModel.HotspotNotice, Mode=OneWay}" Severity="Informational" IsClosable="False" />
 
             <!-- Hero: phone illustration, status, actions -->
             <Border Style="{StaticResource FenpoCardStyle}" Padding="28,20">
@@ -150,11 +151,11 @@
                                         </Grid>
                                     </StackPanel>
                                 </Button>
-                                <!-- Hotspot needs Fenpo on the phone to share its Wi-Fi details; not there yet (DECISIONS #36: shown, not hidden). -->
-                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="False" x:Uid="Action_Hotspot">
+                                <!-- The phone's hotspot: its name and password come from Fenpo on the phone (hotspot.proto). -->
+                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.CanHotspot, Mode=OneWay}" Command="{x:Bind ViewModel.JoinHotspotCommand}" x:Uid="Action_Hotspot">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE704;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
-                                        <TextBlock x:Uid="Action_HotspotText" FontSize="13" TextWrapping="Wrap" />
+                                        <TextBlock Text="{x:Bind ViewModel.HotspotText, Mode=OneWay}" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
                                 <Button Grid.Column="2" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" Click="OnSendFileClick" x:Uid="Action_SendFile">
