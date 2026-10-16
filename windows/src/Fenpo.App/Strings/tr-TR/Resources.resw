@@ -960,15 +960,6 @@
   <data name="Settings_ThemeHint.Text" xml:space="preserve">
     <value>Sistem seçiliyken Windows’un açık veya koyu ayarını izler</value>
   </data>
-  <data name="Settings_Unlock.Text" xml:space="preserve">
-    <value>Telefonla kilit aç</value>
-  </data>
-  <data name="Settings_UnlockHint.Text" xml:space="preserve">
-    <value>Kilitli bilgisayarda giriş seçeneklerinden "Fenpo ile aç"ı seç, telefonda Face ID ya da parmak iziyle onayla. Yeniden başlattıktan sonraki ilk girişte şifren gerekir.</value>
-  </data>
-  <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Telefonla kilit aç</value>
-  </data>
   <data name="Settings_UsePhone.Content" xml:space="preserve">
     <value>Bu telefonu kullan</value>
   </data>
@@ -1130,39 +1121,6 @@
   </data>
   <data name="Tray_Summary" xml:space="preserve">
     <value>{0}, {1}</value>
-  </data>
-  <data name="Unlock_Declined" xml:space="preserve">
-    <value>Telefonda onaylanmadı. Yeniden açıp onayla.</value>
-  </data>
-  <data name="Unlock_Done" xml:space="preserve">
-    <value>Hazır. Kilitli bilgisayarda giriş seçeneklerinden "Fenpo ile aç"ı seç.</value>
-  </data>
-  <data name="Unlock_Failed" xml:space="preserve">
-    <value>Kurulamadı. Telefonda Face ID ya da parmak izi açık olmalı; yeniden dene.</value>
-  </data>
-  <data name="Unlock_InstallDeclined" xml:space="preserve">
-    <value>Kilit ekranı bileşeni kurulmadı. Yönetici onayını verip yeniden dene.</value>
-  </data>
-  <data name="Unlock_NotAvailable" xml:space="preserve">
-    <value>Telefondaki Fenpo bağlı değil ya da kilit açmayı desteklemiyor. Telefonda Fenpo'yu güncelle ve aç.</value>
-  </data>
-  <data name="Unlock_PasswordConfirm" xml:space="preserve">
-    <value>Telefonda onayla</value>
-  </data>
-  <data name="Unlock_PasswordLabel" xml:space="preserve">
-    <value>Windows şifresi (PIN değil)</value>
-  </data>
-  <data name="Unlock_PasswordText" xml:space="preserve">
-    <value>Fenpo şifreni bu bilgisayarda şifreli saklar; onu açacak anahtar telefonunda durur ve sadece Face ID ya da parmak izi onayından sonra gelir. Windows Hello PIN'i olmaz: hesabının şifresini yaz. Microsoft hesabıyla giriyorsan Microsoft hesabının şifresi.</value>
-  </data>
-  <data name="Unlock_PasswordTitle" xml:space="preserve">
-    <value>Windows şifren</value>
-  </data>
-  <data name="Unlock_Waiting" xml:space="preserve">
-    <value>Telefonda Face ID ya da parmak iziyle onayla. Telefondaki Fenpo bir bildirim gösterdi.</value>
-  </data>
-  <data name="Unlock_WrongPassword" xml:space="preserve">
-    <value>Windows bu şifreyi kabul etmedi. PIN kabul edilmez; hesabının şifresini gir. Microsoft hesabıyla giriyorsan Microsoft hesabının şifresi.</value>
   </data>
   <data name="VirtualCamera_Failed" xml:space="preserve">
     <value>Kurulum tamamlanmadı. Yönetici onayını verip yeniden dene.</value>

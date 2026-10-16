@@ -116,8 +116,6 @@ public partial class App : Application
                 .AddSingleton<Fenpo.Bluetooth.Hid.HidPeripheral>()
                 .AddSingleton<PhoneControlService>()
                 .AddHostedService(sp => sp.GetRequiredService<PhoneControlService>())
-                .AddSingleton<UnlockService>()
-                .AddHostedService(sp => sp.GetRequiredService<UnlockService>())
                 .AddSingleton<VirtualCameraService>()
                 .AddHostedService(sp => sp.GetRequiredService<VirtualCameraService>())
                 .AddHostedService<MediaStreamRouter>()
