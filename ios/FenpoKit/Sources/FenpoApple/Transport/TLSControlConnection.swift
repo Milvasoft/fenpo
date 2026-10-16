@@ -3,7 +3,6 @@ import FenpoCore
 import FenpoProtocol
 import Foundation
 import Network
-import OSLog
 import Security
 import Synchronization
 
@@ -28,7 +27,7 @@ public actor TLSControlConnection {
     private let queue = DispatchQueue(label: "com.fenpo.tls")
     private var decoder = EnvelopeFrameDecoder()
     private var pending: [[UInt8]] = []
-    private let logger = Logger(subsystem: "com.fenpo.kit", category: "TLS")
+    private let log = FenpoLog("TLS")
 
     /// Endpoint this connection goes to.
     public nonisolated let endpoint: Endpoint
@@ -83,7 +82,7 @@ public actor TLSControlConnection {
         } onCancel: {
             connection.cancel()
         }
-        logger.info("TLS ready to \(self.endpoint.description, privacy: .public)")
+        log.info("TLS ready to \(self.endpoint.description)")
     }
 
     /// Sends one Envelope.

@@ -3,7 +3,7 @@
 import FenpoCore
 import FenpoProtocol
 import Foundation
-import OSLog
+import UIKit
 
 /// Client of the Fenpo BLE channel (path ③). The phone is the central, the PC the peripheral.
 ///
@@ -55,7 +55,7 @@ public final class BLECentral: NSObject {
             guard state != oldValue else {
                 return
             }
-            logger.info("BLE state \(String(describing: self.state), privacy: .public)")
+            log.info("BLE state \(String(describing: self.state))")
             onStateChange?(state)
             notifyChange()
         }
@@ -88,7 +88,7 @@ public final class BLECentral: NSObject {
     private var outbox: [[UInt8]] = []
     private var changeWaiters: [CheckedContinuation<Void, Never>] = []
 
-    private let logger = Logger(subsystem: "com.fenpo.kit", category: "BLE")
+    private let log = FenpoLog("BLE")
 
     /// Creates the central manager with state restoration. Create exactly one, at launch.
     override public init() {
@@ -169,7 +169,7 @@ public final class BLECentral: NSObject {
             peripheral = manager.retrievePeripherals(withIdentifiers: [targetIdentifier]).first
         }
         guard let peripheral else {
-            logger.error("Peripheral \(targetIdentifier, privacy: .public) is not known to the system")
+            log.error("Peripheral \(targetIdentifier) is not known to the system")
             state = .idle
             return
         }
@@ -219,17 +219,18 @@ public final class BLECentral: NSObject {
             persistCounters?(cipher.counters)
             handle(try Fenpo_V1_Envelope(serializedBytes: plaintext))
         } catch {
-            logger.error("Dropped BLE message: \(String(describing: error), privacy: .public)")
+            log.error("Dropped BLE message: \(String(describing: error))")
         }
     }
 
     private func handle(_ envelope: Fenpo_V1_Envelope) {
+        log.info("Received \(envelope.bodyName) #\(envelope.id), app \(UIApplication.shared.applicationState.logName)")
         if case .hello = envelope.body, let localHello {
             do {
                 session = try Handshake.negotiate(local: localHello, remote: envelope)
-                logger.info("BLE Hello from \(self.session?.peerName ?? "", privacy: .public)")
+                log.info("BLE Hello from \(self.session?.peerName ?? "")")
             } catch {
-                logger.error("BLE handshake failed: \(String(describing: error), privacy: .public)")
+                log.error("BLE handshake failed: \(String(describing: error))")
             }
             return
         }
@@ -246,7 +247,7 @@ public final class BLECentral: NSObject {
             do {
                 try send(.hello(localHello))
             } catch {
-                logger.error("Sending Hello failed: \(String(describing: error), privacy: .public)")
+                log.error("Sending Hello failed: \(String(describing: error))")
             }
         }
     }
@@ -294,7 +295,7 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
 
     public func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
         let restored = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] ?? []
-        logger.info("Restoring \(restored.count) peripheral(s)")
+        log.info("Restoring \(restored.count) peripheral(s)")
         if let first = restored.first {
             peripheral = first
             first.delegate = self
@@ -303,17 +304,17 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
     }
 
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        logger.info("Connected to \(peripheral.identifier, privacy: .public)")
+        log.info("Connected to \(peripheral.identifier)")
         peripheral.discoverServices([Self.serviceUUID])
     }
 
     public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Swift.Error)?) {
-        logger.error("Connect failed: \(String(describing: error), privacy: .public)")
+        log.error("Connect failed: \(String(describing: error))")
         reconnect(peripheral)
     }
 
     public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Swift.Error)?) {
-        logger.info("Disconnected: \(String(describing: error), privacy: .public)")
+        log.info("Disconnected: \(String(describing: error))")
         reconnect(peripheral)
     }
 
@@ -331,7 +332,7 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
 extension BLECentral: @preconcurrency CBPeripheralDelegate {
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Swift.Error)?) {
         guard let service = peripheral.services?.first(where: { $0.uuid == Self.serviceUUID }) else {
-            logger.error("Fenpo service missing: \(String(describing: error), privacy: .public)")
+            log.error("Fenpo service missing: \(String(describing: error))")
             return
         }
         peripheral.discoverCharacteristics([Self.rxUUID, Self.txUUID], for: service)
@@ -341,7 +342,7 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
         rx = service.characteristics?.first { $0.uuid == Self.rxUUID }
         tx = service.characteristics?.first { $0.uuid == Self.txUUID }
         guard let tx, rx != nil else {
-            logger.error("Fenpo characteristics missing: \(String(describing: error), privacy: .public)")
+            log.error("Fenpo characteristics missing: \(String(describing: error))")
             return
         }
         // tx requires encryption: the first subscription makes iOS pair (bond) with the PC.
@@ -353,7 +354,7 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
             return
         }
         if let error {
-            logger.error("Subscribing to tx failed: \(String(describing: error), privacy: .public)")
+            log.error("Subscribing to tx failed: \(String(describing: error))")
             return
         }
         if characteristic.isNotifying {

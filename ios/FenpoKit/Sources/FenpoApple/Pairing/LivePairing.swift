@@ -2,7 +2,6 @@
 import FenpoCore
 import FenpoProtocol
 import Foundation
-import OSLog
 import UIKit
 
 /// Pairing over the real channels: TLS data channel from the QR code, then the Bluetooth bond
@@ -34,7 +33,7 @@ public final class LivePairing: PairingProviding {
     private let store: PairedPCStore
     private nonisolated let central: BLECentral
     private let accessories: AccessorySetup
-    private let logger = Logger(subsystem: "com.fenpo.kit", category: "Pairing")
+    private let log = FenpoLog("Pairing")
 
     /// Creates the pairing flow.
     public init(identityStore: DeviceIdentityStore, store: PairedPCStore, central: BLECentral, accessories: AccessorySetup) {
@@ -70,7 +69,7 @@ public final class LivePairing: PairingProviding {
             try configureChannel(for: record)
             central.connect(to: identifier)
         } catch {
-            logger.error("Resuming the BLE channel failed: \(String(describing: error), privacy: .public)")
+            log.error("Resuming the BLE channel failed: \(String(describing: error))")
         }
     }
 
@@ -91,7 +90,7 @@ public final class LivePairing: PairingProviding {
                     try await connection.start()
                 }
             } catch {
-                logger.info("No TLS to \(endpoint.description, privacy: .public): \(String(describing: error), privacy: .public)")
+                log.info("No TLS to \(endpoint.description): \(String(describing: error))")
                 lastError = error
                 await connection.cancel()
                 continue
@@ -135,7 +134,7 @@ public final class LivePairing: PairingProviding {
             PairedPCRecord(pcID: code.pcID, name: name, certificateSHA256: code.certificateSHA256, endpoints: code.endpoints.map(\.description)),
             bleChannelKey: Array(result.bleChannelKey)
         )
-        logger.info("Paired with \(name, privacy: .public)")
+        log.info("Paired with \(name)")
 
         // S5: the pairing connection continues as a normal session with Hello.
         var systemName = ""
@@ -148,7 +147,7 @@ public final class LivePairing: PairingProviding {
             let session = try Handshake.negotiate(local: hello, remote: answer)
             systemName = session.peerPlatform == .windows ? "Windows" : ""
         } catch {
-            logger.error("Hello after pairing failed: \(String(describing: error), privacy: .public)")
+            log.error("Hello after pairing failed: \(String(describing: error))")
         }
         return PairedPC(id: code.pcID, name: name, systemName: systemName)
     }
@@ -182,12 +181,12 @@ public final class LivePairing: PairingProviding {
         let cipher = try AESGCMChannelCipher(key: key, counters: try store.counters(for: record.pcID))
         let store = store
         let pcID = record.pcID
-        let logger = logger
+        let log = log
         central.configure(cipher: cipher, hello: makeHello()) { counters in
             do {
                 try store.saveCounters(counters, for: pcID)
             } catch {
-                logger.error("Saving BLE counters failed: \(String(describing: error), privacy: .public)")
+                log.error("Saving BLE counters failed: \(String(describing: error))")
             }
         }
     }
