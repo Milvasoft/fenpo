@@ -13,13 +13,13 @@ import Synchronization
 public final class ScreenBroadcaster: @unchecked Sendable {
     /// Largest side sent to the PC (protocol/README.md, "Video").
     private static let maxSide = 1920
-    private static let fps: Int32 = 30
+    fileprivate static let fps: Int32 = 30
     private static let bitrateKbps = 6000
 
     private struct Running {
         var encoder: H264Encoder?
         var isOpening = false
-        var lastFrame = CMTime.invalid
+        var pacer = FramePacer(fps: Double(ScreenBroadcaster.fps))
     }
 
     private let state = Mutex(Running())
@@ -66,10 +66,9 @@ public final class ScreenBroadcaster: @unchecked Sendable {
         let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         let action: (encoder: H264Encoder?, open: Bool) = state.withLock { running in
             if let encoder = running.encoder {
-                if running.lastFrame.isValid, CMTimeGetSeconds(CMTimeSubtract(time, running.lastFrame)) < 1.0 / Double(Self.fps + 2) {
+                guard running.pacer.accept(CMTimeGetSeconds(time)) else {
                     return (nil, false)
                 }
-                running.lastFrame = time
                 return (encoder, false)
             }
             guard !running.isOpening else {

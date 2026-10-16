@@ -93,3 +93,40 @@ struct FrameCropTests {
         #expect(crop == .init(x: 200, y: 0, width: 1600, height: 1000))
     }
 }
+
+struct FramePacerTests {
+    /// Frames accepted in one second of a source.
+    func accepted(times: [Double], fps: Double = 30) -> Int {
+        var pacer = FramePacer(fps: fps)
+        return times.filter { pacer.accept($0) }.count
+    }
+
+    @Test
+    func halvesSixtyToThirty() {
+        let times = (0..<60).map { Double($0) / 60 }
+        #expect(accepted(times: times) == 30)
+    }
+
+    @Test
+    func keepsThirtyFromAJitteryFortyFive() {
+        // 45 frames a second, each up to 4 ms off.
+        let times = (0..<45).map { Double($0) / 45 + ($0.isMultiple(of: 2) ? 0.004 : -0.004) }
+        let count = accepted(times: times)
+        #expect(count >= 29 && count <= 31)
+    }
+
+    @Test
+    func passesASlowerSourceWhole() {
+        let times = (0..<20).map { Double($0) / 20 }
+        #expect(accepted(times: times) == 20)
+    }
+
+    @Test
+    func picksUpAfterAPause() {
+        var pacer = FramePacer(fps: 30)
+        #expect(pacer.accept(0))
+        #expect(pacer.accept(5))
+        #expect(!pacer.accept(5.01))
+        #expect(pacer.accept(5.034))
+    }
+}
