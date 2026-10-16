@@ -89,6 +89,7 @@ struct TouchpadView: View {
         .padding(.horizontal, 16)
         .padding(.bottom, 12)
         .fenpoScreenBackground()
+        .disablesBackSwipe()
         .navigationTitle("remote.touchpad")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
