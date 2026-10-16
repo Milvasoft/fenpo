@@ -18,7 +18,6 @@ import "fenpo/v1/pc_notification.proto";
 import "fenpo/v1/files.proto";
 import "fenpo/v1/photos.proto";
 import "fenpo/v1/hotspot.proto";
-import "fenpo/v1/unlock.proto";
 
 option csharp_namespace = "Fenpo.Protocol.V1";
 option java_package = "com.fenpo.protocol.v1";
@@ -121,16 +120,11 @@ message Envelope {
     HotspotInfo hotspot_info = 120;
     HotspotRequest hotspot_request = 121;
     HotspotStatus hotspot_status = 122;
-
-    // 130-139: unlocking the PC with the phone
-    UnlockEnroll unlock_enroll = 130;
-    UnlockRequest unlock_request = 131;
-    UnlockKey unlock_key = 132;
-    UnlockRevoke unlock_revoke = 133;
   }
 
   // 66-69 camera additions, 78-79 folder additions, 84-89 screen mirror additions, 99 notification additions,
-  // 107-109 message additions, 115-119 photo additions, 123-129 hotspot additions, 134-139 unlock additions.
+  // 107-109 message additions, 115-119 photo additions, 123-129 hotspot additions.
+  // 130-139 were unlocking the PC with the phone, dropped (DECISIONS #40); never reuse them.
   // Defined in later phases.
   reserved 66 to 69;
   reserved 78 to 79;
@@ -139,5 +133,5 @@ message Envelope {
   reserved 107 to 109;
   reserved 115 to 119;
   reserved 123 to 129;
-  reserved 134 to 139;
+  reserved 130 to 139;
 }
