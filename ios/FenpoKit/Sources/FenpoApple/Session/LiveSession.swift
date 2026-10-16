@@ -97,6 +97,7 @@ public final class FenpoServices {
     public let actions: LiveFenpoActions
     public let ringer: PhoneRinger
     public let statusStore: SharedStatusStore
+    public let camera: CameraService
     public let browser = PCBrowser()
 
     /// Called whenever the channel state, the PC's status or a transfer changes.
@@ -123,6 +124,7 @@ public final class FenpoServices {
         actions = LiveFenpoActions(store: pairedStore, central: central, wifi: wifi, transfers: transfers)
         ringer = PhoneRinger()
         statusStore = SharedStatusStore()
+        camera = CameraService(wifi: wifi)
 
         central.onEnvelope = { [weak self] envelope in
             self?.route(envelope, from: .bluetooth)
@@ -142,6 +144,9 @@ public final class FenpoServices {
         transfers.onChange = { [weak self] in
             self?.onChange?()
         }
+        camera.onChange = { [weak self] in
+            self?.onChange?()
+        }
     }
 
     /// Activates AccessorySetupKit and reconnects to the paired PC.
@@ -156,11 +161,16 @@ public final class FenpoServices {
     public func appBecameActive() {
         isActive = true
         connectWiFiIfUseful()
+        camera.appBecameActive()
     }
 
     /// Fenpo went to the background: iOS suspends sockets, so close the channel unless a transfer runs.
     public func appEnteredBackground() {
         isActive = false
+        if camera.state != nil {
+            // iOS stops the camera in the background; tell the PC instead of freezing its picture.
+            camera.stopFromPhone()
+        }
         if transfers.active.isEmpty {
             wifi.disconnect()
         }
@@ -210,6 +220,9 @@ public final class FenpoServices {
 
     private func route(_ envelope: Fenpo_V1_Envelope, from channel: Channel) {
         for handler in extraHandlers where handler(envelope, channel) {
+            return
+        }
+        if camera.handle(envelope) {
             return
         }
         if transfers.handle(envelope) {

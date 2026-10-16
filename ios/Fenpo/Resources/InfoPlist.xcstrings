@@ -41,13 +41,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo uses the camera to scan the pairing code on your PC."
+            "value": "Fenpo uses the camera to scan the pairing code and to be your PC’s webcam."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo, bilgisayardaki eşleştirme kodunu okumak için kamerayı kullanır."
+            "value": "Fenpo kamerayı eşleştirme kodunu okumak ve bilgisayarının web kamerası olmak için kullanır."
           }
         }
       }

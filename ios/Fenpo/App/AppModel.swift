@@ -1,5 +1,6 @@
 import FenpoApple
 import FenpoCore
+import AVFoundation
 import Foundation
 import Observation
 import UIKit
@@ -26,6 +27,7 @@ final class AppModel {
     private let session: any SessionProviding
     private let actions: any FenpoActions
     private let ringer: PhoneRinger?
+    private let camera: CameraService?
 
     /// Runs the pairing steps.
     let pairing: any PairingProviding
@@ -49,22 +51,46 @@ final class AppModel {
     /// The PC is ringing this iPhone and Fenpo is in front.
     var isRinging = false
 
+    /// The camera screen's state while the iPhone is the PC's webcam.
+    var cameraState: CameraService.UIState?
+
     /// Creates the model.
     /// - Parameters:
     ///   - session: Source of the session state.
     ///   - pairing: Runs the pairing steps.
     ///   - actions: Clipboard and PC actions.
     ///   - ringer: Plays the ring the PC asks for; `nil` in previews.
+    ///   - camera: Fenpo Kamera; `nil` in previews.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
         actions: any FenpoActions = SampleActions(),
-        ringer: PhoneRinger? = nil
+        ringer: PhoneRinger? = nil,
+        camera: CameraService? = nil
     ) {
         self.session = session
         self.pairing = pairing
         self.actions = actions
         self.ringer = ringer
+        self.camera = camera
+    }
+
+    /// The camera's live picture.
+    var cameraSession: AVCaptureSession? {
+        camera?.previewSession
+    }
+
+    /// Camera screen actions.
+    var cameraActions: CameraActions {
+        guard let camera else {
+            return CameraActions(stop: { [weak self] in self?.cameraState = nil })
+        }
+        return CameraActions(
+            stop: { camera.stopFromPhone() },
+            zoom: { camera.setZoom($0) },
+            centerStage: { camera.setCenterStage($0) },
+            flip: { camera.flip() }
+        )
     }
 
     /// Fenpo came to the front: refresh, stop a background ring, ask for notifications once paired.
@@ -87,6 +113,9 @@ final class AppModel {
     /// Reloads the session state.
     func refresh() async {
         snapshot = await session.snapshot()
+        if let camera {
+            cameraState = camera.state
+        }
     }
 
     /// Asks the PC to lock.

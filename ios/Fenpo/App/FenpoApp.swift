@@ -44,7 +44,7 @@ struct FenpoApp: App {
         #endif
         let services = FenpoServices.shared
         FenpoApp.services = services
-        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer)
+        let model = AppModel(session: services.session, pairing: services.pairing, actions: services.actions, ringer: services.ringer, camera: services.camera)
         services.onChange = {
             Task { await model.refresh() }
         }
