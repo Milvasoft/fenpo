@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+// Live video and audio from the phone: the camera (camera.proto) and the screen (screen.proto).
+//
+// Control messages run on the control connection. The media itself moves on its own TLS
+// connection that the phone opens to the PC's control server port, like file transfers: the
+// first frame is [uint32 length][Envelope with media_stream_open], then every frame is
+// [uint32 length][StreamPacket]. The phone closes it when the stream stops.
+
+enum VideoCodec {
+  VIDEO_CODEC_UNSPECIFIED = 0;
+  VIDEO_CODEC_H264 = 1;                  // Every phone and PC decodes it; the default.
+  VIDEO_CODEC_HEVC = 2;                  // Only when both sides say so.
+}
+
+enum AudioCodec {
+  AUDIO_CODEC_UNSPECIFIED = 0;           // No audio.
+  AUDIO_CODEC_OPUS = 1;
+  AUDIO_CODEC_AAC = 2;
+}
+
+message VideoFormat {
+  VideoCodec codec = 1;
+  uint32 width = 2;                      // As encoded, after rotation.
+  uint32 height = 3;
+  uint32 fps = 4;
+  uint32 bitrate_kbps = 5;
+}
+
+enum StreamKind {
+  STREAM_KIND_UNSPECIFIED = 0;
+  STREAM_KIND_CAMERA = 1;
+  STREAM_KIND_SCREEN = 2;
+}
+
+// First frame of a media connection, as an Envelope body, so the PC can tell it from a control
+// connection (Hello) and a file transfer (TransferStreamHeader).
+message MediaStreamOpen {
+  string stream_id = 1;                  // From CameraStatus or ScreenStatus.
+  StreamKind kind = 2;
+  VideoFormat video = 3;
+  AudioCodec audio = 4;
+  uint32 audio_sample_rate = 5;
+  uint32 audio_channels = 6;
+}
+
+enum StreamTrack {
+  STREAM_TRACK_UNSPECIFIED = 0;
+  STREAM_TRACK_VIDEO = 1;
+  STREAM_TRACK_AUDIO = 2;
+}
+
+// One encoded access unit. The phone drops video frames rather than queue them when the
+// connection falls behind, and always sends codec_config again before the next key frame.
+message StreamPacket {
+  StreamTrack track = 1;
+  uint64 pts_us = 2;                     // Presentation time on the phone's monotonic clock.
+  bool key_frame = 3;
+  bool codec_config = 4;                 // SPS/PPS (VPS) or the audio codec header.
+  bytes data = 5;
+}
