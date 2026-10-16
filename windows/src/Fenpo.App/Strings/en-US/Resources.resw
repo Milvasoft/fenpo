@@ -126,6 +126,9 @@
   <data name="CallsTitle.Text" xml:space="preserve">
     <value>Calls</value>
   </data>
+  <data name="Camera_Apps.Text" xml:space="preserve">
+    <value>Fenpo Kamera in apps</value>
+  </data>
   <data name="Camera_CenterStage.Text" xml:space="preserve">
     <value>Keep me centered</value>
   </data>
@@ -139,10 +142,13 @@
     <value>The camera did not open. Close any other app using it and try again.</value>
   </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>The preview shows the phone's camera. For it to show up as a webcam in Teams, Zoom and Meet, the Fenpo Camera component is needed; it comes in a later version.</value>
+    <value>The preview shows the phone's camera. With Fenpo Kamera installed it shows up in Teams, Zoom, Meet and OBS as an ordinary webcam. Keep Fenpo open on the phone; a landscape stand works best.</value>
   </data>
   <data name="Camera_Idle" xml:space="preserve">
     <value>Preview the phone's camera here.</value>
+  </data>
+  <data name="Camera_InUseBadge.Text" xml:space="preserve">
+    <value>In use by an app</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -173,6 +179,9 @@
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portrait blur</value>
+  </data>
+  <data name="Camera_Remove.Content" xml:space="preserve">
+    <value>Remove</value>
   </data>
   <data name="Camera_Starting" xml:space="preserve">
     <value>Opening the camera…</value>
@@ -1109,5 +1118,26 @@
   </data>
   <data name="Tray_Summary" xml:space="preserve">
     <value>{0}, {1}</value>
+  </data>
+  <data name="VirtualCamera_Failed" xml:space="preserve">
+    <value>The install did not finish. Give administrator approval and try again.</value>
+  </data>
+  <data name="VirtualCamera_Install" xml:space="preserve">
+    <value>Install Fenpo Kamera</value>
+  </data>
+  <data name="VirtualCamera_Installed" xml:space="preserve">
+    <value>Pick Fenpo Kamera in the app's camera settings. The phone's camera starts by itself when the app opens it.</value>
+  </data>
+  <data name="VirtualCamera_InUse" xml:space="preserve">
+    <value>An app is using Fenpo Kamera. The picture comes from the phone's camera.</value>
+  </data>
+  <data name="VirtualCamera_NeedsUpdate" xml:space="preserve">
+    <value>A newer Fenpo Kamera is here. Press Update; Windows asks for administrator approval.</value>
+  </data>
+  <data name="VirtualCamera_NotInstalled" xml:space="preserve">
+    <value>Install Fenpo Kamera to pick the phone's camera in Teams, Zoom, Meet and OBS. Windows asks for administrator approval once.</value>
+  </data>
+  <data name="VirtualCamera_Update" xml:space="preserve">
+    <value>Update</value>
   </data>
 </root>

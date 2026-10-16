@@ -20,7 +20,7 @@ public sealed record MediaFeed(MediaStreamOpen Open, ChannelReader<StreamPacket>
 /// Takes the phone's media connections (video.proto) from the control server, reads their packets and hands the
 /// stream to the screen mirror or the camera by its kind.
 /// </summary>
-public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService screen, CameraService camera, ILogger<MediaStreamRouter> logger) : IMediaStreamConnections, IHostedService
+public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService screen, CameraService camera, VirtualCameraService virtualCamera, ILogger<MediaStreamRouter> logger) : IMediaStreamConnections, IHostedService
 {
     // A backlog this long means the player is not keeping up; older video is dropped until the next key frame.
     private const int _maxQueued = 90;
@@ -72,6 +72,12 @@ public sealed class MediaStreamRouter(ControlServer server, ScreenMirrorService 
                 var packet = StreamPacket.Parser.ParseFrom(frame);
                 var dropped = packets.Reader.Count > _maxQueued && !packet.KeyFrame && !packet.CodecConfig;
                 traffic.Add(frame.Length, packets.Reader.Count, dropped);
+
+                // Fenpo Kamera gets every camera frame as it arrives, whatever the preview does.
+                if (open.Kind == StreamKind.Camera)
+                {
+                    virtualCamera.Write(packet);
+                }
 
                 if (packet.Track == StreamTrack.Audio)
                 {
