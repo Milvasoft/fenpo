@@ -7,7 +7,9 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using Fenpo.Core.Channel;
 using Fenpo.Core.Pairing;
+using Fenpo.Core.Transfers;
 using Fenpo.Protocol.V1;
+using Google.Protobuf;
 using Microsoft.Extensions.Logging;
 
 namespace Fenpo.Transport;
@@ -15,7 +17,9 @@ namespace Fenpo.Transport;
 /// <summary>
 /// The ④ control connection: TLS 1.3 with a client certificate required. A connection either pairs (PairingRequest with
 /// the QR's one-time token; the phone's certificate is pinned from TLS, not from what it claims) and then continues as a
-/// session, or opens a session directly with Hello from a pinned certificate (protocol/fenpo/v1/pairing.proto).
+/// session, or opens a session directly with Hello from a pinned certificate (protocol/fenpo/v1/pairing.proto). A
+/// connection whose first frame is a bare TransferStreamHeader is a file transfer's data connection instead and goes to
+/// the <see cref="ITransferDataConnections"/> given to <see cref="UseTransfers"/> (protocol/README.md, File transfer).
 /// </summary>
 public sealed class ControlServer(
     PcCertificate certificate,
@@ -26,6 +30,7 @@ public sealed class ControlServer(
     ILogger<ControlServer> logger) : IAsyncDisposable
 {
     private static readonly TimeSpan _firstMessageTimeout = TimeSpan.FromSeconds(15);
+    private static readonly string[] _virtualAdapters = ["Hyper-V", "vEthernet", "WSL", "VirtualBox", "VMware", "Virtual Adapter", "Wi-Fi Direct"];
 
     private readonly PcCertificate _certificate = certificate;
     private readonly PairingTokens _tokens = tokens;
@@ -34,6 +39,7 @@ public sealed class ControlServer(
     private readonly PcIdentity _identity = identity;
     private readonly ILogger<ControlServer> _logger = logger;
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
+    private ITransferDataConnections? _transfers;
     private TcpListener? _listener;
     private CancellationTokenSource? _stop;
 
@@ -46,6 +52,11 @@ public sealed class ControlServer(
     /// Raised when a paired phone's session opens (true) or closes (false).
     /// </summary>
     public event EventHandler<(PairedAppDevice Device, bool Connected)>? SessionChanged;
+
+    /// <summary>
+    /// Raised with the phone's Hello when its session opens, just before <see cref="SessionChanged"/>.
+    /// </summary>
+    public event EventHandler<(PairedAppDevice Device, Hello Hello)>? HelloReceived;
 
     /// <summary>
     /// Raised for session messages the server does not answer itself.
@@ -62,6 +73,12 @@ public sealed class ControlServer(
     /// </summary>
     /// <returns>The pairing URI.</returns>
     public PairingUri PairingUri() => new(_identity.DeviceId, _identity.DeviceName, [.. LanAddresses().Select(a => $"{a}:{Port}")], _certificate.Fingerprint, _tokens.Current);
+
+    /// <summary>
+    /// Sets who takes file transfer data connections; without one they are closed. Set before <see cref="Start"/>.
+    /// </summary>
+    /// <param name="transfers">File transfers.</param>
+    public void UseTransfers(ITransferDataConnections transfers) => _transfers = transfers;
 
     /// <summary>
     /// Starts listening on every interface.
@@ -105,21 +122,45 @@ public sealed class ControlServer(
             return false;
         }
 
-        await session.SendAsync(envelope, cancellationToken);
-        return true;
+        try
+        {
+            await session.SendAsync(envelope, cancellationToken);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or ObjectDisposedException)
+        {
+            _logger.LogDebug("Sending to {Phone} over Wi-Fi failed: {Reason}", session.Device.Name, exception.Message);
+            return false;
+        }
     }
 
     /// <summary>
-    /// Gets the LAN IPv4 addresses phones can reach (up, not loopback).
+    /// Gets a value indicating whether a phone's session is open.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    /// <returns>True when connected over Wi-Fi.</returns>
+    public bool IsConnected(string deviceId) => _sessions.ContainsKey(deviceId);
+
+    /// <summary>
+    /// Gets the LAN IPv4 addresses phones can reach: adapters that are up, not loopback, tunnels or virtual switches
+    /// (Hyper-V, WSL), no link-local addresses; the adapter with a default gateway first, Wi‑Fi before Ethernet.
     /// </summary>
     /// <returns>Addresses.</returns>
     public static IReadOnlyList<IPAddress> LanAddresses() => [.. NetworkInterface.GetAllNetworkInterfaces()
-        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel))
-        .OrderByDescending(n => n.GetIPProperties().GatewayAddresses.Count > 0)
+        .Where(n => n.OperationalStatus == OperationalStatus.Up && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel) && !IsVirtual(n))
+        .OrderByDescending(HasIpv4Gateway)
+        .ThenByDescending(n => n.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
         .SelectMany(n => n.GetIPProperties().UnicastAddresses)
         .Select(a => a.Address)
-        .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a))
+        .Where(a => a.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(a) && !IsLinkLocal(a))
         .Distinct()];
+
+    private static bool IsLinkLocal(IPAddress address) => address.GetAddressBytes() is [169, 254, ..];
+
+    private static bool HasIpv4Gateway(NetworkInterface adapter) => adapter.GetIPProperties().GatewayAddresses.Any(g => g.Address.AddressFamily == AddressFamily.InterNetwork && !g.Address.Equals(IPAddress.Any));
+
+    // Virtual switches and VM adapters have addresses a phone on the Wi‑Fi cannot reach.
+    private static bool IsVirtual(NetworkInterface adapter) => _virtualAdapters.Any(name => adapter.Name.Contains(name, StringComparison.OrdinalIgnoreCase) || adapter.Description.Contains(name, StringComparison.OrdinalIgnoreCase));
 
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
@@ -183,7 +224,23 @@ public sealed class ControlServer(
 
             using var firstTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             firstTimeout.CancelAfter(_firstMessageTimeout);
-            var first = await EnvelopeFraming.ReadAsync(ssl, firstTimeout.Token);
+            var firstFrame = await EnvelopeFraming.ReadFrameAsync(ssl, firstTimeout.Token);
+
+            if (firstFrame is null)
+            {
+                return;
+            }
+
+            // A bare TransferStreamHeader parses as an Envelope without a body (its field 1 is a string, Envelope's a
+            // number); Hello and PairingRequest always have one.
+            var first = ParseEnvelope(firstFrame);
+
+            if (first?.BodyCase is null or Envelope.BodyOneofCase.None)
+            {
+                await ServeDataAsync(ssl, firstFrame, fingerprint, remote, cancellationToken);
+                return;
+            }
+
             PairedAppDevice? device;
 
             switch (first?.BodyCase)
@@ -230,6 +287,7 @@ public sealed class ControlServer(
             _sessions[device.DeviceId] = session;
             await session.SendAsync(new Envelope { ReplyTo = first.Id, Hello = PcHello.Create(_identity) }, cancellationToken);
             _logger.LogInformation("Fenpo app on {Phone} connected over Wi-Fi ({Platform} {Os})", device.Name, first.Hello.Platform, first.Hello.OsVersion);
+            HelloReceived?.Invoke(this, (device, first.Hello));
             SessionChanged?.Invoke(this, (device, true));
 
             while (await EnvelopeFraming.ReadAsync(ssl, cancellationToken) is { } envelope)
@@ -259,6 +317,43 @@ public sealed class ControlServer(
             await ssl.DisposeAsync();
             client.Dispose();
         }
+    }
+
+    private static Envelope? ParseEnvelope(byte[] frame)
+    {
+        try
+        {
+            return Envelope.Parser.ParseFrom(frame);
+        }
+        catch (InvalidProtocolBufferException)
+        {
+            return null;
+        }
+    }
+
+    private async Task ServeDataAsync(SslStream ssl, byte[] frame, string fingerprint, string remote, CancellationToken cancellationToken)
+    {
+        TransferStreamHeader header;
+
+        try
+        {
+            header = TransferStreamHeader.Parser.ParseFrom(frame);
+        }
+        catch (InvalidProtocolBufferException)
+        {
+            _logger.LogInformation("First frame from {Remote} is neither an Envelope nor a TransferStreamHeader", remote);
+            return;
+        }
+
+        var device = _devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint);
+
+        if (device is null || string.IsNullOrEmpty(header.TransferId) || _transfers is null)
+        {
+            _logger.LogInformation("Data connection from {Remote} refused: {Reason}", remote, device is null ? "certificate not paired" : _transfers is null ? "no transfers" : "no transfer id");
+            return;
+        }
+
+        await _transfers.HandleAsync(device, header.TransferId, ssl, cancellationToken);
     }
 
     private async Task<PairedAppDevice?> PairAsync(SslStream ssl, Envelope request, string fingerprint, CancellationToken cancellationToken)

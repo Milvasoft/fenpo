@@ -31,7 +31,10 @@
     <value>Ekranı yansıt</value>
   </data>
   <data name="Action_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefondaki Fenpo ile çalışır</value>
+  </data>
+  <data name="Action_Ringing.Text" xml:space="preserve">
+    <value>Telefon çalıyor</value>
   </data>
   <data name="Action_RingText.Text" xml:space="preserve">
     <value>Telefonu çaldır</value>
@@ -180,8 +183,17 @@
   <data name="Chip_WifiOn" xml:space="preserve">
     <value>Aynı Wi‑Fi ağı</value>
   </data>
+  <data name="Clipboard_Copy.Text" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
   <data name="Clipboard_Empty.Text" xml:space="preserve">
     <value>İki tarafta kopyaladıkların burada listelenir.</value>
+  </data>
+  <data name="Clipboard_FromPc" xml:space="preserve">
+    <value>Bu bilgisayardan, telefona gönderildi</value>
+  </data>
+  <data name="Clipboard_FromPhone" xml:space="preserve">
+    <value>Telefondan, {0}</value>
   </data>
   <data name="Clipboard_History.Text" xml:space="preserve">
     <value>Son kopyalananlar</value>
@@ -201,6 +213,21 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Pano</value>
   </data>
+  <data name="Files_AndMore" xml:space="preserve">
+    <value>{0} ve {1} dosya daha</value>
+  </data>
+  <data name="Files_Cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="Files_Cancelled" xml:space="preserve">
+    <value>İptal edildi</value>
+  </data>
+  <data name="Files_Declined" xml:space="preserve">
+    <value>Telefon kabul etmedi</value>
+  </data>
+  <data name="Files_Done" xml:space="preserve">
+    <value>Tamamlandı</value>
+  </data>
   <data name="Files_DropHint.Text" xml:space="preserve">
     <value>Ya da bilgisayardan dosya seç.</value>
   </data>
@@ -210,20 +237,65 @@
   <data name="Files_NeedsApp.Message" xml:space="preserve">
     <value>Dosya ve fotoğraf göndermek için telefondaki Fenpo’yu bu bilgisayara bağla.</value>
   </data>
+  <data name="Files_NeedsWifi" xml:space="preserve">
+    <value>Dosyalar Wi‑Fi ile gider. Telefonu bilgisayarla aynı Wi‑Fi ağına bağla ve telefonda Fenpo’yu aç.</value>
+  </data>
   <data name="Files_NoPhotos.Text" xml:space="preserve">
-    <value>Telefondaki Fenpo bağlanınca son fotoğraflar burada görünür.</value>
+    <value>Son fotoğraflar sonraki bir sürümde burada görünecek. Şimdilik fotoğrafları telefondaki Fenpo’dan gönder.</value>
+  </data>
+  <data name="Files_NotConnected" xml:space="preserve">
+    <value>Telefondaki Fenpo bağlı değil. Telefonda Fenpo’yu aç.</value>
+  </data>
+  <data name="Files_NothingToSend" xml:space="preserve">
+    <value>Klasör gönderilemiyor. Klasörün içindeki dosyaları seç.</value>
   </data>
   <data name="Files_NoTransfers.Text" xml:space="preserve">
     <value>Henüz aktarım yok</value>
   </data>
+  <data name="Files_OpenFolder.Content" xml:space="preserve">
+    <value>Klasörü aç</value>
+  </data>
   <data name="Files_Pick.Content" xml:space="preserve">
     <value>Dosya seç</value>
+  </data>
+  <data name="Files_Received" xml:space="preserve">
+    <value>Telefondan geldi, {0}</value>
+  </data>
+  <data name="Files_ReceiveFailed" xml:space="preserve">
+    <value>Alınamadı. Telefondan tekrar gönder.</value>
+  </data>
+  <data name="Files_Receiving" xml:space="preserve">
+    <value>Telefondan geliyor, {0} / {1}</value>
   </data>
   <data name="Files_RecentPhotos.Text" xml:space="preserve">
     <value>Son fotoğraflar</value>
   </data>
+  <data name="Files_Retry" xml:space="preserve">
+    <value>Tekrar</value>
+  </data>
+  <data name="Files_SendFailed" xml:space="preserve">
+    <value>Gönderilemedi. Telefon ve bilgisayar aynı Wi‑Fi ağındayken tekrar dene.</value>
+  </data>
+  <data name="Files_Sending" xml:space="preserve">
+    <value>Telefona gidiyor, {0} / {1}</value>
+  </data>
+  <data name="Files_Sent" xml:space="preserve">
+    <value>Telefona gitti, {0}</value>
+  </data>
+  <data name="Files_Show" xml:space="preserve">
+    <value>Göster</value>
+  </data>
   <data name="Files_Transfers.Text" xml:space="preserve">
     <value>Aktarımlar</value>
+  </data>
+  <data name="Files_Unsupported" xml:space="preserve">
+    <value>Telefondaki Fenpo dosya almıyor. Telefonda Fenpo’yu güncelle.</value>
+  </data>
+  <data name="Files_WaitingData" xml:space="preserve">
+    <value>Telefon bağlanıyor</value>
+  </data>
+  <data name="Files_WaitingPhone" xml:space="preserve">
+    <value>Telefonun kabul etmesi bekleniyor</value>
   </data>
   <data name="FilesTitle.Text" xml:space="preserve">
     <value>Dosyalar ve fotoğraflar</value>
@@ -663,6 +735,18 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>
   </data>
+  <data name="Size_Bytes" xml:space="preserve">
+    <value>{0} B</value>
+  </data>
+  <data name="Size_GB" xml:space="preserve">
+    <value>{0} GB</value>
+  </data>
+  <data name="Size_KB" xml:space="preserve">
+    <value>{0} KB</value>
+  </data>
+  <data name="Size_MB" xml:space="preserve">
+    <value>{0} MB</value>
+  </data>
   <data name="Status_BrokenBond" xml:space="preserve">
     <value>Eşleşme bozuk, yeniden eşleştir</value>
   </data>
@@ -695,6 +779,15 @@
   </data>
   <data name="Time_Yesterday" xml:space="preserve">
     <value>Dün</value>
+  </data>
+  <data name="Toast_FileReceived" xml:space="preserve">
+    <value>{0} geldi</value>
+  </data>
+  <data name="Toast_FilesReceived" xml:space="preserve">
+    <value>{0} dosya geldi</value>
+  </data>
+  <data name="Toast_ShowFile" xml:space="preserve">
+    <value>Göster</value>
   </data>
   <data name="Tray_Clipboard.Text" xml:space="preserve">
     <value>Pano</value>
@@ -733,7 +826,10 @@
     <value>Yakınlık kilidi</value>
   </data>
   <data name="Tray_Ring.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Telefondaki Fenpo ile çalışır</value>
+  </data>
+  <data name="Tray_Ringing.Text" xml:space="preserve">
+    <value>Çalıyor</value>
   </data>
   <data name="Tray_RingText.Text" xml:space="preserve">
     <value>Çaldır</value>

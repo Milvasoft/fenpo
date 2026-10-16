@@ -87,7 +87,11 @@ public sealed class BluetoothHostedService(
                     continue;
                 }
 
-                _status.Update(s => s with { State = PhoneConnectionState.NotPaired });
+                // A phone paired only through Fenpo on it (Android) has no Bluetooth link here but is still paired.
+                _status.Update(s => s with
+                {
+                    State = !s.HasAppPhone ? PhoneConnectionState.NotPaired : s.AppConnected ? PhoneConnectionState.Connected : PhoneConnectionState.Disconnected,
+                });
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {

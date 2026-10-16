@@ -51,9 +51,11 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
     /// <returns>The reason a completed message was dropped, or null.</returns>
     public string? OnChunk(ReadOnlySpan<byte> chunk)
     {
+        var dropped = _assembler.Dropped;
+
         if (!_assembler.TryAdd(chunk, out var sealedMessage) || sealedMessage is null)
         {
-            return null;
+            return _assembler.Dropped != dropped ? $"chunk {chunk.Length} bytes, flags {(chunk.Length > 0 ? chunk[0] : 0)}, out of order or too long" : null;
         }
 
         // A connection may belong to any paired phone until one key opens a message; then it stays with that phone.
@@ -129,9 +131,10 @@ public sealed class BleChannelSession(IPairedAppDevices devices, IBleCounters co
         switch (envelope.BodyCase)
         {
             case Envelope.BodyOneofCase.Hello:
-                HelloReceived?.Invoke(this, envelope.Hello);
+                // The PC's Hello comes first; whatever listeners send after Hello follows it.
                 Send(new Envelope { ReplyTo = envelope.Id, Hello = PcHello.Create(_identity) });
                 SendPcStatus();
+                HelloReceived?.Invoke(this, envelope.Hello);
                 break;
             case Envelope.BodyOneofCase.Ping:
                 Send(new Envelope { ReplyTo = envelope.Id, Pong = new Pong { Nonce = envelope.Ping.Nonce } });

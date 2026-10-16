@@ -76,7 +76,23 @@ The phone sends `Hello` as soon as it subscribes to `tx`, which means the encryp
   phone whose certificate opened the connection; anything else is closed. One data connection per transfer.
 - The phone opens the data connection within 30 seconds of the accept, otherwise both sides treat the transfer as
   failed. The receiver reports `TransferProgress` on the control connection and `TRANSFER_STATE_COMPLETED` once every
-  byte arrived and every given `sha256` matched. The writer closes the data connection after the last byte.
+  byte arrived and every given `sha256` matched, counting by the sizes in the offer, without waiting for the end of
+  the stream.
+- The phone reads its data connection to the end and closes it only after the PC's `COMPLETED` or `FAILED` (or a
+  timeout). Closing a TLS socket that still holds unread bytes, such as TLS 1.3 session tickets, sends a TCP reset,
+  which can throw away the last bytes still on their way to the PC. The PC closes after its last byte or its report.
+
+## Notification mirroring (Android)
+
+Only Android phones send their notifications over the Fenpo channel (`CAPABILITY_NOTIFICATION_MIRROR`); the iPhone's come through ANCS.
+
+- After `Hello`, on that channel, the phone sends a snapshot: `PhoneNotification` with `pre_existing` for every current notification, then `NotificationSnapshotDone`. The PC removes that phone's keys it did not receive since the snapshot started and does not pop up `pre_existing` ones. The snapshot is idempotent; the phone may skip it on BLE while Wi‑Fi is up.
+- Then the phone sends one `PhoneNotification` for each new or updated notification and `NotificationRemoved` when one is gone, on its best open channel. The `key` identifies a notification. `seq` grows with every such message across both channels; the PC ignores a message for a key whose `seq` is not newer than the last it saw and remembers removed keys for a few minutes, so a late update cannot bring a removed notification back.
+- `category` comes from Android's `Notification.category`: `call` is `INCOMING_CALL` (the PC shows it in the Island with its actions), `missed_call` `MISSED_CALL`, `msg` and `social` `SOCIAL`, `email` `EMAIL`, `event`, `reminder` and `alarm` `SCHEDULE`, `navigation` `LOCATION`, anything else `UNSPECIFIED`.
+- The PC answers with `DismissNotification` (only for `dismissible` ones) or `RunNotificationAction` (`reply_text` for actions with `accepts_reply`). A notification or action that no longer exists is answered with `Error` `INVALID_REQUEST`.
+- `content_hidden` means Android withheld the content (one-time codes, lock screen privacy); the PC says so instead of showing an empty notification.
+- App icons are not repeated in every notification: the PC sends `AppIconRequest` for an `app_id` it has not cached and the phone answers with `AppIcon` (64x64 PNG).
+- On the BLE channel a `PhoneNotification` must fit the 4096-byte sealed limit: the phone drops `large_icon_png` first, then shortens `text` and `messages`. An `AppIcon` that does not fit waits for Wi‑Fi.
 
 ## Notification mirroring (Android)
 

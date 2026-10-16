@@ -15,18 +15,25 @@ public sealed partial class ClipboardPage : Page
     public ClipboardPage()
     {
         ViewModel = App.GetService<AppFeatureViewModel>();
+        Clipboard = App.GetService<ClipboardViewModel>();
         InitializeComponent();
     }
 
     /// <summary>
-    /// Gets the view model.
+    /// Gets the view model (is the phone app connected, sharing switch).
     /// </summary>
     public AppFeatureViewModel ViewModel { get; }
+
+    /// <summary>
+    /// Gets the list view model.
+    /// </summary>
+    public ClipboardViewModel Clipboard { get; }
 
     /// <inheritdoc/>
     protected override void OnNavigatedFrom(NavigationEventArgs e)
     {
         base.OnNavigatedFrom(e);
         ViewModel.Dispose();
+        Clipboard.Dispose();
     }
 }

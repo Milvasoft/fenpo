@@ -47,9 +47,14 @@ public sealed class FenpoGattServer(
     private PcStatus _lastPcStatus = new();
 
     /// <summary>
-    /// Raised when the Fenpo app on a phone connects (true) or the last one leaves (false).
+    /// Raised when the Fenpo app on a phone says Hello over Bluetooth.
     /// </summary>
-    public event EventHandler<bool>? AppConnectionChanged;
+    public event EventHandler<(PairedAppDevice Device, Hello Hello)>? HelloReceived;
+
+    /// <summary>
+    /// Raised when a phone that said Hello leaves the channel (unsubscribed or disconnected).
+    /// </summary>
+    public event EventHandler<PairedAppDevice>? SessionClosed;
 
     /// <summary>
     /// Raised with the Bluetooth LE id of a phone that said Hello as Android (it is not an iPhone for the ANCS link).
@@ -59,7 +64,7 @@ public sealed class FenpoGattServer(
     /// <summary>
     /// Raised for messages from the phone app that the channel does not answer itself.
     /// </summary>
-    public event EventHandler<Envelope>? MessageReceived;
+    public event EventHandler<(PairedAppDevice Device, Envelope Envelope)>? MessageReceived;
 
     /// <summary>
     /// Gets a value indicating whether the service is up and advertised.
@@ -128,6 +133,39 @@ public sealed class FenpoGattServer(
         _logger.LogInformation("Fenpo BLE channel advertised");
         return true;
     }
+
+    /// <summary>
+    /// Sends a message to a phone connected over Bluetooth.
+    /// </summary>
+    /// <param name="deviceId">Phone id (the Fenpo app's, not the Bluetooth one).</param>
+    /// <param name="envelope">Message; at most 4096 bytes once sealed.</param>
+    /// <returns>False when the phone is not on the channel or the message is too large for it.</returns>
+    public bool Send(string deviceId, Envelope envelope)
+    {
+        var connection = _connections.Values.FirstOrDefault(c => c.Session.Device?.DeviceId == deviceId);
+
+        if (connection is null)
+        {
+            return false;
+        }
+
+        try
+        {
+            return connection.Session.Send(envelope);
+        }
+        catch (ArgumentException)
+        {
+            // Larger than a sealed BLE message: it has to wait for Wi-Fi.
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a phone is on the Bluetooth channel.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    /// <returns>True when it said Hello and is still subscribed.</returns>
+    public bool IsConnected(string deviceId) => _connections.Values.Any(c => c.Session.Device?.DeviceId == deviceId);
 
     /// <inheritdoc/>
     public ValueTask DisposeAsync()
@@ -215,16 +253,22 @@ public sealed class FenpoGattServer(
 
         foreach (var gone in _connections.Keys.Where(id => !subscribed.Contains(id)).ToList())
         {
-            if (_connections.TryRemove(gone, out var connection))
-            {
-                connection.Outgoing.Writer.TryComplete();
-            }
+            Close(gone);
+        }
+    }
+
+    private void Close(string id)
+    {
+        if (!_connections.TryRemove(id, out var connection))
+        {
+            return;
         }
 
-        if (_connections.IsEmpty)
+        connection.Outgoing.Writer.TryComplete();
+
+        if (connection.Session.Device is { } device)
         {
-            _status.Update(s => s with { AppConnected = false });
-            AppConnectionChanged?.Invoke(this, false);
+            SessionClosed?.Invoke(this, device);
         }
     }
 
@@ -232,26 +276,36 @@ public sealed class FenpoGattServer(
     {
         // Chunks fit the largest notification: ATT MTU minus the ATT and chunk headers.
         var payload = BleChunks.PayloadLength(Math.Max(23, (int)gattSession.MaxPduSize));
+        _logger.LogInformation("Fenpo BLE channel opened by {Device} (PDU {Pdu})", id, gattSession.MaxPduSize);
         var session = new BleChannelSession(_devices, _counters, _identity, CurrentPcStatus, payload);
         var connection = new Connection(id, session, Channel.CreateUnbounded<byte[]>());
         session.ChunkReady += (sender, chunk) => connection.Outgoing.Writer.TryWrite(chunk);
         session.HelloReceived += (sender, hello) =>
         {
             _logger.LogInformation("Fenpo app on {Phone} said hello ({Platform} {Os})", session.Device?.Name, hello.Platform, hello.OsVersion);
-            _status.Update(s => s with { AppConnected = true });
-            AppConnectionChanged?.Invoke(this, true);
 
             if (hello.Platform == DevicePlatform.Android)
             {
                 AndroidPhoneSeen?.Invoke(this, id);
             }
+
+            if (session.Device is { } device)
+            {
+                HelloReceived?.Invoke(this, (device, hello));
+            }
         };
-        session.MessageReceived += (sender, envelope) => MessageReceived?.Invoke(this, envelope);
+        session.MessageReceived += (sender, envelope) =>
+        {
+            if (session.Device is { } device)
+            {
+                MessageReceived?.Invoke(this, (device, envelope));
+            }
+        };
         gattSession.SessionStatusChanged += (sender, e) =>
         {
-            if (e.Status == GattSessionStatus.Closed && _connections.TryRemove(id, out var closed))
+            if (e.Status == GattSessionStatus.Closed)
             {
-                closed.Outgoing.Writer.TryComplete();
+                Close(id);
             }
         };
         _ = Task.Run(() => SendLoopAsync(connection));
