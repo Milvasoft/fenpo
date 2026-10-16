@@ -10,6 +10,9 @@
 		<string>en</string>
 		<string>tr</string>
 	</array>
+	<!-- Standard TLS and AES-GCM from Network.framework and CryptoKit only: exempt (Buğra's decision). -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>UIPrefersShowingLanguageSettings</key>
 	<true/>
 	<key>UIBackgroundModes</key>

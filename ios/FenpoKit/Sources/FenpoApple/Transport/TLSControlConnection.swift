@@ -69,8 +69,12 @@ public actor TLSControlConnection {
                     switch state {
                     case .ready:
                         once.resume(returning: ())
-                    case .failed(let error), .waiting(let error):
+                    case .failed(let error):
                         once.resume(throwing: TLSConnectionError.network(String(describing: error)))
+                    case .waiting:
+                        // Also the state while iOS shows the local network prompt; the caller's
+                        // timeout decides when to give up.
+                        break
                     case .cancelled:
                         once.resume(throwing: TLSConnectionError.cancelled)
                     default:

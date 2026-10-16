@@ -1,4 +1,12 @@
-# iOS cihaz testleri: kilometre taşı 1 (S4, S6)
+# iOS cihaz testleri
+
+| Kilometre taşı | Kim, nerede | Bölüm |
+|---|---|---|
+| 1: S4 ve S6 | Ortak, kendi Mac'i ve iPhone'u; PC yerine Mac'teki test aracı | Aşağıda, 1–5 |
+| 2: gerçek PC ile eşleşme | Buğra, Windows PC'si ve TestFlight'tan kurduğu iPhone | [Kilometre taşı 2](#kilometre-taşı-2-gerçek-pc-ile-eşleşme) |
+| TestFlight'a yükleme | Ortak, Mac'te | [TestFlight](#testflight) |
+
+# Kilometre taşı 1 (S4, S6)
 
 Bu liste Mac'i ve iPhone'u olan ortak için. Windows uygulamasına gerek yok: PC'nin yerini Mac'te çalışan küçük bir araç (`FenpoTestPeripheral`) alıyor. Araç, Windows'un yapacağı gibi aynı Bluetooth servisini yayınlıyor, aynı şifrelemeyi ve parçalamayı kullanıyor.
 
@@ -147,3 +155,67 @@ Buğra'ya şunları gönderin:
 - Test aracının şifreleme anahtarı sabit ve herkese açık (`TestPeripheral.bleChannelKey`). Sadece Geliştirici menüsündeki test eşleşmesinde kullanılır; gerçek bir PC için hiçbir zaman kullanılmaz.
 - Kayıtta pano içeriği yer almaz, sadece türü ve uzunluğu yazılır.
 - Gerçek Windows uygulamasıyla uçtan uca eşleşme (QR → Wi‑Fi → Bluetooth) kilometre taşı 2'de denenecek.
+
+# Kilometre taşı 2: gerçek PC ile eşleşme
+
+Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşmesinin uçtan uca denenmesi (DECISIONS #14, #15). Windows tarafının eşleşmesi ve kontrol kanalı `main`'de (468655e), BLE kanalı da öyle (f65f0e9).
+
+## Hazırlık
+
+- **Windows:** `main`'deki son Fenpo derlemesi açık. Phone Link kapalı (Bluetooth bağlantısını tutuyor). PC ile iPhone aynı Wi‑Fi ağında. Windows güvenlik duvarı ilk açılışta Fenpo için izin sorarsa **Özel ağlar**'a izin verin.
+- **iPhone:** Fenpo'yu TestFlight'tan kurun (aşağıdaki TestFlight bölümü). Daha önce Mac'le test eşleşmesi yapıldıysa önce Geliştirici → **Eşleşmeyi ve kimliği sil**.
+- iPhone, Windows Ayarlar'dan zaten Bluetooth ile eşleşmişse (Aşama 1'in uygulamasız eşleşmesi, DECISIONS #28), M2'de iOS'un eşleşme penceresi çıkmayabilir. Bunu not edin.
+
+## Testler
+
+| # | Adım | Beklenen |
+|---|---|---|
+| M1 | Windows'ta **iPhone'unu bağla** ekranını açın. iPhone'da Fenpo → **Kodu okut** ile QR'ı okutun | Tarayıcı açılınca iOS yerel ağ izni sorar; **İzin Ver**. "Neredeyse bitti" ekranında **Wi‑Fi bağlantısı** işaretlenir: "<PC> ile şifreli kanal kuruldu" |
+| M2 | **Bluetooth'u bağla** | Aksesuar seçicisi açılır. PC hangi adla görünüyor (QR'daki ad mı, Bluetooth adı mı)? Seçin; iOS eşleşme isteği gelir, onaylayın |
+| M3 | iOS "Bildirimlerini paylaşmak istiyor" diye sorar; **İzin Ver** | **Bildirim paylaşımı** adımı işaretlenir (PC'den `PcStatus`); **Bitti** düğmesi çıkar |
+| M4 | **Bitti** | Ana ekranda PC kartı: ad ve yeşil Bluetooth. Geliştirici → Durum: Bluetooth `ready`, Bluetooth'taki PC adı ve özellikler dolu |
+| M5 | Windows'ta telefon satırına bakın | iOS sürümü ve model (Hello'daki `os_version`, `model`) doğru |
+| M6 | Başka bir telefondan bu iPhone'a mesaj gönderin | Windows'ta bildirim görünür (ANCS, aynı Bluetooth bağı) |
+| M7 | Windows'ta Fenpo'yu kapatıp açın; iPhone'da Fenpo'yu açmayın | 1 dakika içinde yeniden bağlanır: Windows'ta telefon bağlı görünür, iPhone kaydında `Received Hello` |
+| M8 | PC'yi yeniden başlatın | M7 ile aynı |
+| M9 | Tarayıcıyı tekrar açıp 10 saniye bekleyin, kapatın. Geliştirici → Kayıt | `[Bonjour] Found ...` satırında PC'nin `_fenpo._tcp` kaydı ve TXT'deki `id`, `v`. Windows tarafı bunun telefonda doğrulanmasını istedi |
+| M10 | iPhone hücresel veride, Wi‑Fi kapalıyken QR okutun | "Tamamlanmadı" ve **Yeniden dene**. Mesaj, ne yapılacağını anlatıyor mu? |
+| M11 | QR'ın fotoğrafını çekin, 6 dakika bekleyin (QR 5 dakikada yenilenir), fotoğraftaki eski QR'ı okutun | Eşleşme reddedilir (`TOKEN_INVALID`), "Tamamlanmadı" |
+| M12 | PC sekmesi → **Eşleştirmeyi kaldır** | Ana ekran "Bilgisayarını ekle"ye döner; aksesuar iOS Ayarlar → Gizlilik ve Güvenlik → Aksesuarlar'dan da kalkar |
+
+**Windows tarafı bekleniyor:** Pano (`ClipboardItem`, `ClipboardRequest`), PC'yi kilitle (`LockPc`), telefonu çaldır (`RingDevice`), PC'de aç (`OpenUrl`) ve dosya aktarımı Windows'ta henüz yok. Geldikçe kilometre taşı 1'deki T15–T22, Mac aracı yerine gerçek PC ile tekrarlanacak. Paylaşım menüsündeki "PC'de aç" de Wi‑Fi kanalından bunu bekliyor.
+
+Geri bildirim kilometre taşı 1'deki gibi: tablo, iPhone kaydı (Geliştirici → Kayıt → Dışa aktar) ve Windows'un kaydı.
+
+# TestFlight
+
+Yükleme GitHub Actions'tan yapılır, Mac gerekmez. App Store Connect'te uygulama kaydı (`com.fenpo.app`) ve API anahtarı Buğra'da; repo secret'ları `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID`.
+
+## Yüklemek
+
+1. GitHub → **Actions → iOS → Run workflow**: dal `ios`, **Upload a Release build to TestFlight** işaretli.
+2. Önce testler koşar (Windows çekirdeği, simülatör, ekran görüntüleri). Geçerlerse **Upload to TestFlight** işi Release arşivini API anahtarıyla imzalar (uygulama, paylaşım uzantısı, widget'lar, App Group) ve yükler.
+3. İşin özetinde sürüm ve derleme numarası yazar: `Fenpo 0.1.0 (<run_number>) from <commit>`. Derleme numarası iş akışının çalışma numarasıdır, her yüklemede artar.
+4. Build birkaç dakika işlendikten sonra App Store Connect → TestFlight'ta görünür. Dahili test grubuna (ör. "Fenpo ekibi") eklenen testçiler hemen kurabilir.
+
+Şifreleme beyanı Info.plist'te: `ITSAppUsesNonExemptEncryption = NO`. Fenpo sadece Apple'ın Network.framework'ündeki TLS'i ve CryptoKit'teki AES-GCM'i kullanıyor. App Store Connect bu yüzden her build'de soru sormaz.
+
+## Mac'ten yüklemek (yedek)
+
+Actions çalışmazsa, Xcode'u Milvasoft ekibinde oturum açmış bir Mac'te:
+
+```bash
+git checkout <commit>
+ios/scripts/archive-testflight.sh
+```
+
+Burada derleme numarası commit sayısıdır (`git rev-list --count HEAD`). İki yolu karıştırırsanız App Store Connect, daha küçük numaralı build'i reddeder.
+
+## Sorunlar
+
+| Belirti | Ne yapmalı |
+|---|---|
+| Arşivde `No signing certificate` ya da `Cloud signing permission error` | API anahtarının rolü bulut imzalamaya yetmiyor olabilir. App Store Connect → Kullanıcılar ve Erişim → Entegrasyonlar'da anahtarın rolünü **Admin** yapın ya da "Bulutta yönetilen dağıtım sertifikalarına erişim" iznini verin, sonra yeniden çalıştırın |
+| `No profiles for 'com.fenpo.app.share' were found` | Kimlik hesapta kayıtlı (bkz. DECISIONS #26). `-allowProvisioningUpdates` profilleri kendisi oluşturur; yine de olmazsa logu (`testflight-logs`) Buğra'ya gönderin |
+| Yükleme `ITMS-91053` (gizlilik bildirimi) uyarısı | `ios/Shared/PrivacyInfo.xcprivacy` eksik bir API nedeni bildiriyor; uyarı metnini Buğra'ya gönderin |
+| Yükleme "bundle version must be higher" | Daha büyük numaralı bir build zaten var; iş akışını yeniden çalıştırmak numarayı artırır |
