@@ -55,6 +55,12 @@ public sealed partial class ScreenMirrorWindow : Window
         _mirror.StreamOpened += OnStreamOpened;
         Closed += (sender, e) => OnClosed();
         ApplyState();
+
+        // An iPhone broadcast started on the phone opens this window while its stream already runs.
+        if (_mirror.State == ScreenState.Streaming && _mirror.Feed is { } feed)
+        {
+            Play(feed);
+        }
     }
 
     /// <summary>
@@ -65,6 +71,11 @@ public sealed partial class ScreenMirrorWindow : Window
         Activate();
         _ = _mirror.StartMirroringAsync();
     }
+
+    /// <summary>
+    /// Shows the window for a stream the phone started by itself.
+    /// </summary>
+    public void Show() => Activate();
 
     private static Envelope Global(ScreenGlobalAction action) => new() { ScreenInput = new ScreenInput { Global = action } };
 
@@ -103,12 +114,19 @@ public sealed partial class ScreenMirrorWindow : Window
         RestartButton.Visibility = state is ScreenState.PausedLocked or ScreenState.Stopped or ScreenState.Failed ? Visibility.Visible : Visibility.Collapsed;
         StateText.Text = _localization.GetString(state switch
         {
+            ScreenState.WaitingForConsent when _mirror.FromIphone => "Mirror_WaitingIphone",
             ScreenState.WaitingForConsent => "Mirror_WaitingConsent",
             ScreenState.PausedLocked => "Mirror_Locked",
             ScreenState.Failed => "Mirror_Failed",
             _ => "Mirror_Stopped",
         });
-        NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable;
+        NoControl.IsOpen = state == ScreenState.Streaming && !_mirror.ControlAvailable && !_mirror.FromIphone;
+
+        // The iPhone cannot be controlled from the PC: only Stop stays.
+        foreach (var control in Controls.Children.OfType<FrameworkElement>().Where(c => c != StopButton))
+        {
+            control.Visibility = _mirror.FromIphone ? Visibility.Collapsed : Visibility.Visible;
+        }
     }
 
     private void OnStreamOpened(object? sender, MediaFeed stream) => _dispatcher.TryEnqueue(() => Play(stream));

@@ -31,7 +31,7 @@
         <InfoBar x:Name="NoControl" Grid.Row="1" x:Uid="Mirror_NoControl" Margin="12,0,12,8" Severity="Informational" IsClosable="False" />
 
         <!-- Android's buttons, typing, stop. -->
-        <Grid Grid.Row="2" Padding="12,0,12,12" ColumnSpacing="6">
+        <Grid x:Name="Controls" Grid.Row="2" Padding="12,0,12,12" ColumnSpacing="6">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
@@ -53,7 +53,7 @@
                 <FontIcon Glyph="&#xEA8F;" FontSize="16" />
             </Button>
             <TextBox x:Name="TypeBox" Grid.Column="4" x:Uid="Mirror_Type" KeyDown="OnTypeKeyDown" VerticalAlignment="Center" />
-            <Button Grid.Column="5" x:Uid="Mirror_Stop" Padding="8" Click="OnStopClick">
+            <Button x:Name="StopButton" Grid.Column="5" x:Uid="Mirror_Stop" Padding="8" Click="OnStopClick">
                 <FontIcon Glyph="&#xE71A;" FontSize="16" />
             </Button>
         </Grid>

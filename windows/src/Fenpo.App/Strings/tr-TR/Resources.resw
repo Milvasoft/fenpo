@@ -585,6 +585,9 @@
   <data name="Mirror_WaitingConsent" xml:space="preserve">
     <value>Telefonda ekranı paylaşmaya izin ver.</value>
   </data>
+  <data name="Mirror_WaitingIphone" xml:space="preserve">
+    <value>iPhone'da Fenpo › PC › Ekranı PC'de göster'e dokun ya da Denetim Merkezi'nden ekran yayınını başlat.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Aramalar</value>
   </data>

@@ -45,6 +45,17 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
     /// </summary>
     public bool CanMirror => _channel.IsConnected && _channel.Supports(Capability.ScreenMirror);
 
+    /// <summary>
+    /// Gets a value indicating whether the phone in use is an iPhone: its user starts the broadcast on the phone, and
+    /// the PC cannot control it (screen.proto).
+    /// </summary>
+    public bool FromIphone => _channel.Phone?.Platform == DevicePlatform.Ios;
+
+    /// <summary>
+    /// Gets the stream playing now, for a window that opens after it started (an iPhone broadcast started on the phone).
+    /// </summary>
+    public MediaFeed? Feed { get; private set; }
+
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -124,6 +135,7 @@ public sealed class ScreenMirrorService(PhoneChannel channel, ILogger<ScreenMirr
     {
         _streamId = feed.Open.StreamId;
         Video = feed.Open.Video;
+        Feed = feed;
         StreamOpened?.Invoke(this, feed);
         await RequestKeyFrameAsync();
     }

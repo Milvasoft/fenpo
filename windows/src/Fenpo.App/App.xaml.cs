@@ -201,7 +201,10 @@ public partial class App : Application
     /// <summary>
     /// Shows the phone's screen in its own window and asks the phone to start, or brings the open window forward.
     /// </summary>
-    public void ShowScreenMirror()
+    public void ShowScreenMirror() => ShowScreenMirror(askPhone: true);
+
+    // askPhone false: the phone started the stream itself (an iPhone broadcast), so the window only shows it.
+    private void ShowScreenMirror(bool askPhone)
     {
         if (_mirrorWindow is not null)
         {
@@ -211,7 +214,15 @@ public partial class App : Application
 
         _mirrorWindow = new ScreenMirrorWindow(GetService<ScreenMirrorService>(), GetService<ThemeService>(), GetService<LocalizationService>(), GetService<ILogger<ScreenMirrorWindow>>());
         _mirrorWindow.Closed += (sender, e) => _mirrorWindow = null;
-        _mirrorWindow.Start();
+
+        if (askPhone)
+        {
+            _mirrorWindow.Start();
+        }
+        else
+        {
+            _mirrorWindow.Show();
+        }
     }
 
     /// <summary>
@@ -247,6 +258,7 @@ public partial class App : Application
         calls.AttachUi(dispatcher);
         GetService<ClipboardSync>().AttachUi(dispatcher);
         GetService<PcInputService>().AttachUi(dispatcher);
+        GetService<ScreenMirrorService>().StreamOpened += (sender, feed) => dispatcher.TryEnqueue(() => ShowScreenMirror(askPhone: false));
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() =>
         {
             // A second "fenpo --send ..." (File Explorer's right-click command) arrives here from the new process.
