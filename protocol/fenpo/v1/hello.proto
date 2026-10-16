@@ -8,7 +8,8 @@ option csharp_namespace = "Fenpo.Protocol.V1";
 option java_package = "com.fenpo.protocol.v1";
 option java_multiple_files = true;
 
-// First message on every connection, sent by both sides.
+// First message on every connection, sent by both sides. On the BLE channel the phone
+// sends it as soon as it subscribes to `tx`, and the PC answers with its own.
 message Hello {
   string device_id = 1;                  // Stable id created at first launch (UUID).
   string device_name = 2;                // User visible name, e.g. "BUGRA-PC".
@@ -16,9 +17,11 @@ message Hello {
   string app_version = 4;                // Semantic version of the sending app.
   repeated uint32 protocol_versions = 5; // Supported protocol versions, currently [1].
   repeated Capability capabilities = 6;
+  string os_version = 7;                 // e.g. "iOS 27.0.1", "Windows 11 26300".
+  string model = 8;                      // Hardware model identifier, e.g. "iPhone14,5".
 }
 
-// Keep-alive. The receiver answers with Pong carrying the same nonce.
+// Keep-alive on both channels. The receiver answers with Pong carrying the same nonce.
 message Ping {
   uint64 nonce = 1;
 }

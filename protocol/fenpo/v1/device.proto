@@ -14,6 +14,13 @@ message DeviceState {
   repeated string addresses = 4;         // Current ip:port endpoints of the data channel.
 }
 
+// What the PC receives from the phone over Bluetooth, which the phone cannot see by
+// itself. Sent by the PC right after Hello and whenever a value changes.
+message PcStatus {
+  bool notifications_subscribed = 1;     // The PC is subscribed to ANCS ("Share System Notifications" allowed).
+  bool messages_available = 2;           // The PC is connected to the phone's message access service (MAP).
+}
+
 // Play a sound on the phone so it can be found.
 message RingDevice {
   bool stop = 1;                         // true stops a ring in progress.
