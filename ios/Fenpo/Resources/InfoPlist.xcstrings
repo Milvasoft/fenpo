@@ -68,6 +68,23 @@
           }
         }
       }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo shows your photos on your PC when you browse them there, and sends new screenshots if you turn that on."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo, bilgisayarında göz attığında fotoğraflarını orada gösterir ve açarsan yeni ekran görüntülerini gönderir."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

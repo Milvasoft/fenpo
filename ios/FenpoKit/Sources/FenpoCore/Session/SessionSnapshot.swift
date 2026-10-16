@@ -8,6 +8,10 @@ public struct SessionSnapshot: Equatable, Sendable {
     /// Connection paths that are up.
     public var links: ChannelLinks
 
+    /// Whether the PC receives the iPhone's notifications (ANCS, "Share System Notifications" in
+    /// the iPhone's Bluetooth settings for the PC); `nil` while unknown.
+    public var notificationsShared: Bool?
+
     /// Distance to the PC from the BLE signal.
     public var proximity: Proximity
 
@@ -30,6 +34,7 @@ public struct SessionSnapshot: Equatable, Sendable {
     public init(
         pc: PairedPC?,
         links: ChannelLinks,
+        notificationsShared: Bool? = nil,
         proximity: Proximity,
         phoneClipboardPreview: String?,
         pcClipboardPreview: String?,
@@ -39,6 +44,7 @@ public struct SessionSnapshot: Equatable, Sendable {
     ) {
         self.pc = pc
         self.links = links
+        self.notificationsShared = notificationsShared
         self.proximity = proximity
         self.phoneClipboardPreview = phoneClipboardPreview
         self.pcClipboardPreview = pcClipboardPreview

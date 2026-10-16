@@ -39,8 +39,12 @@ public final class FileTransferService {
     // MARK: - Phone to PC
 
     /// Offers files to the PC and streams them once accepted.
-    /// - Parameter files: Files in order.
-    public func send(_ files: [OutgoingFile]) async throws {
+    /// - Parameters:
+    ///   - files: Files in order.
+    ///   - transferID: The PC's id when it asked for these files (`PhotoFetch`), so it accepts them
+    ///     without asking its user; a new one otherwise.
+    ///   - destinationPath: A folder in the PC's shared folders instead of its download folder.
+    public func send(_ files: [OutgoingFile], transferID: String? = nil, destinationPath: String? = nil) async throws {
         guard let first = files.first else {
             throw FenpoActionError.emptyText
         }
@@ -49,8 +53,11 @@ public final class FileTransferService {
             throw FenpoActionError.unsupportedByPC
         }
 
-        let id = UUID().uuidString
-        let offer = TransferPlan.offer(transferID: id, files: files)
+        let id = transferID ?? UUID().uuidString
+        var offer = TransferPlan.offer(transferID: id, files: files)
+        if let destinationPath {
+            offer.destinationPath = destinationPath
+        }
         active[id] = ActiveTransfer(id: id, firstFileName: first.name, fileCount: files.count, direction: .toPC, totalBytes: offer.totalBytes)
         defer {
             active[id] = nil

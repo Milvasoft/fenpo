@@ -2,6 +2,7 @@ import FenpoApple
 import FenpoCore
 import AVFoundation
 import CoreBluetooth
+import Photos
 import Foundation
 import Observation
 import UIKit
@@ -40,6 +41,12 @@ final class AppModel {
 
     /// Touchpad, keyboard and presentation remote; `nil` in previews.
     let pcInput: PcInputService?
+
+    /// The Personal Hotspot details for the PC; `nil` in previews.
+    let hotspot: HotspotService?
+
+    /// Sends new screenshots to the PC; `nil` in previews.
+    let screenshots: ScreenshotSender?
 
     /// Runs the pairing steps.
     let pairing: any PairingProviding
@@ -81,6 +88,8 @@ final class AppModel {
     ///   - transferActivities: Live Activities of large transfers; `nil` in previews.
     ///   - readsPermissions: Reads the real permissions; previews keep the sample.
     ///   - pcInput: Touchpad and presentation remote; `nil` in previews.
+    ///   - hotspot: Personal Hotspot details; `nil` in previews.
+    ///   - screenshots: Screenshot sending; `nil` in previews.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
@@ -89,7 +98,9 @@ final class AppModel {
         camera: CameraService? = nil,
         transferActivities: TransferActivities? = nil,
         readsPermissions: Bool = false,
-        pcInput: PcInputService? = nil
+        pcInput: PcInputService? = nil,
+        hotspot: HotspotService? = nil,
+        screenshots: ScreenshotSender? = nil
     ) {
         self.session = session
         self.pairing = pairing
@@ -99,6 +110,8 @@ final class AppModel {
         self.transferActivities = transferActivities
         self.readsPermissions = readsPermissions
         self.pcInput = pcInput
+        self.hotspot = hotspot
+        self.screenshots = screenshots
     }
 
     /// The camera's live picture.
@@ -163,9 +176,29 @@ final class AppModel {
                 // iOS has no API for these: local network is known only once the Wi-Fi channel
                 // worked, and the paste setting never.
                 localNetwork: snapshot.links.wifi ? .allowed : .unknown,
-                paste: .unknown
+                paste: .unknown,
+                photos: Self.photosPermission
             )
         }
+    }
+
+    private static var photosPermission: PermissionState {
+        switch PHPhotoLibrary.authorizationStatus(for: .readWrite) {
+        case .authorized, .limited:
+            .allowed
+        case .denied, .restricted:
+            .denied
+        case .notDetermined:
+            .notDetermined
+        @unknown default:
+            .unknown
+        }
+    }
+
+    /// Asks for photo access the first time; later the switch is in iOS Settings.
+    func requestPhotoAccess() async {
+        _ = await PHPhotoLibrary.requestAuthorization(for: .readWrite)
+        await refresh()
     }
 
     private static var bluetoothPermission: PermissionState {
