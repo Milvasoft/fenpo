@@ -25,7 +25,7 @@
     <value>Hotspot’a bağlan</value>
   </data>
   <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Android telefondaki Fenpo ile çalışır</value>
   </data>
   <data name="Action_MirrorText.Text" xml:space="preserve">
     <value>Ekranı yansıt</value>
@@ -135,8 +135,14 @@
   <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Kişiyi ortala</value>
   </data>
+  <data name="Camera_Failed" xml:space="preserve">
+    <value>Kamera açılamadı. Kamerayı kullanan başka bir uygulamayı kapatıp yeniden dene.</value>
+  </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</value>
+    <value>Önizleme telefonun kamerasını gösterir. Teams, Zoom ve Meet'te web kamerası olarak görünmesi için Fenpo Kamera bileşeni gerekiyor; o bir sonraki sürümde geliyor.</value>
+  </data>
+  <data name="Camera_Idle" xml:space="preserve">
+    <value>Telefonun kamerasını burada önizle.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -159,11 +165,26 @@
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Telefonu kamera olarak kullanmak için uygulamayı aç.</value>
   </data>
+  <data name="Camera_NotOffered" xml:space="preserve">
+    <value>Telefondaki Fenpo kamerayı paylaşmıyor. Telefonda Fenpo'yu güncelle ve açık tut.</value>
+  </data>
   <data name="Camera_Portrait.Text" xml:space="preserve">
     <value>Portre bulanıklığı</value>
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portre bulanıklığı</value>
+  </data>
+  <data name="Camera_Starting" xml:space="preserve">
+    <value>Kamera açılıyor…</value>
+  </data>
+  <data name="Camera_StartPreview.Content" xml:space="preserve">
+    <value>Önizlemeyi başlat</value>
+  </data>
+  <data name="Camera_StopPreview.Content" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="Camera_WaitingTap" xml:space="preserve">
+    <value>Telefonda Fenpo'nun “Kamerayı başlat” bildirimine dokun.</value>
   </data>
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Kamera</value>
@@ -311,6 +332,18 @@
   </data>
   <data name="Filter_Other.Content" xml:space="preserve">
     <value>Diğer</value>
+  </data>
+  <data name="Forget_Cancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="Forget_Confirm" xml:space="preserve">
+    <value>Kaldır</value>
+  </data>
+  <data name="Forget_Text" xml:space="preserve">
+    <value>Bu bilgisayar telefonu artık tanımaz. Yeniden bağlamak için telefondaki Fenpo ile QR kodu okut.</value>
+  </data>
+  <data name="Forget_Title" xml:space="preserve">
+    <value>{0} eşleşmesi kaldırılsın mı?</value>
   </data>
   <data name="Home_Files.Content" xml:space="preserve">
     <value>Dosyalar</value>
@@ -477,6 +510,60 @@
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Mesajlar</value>
   </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+  <data name="Mirror_Failed" xml:space="preserve">
+    <value>Yansıtma başlamadı. Telefonda Fenpo açıkken yeniden başlat.</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ana ekran</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ana ekran</value>
+  </data>
+  <data name="Mirror_Locked" xml:space="preserve">
+    <value>Telefon kilitlendi. Kilidini aç, sonra yeniden başlat.</value>
+  </data>
+  <data name="Mirror_NoControl.Message" xml:space="preserve">
+    <value>Telefonu buradan kontrol etmek için telefonda Ayarlar &gt; Erişilebilirlik &gt; Fenpo'yu aç.</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Son uygulamalar</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Son uygulamalar</value>
+  </data>
+  <data name="Mirror_Restart.Content" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yansıtmayı durdur</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yansıtmayı durdur</value>
+  </data>
+  <data name="Mirror_Stopped" xml:space="preserve">
+    <value>Yansıtma durdu.</value>
+  </data>
+  <data name="Mirror_Title" xml:space="preserve">
+    <value>Telefon ekranı</value>
+  </data>
+  <data name="Mirror_Type.PlaceholderText" xml:space="preserve">
+    <value>Telefona yaz, Enter ile gönder</value>
+  </data>
+  <data name="Mirror_WaitingConsent" xml:space="preserve">
+    <value>Telefonda ekranı paylaşmaya izin ver.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Aramalar</value>
   </data>
@@ -507,11 +594,17 @@
   <data name="NeedsApp_Title.Text" xml:space="preserve">
     <value>Telefonda Fenpo gerekiyor.</value>
   </data>
+  <data name="Notification_ContentHidden" xml:space="preserve">
+    <value>İçerik telefonda gizli. Görmek için telefonun kilidini aç.</value>
+  </data>
   <data name="Notification_Dismiss" xml:space="preserve">
     <value>Kapat</value>
   </data>
   <data name="Notification_DismissButton.Content" xml:space="preserve">
     <value>Kapat</value>
+  </data>
+  <data name="Notification_ReplyHint" xml:space="preserve">
+    <value>Yanıt yaz</value>
   </data>
   <data name="Notifications_ClearAll.Content" xml:space="preserve">
     <value>Tümünü temizle</value>
@@ -524,6 +617,12 @@
   </data>
   <data name="Notifications_Footnote.Text" xml:space="preserve">
     <value>iPhone’da WhatsApp gibi uygulamalara buradan yanıt yazılamıyor, iOS buna izin vermiyor. SMS ve iMessage’lar Mesajlar sayfasından yanıtlanabiliyor.</value>
+  </data>
+  <data name="Notifications_Refused.Message" xml:space="preserve">
+    <value>Bu yüzden bildirimler ve gelen aramalar gelmiyor. iPhone'da Ayarlar › Bluetooth'u aç, bu bilgisayarın yanındaki (i) simgesine dokun ve Sistem Bildirimlerini Paylaş'ı aç. Fenpo birkaç saniye içinde kendiliğinden bağlanır.</value>
+  </data>
+  <data name="Notifications_Refused.Title" xml:space="preserve">
+    <value>iPhone bu bilgisayarla bildirim paylaşmıyor</value>
   </data>
   <data name="NotificationsTitle.Text" xml:space="preserve">
     <value>Bildirimler</value>
@@ -609,11 +708,32 @@
   <data name="Pair_WithApp.Content" xml:space="preserve">
     <value>Telefondaki Fenpo ile bağla</value>
   </data>
+  <data name="Phone_SwitchTo" xml:space="preserve">
+    <value>{0} telefonuna geç</value>
+  </data>
+  <data name="Ring_PcStop" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="Ring_PcText" xml:space="preserve">
+    <value>Bilgisayarı bulman için çalıyor.</value>
+  </data>
+  <data name="Ring_PcTitle" xml:space="preserve">
+    <value>{0} bu bilgisayarı çaldırıyor</value>
+  </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
   </data>
   <data name="Settings_AppearanceHeader.Text" xml:space="preserve">
     <value>Görünüm ve dil</value>
+  </data>
+  <data name="Settings_CallRing.Text" xml:space="preserve">
+    <value>Aramada bilgisayar da çalsın</value>
+  </data>
+  <data name="Settings_CallRingHint.Text" xml:space="preserve">
+    <value>Telefon çalarken bilgisayar Windows'un arama sesini çalar</value>
+  </data>
+  <data name="Settings_CallRingToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Aramada bilgisayar da çalsın</value>
   </data>
   <data name="Settings_Calls.Text" xml:space="preserve">
     <value>Gelen aramaları ekranın üstünde göster</value>
@@ -651,8 +771,14 @@
   <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Odak modunu eşitle</value>
   </data>
+  <data name="Settings_ForgetPhone.Content" xml:space="preserve">
+    <value>Eşleşmeyi kaldır</value>
+  </data>
   <data name="Settings_IncomingFiles.Text" xml:space="preserve">
     <value>Gelen dosyalar</value>
+  </data>
+  <data name="Settings_InUse" xml:space="preserve">
+    <value>Kullanılıyor · {0}</value>
   </data>
   <data name="Settings_Language.Text" xml:space="preserve">
     <value>Dil</value>
@@ -731,6 +857,9 @@
   </data>
   <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Telefonla kilit aç</value>
+  </data>
+  <data name="Settings_UsePhone.Content" xml:space="preserve">
+    <value>Bu telefonu kullan</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Ayarlar</value>

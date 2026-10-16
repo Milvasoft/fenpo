@@ -44,6 +44,7 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
         LanguageIndex = Math.Max(0, Array.IndexOf(_languages, current.Language));
         ShowNotifications = current.ShowNotifications;
         ShowIncomingCalls = current.ShowIncomingCalls;
+        RingForCalls = current.RingForCalls;
         ShareClipboard = current.ShareClipboard;
         MediaControl = current.MediaControl;
         ProximityLock = current.ProximityLock;
@@ -106,6 +107,48 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     public partial string DeviceHint { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the other paired phone's name, or empty when there is only one.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOtherPhone))]
+    public partial string OtherDeviceTitle { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the other phone's model and state.
+    /// </summary>
+    [ObservableProperty]
+    public partial string OtherDeviceHint { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets a value indicating whether a second phone is paired.
+    /// </summary>
+    public bool HasOtherPhone => OtherDeviceTitle.Length > 0;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the phone in use is the Android phone (paired in Fenpo, not in Windows
+    /// Bluetooth settings: "Remove pairing" instead of "Bluetooth settings").
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ActiveIsIphone))]
+    public partial bool ActiveIsAndroid { get; set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the phone in use is the iPhone (or none is paired).
+    /// </summary>
+    public bool ActiveIsIphone => !ActiveIsAndroid;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the other paired phone is the Android phone.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool OtherIsAndroid { get; set; }
+
+    /// <summary>
+    /// Gets the Android phone's name, for the confirmation.
+    /// </summary>
+    public string AndroidName => PhoneStatusText.Name(_status.StatusOf(PhoneKind.Android), _localization);
+
+    /// <summary>
     /// Gets or sets the folder for received files.
     /// </summary>
     [ObservableProperty]
@@ -149,6 +192,12 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     public partial bool ShowIncomingCalls { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the PC rings for calls.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool RingForCalls { get; set; }
+
+    /// <summary>
     /// Gets or sets a value indicating whether the clipboard is shared.
     /// </summary>
     [ObservableProperty]
@@ -183,6 +232,8 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
     partial void OnShowNotificationsChanged(bool value) => _settings.Update(s => s with { ShowNotifications = value });
 
     partial void OnShowIncomingCallsChanged(bool value) => _settings.Update(s => s with { ShowIncomingCalls = value });
+
+    partial void OnRingForCallsChanged(bool value) => _settings.Update(s => s with { RingForCalls = value });
 
     partial void OnShareClipboardChanged(bool value) => _settings.Update(s => s with { ShareClipboard = value });
 
@@ -256,16 +307,27 @@ public sealed partial class SettingsViewModel : ObservableObject, IDisposable
         _settings.Update(s => s with { IncomingFolder = path });
     }
 
+    [RelayCommand]
+    private void UseOtherPhone() => _status.Use(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+
     private void OnStatusChanged(object? sender, PhoneStatus status) => _dispatcher.TryEnqueue(() => ApplyStatus(status));
+
+    private string Hint(PhoneStatus status) => status.ModelName is { } model
+        ? _localization.Format("Settings_DeviceModelState", model, PhoneStatusText.State(status, _localization))
+        : PhoneStatusText.State(status, _localization);
 
     private void ApplyStatus(PhoneStatus status)
     {
         IsPaired = status.State != PhoneConnectionState.NotPaired;
+        var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+        var twoPhones = IsPaired && other.State != PhoneConnectionState.NotPaired;
         DeviceTitle = IsPaired ? PhoneStatusText.Name(status, _localization) : _localization.GetString("Settings_NoDevice");
         DeviceHint = !IsPaired
             ? _localization.GetString("Settings_NoDeviceHint")
-            : status.ModelName is { } model
-                ? _localization.Format("Settings_DeviceModelState", model, PhoneStatusText.State(status, _localization))
-                : PhoneStatusText.State(status, _localization);
+            : twoPhones ? _localization.Format("Settings_InUse", Hint(status)) : Hint(status);
+        OtherDeviceTitle = twoPhones ? PhoneStatusText.Name(other, _localization) : string.Empty;
+        ActiveIsAndroid = IsPaired && _status.Active == PhoneKind.Android;
+        OtherIsAndroid = twoPhones && _status.Active == PhoneKind.Iphone;
+        OtherDeviceHint = twoPhones ? Hint(other) : string.Empty;
     }
 }

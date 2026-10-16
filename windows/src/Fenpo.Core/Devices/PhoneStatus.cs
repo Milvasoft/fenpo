@@ -87,6 +87,12 @@ public sealed record PhoneStatus
     public bool NotificationsAvailable { get; init; }
 
     /// <summary>
+    /// Gets a value indicating whether the iPhone refuses notification access to this PC ("Share System Notifications"
+    /// is off for it), so neither notifications nor calls arrive.
+    /// </summary>
+    public bool NotificationsRefused { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether message access works (MAP).
     /// </summary>
     public bool MessagesAvailable { get; init; }
@@ -95,6 +101,11 @@ public sealed record PhoneStatus
     /// Gets a value indicating whether the Fenpo iPhone app is connected (clipboard, files, camera need it).
     /// </summary>
     public bool AppConnected { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether Do Not Disturb or a Focus mode is on, as Fenpo on the phone reports it.
+    /// </summary>
+    public bool FocusActive { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether a phone is paired with Fenpo on it (an Android phone has no Bluetooth link to

@@ -3,25 +3,34 @@ using Fenpo.Bluetooth.Ancs;
 using Fenpo.Bluetooth.Gatt;
 using Fenpo.Bluetooth.Link;
 using Fenpo.Core.Devices;
+using Fenpo.Core.Settings;
 using Microsoft.Extensions.Logging;
 
 namespace Fenpo.Bluetooth.Status;
 
 /// <summary>
-/// Combines the link state, Battery, Device Information, Current Time and ANCS availability into one
-/// <see cref="PhoneStatus"/>.
+/// The status of each paired phone and which one is in use. The iPhone's combines the link state, Battery, Device
+/// Information, Current Time and ANCS availability; the Android phone's comes from the Fenpo channel. Everything that
+/// shows "the phone" follows <see cref="Current"/>, the phone in use: the one chosen in the settings, or the other one
+/// when only that one is paired, the iPhone first.
 /// </summary>
-public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger<PhoneStatusTracker> logger) : IPhoneStatusSource
+public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettingsStore settings, ILogger<PhoneStatusTracker> logger) : IPhoneStatusSource
 {
     private readonly IphoneLink _link = link;
     private readonly AncsClient _ancs = ancs;
+    private readonly ISettingsStore _settings = settings;
     private readonly ILogger<PhoneStatusTracker> _logger = logger;
     private readonly Lock _lock = new();
-    private PhoneStatus _current = PhoneStatus.Unknown;
+    private PhoneStatus _iphone = PhoneStatus.Unknown;
+    private PhoneStatus _android = PhoneStatus.Unknown;
+    private PhoneKind _active = settings.Current.ActivePhone ?? PhoneKind.Iphone;
     private GattSubscription? _batterySubscription;
 
     /// <inheritdoc/>
     public event EventHandler<PhoneStatus>? Changed;
+
+    /// <inheritdoc/>
+    public event EventHandler<PhoneKind>? ActiveChanged;
 
     /// <inheritdoc/>
     public PhoneStatus Current
@@ -30,9 +39,37 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
         {
             lock (_lock)
             {
-                return _current;
+                return _active == PhoneKind.Iphone ? _iphone : _android;
             }
         }
+    }
+
+    /// <inheritdoc/>
+    public PhoneKind Active
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return _active;
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public PhoneStatus StatusOf(PhoneKind kind)
+    {
+        lock (_lock)
+        {
+            return kind == PhoneKind.Iphone ? _iphone : _android;
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Use(PhoneKind kind)
+    {
+        _settings.Update(s => s with { ActivePhone = kind });
+        Choose();
     }
 
     /// <summary>
@@ -48,30 +85,91 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ILogger
         });
         _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
         _link.BrokenBondDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
-        _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available });
+        _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available, NotificationsRefused = !available && s.NotificationsRefused });
+        _ancs.RefusedChanged += (_, refused) => Update(s => s with { NotificationsRefused = refused });
+
+        // A forgotten iPhone or a new choice can change the phone in use.
+        _settings.Changed += (_, _) => Choose();
     }
 
     /// <summary>
-    /// Updates the status, for example when no phone is paired or the Fenpo channel connects.
+    /// Updates the iPhone's status, for example when no iPhone is paired or Fenpo on it connects.
     /// </summary>
     /// <param name="change">Produces the new status.</param>
-    public void Update(Func<PhoneStatus, PhoneStatus> change)
+    public void Update(Func<PhoneStatus, PhoneStatus> change) => Update(PhoneKind.Iphone, change);
+
+    /// <summary>
+    /// Updates one phone's status.
+    /// </summary>
+    /// <param name="kind">Phone.</param>
+    /// <param name="change">Produces the new status.</param>
+    public void Update(PhoneKind kind, Func<PhoneStatus, PhoneStatus> change)
     {
         PhoneStatus updated;
+        bool shown;
 
         lock (_lock)
         {
-            updated = change(_current);
+            var before = kind == PhoneKind.Iphone ? _iphone : _android;
+            updated = change(before);
 
-            if (updated == _current)
+            if (updated == before)
             {
                 return;
             }
 
-            _current = updated;
+            if (kind == PhoneKind.Iphone)
+            {
+                _iphone = updated;
+            }
+            else
+            {
+                _android = updated;
+            }
+
+            shown = kind == _active;
         }
 
-        Changed?.Invoke(this, updated);
+        // A phone that appears or goes away can change which one is in use.
+        if (!Choose() && shown)
+        {
+            Changed?.Invoke(this, updated);
+        }
+    }
+
+    // The iPhone found before counts as paired while its link is still being looked up after a start, so the phone in
+    // use does not flip to the Android phone and back.
+    private bool IsPaired(PhoneKind kind) => kind == PhoneKind.Iphone
+        ? _iphone.State != PhoneConnectionState.NotPaired || _settings.Current.PhoneDeviceId is not null
+        : _android.State != PhoneConnectionState.NotPaired;
+
+    // The chosen phone while it is paired; otherwise whichever is.
+    private bool Choose()
+    {
+        PhoneKind active;
+        PhoneStatus current;
+
+        lock (_lock)
+        {
+            var wanted = _settings.Current.ActivePhone ?? PhoneKind.Iphone;
+            var other = wanted == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone;
+            var wantedPaired = IsPaired(wanted);
+            var otherPaired = IsPaired(other);
+            active = !wantedPaired && otherPaired ? other : wanted;
+
+            if (active == _active)
+            {
+                return false;
+            }
+
+            _active = active;
+            current = active == PhoneKind.Iphone ? _iphone : _android;
+        }
+
+        _logger.LogInformation("Phone in use: {Phone}", active);
+        ActiveChanged?.Invoke(this, active);
+        Changed?.Invoke(this, current);
+        return true;
     }
 
     private async Task ReadServicesAsync(LinkServices services)

@@ -33,6 +33,7 @@
     <ScrollViewer>
         <StackPanel Padding="32,28">
             <TextBlock x:Uid="NotificationsTitle" Style="{StaticResource FenpoPageTitleStyle}" />
+            <InfoBar x:Uid="Notifications_Refused" IsOpen="{x:Bind ViewModel.NotificationsRefused, Mode=OneWay}" Severity="Warning" IsClosable="False" Margin="0,0,0,16" />
 
             <Grid Margin="0,0,0,16">
                 <StackPanel Orientation="Horizontal" Spacing="6">

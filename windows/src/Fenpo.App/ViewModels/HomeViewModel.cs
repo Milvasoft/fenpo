@@ -22,6 +22,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     private readonly LocalizationService _localization;
     private readonly PhoneActions _actions;
     private readonly FileTransferService _transfers;
+    private readonly ScreenMirrorService _mirror;
     private readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     private readonly DispatcherQueueTimer _clock;
     private readonly DispatcherQueueTimer _transfersRefresh;
@@ -36,10 +37,12 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <param name="localization">Strings.</param>
     /// <param name="actions">Ring the phone.</param>
     /// <param name="transfers">File transfers (recent transfers card).</param>
-    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions, FileTransferService transfers)
+    /// <param name="mirror">Screen mirroring (Android).</param>
+    public HomeViewModel(IPhoneStatusSource status, NotificationStore notifications, IMediaSource media, AppIconService icons, LocalizationService localization, PhoneActions actions, FileTransferService transfers, ScreenMirrorService mirror)
     {
         _actions = actions;
         _transfers = transfers;
+        _mirror = mirror;
 
         // Progress arrives many times a second; the card follows twice a second.
         _transfersRefresh = _dispatcher.CreateTimer();
@@ -119,6 +122,10 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool UsbOn { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the iPhone in use refuses to share its notifications.</summary>
+    [ObservableProperty]
+    public partial bool NotificationsRefused { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the iPhone app is connected (app-only actions).</summary>
     [ObservableProperty]
     public partial bool AppConnected { get; set; }
@@ -126,6 +133,18 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     /// <summary>Gets or sets a value indicating whether Fenpo on the phone can ring.</summary>
     [ObservableProperty]
     public partial bool CanRing { get; set; }
+
+    /// <summary>Gets or sets a value indicating whether the phone's screen can be shown here (Android).</summary>
+    [ObservableProperty]
+    public partial bool CanMirror { get; set; }
+
+    /// <summary>Gets or sets the other paired phone's name, or empty when there is only one.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOtherPhone))]
+    public partial string OtherPhoneText { get; set; } = string.Empty;
+
+    /// <summary>Gets a value indicating whether a second phone is paired (the switch link shows).</summary>
+    public bool HasOtherPhone => OtherPhoneText.Length > 0;
 
     /// <summary>Gets or sets the clock on the phone illustration.</summary>
     [ObservableProperty]
@@ -211,6 +230,9 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
     }
 
     [RelayCommand]
+    private void UseOtherPhone() => _status.Use(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+
+    [RelayCommand]
     private Task PlayPauseAsync() => _media.SendAsync(MediaCommand.TogglePlayPause);
 
     [RelayCommand]
@@ -258,7 +280,11 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         UsbOn = status.UsbConnected;
         UsbText = _localization.GetString(status.UsbConnected ? "Chip_UsbOn" : "Chip_UsbOff");
         AppConnected = status.AppConnected;
+        NotificationsRefused = _status.Active == PhoneKind.Iphone && status.NotificationsRefused;
         CanRing = _actions.CanRing;
+        CanMirror = _mirror.CanMirror;
+        var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
+        OtherPhoneText = other.State == PhoneConnectionState.NotPaired ? string.Empty : _localization.Format("Phone_SwitchTo", PhoneStatusText.Name(other, _localization));
     }
 
     private void ApplyNotifications()

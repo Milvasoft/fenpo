@@ -48,7 +48,7 @@ public static class ModelNames
     /// Gets the marketing name for <paramref name="identifier"/>.
     /// </summary>
     /// <param name="identifier">Model identifier such as "iPhone14,5".</param>
-    /// <returns>"iPhone 13", or "iPhone"/"iPad" for identifiers this table does not know yet.</returns>
+    /// <returns>"iPhone 13", "iPhone"/"iPad" for Apple identifiers this table does not know yet, other models as they are.</returns>
     public static string Resolve(string identifier)
     {
         if (_names.TryGetValue(identifier.Trim(), out var name))
@@ -56,6 +56,9 @@ public static class ModelNames
             return name;
         }
 
-        return identifier.StartsWith("iPad", StringComparison.OrdinalIgnoreCase) ? "iPad" : "iPhone";
+        // Apple identifiers this table does not know yet; anything else (an Android model) is shown as it came.
+        return identifier.StartsWith("iPad", StringComparison.OrdinalIgnoreCase) ? "iPad"
+            : identifier.StartsWith("iPhone", StringComparison.OrdinalIgnoreCase) ? "iPhone"
+            : identifier.Trim();
     }
 }

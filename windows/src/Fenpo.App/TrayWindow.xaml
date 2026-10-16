@@ -40,6 +40,7 @@
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" FontSize="15" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{x:Bind ViewModel.Summary, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" />
+                    <HyperlinkButton Content="{x:Bind ViewModel.OtherPhoneText, Mode=OneWay}" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" Visibility="{x:Bind ViewModel.HasOtherPhone, Mode=OneWay}" Padding="0" FontSize="12" />
                 </StackPanel>
                 <Button Grid.Column="2" x:Uid="Tray_Settings" Padding="8" VerticalAlignment="Center" Click="OnSettingsClick">
                     <FontIcon Glyph="&#xE713;" FontSize="16" />
@@ -81,7 +82,7 @@
                     </StackPanel>
                 </ToggleButton>
                 <!-- These need the iPhone app (DECISIONS #36): visible, with what they need. -->
-                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource QuickToggleStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Tray_Hotspot">
+                <ToggleButton Grid.Row="1" Grid.Column="1" Style="{StaticResource QuickToggleStyle}" IsEnabled="False" x:Uid="Tray_Hotspot">
                     <StackPanel Spacing="6">
                         <FontIcon Glyph="&#xE704;" FontSize="16" />
                         <TextBlock x:Uid="Tray_HotspotText" HorizontalAlignment="Center" />

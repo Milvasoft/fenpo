@@ -10,7 +10,8 @@ namespace Fenpo.Core.Channel;
 /// <param name="Name">Phone's name.</param>
 /// <param name="BleKey">PairingResult.ble_channel_key (32 bytes).</param>
 /// <param name="CertificateSha256">SHA-256 of the phone's TLS certificate (DER), lower-case hex.</param>
-public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "");
+/// <param name="Platform">The phone's platform from pairing or its Hello; unspecified for records from before.</param>
+public sealed record PairedAppDevice(string DeviceId, string Name, byte[] BleKey, string CertificateSha256 = "", DevicePlatform Platform = DevicePlatform.Unspecified);
 
 /// <summary>
 /// Phones paired with the Fenpo app.
@@ -27,6 +28,12 @@ public interface IPairedAppDevices
     /// </summary>
     /// <param name="device">Phone.</param>
     void Save(PairedAppDevice device);
+
+    /// <summary>
+    /// Forgets a paired phone; its certificate and key no longer open anything.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    void Remove(string deviceId);
 }
 
 /// <summary>
@@ -92,6 +99,12 @@ public static class PcHello
             Capability.Ring,
             Capability.LockPc,
             Capability.FileTransfer,
+            Capability.NotificationMirror,
+            Capability.Media,
+            Capability.ScreenMirror,
+            Capability.Camera,
+            Capability.PcInput,
+            Capability.Messages,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,

@@ -48,6 +48,7 @@
 
     <ScrollViewer>
         <StackPanel Padding="32,28" Spacing="16">
+            <InfoBar x:Uid="Notifications_Refused" IsOpen="{x:Bind ViewModel.NotificationsRefused, Mode=OneWay}" Severity="Warning" IsClosable="False" />
 
             <!-- Hero: phone illustration, status, actions -->
             <Border Style="{StaticResource FenpoCardStyle}" Padding="28,20">
@@ -89,6 +90,7 @@
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{x:Bind ViewModel.StatusText, Mode=OneWay}" Style="{StaticResource FenpoCaptionTextStyle}" />
                         <TextBlock Text="{x:Bind ViewModel.DeviceName, Mode=OneWay}" FontSize="24" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <HyperlinkButton Content="{x:Bind ViewModel.OtherPhoneText, Mode=OneWay}" Command="{x:Bind ViewModel.UseOtherPhoneCommand}" Visibility="{x:Bind ViewModel.HasOtherPhone, Mode=OneWay}" Padding="0" FontSize="13" Margin="0,2,0,0" />
 
                         <!-- Not paired: one clear way forward -->
                         <StackPanel Visibility="{x:Bind helpers:BindHelpers.CollapsedWhen(ViewModel.IsPaired), Mode=OneWay}" Margin="0,12,0,0" Spacing="12">
@@ -148,7 +150,8 @@
                                         </Grid>
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Hotspot">
+                                <!-- Hotspot needs Fenpo on the phone to share its Wi-Fi details; not there yet (DECISIONS #36: shown, not hidden). -->
+                                <Button Grid.Column="1" Style="{StaticResource ActionButtonStyle}" IsEnabled="False" x:Uid="Action_Hotspot">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE704;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_HotspotText" FontSize="13" TextWrapping="Wrap" />
@@ -160,13 +163,13 @@
                                         <TextBlock x:Uid="Action_SendFileText" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Camera">
+                                <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" Click="OnCameraClick" x:Uid="Action_Camera">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE722;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_CameraText" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="4" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Mirror">
+                                <Button Grid.Column="4" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.CanMirror, Mode=OneWay}" Click="OnMirrorClick" x:Uid="Action_Mirror">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE7F4;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_MirrorText" FontSize="13" TextWrapping="Wrap" />

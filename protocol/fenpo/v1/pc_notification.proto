@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package fenpo.v1;
+
+option csharp_namespace = "Fenpo.Protocol.V1";
+option java_package = "com.fenpo.protocol.v1";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+// The PC's notifications on the phone (CAPABILITY_PC_NOTIFICATIONS), for the apps the PC's user picked.
+//
+// The PC reads its own notifications (Windows notification listener, with its user's permission) and sends each new
+// one from a picked app on its best open channel; the phone shows it as a local notification. On iOS the BLE channel
+// wakes the app in the background, so these must fit the 4096-byte sealed limit: app_icon_png is left out on BLE and
+// text is shortened. Removing a notification on the PC removes it from the phone.
+
+// PC → phone.
+message PcNotification {
+  string id = 1;                         // Stable while the notification exists on the PC.
+  string app_id = 2;                     // Windows app user model id, e.g. "Microsoft.Outlook".
+  string app_name = 3;
+  string title = 4;
+  string text = 5;
+  google.protobuf.Timestamp posted_at = 6;
+  bytes app_icon_png = 7;                // 64x64, Wi‑Fi only; the phone caches it per app_id.
+}
+
+// PC → phone.
+message PcNotificationRemoved {
+  string id = 1;
+}

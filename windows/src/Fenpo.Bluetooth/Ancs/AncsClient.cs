@@ -16,6 +16,10 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
 {
     private static readonly TimeSpan _responseTimeout = TimeSpan.FromSeconds(5);
 
+    // The iPhone refuses the subscription while "Share System Notifications" is off for this PC, and does not announce
+    // when it is turned on: the subscription is tried again this often for as long as the link stays.
+    private static readonly TimeSpan _retryInterval = TimeSpan.FromSeconds(15);
+
     private readonly IphoneLink _link = link;
     private readonly ILogger<AncsClient> _logger = logger;
     private readonly SemaphoreSlim _controlPointGate = new(1, 1);
@@ -25,6 +29,8 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     private Session? _session;
     private GattSubscription[] _subscriptions = [];
     private TaskCompletionSource<AncsResponse>? _pending;
+    private LinkServices? _latest;
+    private bool _refused;
 
     /// <inheritdoc/>
     public event EventHandler<PhoneNotification>? Added;
@@ -36,12 +42,17 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     public event EventHandler<string>? Removed;
 
     /// <inheritdoc/>
-    public event EventHandler? Reset;
+    public event EventHandler<string>? Reset;
 
     /// <summary>
     /// Raised when notification access starts or stops working (ANCS visible and subscribed).
     /// </summary>
     public event EventHandler<bool>? AvailabilityChanged;
+
+    /// <summary>
+    /// Raised when the iPhone starts (true) or stops (false) refusing the ANCS subscription.
+    /// </summary>
+    public event EventHandler<bool>? RefusedChanged;
 
     /// <summary>
     /// Gets a value indicating whether notifications are flowing.
@@ -53,8 +64,17 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     /// </summary>
     public void Attach()
     {
-        _link.ServicesReady += (sender, services) => _ = StartAsync(services);
-        _link.ServicesLost += (_, _) => Stop();
+        _link.ServicesReady += (sender, services) =>
+        {
+            _latest = services;
+            _ = StartAsync(services);
+        };
+        _link.ServicesLost += (_, _) =>
+        {
+            _latest = null;
+            SetRefused(false);
+            Stop();
+        };
     }
 
     /// <inheritdoc/>
@@ -107,14 +127,22 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
 
             // Data Source first so no response is lost; the Notification Source subscription starts the flow,
             // including every notification already on the phone (PreExisting).
-            var dataSubscription = await dataSource.SubscribeAsync(OnDataSource);
-            var sourceSubscription = dataSubscription is null ? null : await notificationSource.SubscribeAsync(data => OnNotificationSource(session, data));
+            GattWriteResult? refusal = null;
+            var dataSubscription = await dataSource.SubscribeAsync(OnDataSource, result => refusal = result);
+            var sourceSubscription = dataSubscription is null ? null : await notificationSource.SubscribeAsync(data => OnNotificationSource(session, data), result => refusal = result);
 
             if (dataSubscription is null || sourceSubscription is null)
             {
                 dataSubscription?.Dispose();
-                _logger.LogWarning("ANCS subscription failed (generation {Generation})", services.Generation);
+
+                if (!_refused)
+                {
+                    _logger.LogWarning("ANCS subscription failed (generation {Generation}): {Result}; notification sharing may be off for this PC on the iPhone, trying again every {Interval} s", services.Generation, refusal?.Describe() ?? "unknown", _retryInterval.TotalSeconds);
+                }
+
                 Stop();
+                SetRefused(true);
+                _ = RetryAsync(services);
                 return;
             }
 
@@ -122,11 +150,32 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             ReplaceSubscriptions([dataSubscription, sourceSubscription]);
 
             _logger.LogInformation("ANCS started (generation {Generation})", services.Generation);
+            SetRefused(false);
             AvailabilityChanged?.Invoke(this, true);
         }
         catch (Exception exception) when (exception is ObjectDisposedException or System.Runtime.InteropServices.COMException)
         {
             _logger.LogWarning(exception, "ANCS start failed (generation {Generation}); waiting for the next discovery", services.Generation);
+        }
+    }
+
+    private void SetRefused(bool refused)
+    {
+        if (_refused != refused)
+        {
+            _refused = refused;
+            RefusedChanged?.Invoke(this, refused);
+        }
+    }
+
+    private async Task RetryAsync(LinkServices services)
+    {
+        await Task.Delay(_retryInterval);
+
+        // Only while the same link is up and nothing else started a session in between.
+        if (ReferenceEquals(_latest, services) && _session is null)
+        {
+            await StartAsync(services);
         }
     }
 
@@ -148,7 +197,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             _pending?.TrySetCanceled();
         }
 
-        Reset?.Invoke(this, EventArgs.Empty);
+        Reset?.Invoke(this, string.Empty);
         AvailabilityChanged?.Invoke(this, false);
     }
 

@@ -9,6 +9,7 @@ public sealed class ModelNamesTests
     [InlineData("iPhone18,4", "iPhone Air")]
     [InlineData("iPhone99,1", "iPhone")]
     [InlineData("iPad16,3", "iPad")]
+    [InlineData("SM-G975F", "SM-G975F")]
     public void Resolves(string identifier, string expected) => Assert.Equal(expected, ModelNames.Resolve(identifier));
 
     [Fact]

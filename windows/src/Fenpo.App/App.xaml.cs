@@ -2,7 +2,10 @@ using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
 using Fenpo.Core.Api;
+using Fenpo.Bluetooth.Ams;
+using Fenpo.Bluetooth.Ancs;
 using Fenpo.Core.Channel;
+using Fenpo.Core.Media;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Pairing;
 using Fenpo.Core.Settings;
@@ -29,6 +32,7 @@ public partial class App : Application
     private MainWindow? _window;
     private TrayWindow? _trayWindow;
     private TrayIconService? _trayIcon;
+    private ScreenMirrorWindow? _mirrorWindow;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="App"/> class.
@@ -70,6 +74,22 @@ public partial class App : Application
                 .AddSingleton<PhoneChannel>()
                 .AddHostedService(sp => sp.GetRequiredService<PhoneChannel>())
                 .AddFenpoBluetooth()
+
+                // The iPhone (ANCS, AMS) and an Android phone (Fenpo channel) behind one notification and media source.
+                .AddSingleton<AndroidNotificationSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidNotificationSource>())
+                .AddSingleton<AndroidMediaSource>()
+                .AddHostedService(sp => sp.GetRequiredService<AndroidMediaSource>())
+                .AddSingleton<INotificationSource>(sp => new CombinedNotificationSource([("i:", sp.GetRequiredService<AncsClient>()), ("a:", sp.GetRequiredService<AndroidNotificationSource>())]))
+                .AddSingleton(sp => new CombinedMediaSource([sp.GetRequiredService<AmsClient>(), sp.GetRequiredService<AndroidMediaSource>()]))
+                .AddSingleton<IMediaSource>(sp => sp.GetRequiredService<CombinedMediaSource>())
+                .AddSingleton<FenpoMessageSource>()
+                .AddHostedService(sp => sp.GetRequiredService<FenpoMessageSource>())
+                .AddSingleton<Fenpo.Core.Messages.IMessageSource>(sp => new Fenpo.Core.Messages.CombinedMessageSource([sp.GetRequiredService<Fenpo.Bluetooth.Map.MapMessageSource>(), sp.GetRequiredService<FenpoMessageSource>()]))
+                .AddHostedService<ActivePhoneSync>()
+                .AddHostedService<PcMediaShare>()
+                .AddSingleton<PcInputService>()
+                .AddHostedService(sp => sp.GetRequiredService<PcInputService>())
                 .AddSingleton<NotificationStore>()
                 .AddSingleton<AppIconService>()
                 .AddSingleton<MessageContacts>()
@@ -80,6 +100,11 @@ public partial class App : Application
                 .AddSingleton(new PairingTokens())
                 .AddSingleton<FileTransferService>()
                 .AddHostedService(sp => sp.GetRequiredService<FileTransferService>())
+                .AddSingleton<ScreenMirrorService>()
+                .AddHostedService(sp => sp.GetRequiredService<ScreenMirrorService>())
+                .AddSingleton<CameraService>()
+                .AddHostedService(sp => sp.GetRequiredService<CameraService>())
+                .AddHostedService<MediaStreamRouter>()
                 .AddSingleton<ControlServer>()
                 .AddHostedService<TransportHostedService>()
                 .AddSingleton<PhoneActions>()
@@ -168,6 +193,22 @@ public partial class App : Application
     }
 
     /// <summary>
+    /// Shows the phone's screen in its own window and asks the phone to start, or brings the open window forward.
+    /// </summary>
+    public void ShowScreenMirror()
+    {
+        if (_mirrorWindow is not null)
+        {
+            _mirrorWindow.Activate();
+            return;
+        }
+
+        _mirrorWindow = new ScreenMirrorWindow(GetService<ScreenMirrorService>(), GetService<ThemeService>(), GetService<LocalizationService>(), GetService<ILogger<ScreenMirrorWindow>>());
+        _mirrorWindow.Closed += (sender, e) => _mirrorWindow = null;
+        _mirrorWindow.Start();
+    }
+
+    /// <summary>
     /// Stops the services, removes the tray icon and ends the process.
     /// </summary>
     /// <returns>A task that completes when the services stopped.</returns>
@@ -199,6 +240,7 @@ public partial class App : Application
         var calls = GetService<CallService>();
         calls.AttachUi(dispatcher);
         GetService<ClipboardSync>().AttachUi(dispatcher);
+        GetService<PcInputService>().AttachUi(dispatcher);
         AppInstance.GetCurrent().Activated += (sender, e) => dispatcher.TryEnqueue(() => ShowMainWindow());
         GetService<NotificationRouter>().OpenRequested += (sender, page) => dispatcher.TryEnqueue(() => ShowMainWindow(page));
 

@@ -161,6 +161,18 @@ public sealed class FenpoGattServer(
     }
 
     /// <summary>
+    /// Drops a forgotten phone's connections; its next message finds no key that opens it.
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    public void Forget(string deviceId)
+    {
+        foreach (var id in _connections.Where(c => c.Value.Session.Device?.DeviceId == deviceId).Select(c => c.Key).ToList())
+        {
+            Close(id);
+        }
+    }
+
+    /// <summary>
     /// Gets a value indicating whether a phone is on the Bluetooth channel.
     /// </summary>
     /// <param name="deviceId">Phone id.</param>
@@ -342,8 +354,9 @@ public sealed class FenpoGattServer(
 
     private PcStatus CurrentPcStatus() => new()
     {
-        NotificationsSubscribed = _status.Current.NotificationsAvailable,
-        MessagesAvailable = _status.Current.MessagesAvailable,
+        // What the PC gets over Bluetooth is the iPhone's (ANCS, MAP); Fenpo on the iPhone is who asks.
+        NotificationsSubscribed = _status.StatusOf(PhoneKind.Iphone).NotificationsAvailable,
+        MessagesAvailable = _status.StatusOf(PhoneKind.Iphone).MessagesAvailable,
     };
 
     private void OnPhoneStatusChanged(object? sender, PhoneStatus phoneStatus)
