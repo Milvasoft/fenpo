@@ -292,6 +292,9 @@ public sealed class PhoneChannel(
             AppConnected = connected,
             WifiConnected = _wifiHellos.ContainsKey(device.DeviceId),
             State = kind == PhoneKind.Android && !connected ? PhoneConnectionState.Disconnected : s.State,
+
+            // Focus is known only while Fenpo on the phone is connected; without it the PC is not kept quiet.
+            FocusActive = connected && s.FocusActive,
         });
         Changed?.Invoke(this, EventArgs.Empty);
     }
