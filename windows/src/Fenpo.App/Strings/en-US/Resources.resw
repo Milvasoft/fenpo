@@ -585,6 +585,9 @@
   <data name="Mirror_WaitingConsent" xml:space="preserve">
     <value>Allow screen sharing on the phone.</value>
   </data>
+  <data name="Mirror_WaitingIphone" xml:space="preserve">
+    <value>On the iPhone, tap Fenpo › PC › Show screen on PC, or start the screen broadcast from Control Center.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Calls</value>
   </data>
