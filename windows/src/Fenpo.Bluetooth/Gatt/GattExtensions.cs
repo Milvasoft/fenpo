@@ -21,11 +21,18 @@ internal static class GattExtensions
     /// <summary>
     /// Attaches <paramref name="onValue"/> and enables notifications. The handler is attached first so nothing is missed.
     /// </summary>
-    public static async Task<bool> SubscribeAsync(this GattCharacteristic characteristic, Action<byte[]> onValue)
+    public static async Task<GattSubscription?> SubscribeAsync(this GattCharacteristic characteristic, Action<byte[]> onValue)
     {
-        characteristic.ValueChanged += (_, args) => onValue(args.CharacteristicValue.ToArray());
+        var subscription = new GattSubscription(characteristic, onValue);
         var result = await characteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(GattClientCharacteristicConfigurationDescriptorValue.Notify);
-        return result.Status == GattCommunicationStatus.Success;
+
+        if (result.Status != GattCommunicationStatus.Success)
+        {
+            subscription.Dispose();
+            return null;
+        }
+
+        return subscription;
     }
 
     /// <summary>

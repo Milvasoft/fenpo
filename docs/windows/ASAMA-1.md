@@ -10,7 +10,7 @@
 |---|---|
 | İskelet, tema ve dil, Ayarlar | Bitti, iki temada ve iki dilde ekran görüntüsüyle kontrol edildi |
 | Bluetooth katmanı (IphoneLink, ANCS, AMS, BAS/CTS/DIS) | Bitti, S1 fixture'larıyla testli, cihazda bağlanıyor |
-| Bildirimler (router, Windows bildirimi, Bildirimler sayfası) | Bitti. Windows bildirimindeki düğmeler cihazda denenmedi |
+| Bildirimler (router, Windows bildirimi, Bildirimler sayfası) | Bitti, cihazda denendi: canlı WhatsApp, Mesajlar, Gmail, cevapsız arama. İlk sürümde yeni bildirimler ilk partiden sonra kesiliyordu (abone olunan karakteristik çöp toplayıcıya gidiyordu); düzeltildi |
 | Medya (kart, medya tuşları, Windows medya paneli) | Kod bitti, cihazda müzik çalarken denenmedi |
 | iPhone'um, tepsi ikonu ve paneli, tek örnek, tepsiye kapanma | Bitti, kontrol edildi |
 | Windows açılınca başlat | Bitti, anahtar Windows başlangıç görevini açıp kapatıyor |
@@ -18,7 +18,7 @@
 | Yakınlık kilidi | Bitti, algoritma S1 kaydıyla testli; cihazla uzaklaşma denenmedi |
 | Mesajlar (MAP: OBEX, MAS, MNS, Mesajlar sayfası) | Bitti, cihazda denendi: sohbet listesi, mesajlar, gönderme ve gönderilenin kalması çalışıyor. Kayıtlı kişilerin adı bildirimlerden öğreniliyor (RESEARCH §3) |
 | Rehber (PBAP) | Kod hazır, iPhone bağlantıyı reddediyor; muhtemelen HFP gerektiriyor (RESEARCH §3) |
-| Aramalar (Ada, Yanıtla/Reddet, son aramalar, aramada PC medyasını duraklat) | Bitti, ekranlar kontrol edildi, gerçek aramayla denenmedi |
+| Aramalar (Ada, Yanıtla/Reddet, son aramalar, aramada PC medyasını duraklat) | Bitti, cihazda denendi: Ada çıkıyor, Yanıtla ve Reddet telefona gidiyor. Aramada PC medyasını duraklatma denenmedi |
 | Dosyalar, Pano, Kamera | Sayfalar ve "iPhone'da Fenpo gerekiyor" bandı hazır; işlevler iPhone uygulamasını bekliyor |
 | Yerel API ve Fenpo.Sdk | Bitti, gerçek pipe üzerinden uçtan uca testli, paketli uygulamaya dışarıdan bağlanıldı |
 | Fenpo BLE ve Wi‑Fi kanalları | Bekliyor: protokol commit'i (beede75) main'e alınmadı, TLS tarafı Defender kararını bekliyor, iPhone uygulaması yok |
