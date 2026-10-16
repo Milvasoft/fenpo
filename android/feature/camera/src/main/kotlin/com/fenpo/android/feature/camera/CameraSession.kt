@@ -39,6 +39,7 @@ class CameraSession(
     context: Context,
     private val encoderSurface: Surface,
     private val fps: Int,
+    private val onOpened: () -> Unit = {},
     private val onFailure: (String) -> Unit,
 ) {
     private val manager = context.getSystemService(CameraManager::class.java)
@@ -203,6 +204,7 @@ class CameraSession(
                         return
                     }
                     device = camera
+                    onOpened()
                     configure()
                 }
 

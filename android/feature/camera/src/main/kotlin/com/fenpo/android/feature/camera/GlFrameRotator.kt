@@ -12,10 +12,12 @@ import android.opengl.GLES20
 import android.opengl.Matrix
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.view.Surface
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
+import kotlin.math.abs
 
 /**
  * Turns camera frames upright for the PC whatever way the phone is held: the camera draws into
@@ -38,6 +40,7 @@ class GlFrameRotator(
     private var textureId = 0
     private val transform = FloatArray(MATRIX)
     private val mvp = FloatArray(MATRIX)
+    private val logged = FloatArray(MATRIX)
     private val quad: FloatBuffer =
         ByteBuffer
             .allocateDirect(QUAD.size * FLOAT_BYTES)
@@ -45,8 +48,22 @@ class GlFrameRotator(
             .asFloatBuffer()
             .apply { put(QUAD).position(0) }
 
-    /** Clockwise rotation applied to the camera picture, 0/90/180/270. */
-    @Volatile var rotationDegrees: Int = 0
+    @Volatile private var pose = Pose(sensor = 0, held = 0, front = false)
+
+    /** The open lens's mounting and facing, and the way the phone is held (`OrientationEventListener` degrees). */
+    fun orient(
+        sensorOrientation: Int,
+        heldDegrees: Int,
+        front: Boolean,
+    ) {
+        pose = Pose(sensorOrientation, quarter(heldDegrees), front)
+    }
+
+    private class Pose(
+        val sensor: Int,
+        val held: Int,
+        val front: Boolean,
+    )
 
     /** Where the camera draws; valid after construction until [release]. */
     lateinit var inputSurface: Surface
@@ -118,17 +135,35 @@ class GlFrameRotator(
             return
         }
         texture.getTransformMatrix(transform)
+        if (!transform.contentEquals(logged)) {
+            transform.copyInto(logged)
+            Log.i(TAG, "Texture transform ${transform.joinToString { "%.1f".format(java.util.Locale.ROOT, it) }}")
+        }
         GLES20.glViewport(0, 0, width, height)
         GLES20.glUseProgram(program)
-        val rotation = rotationDegrees
-        // Rotate in pixel space so the picture keeps its shape; a quarter turn makes it portrait,
-        // which is scaled up to cover the landscape frame (cropped top and bottom, like a webcam).
-        val cover = if (rotation % STRAIGHT != 0) width.toFloat() / height else 1f
+        val current = pose
+        // The camera service puts the sensor's turn (and the front lens's mirror) into the texture
+        // transform, as for a preview on the phone held upright: the picture then comes out portrait
+        // and is only turned further by the way the phone is held, and the front one is un-mirrored
+        // as webcams send it. If the transform carries no turn, the whole turn is done here.
+        val turnedByCamera = abs(transform[0]) < HALF
+        val sensorTurns = current.sensor % STRAIGHT != 0
+        val cameraTurned = turnedByCamera && sensorTurns
+        val rotation = if (cameraTurned) current.held else rotationFor(current.sensor, current.held, current.front)
+        // Size of the picture the transform gives, in pixels; turned again by `rotation`.
+        val pictureWidth = (if (turnedByCamera) height else width).toFloat()
+        val pictureHeight = (if (turnedByCamera) width else height).toFloat()
+        val quarterTurn = rotation % STRAIGHT != 0
+        val shownWidth = if (quarterTurn) pictureHeight else pictureWidth
+        val shownHeight = if (quarterTurn) pictureWidth else pictureHeight
+        // Scaled to cover the landscape frame (cropped top and bottom when upright, like a webcam).
+        val cover = maxOf(width / shownWidth, height / shownHeight)
         Matrix.setIdentityM(mvp, 0)
+        if (cameraTurned && current.front) Matrix.scaleM(mvp, 0, -1f, 1f, 1f)
         Matrix.scaleM(mvp, 0, 2f / width, 2f / height, 1f)
         Matrix.scaleM(mvp, 0, cover, cover, 1f)
         Matrix.rotateM(mvp, 0, -rotation.toFloat(), 0f, 0f, 1f)
-        Matrix.scaleM(mvp, 0, width / 2f, height / 2f, 1f)
+        Matrix.scaleM(mvp, 0, pictureWidth / 2f, pictureHeight / 2f, 1f)
         GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(program, "uMvp"), 1, false, mvp, 0)
         GLES20.glUniformMatrix4fv(GLES20.glGetUniformLocation(program, "uTex"), 1, false, transform, 0)
         val position = GLES20.glGetAttribLocation(program, "aPos")
@@ -177,6 +212,7 @@ class GlFrameRotator(
     }
 
     companion object {
+        private const val TAG = "FenpoCamera"
         private const val EGL_RECORDABLE_ANDROID = 0x3142
         private const val MATRIX = 16
         private const val FLOAT_BYTES = 4
@@ -205,11 +241,15 @@ class GlFrameRotator(
             deviceDegrees: Int,
             front: Boolean,
         ): Int {
-            val device = ((deviceDegrees + QUARTER / 2) / QUARTER * QUARTER) % FULL
+            val device = quarter(deviceDegrees)
             val turn = if (front) sensorOrientation - device else sensorOrientation + device
             return ((turn % FULL) + FULL) % FULL
         }
 
+        /** `OrientationEventListener` degrees rounded to the nearest quarter turn. */
+        fun quarter(degrees: Int): Int = ((degrees + QUARTER / 2) / QUARTER * QUARTER) % FULL
+
+        private const val HALF = 0.5f
         private const val QUARTER = 90
         private const val FULL = 360
     }

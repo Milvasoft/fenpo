@@ -138,16 +138,38 @@ class CameraStreamService :
         sender = mediaSender
         val upright = GlFrameRotator(videoEncoder.surface, width, height)
         rotator = upright
-        val camera = CameraSession(this, upright.inputSurface, fps) { reason -> scope.launch { fail(reason) } }
+        var held = 0
+        var lastRotation = -1
+        lateinit var camera: CameraSession
+
+        // The turn depends on the lens as well as the hand: work it out again when either changes.
+        fun turnUpright() {
+            val rotation = GlFrameRotator.rotationFor(camera.sensorOrientation, held, camera.isFront)
+            if (rotation != lastRotation) {
+                lastRotation = rotation
+                Log.i(
+                    TAG,
+                    "Upright: held $held°, sensor ${camera.sensorOrientation}°, front ${camera.isFront}, turn $rotation°",
+                )
+            }
+            upright.orient(camera.sensorOrientation, held, camera.isFront)
+            camera.setCropCompensation(if (rotation % HALF_TURN != 0) width.toFloat() / height else 1f)
+        }
+        camera =
+            CameraSession(
+                this,
+                upright.inputSurface,
+                fps,
+                onOpened = { turnUpright() },
+            ) { reason -> scope.launch { fail(reason) } }
         session = camera
         camera.start(coordinator.ui.value.settings)
         orientation =
             object : OrientationEventListener(this) {
                 override fun onOrientationChanged(degrees: Int) {
                     if (degrees == ORIENTATION_UNKNOWN) return
-                    val rotation = GlFrameRotator.rotationFor(camera.sensorOrientation, degrees, camera.isFront)
-                    upright.rotationDegrees = rotation
-                    camera.setCropCompensation(if (rotation % HALF_TURN != 0) width.toFloat() / height else 1f)
+                    held = degrees
+                    turnUpright()
                 }
             }.also { it.enable() }
         if (audioCodec != AudioCodec.AUDIO_CODEC_UNSPECIFIED && hasMicrophonePermission()) {
