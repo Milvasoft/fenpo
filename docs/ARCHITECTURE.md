@@ -53,7 +53,6 @@ Fenpo.exe (MSIX, tam güven, oturum açılınca başlar)
 
 Fenpo.VirtualCamera.dll            Native AOT COM medya kaynağı, Frame Server içinde çalışır
                                    Fenpo.exe ile paylaşımlı bellek / paylaşımlı doku üzerinden konuşur
-Fenpo.CredentialProvider.dll       C++ COM, LogonUI içinde (Aşama 5, ayrı kurulum)
 fenpo-mirror.exe                   isteğe bağlı UxPlay derlemesi, GPLv3, ayrı indirme
 ```
 
@@ -72,8 +71,6 @@ windows/
 │   ├── Fenpo.Protocol/            .proto'dan üretilen C# tipleri
 │   ├── Fenpo.Sdk/                 named pipe istemcisi (NuGet paketi olabilir)
 │   └── Fenpo.VirtualCamera/       Native AOT COM sunucusu
-├── native/
-│   └── Fenpo.CredentialProvider/  C++ (Aşama 5)
 └── tests/
     ├── Fenpo.Core.Tests/
     ├── Fenpo.Bluetooth.Tests/     ANCS/MAP ayrıştırıcıları için kayıtlı bayt dizileriyle
@@ -155,7 +152,6 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | `pc_notification.proto` | PC'nin seçilen uygulamalarının bildirimleri telefonda: `PcNotification`, `PcNotificationRemoved` |
 | `files.proto` | PC'nin paylaşılan klasörleri telefonda (iPhone Dosyalar, Android dosya seçici): `FolderListRequest`, `FolderListing`, `FileFetch`, `FileThumbnailRequest`, `FileThumbnail`, `FileChange`, `FileChangeResult`, `FolderChanged`. İçerik normal dosya aktarımıyla; yükleme `TransferOffer.destination_path` ile |
 | `photos.proto` | Telefonun fotoğraf kitaplığına PC'den göz atma: `PhotoListRequest`, `PhotoList`, `PhotoThumbnailRequest`, `PhotoThumbnail`, `PhotoFetch` |
-| `unlock.proto` | Kilitli PC oturumunu telefonun Face ID'si veya parmak iziyle açma: `UnlockEnroll`, `UnlockRequest`, `UnlockKey`, `UnlockRevoke`. Şifreyi açan anahtar sadece telefonda, biyometriyle korunur |
 | `hotspot.proto` | Telefonun hotspot'una PC'den tek tıkla bağlanma: `HotspotInfo` (kullanıcının telefona bir kez yazdığı ad ve şifre), `HotspotRequest`, `HotspotStatus` |
 | `envelope.proto` | `Envelope` ve özellik gruplarına ayrılmış alan numarası aralıkları |
 
@@ -165,7 +161,7 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 
 Windows'ta bildirim, mesaj ve medya servisleri kaynaktan bağımsız arayüzler üzerinden beslenir (`INotificationSource`, `IMessageSource`, `IMediaSource`). iPhone için kaynak ANCS, MAP ve AMS; Android kendi kaynağını Fenpo kanalı üzerinden ekler.
 
-**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü (medya komutu ve PC girdisi dahil), 50–59 cihaz, PC ve medya durumu, 90–96 bildirim aynalama (Android), 100–106 mesajlar (Android, MAP'i olmayan telefonlar). 60–65 kamera, görüntü bağlantısının ilk çerçevesi ve anahtar kare isteği, 80–83 ekran yansıtma (Android). 70–77 PC'nin paylaşılan klasörleri, 97–98 PC bildirimleri telefonda, 110–114 fotoğraf kitaplığı, 120–122 hotspot, 130–133 kilit açma. Sonraki aşamalar için ayrılmış: 66–69 kamera eklemeleri, 78–79 klasör eklemeleri, 84–89 yansıtma eklemeleri, 99 bildirim eklemeleri, 107–109 mesaj eklemeleri, 115–119 fotoğraf eklemeleri, 123–129 hotspot eklemeleri.
+**Alan aralıkları (`Envelope.body`):** 10–19 oturum ve eşleşme, 20–29 içerik, 30–39 dosya aktarımı, 40–49 cihaz kontrolü (medya komutu ve PC girdisi dahil), 50–59 cihaz, PC ve medya durumu, 90–96 bildirim aynalama (Android), 100–106 mesajlar (Android, MAP'i olmayan telefonlar). 60–65 kamera, görüntü bağlantısının ilk çerçevesi ve anahtar kare isteği, 80–83 ekran yansıtma (Android). 70–77 PC'nin paylaşılan klasörleri, 97–98 PC bildirimleri telefonda, 110–114 fotoğraf kitaplığı, 120–122 hotspot. 130–139 telefonla kilit açmaya ayrılmıştı, kaldırıldı (DECISIONS #40); yeniden kullanılmaz. Sonraki aşamalar için ayrılmış: 66–69 kamera eklemeleri, 78–79 klasör eklemeleri, 84–89 yansıtma eklemeleri, 99 bildirim eklemeleri, 107–109 mesaj eklemeleri, 115–119 fotoğraf eklemeleri, 123–129 hotspot eklemeleri.
 
 **iPhone ekran yansıtma:** Yayını (ReplayKit) sadece iPhone'un kullanıcısı başlatabilir. iPhone `ScreenStart`'a `WAITING_FOR_CONSENT` ile cevap verip nasıl başlatılacağını gösterir; yayın uzantısı görüntü bağlantısını açar ve `ScreenStart` olmadan `STREAMING` bildirir. PC'den kontrol yok.
 

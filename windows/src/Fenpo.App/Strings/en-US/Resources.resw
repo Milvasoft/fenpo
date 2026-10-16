@@ -243,6 +243,12 @@
   <data name="ClipboardTitle.Text" xml:space="preserve">
     <value>Clipboard</value>
   </data>
+  <data name="Control_Active" xml:space="preserve">
+    <value>Keyboard and mouse on the phone · Ctrl+Alt+I to come back</value>
+  </data>
+  <data name="Control_Connecting" xml:space="preserve">
+    <value>Connecting to the phone… The iPhone needs AssistiveTouch on for the pointer · Ctrl+Alt+I to cancel</value>
+  </data>
   <data name="Files_AndMore" xml:space="preserve">
     <value>{0} and {1} more</value>
   </data>
@@ -572,6 +578,12 @@
   </data>
   <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
     <value>Back</value>
+  </data>
+  <data name="Mirror_Control.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Hand the PC's keyboard and mouse to the iPhone (Ctrl+Alt+I)</value>
+  </data>
+  <data name="Mirror_ControlText.Text" xml:space="preserve">
+    <value>Keyboard and mouse</value>
   </data>
   <data name="Mirror_Failed" xml:space="preserve">
     <value>Mirroring did not start. Start again with Fenpo open on the phone.</value>
@@ -947,15 +959,6 @@
   </data>
   <data name="Settings_ThemeHint.Text" xml:space="preserve">
     <value>With System, follows the Windows light or dark setting</value>
-  </data>
-  <data name="Settings_Unlock.Text" xml:space="preserve">
-    <value>Unlock with the phone</value>
-  </data>
-  <data name="Settings_UnlockHint.Text" xml:space="preserve">
-    <value>Unlocks Windows after Face ID approval. Needs a separate component (experimental)</value>
-  </data>
-  <data name="Settings_UnlockToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Unlock with the phone</value>
   </data>
   <data name="Settings_UsePhone.Content" xml:space="preserve">
     <value>Use this phone</value>

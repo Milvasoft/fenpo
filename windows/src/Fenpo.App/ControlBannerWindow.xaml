@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Fenpo.App.ControlBannerWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:helpers="using:Fenpo.App.Helpers"
+    Title="Fenpo">
+
+    <Window.SystemBackdrop>
+        <helpers:TransparentBackdrop />
+    </Window.SystemBackdrop>
+
+    <!-- While the PC's keyboard and mouse go to the phone: a pill at the top center, like the island, so it is clear
+         why the pointer does not move and how to get it back. -->
+    <Border Background="{ThemeResource FenpoIslandBrush}" CornerRadius="22" Padding="18,0" RequestedTheme="Dark">
+        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <FontIcon Glyph="&#xE765;" FontSize="18" Foreground="{ThemeResource FenpoAcceptBrush}" VerticalAlignment="Center" />
+            <TextBlock x:Name="Text" FontSize="14" Foreground="White" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+    </Border>
+</Window>
