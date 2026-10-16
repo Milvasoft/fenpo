@@ -20,7 +20,10 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     private let queue = DispatchQueue(label: "com.fenpo.camera", autoreleaseFrequency: .workItem)
     private let output = AVCaptureVideoDataOutput()
     private var input: AVCaptureDeviceInput?
-    private let handler = Mutex<FrameHandler?>(nil)
+    /// The handler sits in a class box: a function value read through `withLock`'s inout access is
+    /// re-abstracted and written back wrapped in a new thunk, one more per frame. That chain made
+    /// every frame slower and overflowed the stack when it was freed (the build 26 crash on stop).
+    private let handler = Mutex<FrameHandlerBox?>(nil)
     private let fitter = Mutex<FrameFitter?>(nil)
     private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
     private var rotationObservation: NSKeyValueObservation?
@@ -39,7 +42,8 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     /// Sets who receives frames.
     /// - Parameter frameHandler: Called on the capture queue.
     func setFrameHandler(_ frameHandler: FrameHandler?) {
-        handler.withLock { $0 = frameHandler }
+        let box = frameHandler.map(FrameHandlerBox.init)
+        handler.withLock { $0 = box }
     }
 
     /// Picks the camera and the size; call before `start()` and again to flip.
@@ -218,7 +222,7 @@ extension CapturePipeline: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         autoreleasepool {
             guard
-                let handler = handler.withLock({ $0 }),
+                let handler = handler.withLock({ $0 })?.body,
                 let image = CMSampleBufferGetImageBuffer(sampleBuffer),
                 let fitted = fitter.withLock({ $0 })?.fit(image)
             else {
@@ -237,6 +241,14 @@ extension CapturePipeline: AVCaptureVideoDataOutputSampleBufferDelegate {
             let reason = CMGetAttachment(sampleBuffer, key: kCMSampleBufferAttachmentKey_DroppedFrameReason, attachmentModeOut: nil) as? String ?? "unknown"
             log.info("Capture dropped a late frame (\(reason)), \(count) so far")
         }
+    }
+}
+/// Holds a frame handler by reference (see `CapturePipeline.handler`).
+final class FrameHandlerBox: Sendable {
+    let body: CapturePipeline.FrameHandler
+
+    init(_ body: @escaping CapturePipeline.FrameHandler) {
+        self.body = body
     }
 }
 #endif
