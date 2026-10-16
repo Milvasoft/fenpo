@@ -64,6 +64,9 @@ final class AppModel {
     /// Screens pushed on the PC tab.
     var pcPath: [PCScreen] = []
 
+    /// Transfers opened on the Transfers tab.
+    var transfersPath: [TransferRoute] = []
+
     @ObservationIgnored private var isRefreshScheduled = false
 
     /// The pairing flow is on screen.

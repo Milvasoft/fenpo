@@ -34,10 +34,10 @@ public actor SampleSession: SessionProviding {
             pcClipboardPreview: "docker compose -f deploy/compose.yml up -d",
             readyPhotoCount: 3,
             transfers: [
-                TransferRecord(fileName: "Sözleşme_v3.pdf", direction: .fromPC, date: now.addingTimeInterval(-120), localFileName: "Sözleşme_v3.pdf"),
-                TransferRecord(fileName: "IMG_4835.HEIC", direction: .toPC, date: now.addingTimeInterval(-3_600), folder: "Resimler"),
-                TransferRecord(fileName: "Bütçe_Ekim.xlsx", direction: .fromPC, date: now.addingTimeInterval(-86_400), localFileName: "Bütçe_Ekim.xlsx"),
-                TransferRecord(fileName: "Teklif v2.docx", direction: .toPC, date: now.addingTimeInterval(-172_800), folder: "Belgeler"),
+                TransferRecord(id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!, fileName: "Sözleşme_v3.pdf", direction: .fromPC, date: now.addingTimeInterval(-120), localFileName: "Sözleşme_v3.pdf"),
+                TransferRecord(id: UUID(uuidString: "00000000-0000-0000-0000-000000000002")!, fileName: "IMG_4835.HEIC", direction: .toPC, date: now.addingTimeInterval(-3_600), folder: "Resimler"),
+                TransferRecord(id: UUID(uuidString: "00000000-0000-0000-0000-000000000003")!, fileName: "Bütçe_Ekim.xlsx", direction: .fromPC, date: now.addingTimeInterval(-86_400), localFileName: "Bütçe_Ekim.xlsx"),
+                TransferRecord(id: UUID(uuidString: "00000000-0000-0000-0000-000000000004")!, fileName: "Teklif v2.docx", direction: .toPC, date: now.addingTimeInterval(-172_800), folder: "Belgeler"),
             ],
             activeTransfers: [
                 ActiveTransfer(id: "sample", firstFileName: "IMG_4836.MOV", fileCount: 1, direction: .toPC, bytesDone: 123_731_968, totalBytes: 192_937_984),
