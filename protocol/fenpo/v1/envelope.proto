@@ -7,6 +7,7 @@ import "fenpo/v1/pairing.proto";
 import "fenpo/v1/content.proto";
 import "fenpo/v1/transfer.proto";
 import "fenpo/v1/device.proto";
+import "fenpo/v1/media.proto";
 import "fenpo/v1/notification.proto";
 
 option csharp_namespace = "Fenpo.Protocol.V1";
@@ -45,10 +46,12 @@ message Envelope {
     // 40-49: device control
     RingDevice ring = 40;
     LockPc lock_pc = 41;
+    MediaCommand media_command = 42;
 
     // 50-59: device state
     DeviceState device_state = 50;
     PcStatus pc_status = 51;
+    MediaState media_state = 52;
 
     // 90-99: notification mirror (Android)
     PhoneNotification phone_notification = 90;

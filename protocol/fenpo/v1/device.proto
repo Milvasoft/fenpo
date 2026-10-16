@@ -12,6 +12,7 @@ message DeviceState {
   optional bool charging = 2;
   optional bool focus_active = 3;        // Do Not Disturb or a Focus mode is on.
   repeated string addresses = 4;         // Current ip:port endpoints of the data channel.
+  optional sint32 ble_rssi_dbm = 5;      // Signal of the other device as this phone measures it on the Fenpo BLE link.
 }
 
 // What the PC receives from the phone over Bluetooth, which the phone cannot see by
