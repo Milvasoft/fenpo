@@ -57,6 +57,8 @@ final class AppModel {
     /// Screens pushed on the PC tab.
     var pcPath: [PCScreen] = []
 
+    @ObservationIgnored private var isRefreshScheduled = false
+
     /// The pairing flow is on screen.
     var isPairingPresented = false
 
@@ -132,6 +134,20 @@ final class AppModel {
     func stopRinging() {
         ringer?.stop()
         isRinging = false
+    }
+
+    /// Reloads the session state soon, at most ten times a second however often the services
+    /// report a change (a transfer reports every chunk).
+    func scheduleRefresh() {
+        guard !isRefreshScheduled else {
+            return
+        }
+        isRefreshScheduled = true
+        Task {
+            try? await Task.sleep(for: .milliseconds(100))
+            isRefreshScheduled = false
+            await refresh()
+        }
     }
 
     /// Reloads the session state.

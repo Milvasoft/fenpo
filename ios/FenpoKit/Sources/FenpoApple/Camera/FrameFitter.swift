@@ -14,6 +14,8 @@ final class FrameFitter: @unchecked Sendable {
     private let context = CIContext(options: [.cacheIntermediates: false])
     private let colorSpace = CGColorSpace(name: CGColorSpace.itur_709)
     private var pool: CVPixelBufferPool?
+    private var misses = 0
+    private let log = FenpoLog("Camera")
 
     /// Creates a fitter for an output size.
     /// - Parameters:
@@ -44,6 +46,10 @@ final class FrameFitter: @unchecked Sendable {
         }
         var output: CVPixelBuffer?
         guard CVPixelBufferPoolCreatePixelBuffer(nil, pool, &output) == kCVReturnSuccess, let output else {
+            misses += 1
+            if misses == 1 || misses % 30 == 0 {
+                log.error("No buffer for a cropped frame, \(misses) so far")
+            }
             return nil
         }
         let crop = FrameCrop.centered(width: sourceWidth, height: sourceHeight, targetWidth: width, targetHeight: height)

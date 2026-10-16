@@ -64,6 +64,7 @@ public final class CameraService {
     /// Changes on every start and stop, so work from an older start stops where it is.
     private var generation = 0
     private static let reconnectAttempts = 3
+    private var observers: [NSObjectProtocol] = []
     private let log = FenpoLog("Camera")
 
     /// Creates the service.
@@ -248,6 +249,7 @@ public final class CameraService {
             UIApplication.shared.isIdleTimerDisabled = true
             current.isStreaming = true
             state = current
+            watchDevice()
             await report(.streaming)
             log.info("Camera streaming \(size.width)x\(size.height) at \(format.fps) fps, \(format.bitrateKbps) kbps")
         } catch {
@@ -317,6 +319,32 @@ public final class CameraService {
         await report(.failed, reason: "The media connection to the PC was lost", streamID: id)
     }
 
+    /// Logs memory warnings and heat while streaming; a hot phone gets half the bitrate so it can
+    /// keep going instead of being stopped by iOS.
+    private func watchDevice() {
+        let center = NotificationCenter.default
+        observers = [
+            center.addObserver(forName: UIApplication.didReceiveMemoryWarningNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.log.error("Memory warning while the camera runs")
+                }
+            },
+            center.addObserver(forName: ProcessInfo.thermalStateDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.thermalStateChanged()
+                }
+            },
+        ]
+        thermalStateChanged()
+    }
+
+    private func thermalStateChanged() {
+        let thermal = ProcessInfo.processInfo.thermalState
+        log.info("Thermal state \(thermal.rawValue)")
+        let full = Int(format.bitrateKbps)
+        encoder?.setBitrate(kbps: thermal.rawValue >= ProcessInfo.ThermalState.serious.rawValue ? full / 2 : full)
+    }
+
     /// Turns everything off. Also cancels a start in progress.
     /// - Parameters:
     ///   - reason: For the log.
@@ -328,6 +356,10 @@ public final class CameraService {
         if encoder != nil {
             UIDevice.current.endGeneratingDeviceOrientationNotifications()
         }
+        for observer in observers {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        observers = []
         let oldStreamID = streamID
         streamID = nil
         pipeline?.stop()

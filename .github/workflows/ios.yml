@@ -18,12 +18,20 @@ on:
         description: "Upload a Release build to TestFlight after the tests pass"
         type: boolean
         default: false
+      symbolicate:
+        description: "Only symbolicate: crash offsets in the Fenpo image (e.g. 0x1C60B0 0x1A2B3C)"
+        type: string
+        default: ""
+      symbolicate_ref:
+        description: "Commit of the crashed build, for symbolicate"
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
 concurrency:
-  group: ios-${{ github.ref }}
+  group: ios-${{ github.ref }}-${{ inputs.symbolicate != '' && 'symbolicate' || 'build' }}
   cancel-in-progress: true
 
 env:
@@ -33,6 +41,7 @@ jobs:
   # The platform independent part of FenpoKit must keep building with the Swift toolchain on Windows.
   core-windows:
     name: FenpoKit core (Windows)
+    if: inputs.symbolicate == ''
     runs-on: windows-latest
     defaults:
       run:
@@ -60,6 +69,7 @@ jobs:
 
   app-macos:
     name: App and FenpoKit (iOS Simulator)
+    if: inputs.symbolicate == ''
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
@@ -214,6 +224,14 @@ jobs:
             > "$log" 2>&1 || { grep -E "error:|Signing|Provisioning|certificate" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
           tail -3 "$log"
 
+      # Crash reports from this build can be symbolicated later with these.
+      - name: Keep the dSYMs
+        uses: actions/upload-artifact@v5
+        with:
+          name: dSYMs-${{ github.run_number }}
+          path: ${{ runner.temp }}/Fenpo.xcarchive/dSYMs
+          retention-days: 90
+
       - name: Upload
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -245,3 +263,52 @@ jobs:
             ${{ runner.temp }}/archive.log
             ${{ runner.temp }}/upload.log
           if-no-files-found: ignore
+
+  # Names the functions at crash offsets of a TestFlight build made before its dSYMs were kept:
+  # rebuilds that commit the way the TestFlight job does (Release, newest Xcode, unsigned, which
+  # leaves the code where it was) and looks the offsets up with atos.
+  symbolicate:
+    name: Symbolicate
+    if: github.event_name == 'workflow_dispatch' && inputs.symbolicate != ''
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.symbolicate_ref || github.sha }}
+
+      - name: Select newest Xcode
+        run: |
+          xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Install tools
+        run: brew install xcodegen protobuf
+
+      - name: Generate protocol code and project
+        run: |
+          ios/scripts/generate-proto.sh
+          (cd ios && xcodegen generate)
+
+      - name: Archive
+        run: |
+          log="$RUNNER_TEMP/archive.log"
+          xcodebuild archive \
+            -project ios/Fenpo.xcodeproj \
+            -scheme Fenpo \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/Fenpo.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO \
+            > "$log" 2>&1 || { grep -E "error:" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
+          tail -3 "$log"
+
+      - name: Look up
+        env:
+          OFFSETS: ${{ inputs.symbolicate }}
+        run: |
+          dwarf="$RUNNER_TEMP/Fenpo.xcarchive/dSYMs/Fenpo.app.dSYM/Contents/Resources/DWARF/Fenpo"
+          for offset in $OFFSETS; do
+            address="$(printf '0x%x' $((0x100000000 + offset)))"
+            echo "$offset: $(xcrun atos -arch arm64 -o "$dwarf" -l 0x100000000 "$address")"
+          done | tee -a "$GITHUB_STEP_SUMMARY"
