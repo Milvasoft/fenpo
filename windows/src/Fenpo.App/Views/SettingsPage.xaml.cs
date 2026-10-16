@@ -22,9 +22,6 @@ public sealed partial class SettingsPage : Page
 
         RadioButton[] themes = [ThemeSystem, ThemeLight, ThemeDark];
         themes[ViewModel.ThemeIndex].IsChecked = true;
-        _settingUnlock = true;
-        UnlockToggle.IsOn = App.GetService<Services.UnlockService>().IsSetUp;
-        _settingUnlock = false;
     }
 
     /// <summary>
@@ -46,88 +43,6 @@ public sealed partial class SettingsPage : Page
     }
 
     private void OnPairClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowPairing();
-
-    private bool _settingUnlock;
-
-    // Unlocking with the phone: the lock screen component (administrator approval once), the Windows password, then
-    // Face ID or the fingerprint on the phone.
-    private async void OnUnlockToggled(object sender, RoutedEventArgs e)
-    {
-        var unlock = App.GetService<Services.UnlockService>();
-
-        if (_settingUnlock || UnlockToggle.IsOn == unlock.IsSetUp)
-        {
-            return;
-        }
-
-        UnlockToggle.IsEnabled = false;
-
-        try
-        {
-            if (!UnlockToggle.IsOn)
-            {
-                await unlock.TurnOffAsync();
-                await unlock.UninstallAsync();
-                ShowUnlockStatus(null);
-                return;
-            }
-
-            if (!unlock.PhoneOffersUnlock)
-            {
-                ShowUnlockStatus("Unlock_NotAvailable");
-            }
-            else if (!Services.UnlockService.IsInstalled && !await unlock.InstallAsync())
-            {
-                ShowUnlockStatus("Unlock_InstallDeclined");
-            }
-            else if (await AskWindowsPasswordAsync() is { } password)
-            {
-                ShowUnlockStatus("Unlock_Waiting");
-                ShowUnlockStatus(await unlock.SetUpAsync(password) switch
-                {
-                    Services.UnlockSetupResult.Done => "Unlock_Done",
-                    Services.UnlockSetupResult.WrongPassword => "Unlock_WrongPassword",
-                    Services.UnlockSetupResult.NotAvailable => "Unlock_NotAvailable",
-                    Services.UnlockSetupResult.Declined => "Unlock_Declined",
-                    _ => "Unlock_Failed",
-                });
-            }
-        }
-        finally
-        {
-            _settingUnlock = true;
-            UnlockToggle.IsOn = unlock.IsSetUp;
-            _settingUnlock = false;
-            UnlockToggle.IsEnabled = true;
-        }
-    }
-
-    private async Task<string?> AskWindowsPasswordAsync()
-    {
-        var localization = App.GetService<Services.LocalizationService>();
-        var password = new PasswordBox { Header = localization.GetString("Unlock_PasswordLabel") };
-        var content = new StackPanel { Spacing = 12 };
-        content.Children.Add(new TextBlock { Text = localization.GetString("Unlock_PasswordText"), TextWrapping = TextWrapping.Wrap });
-        content.Children.Add(password);
-        var dialog = new ContentDialog
-        {
-            XamlRoot = XamlRoot,
-            Title = localization.GetString("Unlock_PasswordTitle"),
-            Content = content,
-            PrimaryButtonText = localization.GetString("Unlock_PasswordConfirm"),
-            CloseButtonText = localization.GetString("Forget_Cancel"),
-            DefaultButton = ContentDialogButton.Primary,
-            RequestedTheme = ActualTheme,
-        };
-
-        return await dialog.ShowAsync() == ContentDialogResult.Primary && password.Password.Length > 0 ? password.Password : null;
-    }
-
-    private void ShowUnlockStatus(string? key)
-    {
-        UnlockStatus.Text = key is null ? string.Empty : App.GetService<Services.LocalizationService>().GetString(key);
-        UnlockStatus.Visibility = key is null ? Visibility.Collapsed : Visibility.Visible;
-    }
 
     private void OnConnectAppClick(object sender, RoutedEventArgs e) => App.GetService<MainWindow>().ShowAppPairing();
 

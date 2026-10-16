@@ -54,24 +54,6 @@
     <Exec Command="set &quot;PATH=%PATH%;$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer&quot; &amp;&amp; dotnet publish &quot;$(VirtualCameraProject)&quot; -c Release -r $(ShellExtensionRid) -o &quot;$(VirtualCameraOut).&quot; -nologo -v q" />
   </Target>
 
-  <!-- The credential provider for unlocking with the phone is C++ (LogonUI loads no managed runtime); Visual Studio's
-       MSBuild builds it and the DLL ships next to Fenpo.exe. Settings installs it with administrator approval. -->
-  <PropertyGroup>
-    <CredentialProviderDir>$(MSBuildThisFileDirectory)..\..\native\Fenpo.CredentialProvider\</CredentialProviderDir>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <CredentialProviderSource Include="$(CredentialProviderDir)*.cpp;$(CredentialProviderDir)*.h;$(CredentialProviderDir)*.rc;$(CredentialProviderDir)*.def;$(CredentialProviderDir)*.bmp;$(CredentialProviderDir)*.vcxproj" />
-  </ItemGroup>
-
-  <Target Name="BuildCredentialProvider" BeforeTargets="Build" Inputs="@(CredentialProviderSource)" Outputs="$(CredentialProviderDir)bin\$(Platform)\Fenpo.CredentialProvider.dll">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\tools\Build-Native.ps1&quot; -Platform $(Platform)" />
-  </Target>
-
-  <Target Name="CopyCredentialProvider" AfterTargets="Build">
-    <Copy SourceFiles="$(CredentialProviderDir)bin\$(Platform)\Fenpo.CredentialProvider.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-  </Target>
-
   <Target Name="CopyVirtualCamera" AfterTargets="Build">
     <Copy SourceFiles="$(VirtualCameraOut)Fenpo.VirtualCamera.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
