@@ -160,7 +160,7 @@ struct HandshakeTests {
         var sequencer = EnvelopeSequencer()
         let session = try Handshake.negotiate(local: local, remote: sequencer.envelope(.hello(pcHello())))
         #expect(session.protocolVersion == 1)
-        #expect(session.capabilities == [.clipboard, .ring])
+        #expect(session.capabilities == [.clipboard, .ring, .camera])
         #expect(session.peerPlatform == .windows)
         #expect(session.peerName == "BUGRA-PC")
     }

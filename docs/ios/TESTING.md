@@ -185,7 +185,7 @@ Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşm
 
 ## Gerçek PC ile özellikler
 
-Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `RingDevice`, `OpenUrl`, `DeviceState`, dosya aktarımı, kamera). M1–M4 bittikten sonra, iPhone ile PC aynı Wi‑Fi'dayken:
+Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `RingDevice`, `OpenUrl`, `DeviceState` ve odak, dosya aktarımı, Kamera sayfasındaki önizleme). M1–M4 bittikten sonra, iPhone ile PC aynı Wi‑Fi'dayken:
 
 | # | Adım | Beklenen |
 |---|---|---|
@@ -203,13 +203,14 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | F12 | Windows'tan iPhone'a 2 dosya gönderin | iPhone'da "Bilgisayardan dosya geldi" bildirimi; Dosyalar → iPhone'umda → Fenpo içinde iki dosya; Aktarımlar'da satırlar, dokununca önizleme |
 | F13 | Aynı adla bir dosyayı ikinci kez gönderin | İkincisi "ad (2).uzantı" olarak kaydedilir, ilki silinmez |
 | F14 | Aktarım sürerken PC'de iptal edin | iPhone'da satır "İptal edildi" ya da "Tamamlanmadı"; yarım dosya Fenpo klasöründe kalmaz |
-| F15 | Windows'ta bir uygulamada (Kamera, Teams) "Fenpo Kamera"yı seçin, iPhone'da Fenpo açık | iPhone'da kamera ekranı açılır, PC'de görüntü gelir. Gecikme yaklaşık kaç saniye? |
+| F15 | iPhone'da Fenpo açıkken Windows'ta Fenpo → **Kamera** sayfasında önizlemeyi başlatın (PC 1920×1080, 30 fps, 6 Mbps, H.264, sessiz ister) | iPhone'da kamera ekranı açılır, PC'de görüntü gelir. Gecikme yaklaşık kaç saniye? Diğer uygulamalar için web kamerası aygıtı PC'de henüz yok |
 | F16 | Kamera açıkken 0,5 / 1× / 2, **Çevir**, **Ortala** (Center Stage'li ön kamerada) | PC'deki görüntü değişir; görüntü yan yatmıyor mu? |
 | F17 | Fenpo arka plandayken F15 | iPhone'da "Bilgisayarın kamerayı kullanmak istiyor" bildirimi; dokununca kamera başlar |
 | F18 | Kamera açıkken **Ekranı karart**, 5 dakika bekleyin | Görüntü sürer; telefon ne kadar ısındı, pil ne kadar düştü? |
-| F19 | Kamerayı iPhone'da **Kamerayı kapat** ile, sonra PC'deki uygulamayı kapatarak durdurun | İki yolda da kamera kapanır, PC'de görüntü donmuş kalmaz |
-| F20 | iOS Ayarlar → Odak → Rahatsız Etme → Filtre ekle → Fenpo, **PC’de sustur** açık. Rahatsız Etme'yi açıp kapatın | PC'de Fenpo bildirimleri odak açıkken susar, kapanınca döner (Windows'un `DeviceState.focus_active`'i göstermesine bağlı) |
+| F19 | Kamerayı iPhone'da **Kamerayı kapat** ile, sonra PC'deki önizlemeyi kapatarak durdurun | İki yolda da kamera kapanır, PC'de görüntü donmuş kalmaz |
+| F20 | Windows'ta **Odak modunu eşitle** açık. iOS Ayarlar → Odak → Rahatsız Etme → Filtre ekle → Fenpo, **PC’de sustur** açık. Rahatsız Etme'yi açıp kapatın | PC'de Fenpo bildirimleri odak açıkken susar (Bildirimler sayfasında yine listelenir, gelen aramalar Ada'da görünür), kapanınca döner |
 | F21 | Fenpo Ayarlar → **Odak modunu eşitle** kapalıyken F20 | PC susmaz |
+| F22 | Rahatsız Etme açıkken iPhone'da Fenpo'yu uygulama değiştiriciden kapatın, sonra yeniden açın | Bağlantı kopunca PC susmayı bırakır; Fenpo yeniden bağlanınca (Hello) odak durumu tekrar gönderilir ve PC yine susar. Kayıtta `Sent Focus state` |
 
 Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `[Intents]`.
 

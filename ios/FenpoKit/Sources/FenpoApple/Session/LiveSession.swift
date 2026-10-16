@@ -132,15 +132,19 @@ public final class FenpoServices {
         central.onStateChange = { [weak self] state in
             if state != .ready {
                 self?.pcBattery = nil
-            } else {
-                self?.actions.resendFocus()
             }
             self?.publishStatus()
         }
         wifi.onEnvelope = { [weak self] envelope in
             self?.route(envelope, from: .wifi)
         }
-        wifi.onStateChange = { [weak self] _ in
+        central.onHello = { [weak self] in
+            self?.actions.resendFocus(over: .bluetooth)
+        }
+        wifi.onStateChange = { [weak self] state in
+            if state == .connected {
+                self?.actions.resendFocus(over: .wifi)
+            }
             self?.onChange?()
         }
         transfers.onChange = { [weak self] in

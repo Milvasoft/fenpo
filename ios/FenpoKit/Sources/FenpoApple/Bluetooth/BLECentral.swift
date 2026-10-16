@@ -61,7 +61,6 @@ public final class BLECentral: NSObject {
         }
     }
 
-    /// What the PC agreed to in its `Hello` on this connection.
     /// Latest `PcStatus` from the PC on this connection.
     public private(set) var pcStatus: Fenpo_V1_PcStatus? {
         didSet {
@@ -69,6 +68,7 @@ public final class BLECentral: NSObject {
         }
     }
 
+    /// What the PC agreed to in its `Hello` on this connection.
     public private(set) var session: NegotiatedSession? {
         didSet {
             notifyChange()
@@ -77,6 +77,9 @@ public final class BLECentral: NSObject {
 
     /// Called on every state change.
     public var onStateChange: ((State) -> Void)?
+
+    /// Called after the PC's `Hello` on this connection was accepted.
+    public var onHello: (() -> Void)?
 
     /// Called for every Envelope from the PC that is not handled here (Hello, Ping).
     public var onEnvelope: ((Fenpo_V1_Envelope) -> Void)?
@@ -281,6 +284,7 @@ public final class BLECentral: NSObject {
             do {
                 session = try Handshake.negotiate(local: localHello, remote: envelope)
                 log.info("BLE Hello from \(self.session?.peerName ?? "")")
+                onHello?()
             } catch {
                 log.error("BLE handshake failed: \(String(describing: error))")
             }
