@@ -7,6 +7,7 @@ import "fenpo/v1/pairing.proto";
 import "fenpo/v1/content.proto";
 import "fenpo/v1/transfer.proto";
 import "fenpo/v1/device.proto";
+import "fenpo/v1/notification.proto";
 
 option csharp_namespace = "Fenpo.Protocol.V1";
 option java_package = "com.fenpo.protocol.v1";
@@ -48,10 +49,18 @@ message Envelope {
     // 50-59: device state
     DeviceState device_state = 50;
     PcStatus pc_status = 51;
+
+    // 90-99: notification mirror (Android)
+    PhoneNotification phone_notification = 90;
+    NotificationRemoved notification_removed = 91;
+    DismissNotification dismiss_notification = 92;
+    RunNotificationAction run_notification_action = 93;
+    AppIconRequest app_icon_request = 94;
+    AppIcon app_icon = 95;
   }
 
-  // 60-69 camera, 70-79 file provider, 80-89 screen mirror,
-  // 90-99 notification mirror (Android), 100-109 messages (Android).
+  // 60-69 camera, 70-79 file provider, 80-89 screen mirror, 100-109 messages (Android).
   // Defined in later phases.
-  reserved 60 to 109;
+  reserved 60 to 89;
+  reserved 96 to 109;
 }
