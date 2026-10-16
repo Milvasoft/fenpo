@@ -17,6 +17,7 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     private readonly ILogger<CameraService> _logger = logger;
     private string? _streamId;
     private CameraSettings? _sent;
+    private bool _adopting;
 
     /// <summary>
     /// Raised from a background thread when the state or what the camera offers changed.
@@ -146,6 +147,12 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     // A change on the Camera page goes to the phone while the camera runs.
     private async Task OnSettingsChangedAsync(AppSettings current)
     {
+        // A change that came from the phone is not sent back to it.
+        if (_adopting)
+        {
+            return;
+        }
+
         var wanted = ToWire(current);
 
         if (State is not (CameraState.Starting or CameraState.Streaming or CameraState.WaitingForTap) || wanted.Equals(_sent))
@@ -186,8 +193,19 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
 
     private void Adopt(CameraSettings applied)
     {
-        _sent = applied;
-        _settings.Update(s => s with { CameraLens = LensOf(applied), CameraCenterStage = applied.CenterStage, CameraUseMicrophone = applied.Microphone });
+        _adopting = true;
+
+        try
+        {
+            _settings.Update(s => s with { CameraLens = LensOf(applied), CameraCenterStage = applied.CenterStage, CameraUseMicrophone = applied.Microphone });
+        }
+        finally
+        {
+            _adopting = false;
+        }
+
+        // What the phone applied, in the PC's own terms, so the next real change is compared against it.
+        _sent = ToWire(_settings.Current);
     }
 
     private void SetState(CameraState state)
