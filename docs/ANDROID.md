@@ -376,7 +376,10 @@ Kurulumdan sonraki "Paired with" kayıtları QR'ın elle yeniden okutulmasından
 | Özellik | Telefonda | Durum |
 |---|---|---|
 | Ekran görüntülerini gönder | Ayar açıkken yeni ekran görüntüsü dosya aktarımıyla PC'ye gider; anahtar açılınca fotoğraf izni istenir. | Cihazda denenmedi (izin telefonda verilmeli). |
-| Kamera döndürme | GL adımı kareyi sensör ve tutuş yönüne göre diker; dikey tutuşta yatay kareye kırpar. | Formül testli. Görüntünün PC'de dik olup olmadığı Buğra'dan bekleniyor. |
+| Kamera döndürme | Kamera servisi `SurfaceTexture` dönüşümüne sensör dönüşünü (ön lenste aynayı da) zaten koyuyor; GL adımı dönüşü bu matristen okur, resmi kendi oranında çizer, yalnız tutuş yönü kadar döndürür, ön lensin aynasını kaldırır. Lens değişince dönüş yeniden hesaplanır. | **Geçti** (21:54, ön ve arka lens, dikey). İlk sürüm sensör dönüşünü ikinci kez uyguluyordu: PC'de görüntü yan ve sünük geliyordu. Yatay tutuş ayrıca denenmedi. |
+| Dikey tutuşta görüş alanı | Dikeyde yatay kareye kırpma yaklaşık 1,8 kat yakınlaştırıyor. S10+'da ana lens 1×'in altına inmiyor (`zoomRatioRange` 1–8); uygulamalara açık 1,8 mm ultra geniş lense (kamera 2, ana lensten 1,96 kat geniş) geçilir, yakınlaştırma ana lens ölçeğinde kalır ve 0,5 seçeneği çıkar. Aynı anda tek kamera açılır. | **Geçti** (21:54). Hızlı lens değişiminde iki kamera birden açılıp "Camera error 2" veriyordu; düzeltildi. |
+| Kamera gecikmesi | Telefonda çekimden gönderime 130–160 ms, 30 fps, kayıp yok; `WIFI_MODE_FULL_LOW_LATENCY` ve 5 saniyede bir akış özeti (`FenpoMedia`). | **Geçti**: 3 saniyelik gecikme PC oynatıcısındaydı, Windows düzeltti; Buğra: "neredeyse realtime". |
+| Ekran yansıtma ve PC'den kontrol | Erişilebilirlik hizmetini Buğra açtı. | **Geçti** (21:58–22:00): yaklaşık 35 fps, kayıp yok, yakalamadan gönderime 41 ms; dokunma, kaydırma ve yazma çalıştı. |
 | Web kamerası uçtan uca | 21:05:42–21:06:12 akış PC'ye gitti, çözücü hatası yok. | **Geçti** (PC tarafındaki kuyruk hatası düzeltildikten sonra). |
 | PC sekmesi | PC'nin `MediaState`'i ("PC'de çalıyor": önceki, oynat/duraklat, sonraki, ses), PC'yi çaldır, kilitle, pano. | Windows `PcMediaShare` ve çaldırmayı ekledi; uçtan uca deneme bekliyor. |
 | SMS (MAP'siz telefonlar) | `messages.proto` (`5e454cb`), `SmsBridge`; `MESSAGES` ayar ve izinle sunulur. | S10+'da MAP olduğu için PC MAP'i tercih ediyor; onay bekliyor. |
