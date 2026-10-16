@@ -135,8 +135,14 @@
   <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Kişiyi ortala</value>
   </data>
+  <data name="Camera_Failed" xml:space="preserve">
+    <value>Kamera açılamadı. Kamerayı kullanan başka bir uygulamayı kapatıp yeniden dene.</value>
+  </data>
   <data name="Camera_Hint.Text" xml:space="preserve">
-    <value>Fenpo Kamera, Teams, Zoom, Meet ve OBS’de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı, en iyisi telefonu yatay bir standa koymak.</value>
+    <value>Önizleme telefonun kamerasını gösterir. Teams, Zoom ve Meet'te web kamerası olarak görünmesi için Fenpo Kamera bileşeni gerekiyor; o bir sonraki sürümde geliyor.</value>
+  </data>
+  <data name="Camera_Idle" xml:space="preserve">
+    <value>Telefonun kamerasını burada önizle.</value>
   </data>
   <data name="Camera_Lens.Text" xml:space="preserve">
     <value>Lens</value>
@@ -164,6 +170,18 @@
   </data>
   <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Portre bulanıklığı</value>
+  </data>
+  <data name="Camera_Starting" xml:space="preserve">
+    <value>Kamera açılıyor…</value>
+  </data>
+  <data name="Camera_StartPreview.Content" xml:space="preserve">
+    <value>Önizlemeyi başlat</value>
+  </data>
+  <data name="Camera_StopPreview.Content" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="Camera_WaitingTap" xml:space="preserve">
+    <value>Telefonda Fenpo'nun “Kamerayı başlat” bildirimine dokun.</value>
   </data>
   <data name="CameraTitle.Text" xml:space="preserve">
     <value>Kamera</value>

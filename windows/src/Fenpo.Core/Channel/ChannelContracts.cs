@@ -102,6 +102,7 @@ public static class PcHello
             Capability.NotificationMirror,
             Capability.Media,
             Capability.ScreenMirror,
+            Capability.Camera,
         },
         OsVersion = identity.OsVersion,
         Model = identity.Model,

@@ -18,11 +18,15 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="10">
-                    <Grid CornerRadius="8" Background="{ThemeResource FenpoIslandBrush}">
-                        <Viewbox Stretch="Uniform">
-                            <Grid Width="320" Height="180" />
-                        </Viewbox>
-                        <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
+                    <!-- Live preview from the phone's camera, with what is going on while it is not live. -->
+                    <Grid CornerRadius="8" Background="{ThemeResource FenpoIslandBrush}" Height="300">
+                        <MediaPlayerElement x:Name="Preview" AreTransportControlsEnabled="False" Stretch="Uniform" />
+                        <StackPanel x:Name="PreviewState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" MaxWidth="300">
+                            <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
+                            <TextBlock x:Name="PreviewText" TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
+                            <Button x:Name="PreviewStart" x:Uid="Camera_StartPreview" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}" Click="OnStartClick" />
+                        </StackPanel>
+                        <Button x:Name="PreviewStop" x:Uid="Camera_StopPreview" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10" Click="OnStopClick" />
                     </Grid>
                     <TextBlock x:Uid="Camera_Hint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
                 </StackPanel>
