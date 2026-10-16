@@ -1,3 +1,4 @@
+import FenpoApple
 import SwiftUI
 import UIKit
 
@@ -32,13 +33,25 @@ struct ScannerView: View {
         }
         .environment(\.colorScheme, .dark)
         .task {
+            startBrowsing()
             camera = await CameraAccess.prepare()
         }
         .onDisappear {
+            FenpoServices.shared.browser.stop()
             if isTorchOn {
                 CameraAccess.setTorch(false)
             }
         }
+    }
+
+    /// Bonjour while scanning brings up the local network prompt before the first TLS connection.
+    private func startBrowsing() {
+        #if DEBUG
+        if ScreenshotScene.current != nil {
+            return
+        }
+        #endif
+        FenpoServices.shared.browser.start()
     }
 
     @ViewBuilder

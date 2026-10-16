@@ -13,6 +13,11 @@ on:
       - "protocol/**"
       - ".github/workflows/ios.yml"
   workflow_dispatch:
+    inputs:
+      testflight:
+        description: "Upload a Release build to TestFlight after the tests pass"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -107,6 +112,19 @@ jobs:
           grep -E "warning:" "$log" | sort -u | head -40 || true
           tail -3 "$log"
 
+      - name: Build Release for devices (what TestFlight gets)
+        working-directory: ios
+        run: |
+          log="$RUNNER_TEMP/release-build.log"
+          xcodebuild build \
+            -project Fenpo.xcodeproj \
+            -scheme Fenpo \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            CODE_SIGNING_ALLOWED=NO \
+            > "$log" 2>&1 || { grep -E "error:" "$log"; tail -60 "$log"; exit 1; }
+          tail -3 "$log"
+
       - name: Test app (keychain and TLS)
         working-directory: ios
         run: |
@@ -138,4 +156,92 @@ jobs:
         with:
           name: xcodebuild-logs
           path: ${{ runner.temp }}/*.log
+          if-no-files-found: ignore
+
+  # Signs with the App Store Connect API key (automatic signing, cloud managed certificates) and
+  # uploads to TestFlight. Only when started by hand with "testflight" checked.
+  testflight:
+    name: Upload to TestFlight
+    needs: [core-windows, app-macos]
+    if: github.event_name == 'workflow_dispatch' && inputs.testflight
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select newest Xcode
+        run: |
+          xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Install tools
+        run: brew install xcodegen protobuf
+
+      - name: Generate protocol code and project
+        run: |
+          ios/scripts/generate-proto.sh
+          (cd ios && xcodegen generate)
+
+      - name: Write the API key
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          key="$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
+          ( umask 077 && printf '%s\n' "$ASC_KEY_P8" > "$key" )
+          echo "ASC_KEY_PATH=$key" >> "$GITHUB_ENV"
+
+      - name: Archive
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          log="$RUNNER_TEMP/archive.log"
+          xcodebuild archive \
+            -project ios/Fenpo.xcodeproj \
+            -scheme Fenpo \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/Fenpo.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            > "$log" 2>&1 || { grep -E "error:|Signing|Provisioning|certificate" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
+          tail -3 "$log"
+
+      - name: Upload
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          log="$RUNNER_TEMP/upload.log"
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Fenpo.xcarchive" \
+            -exportOptionsPlist ios/Config/ExportOptions.plist \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$ASC_KEY_PATH" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            > "$log" 2>&1 || { grep -E "error:|ITMS|Upload" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
+          grep -E "Upload succeeded|EXPORT SUCCEEDED|Uploaded" "$log" | tail -5
+          echo "Uploaded Fenpo $(grep -m1 MARKETING_VERSION ios/Config/Base.xcconfig | cut -d= -f2 | tr -d ' ') (${{ github.run_number }}) from ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Delete the API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP"/AuthKey_*.p8
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: testflight-logs
+          path: |
+            ${{ runner.temp }}/archive.log
+            ${{ runner.temp }}/upload.log
           if-no-files-found: ignore

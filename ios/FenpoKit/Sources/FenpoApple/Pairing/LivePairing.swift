@@ -79,7 +79,8 @@ public final class LivePairing: PairingProviding {
         for endpoint in code.endpoints {
             let connection = TLSControlConnection(endpoint: endpoint, pinnedServerSHA256: code.certificateSHA256, identity: identity)
             do {
-                try await withTimeout(.seconds(8)) {
+                // Long enough for the first-time local network prompt.
+                try await withTimeout(.seconds(20)) {
                     try await connection.start()
                 }
             } catch {

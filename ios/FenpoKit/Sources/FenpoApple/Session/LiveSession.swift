@@ -83,6 +83,7 @@ public final class FenpoServices {
     public let actions: LiveFenpoActions
     public let ringer: PhoneRinger
     public let statusStore: SharedStatusStore
+    public let browser = PCBrowser()
 
     /// Called whenever the channel state or the PC's status changes.
     public var onChange: (() -> Void)?
