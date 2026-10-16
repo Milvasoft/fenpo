@@ -40,6 +40,7 @@ public sealed class ControlServer(
     private readonly ILogger<ControlServer> _logger = logger;
     private readonly ConcurrentDictionary<string, Session> _sessions = new();
     private ITransferDataConnections? _transfers;
+    private IMediaStreamConnections? _mediaStreams;
     private TcpListener? _listener;
     private CancellationTokenSource? _stop;
 
@@ -79,6 +80,12 @@ public sealed class ControlServer(
     /// </summary>
     /// <param name="transfers">File transfers.</param>
     public void UseTransfers(ITransferDataConnections transfers) => _transfers = transfers;
+
+    /// <summary>
+    /// Sets who takes media connections (camera, screen); without one they are closed. Set before <see cref="Start"/>.
+    /// </summary>
+    /// <param name="mediaStreams">Media streams.</param>
+    public void UseMediaStreams(IMediaStreamConnections mediaStreams) => _mediaStreams = mediaStreams;
 
     /// <summary>
     /// Starts listening on every interface.
@@ -131,6 +138,20 @@ public sealed class ControlServer(
         {
             _logger.LogDebug("Sending to {Phone} over Wi-Fi failed: {Reason}", session.Device.Name, exception.Message);
             return false;
+        }
+    }
+
+    /// <summary>
+    /// Closes a phone's session (after it was forgotten).
+    /// </summary>
+    /// <param name="deviceId">Phone id.</param>
+    /// <returns>A task that completes when closed.</returns>
+    public async Task DisconnectAsync(string deviceId)
+    {
+        if (_sessions.TryRemove(deviceId, out var session))
+        {
+            await session.DisposeAsync();
+            SessionChanged?.Invoke(this, (session.Device, false));
         }
     }
 
@@ -262,6 +283,14 @@ public sealed class ControlServer(
                     }
 
                     break;
+                case Envelope.BodyOneofCase.MediaStreamOpen:
+                    // A camera or screen stream: its own connection, so video never holds up the control messages.
+                    if (_devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint) is { } streaming && _mediaStreams is not null)
+                    {
+                        await _mediaStreams.HandleAsync(streaming, first.MediaStreamOpen, ssl, cancellationToken);
+                    }
+
+                    return;
                 case Envelope.BodyOneofCase.Hello:
                     device = _devices.All.FirstOrDefault(d => d.CertificateSha256 == fingerprint);
 

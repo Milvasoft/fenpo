@@ -283,9 +283,14 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
             return;
         }
 
-        _logger.LogInformation("Clipboard {Kind} from {Phone}", item.ContentCase, message.Device.Name);
+        _logger.LogInformation("Clipboard {Kind} from {Phone}{Sensitive}", item.ContentCase, message.Device.Name, item.Sensitive ? " (sensitive)" : string.Empty);
         _dispatcher?.TryEnqueue(() => _ = SetPcClipboardAsync(text, image));
-        Remember(new ClipboardEntry(text, image, FromPhone: true, DateTimeOffset.Now));
+
+        // A password or a code goes to the clipboard but not into the list.
+        if (!item.Sensitive)
+        {
+            Remember(new ClipboardEntry(text, image, FromPhone: true, DateTimeOffset.Now));
+        }
     }
 
     private async Task OnPhoneRequestAsync(ChannelMessage message)

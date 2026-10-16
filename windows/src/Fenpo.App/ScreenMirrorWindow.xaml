@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Fenpo.App.ScreenMirrorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop />
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="Root">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- The phone's screen; the surface on top takes touches, swipes and the wheel. -->
+        <Grid Margin="12,12,12,8" CornerRadius="12" Background="{ThemeResource FenpoInk}">
+            <MediaPlayerElement x:Name="Player" AreTransportControlsEnabled="False" Stretch="Uniform" />
+            <Border x:Name="TouchSurface" Background="Transparent" PointerPressed="OnPointerPressed" PointerReleased="OnPointerReleased" PointerWheelChanged="OnPointerWheelChanged" />
+
+            <!-- Waiting, locked, stopped: what is going on and how to go on. -->
+            <StackPanel x:Name="StatePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="14" MaxWidth="280">
+                <ProgressRing x:Name="Waiting" IsActive="True" Width="32" Height="32" Foreground="{ThemeResource FenpoAccentBrush}" />
+                <TextBlock x:Name="StateText" TextWrapping="Wrap" TextAlignment="Center" FontSize="14" Foreground="{ThemeResource FenpoOnAccentBrush}" />
+                <Button x:Name="RestartButton" x:Uid="Mirror_Restart" HorizontalAlignment="Center" Style="{StaticResource AccentButtonStyle}" Click="OnRestartClick" />
+            </StackPanel>
+        </Grid>
+
+        <InfoBar x:Name="NoControl" Grid.Row="1" x:Uid="Mirror_NoControl" Margin="12,0,12,8" Severity="Informational" IsClosable="False" />
+
+        <!-- Android's buttons, typing, stop. -->
+        <Grid Grid.Row="2" Padding="12,0,12,12" ColumnSpacing="6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Uid="Mirror_Back" Padding="8" Click="OnBackClick">
+                <FontIcon Glyph="&#xE72B;" FontSize="16" />
+            </Button>
+            <Button Grid.Column="1" x:Uid="Mirror_Home" Padding="8" Click="OnHomeClick">
+                <FontIcon Glyph="&#xE80F;" FontSize="16" />
+            </Button>
+            <Button Grid.Column="2" x:Uid="Mirror_Recents" Padding="8" Click="OnRecentsClick">
+                <FontIcon Glyph="&#xE7C4;" FontSize="16" />
+            </Button>
+            <Button Grid.Column="3" x:Uid="Mirror_Notifications" Padding="8" Click="OnNotificationsClick">
+                <FontIcon Glyph="&#xEA8F;" FontSize="16" />
+            </Button>
+            <TextBox x:Name="TypeBox" Grid.Column="4" x:Uid="Mirror_Type" KeyDown="OnTypeKeyDown" VerticalAlignment="Center" />
+            <Button Grid.Column="5" x:Uid="Mirror_Stop" Padding="8" Click="OnStopClick">
+                <FontIcon Glyph="&#xE71A;" FontSize="16" />
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

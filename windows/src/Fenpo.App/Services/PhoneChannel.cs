@@ -53,6 +53,11 @@ public sealed class PhoneChannel(
     public event EventHandler? Changed;
 
     /// <summary>
+    /// Raised with the PC's signal as the Android phone measures it on the BLE link (proximity lock).
+    /// </summary>
+    public event EventHandler<int>? AndroidRssi;
+
+    /// <summary>
     /// Raised after a phone's Hello on either channel (a notification snapshot follows on that channel).
     /// </summary>
     public event EventHandler<ChannelMessage>? HelloReceived;
@@ -154,6 +159,28 @@ public sealed class PhoneChannel(
         }
 
         return (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken)) || _ble.Send(phone.DeviceId, envelope);
+    }
+
+    /// <summary>
+    /// Forgets the paired Android phone: its record goes, its connections close and it shows as not paired. Pairing
+    /// again takes the QR code.
+    /// </summary>
+    /// <returns>A task that completes when done.</returns>
+    public async Task ForgetAndroidAsync()
+    {
+        foreach (var device in _devices.All.Where(d => d.Platform == DevicePlatform.Android || KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android).ToList())
+        {
+            _logger.LogInformation("Forgetting {Phone}", device.Name);
+            _devices.Remove(device.DeviceId);
+            await _wifi.DisconnectAsync(device.DeviceId);
+            _ble.Forget(device.DeviceId);
+            _connected.TryRemove(device.DeviceId, out _);
+            _wifiHellos.TryRemove(device.DeviceId, out _);
+            _bleHellos.TryRemove(device.DeviceId, out _);
+        }
+
+        _status.Update(PhoneKind.Android, s => PhoneStatus.Unknown);
+        Changed?.Invoke(this, EventArgs.Empty);
     }
 
     /// <summary>
@@ -284,17 +311,24 @@ public sealed class PhoneChannel(
     {
         var state = message.Envelope.DeviceState;
 
-        // The iPhone's battery comes from its Battery Service on the Bluetooth link already.
-        if (HelloOf(message.Device.DeviceId)?.Platform != DevicePlatform.Android)
+        if (KindOf(HelloOf(message.Device.DeviceId)) is not { } kind)
         {
             return;
         }
 
-        _status.Update(PhoneKind.Android, s => s with
+        // The iPhone's battery comes from its Battery Service on the Bluetooth link already; Focus only from Fenpo.
+        var android = kind == PhoneKind.Android;
+        _status.Update(kind, s => s with
         {
-            BatteryPercent = state.HasBatteryPercent ? (int)state.BatteryPercent : s.BatteryPercent,
-            Charging = state.HasCharging ? state.Charging : s.Charging,
+            BatteryPercent = android && state.HasBatteryPercent ? (int)state.BatteryPercent : s.BatteryPercent,
+            Charging = android && state.HasCharging ? state.Charging : s.Charging,
+            FocusActive = state.HasFocusActive ? state.FocusActive : s.FocusActive,
         });
+
+        if (android && state.HasBleRssiDbm)
+        {
+            AndroidRssi?.Invoke(this, state.BleRssiDbm);
+        }
     }
 
     private void SendAddresses(PairedAppDevice device)

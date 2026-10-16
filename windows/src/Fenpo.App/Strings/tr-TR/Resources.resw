@@ -25,7 +25,7 @@
     <value>Hotspot’a bağlan</value>
   </data>
   <data name="Action_Mirror.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
-    <value>Telefonda Fenpo gerekiyor</value>
+    <value>Android telefondaki Fenpo ile çalışır</value>
   </data>
   <data name="Action_MirrorText.Text" xml:space="preserve">
     <value>Ekranı yansıt</value>
@@ -312,6 +312,18 @@
   <data name="Filter_Other.Content" xml:space="preserve">
     <value>Diğer</value>
   </data>
+  <data name="Forget_Cancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="Forget_Confirm" xml:space="preserve">
+    <value>Kaldır</value>
+  </data>
+  <data name="Forget_Text" xml:space="preserve">
+    <value>Bu bilgisayar telefonu artık tanımaz. Yeniden bağlamak için telefondaki Fenpo ile QR kodu okut.</value>
+  </data>
+  <data name="Forget_Title" xml:space="preserve">
+    <value>{0} eşleşmesi kaldırılsın mı?</value>
+  </data>
   <data name="Home_Files.Content" xml:space="preserve">
     <value>Dosyalar</value>
   </data>
@@ -477,6 +489,60 @@
   <data name="MessagesTitle.Text" xml:space="preserve">
     <value>Mesajlar</value>
   </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+  <data name="Mirror_Back.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+  <data name="Mirror_Failed" xml:space="preserve">
+    <value>Yansıtma başlamadı. Telefonda Fenpo açıkken yeniden başlat.</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Ana ekran</value>
+  </data>
+  <data name="Mirror_Home.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Ana ekran</value>
+  </data>
+  <data name="Mirror_Locked" xml:space="preserve">
+    <value>Telefon kilitlendi. Kilidini aç, sonra yeniden başlat.</value>
+  </data>
+  <data name="Mirror_NoControl.Message" xml:space="preserve">
+    <value>Telefonu buradan kontrol etmek için telefonda Ayarlar &gt; Erişilebilirlik &gt; Fenpo'yu aç.</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Mirror_Notifications.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bildirimler</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Son uygulamalar</value>
+  </data>
+  <data name="Mirror_Recents.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Son uygulamalar</value>
+  </data>
+  <data name="Mirror_Restart.Content" xml:space="preserve">
+    <value>Yeniden başlat</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Yansıtmayı durdur</value>
+  </data>
+  <data name="Mirror_Stop.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Yansıtmayı durdur</value>
+  </data>
+  <data name="Mirror_Stopped" xml:space="preserve">
+    <value>Yansıtma durdu.</value>
+  </data>
+  <data name="Mirror_Title" xml:space="preserve">
+    <value>Telefon ekranı</value>
+  </data>
+  <data name="Mirror_Type.PlaceholderText" xml:space="preserve">
+    <value>Telefona yaz, Enter ile gönder</value>
+  </data>
+  <data name="Mirror_WaitingConsent" xml:space="preserve">
+    <value>Telefonda ekranı paylaşmaya izin ver.</value>
+  </data>
   <data name="Nav_Calls.Content" xml:space="preserve">
     <value>Aramalar</value>
   </data>
@@ -618,6 +684,15 @@
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>{0} telefonuna geç</value>
   </data>
+  <data name="Ring_PcStop" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="Ring_PcText" xml:space="preserve">
+    <value>Bilgisayarı bulman için çalıyor.</value>
+  </data>
+  <data name="Ring_PcTitle" xml:space="preserve">
+    <value>{0} bu bilgisayarı çaldırıyor</value>
+  </data>
   <data name="Search.PlaceholderText" xml:space="preserve">
     <value>Mesaj, kişi veya dosya ara</value>
   </data>
@@ -659,6 +734,9 @@
   </data>
   <data name="Settings_FocusToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
     <value>Odak modunu eşitle</value>
+  </data>
+  <data name="Settings_ForgetPhone.Content" xml:space="preserve">
+    <value>Eşleşmeyi kaldır</value>
   </data>
   <data name="Settings_IncomingFiles.Text" xml:space="preserve">
     <value>Gelen dosyalar</value>

@@ -167,7 +167,7 @@
                                         <TextBlock x:Uid="Action_CameraText" FontSize="13" TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Button>
-                                <Button Grid.Column="4" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.AppConnected, Mode=OneWay}" x:Uid="Action_Mirror">
+                                <Button Grid.Column="4" Style="{StaticResource ActionButtonStyle}" IsEnabled="{x:Bind ViewModel.CanMirror, Mode=OneWay}" Click="OnMirrorClick" x:Uid="Action_Mirror">
                                     <StackPanel Spacing="18">
                                         <FontIcon Glyph="&#xE7F4;" FontSize="20" Foreground="{ThemeResource FenpoAccentBrush}" HorizontalAlignment="Left" />
                                         <TextBlock x:Uid="Action_MirrorText" FontSize="13" TextWrapping="Wrap" />

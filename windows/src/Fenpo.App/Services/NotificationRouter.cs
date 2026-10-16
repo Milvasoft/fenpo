@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Cryptography;
+using Fenpo.Core.Devices;
 using Fenpo.Core.Notifications;
 using Fenpo.Core.Settings;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +22,7 @@ public sealed class NotificationRouter(
     AppIconService icons,
     ISettingsStore settings,
     LocalizationService localization,
+    IPhoneStatusSource status,
     ILogger<NotificationRouter> logger) : IHostedService
 {
     private const string _group = "phone";
@@ -30,6 +32,7 @@ public sealed class NotificationRouter(
     private readonly AppIconService _icons = icons;
     private readonly ISettingsStore _settings = settings;
     private readonly LocalizationService _localization = localization;
+    private readonly IPhoneStatusSource _status = status;
     private readonly ILogger<NotificationRouter> _logger = logger;
     private CancellationTokenSource? _dropDetached;
 
@@ -103,6 +106,12 @@ public sealed class NotificationRouter(
         var notification = stored.Notification;
 
         if (!_settings.Current.ShowNotifications || notification.Category == NotificationCategory.IncomingCall)
+        {
+            return;
+        }
+
+        // A Focus on the phone keeps the PC quiet too; the notification is still listed.
+        if (_settings.Current.FocusSync && _status.Current.FocusActive)
         {
             return;
         }
@@ -202,6 +211,13 @@ public sealed class NotificationRouter(
 
     private async Task OnInvokedAsync(IDictionary<string, string> arguments, IDictionary<string, string> userInput)
     {
+        // The phone rang the PC: "Stop" takes the ringing notification away, and with it the sound.
+        if (arguments.TryGetValue("ring", out _))
+        {
+            await AppNotificationManager.Default.RemoveByTagAsync(PhoneActions.RingTag);
+            return;
+        }
+
         // Fenpo's own notifications (received files): "Show" selects the file, a click opens their page.
         if (arguments.TryGetValue("reveal", out var reveal))
         {

@@ -39,6 +39,26 @@ public sealed partial class SettingsPage : Page
 
     private async void OnManagePairingClick(object sender, RoutedEventArgs e) => await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
 
+    private async void OnForgetClick(object sender, RoutedEventArgs e)
+    {
+        var localization = App.GetService<Services.LocalizationService>();
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = localization.Format("Forget_Title", ViewModel.AndroidName),
+            Content = localization.GetString("Forget_Text"),
+            PrimaryButtonText = localization.GetString("Forget_Confirm"),
+            CloseButtonText = localization.GetString("Forget_Cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            RequestedTheme = ActualTheme,
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await App.GetService<Services.PhoneChannel>().ForgetAndroidAsync();
+        }
+    }
+
     private async void OnChangeFolderClick(object sender, RoutedEventArgs e)
     {
         var picker = new FolderPicker { SuggestedStartLocation = PickerLocationId.Downloads };
