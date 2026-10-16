@@ -36,7 +36,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
     public event EventHandler<string>? Removed;
 
     /// <inheritdoc/>
-    public event EventHandler? Reset;
+    public event EventHandler<string>? Reset;
 
     /// <summary>
     /// Raised when notification access starts or stops working (ANCS visible and subscribed).
@@ -148,7 +148,7 @@ public sealed class AncsClient(IphoneLink link, ILogger<AncsClient> logger) : IN
             _pending?.TrySetCanceled();
         }
 
-        Reset?.Invoke(this, EventArgs.Empty);
+        Reset?.Invoke(this, string.Empty);
         AvailabilityChanged?.Invoke(this, false);
     }
 

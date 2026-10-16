@@ -507,11 +507,17 @@
   <data name="NeedsApp_Title.Text" xml:space="preserve">
     <value>Telefonda Fenpo gerekiyor.</value>
   </data>
+  <data name="Notification_ContentHidden" xml:space="preserve">
+    <value>İçerik telefonda gizli. Görmek için telefonun kilidini aç.</value>
+  </data>
   <data name="Notification_Dismiss" xml:space="preserve">
     <value>Kapat</value>
   </data>
   <data name="Notification_DismissButton.Content" xml:space="preserve">
     <value>Kapat</value>
+  </data>
+  <data name="Notification_ReplyHint" xml:space="preserve">
+    <value>Yanıt yaz</value>
   </data>
   <data name="Notifications_ClearAll.Content" xml:space="preserve">
     <value>Tümünü temizle</value>
