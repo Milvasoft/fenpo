@@ -175,7 +175,7 @@ final class AppModel {
         transferActivities?.update(snapshot.activeTransfers, pcName: snapshot.pc?.name ?? "")
         if readsPermissions {
             permissions = PermissionsSnapshot(
-                bluetooth: Self.bluetoothPermission,
+                bluetooth: Self.bluetoothPermission(linkUp: snapshot.links.bluetooth, paired: snapshot.pc != nil),
                 // iOS has no API for these: local network is known only once the Wi-Fi channel
                 // worked, and the paste setting never.
                 localNetwork: snapshot.links.wifi ? .allowed : .unknown,
@@ -204,16 +204,21 @@ final class AppModel {
         await refresh()
     }
 
-    private static var bluetoothPermission: PermissionState {
+    /// Pairing goes through AccessorySetupKit, which gives Fenpo its accessory without the system's
+    /// Bluetooth prompt: the authorization then stays "not determined" although the link works.
+    private static func bluetoothPermission(linkUp: Bool, paired: Bool) -> PermissionState {
+        if linkUp {
+            return .allowed
+        }
         switch CBManager.authorization {
         case .allowedAlways:
-            .allowed
+            return .allowed
         case .denied, .restricted:
-            .denied
+            return .denied
         case .notDetermined:
-            .notDetermined
+            return paired ? .allowed : .notDetermined
         @unknown default:
-            .unknown
+            return .unknown
         }
     }
 

@@ -50,6 +50,7 @@ final class H264Encoder: @unchecked Sendable {
         VTSessionSetProperty(created, key: kVTCompressionPropertyKey_ProfileLevel, value: kVTProfileLevel_H264_Main_AutoLevel)
         VTSessionSetProperty(created, key: kVTCompressionPropertyKey_AllowFrameReordering, value: kCFBooleanFalse)
         VTSessionSetProperty(created, key: kVTCompressionPropertyKey_AverageBitRate, value: NSNumber(value: bitrateKbps * 1000))
+        Self.limitBursts(created, bitrateKbps: bitrateKbps)
         VTSessionSetProperty(created, key: kVTCompressionPropertyKey_ExpectedFrameRate, value: NSNumber(value: fps))
         VTSessionSetProperty(created, key: kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, value: NSNumber(value: 2))
         VTCompressionSessionPrepareToEncodeFrames(created)
@@ -63,6 +64,14 @@ final class H264Encoder: @unchecked Sendable {
     /// - Parameter kbps: New average bitrate.
     func setBitrate(kbps: Int) {
         VTSessionSetProperty(session, key: kVTCompressionPropertyKey_AverageBitRate, value: NSNumber(value: kbps * 1000))
+        Self.limitBursts(session, bitrateKbps: kbps)
+    }
+
+    /// The average alone lets motion after a still picture burst far above it (2 to 8.7 Mbit/s seen
+    /// on the PC); no second may carry more than 1.5 times the average.
+    private static func limitBursts(_ session: VTCompressionSession, bitrateKbps: Int) {
+        let bytesPerSecond = bitrateKbps * 1000 / 8 * 3 / 2
+        VTSessionSetProperty(session, key: kVTCompressionPropertyKey_DataRateLimits, value: [NSNumber(value: bytesPerSecond), NSNumber(value: 1)] as CFArray)
     }
 
     /// The next frame becomes a key frame (after `RequestKeyFrame` or a lost connection).

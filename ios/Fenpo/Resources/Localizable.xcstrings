@@ -2961,13 +2961,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You can also start it in Control Center: hold Screen Recording and pick Fenpo. Your PC can’t control the iPhone."
+            "value": "You can also start it in Control Center: hold Screen Recording and pick Fenpo. To use your PC’s keyboard and mouse on the iPhone, press Ctrl+Alt+I on the PC; the pointer needs AssistiveTouch."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Denetim Merkezi’nden de başlatabilirsin: Ekran Kaydı’na basılı tut ve Fenpo’yu seç. Bilgisayar iPhone’u kontrol edemez."
+            "value": "Denetim Merkezi’nden de başlatabilirsin: Ekran Kaydı’na basılı tut ve Fenpo’yu seç. Bilgisayarın klavyesini ve faresini iPhone’da kullanmak için PC’de Ctrl+Alt+I’ye bas; imleç için AssistiveTouch açık olmalı."
           }
         }
       }

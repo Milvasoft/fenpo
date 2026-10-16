@@ -87,7 +87,7 @@ struct SettingsView: View {
                         permissionRow(icon: .wifi, color: .green, title: "settings.permission.localNetwork", state: model.permissions.localNetwork)
                         permissionRow(icon: .paste, color: .slate, title: "settings.permission.paste", state: model.permissions.paste)
                         if model.permissions.photos == .notDetermined {
-                            DisclosureRow(icon: .photo, color: .dusk, title: "settings.permission.photos", value: Text(PermissionState.notDetermined.title), valueColor: .accent) {
+                            DisclosureRow(icon: .photo, color: .dusk, title: "settings.permission.photos", value: Text(PermissionState.notDetermined.title), valueColor: .textSecondary) {
                                 Task { await model.requestPhotoAccess() }
                             }
                         } else {
@@ -169,8 +169,9 @@ struct SettingsView: View {
         if state == .allowed {
             ValueRow(icon: icon, color: color, title: title, value: value)
         } else {
-            // Only a known problem is in the accent color; an unknown state just leads to Settings.
-            DisclosureRow(icon: icon, color: color, title: title, value: value, valueColor: state == .unknown ? .textSecondary : .accent) {
+            // Only a permission that is off, so the feature cannot work, is in the accent color; one
+            // not asked yet or not known just leads to Settings.
+            DisclosureRow(icon: icon, color: color, title: title, value: value, valueColor: state == .denied ? .accent : .textSecondary) {
                 openAppSettings()
             }
         }
