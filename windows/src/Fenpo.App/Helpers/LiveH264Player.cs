@@ -32,7 +32,7 @@ public sealed class LiveH264Player : IDisposable
         properties.Height = height == 0 ? 720 : height;
         Size = (properties.Width, properties.Height);
         var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-        var feeder = new SampleFeeder(packets, _feeding.Token, logger, CatchUp);
+        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position);
         source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
         source.SampleRequested += async (sender, args) =>
         {
@@ -77,23 +77,12 @@ public sealed class LiveH264Player : IDisposable
     /// </summary>
     public (uint Width, uint Height) Size { get; }
 
-    // A live picture must not trail what arrived by more than the lead it needs: when it does, the player plays a bit
-    // faster until it is back. Returns how far the newest frame is ahead of the picture.
-    private TimeSpan CatchUp(TimeSpan newest, TimeSpan lead)
+    // Where the picture is now on the player's clock.
+    private TimeSpan Position()
     {
         try
         {
-            var session = Player.PlaybackSession;
-            var behind = newest - session.Position;
-            // 5 % faster is not visible and trims a lead that grew past what the gaps need; far behind catches up fast.
-            var rate = behind > lead + TimeSpan.FromSeconds(1) ? 2.0 : behind > lead + TimeSpan.FromMilliseconds(100) ? 1.05 : 1.0;
-
-            if (Math.Abs(session.PlaybackRate - rate) > 0.01)
-            {
-                session.PlaybackRate = rate;
-            }
-
-            return behind;
+            return Player.PlaybackSession.Position;
         }
         catch (Exception exception) when (exception is ObjectDisposedException or InvalidOperationException or System.Runtime.InteropServices.COMException)
         {
@@ -110,24 +99,32 @@ public sealed class LiveH264Player : IDisposable
         _feeding.Dispose();
     }
 
-    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan, TimeSpan, TimeSpan> catchUp)
+    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position)
     {
-        private readonly Func<TimeSpan, TimeSpan, TimeSpan> _catchUp = catchUp;
-        private TimeSpan _behind;
+        // Frames still waiting here beyond this many are behind live: they are given times that are already due, so
+        // the player decodes them (later frames need them) and shows only the newest instead of playing them out.
+        private const int Backlog = 2;
 
-        // How far the frame times are moved forward: the player's clock starts before the first frame arrives, so
-        // frames would reach it after their presentation time and play jerky or be dropped.
-        private TimeSpan _shift;
+        private static readonly TimeSpan MinLead = TimeSpan.FromMilliseconds(30);
 
-        // Frames come over Wi‑Fi in bursts; the player keeps a lead of a little more than the longest recent gap
-        // between them, so a gap does not leave it without a frame.
+        private readonly Func<TimeSpan> _position = position;
+        private readonly ChannelReader<StreamPacket> _packets = packets;
+        private readonly CancellationToken _cancellationToken = cancellationToken;
+        private readonly ILogger _logger = logger;
+
+        // Frames come over Wi‑Fi in bursts; a frame may be shown up to a little more than the longest recent gap
+        // after it is handed over, so the burst keeps its spacing and a gap does not leave the player without a frame.
+        // Any later and the picture trails live, any earlier and it is late.
         private readonly System.Diagnostics.Stopwatch _arrivals = System.Diagnostics.Stopwatch.StartNew();
         private TimeSpan _lastArrival;
         private TimeSpan _maxGap;
         private TimeSpan _recentGap = TimeSpan.FromMilliseconds(60);
-        private readonly ChannelReader<StreamPacket> _packets = packets;
-        private readonly CancellationToken _cancellationToken = cancellationToken;
-        private readonly ILogger _logger = logger;
+
+        // Frame time = phone time since the first frame + this offset, which follows the player's clock.
+        private TimeSpan _offset;
+        private TimeSpan _last = TimeSpan.FromTicks(-1);
+        private TimeSpan _early;
+        private int _skipped;
         private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
         private int _framesInWindow;
         private byte[] _config = [];
@@ -156,7 +153,7 @@ public sealed class LiveH264Player : IDisposable
                 _firstPts ??= packet.PtsUs;
                 Measure();
                 var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
-                var time = TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10) + _shift;
+                var phoneTime = TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10);
                 var now = _arrivals.Elapsed;
                 var gap = now - _lastArrival;
                 _lastArrival = now;
@@ -164,16 +161,26 @@ public sealed class LiveH264Player : IDisposable
 
                 // The longest gap lately, slowly forgotten (about 1 % per frame) so a single burst does not stick.
                 _recentGap = gap > _recentGap ? gap : _recentGap - ((_recentGap - TimeSpan.FromMilliseconds(60)) / 100);
-                var lead = TimeSpan.FromMilliseconds(Math.Clamp(_recentGap.TotalMilliseconds + 40, 80, 600));
-                _behind = _catchUp(time, lead);
+                var lead = TimeSpan.FromMilliseconds(Math.Clamp(_recentGap.TotalMilliseconds + 40, 80, 400));
+                var position = _position();
+                TimeSpan time;
 
-                // Frames arriving too close to (or after) their time: move the timeline so they have the lead.
-                if (_behind < lead)
+                if (_packets.Count > Backlog)
                 {
-                    var move = lead - _behind;
-                    _shift += move;
-                    time += move;
+                    time = position;
+                    _skipped++;
                 }
+                else
+                {
+                    time = phoneTime + _offset;
+                    time = time < position + MinLead ? position + MinLead : time > position + lead ? position + lead : time;
+                }
+
+                // Times only go forward.
+                time = time > _last ? time : _last + TimeSpan.FromMilliseconds(1);
+                _offset = time - phoneTime;
+                _last = time;
+                _early = time - position;
                 var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
                 sample.KeyFrame = packet.KeyFrame;
                 return sample;
@@ -189,7 +196,8 @@ public sealed class LiveH264Player : IDisposable
 
             if (_window.Elapsed >= TimeSpan.FromSeconds(3))
             {
-                _logger.LogInformation("Live stream: {Fps:F1} frames/s shown, {Queued} packets waiting, frames {Lead} ms early, longest gap {Gap} ms, timeline moved {Shift} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, (int)_behind.TotalMilliseconds, (int)_maxGap.TotalMilliseconds, (int)_shift.TotalMilliseconds);
+                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds);
+                _skipped = 0;
                 _maxGap = TimeSpan.Zero;
                 _framesInWindow = 0;
                 _window.Restart();
