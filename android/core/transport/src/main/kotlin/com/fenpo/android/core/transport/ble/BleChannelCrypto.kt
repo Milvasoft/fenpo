@@ -7,17 +7,16 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
- * AES-256-GCM for the Fenpo BLE channel, following the S5 protocol proposal (DECISIONS #23):
+ * AES-256-GCM for the Fenpo BLE channel (protocol/README.md, "Sealing"):
  *
  * - Key: `PairingResult.ble_channel_key` (32 bytes). The BLE bond alone is not trusted.
- * - Whole Envelope encrypted first, fragmented afterwards ([BleFragmenter]).
+ * - Whole Envelope sealed first, split into chunks afterwards ([BleFragmenter]).
  * - Nonce, 12 bytes: `[1 byte sender: 0x01 phone, 0x02 PC][3 zero bytes][8 byte counter, big-endian]`.
  * - Associated data: `"fenpo-ble-v1"`.
+ * - Sealed message: `nonce || ciphertext || tag`, CryptoKit's `combined` layout; the receiver
+ *   reads the counter from the nonce. At most [MAX_SEALED_BYTES].
  * - Every sender keeps its counter persistent and increasing; the receiver rejects a counter that
  *   is not larger than the last one it accepted (replay protection).
- *
- * The proposal does not say how the receiver learns the counter. Here the sealed message is
- * `[8 byte counter][ciphertext and tag]`; to be confirmed in the protocol commit.
  *
  * Not thread safe; the connection serializes sends and receives.
  *
@@ -54,33 +53,36 @@ public class BleChannelCrypto(
     public var lastReceivedCounter: Long = lastReceivedCounter
         private set
 
-    /** Encrypts one serialized Envelope. */
+    /** Seals one serialized Envelope. */
     public fun seal(plaintext: ByteArray): ByteArray {
-        val counter = nextSendCounter++
+        require(plaintext.size <= MAX_PLAINTEXT_BYTES) { "Envelope of ${plaintext.size} bytes is too big for BLE" }
+        val nonce = nonce(localSender, nextSendCounter++)
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(TAG_BITS, nonce(localSender, counter)))
+        cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(TAG_BITS, nonce))
         cipher.updateAAD(AAD)
-        val sealed = cipher.doFinal(plaintext)
-        return ByteBuffer
-            .allocate(COUNTER_BYTES + sealed.size)
-            .putLong(counter)
-            .put(sealed)
-            .array()
+        return nonce + cipher.doFinal(plaintext)
     }
 
     /**
-     * Decrypts one message from the other side.
+     * Opens one message from the other side.
      *
-     * @throws GeneralSecurityException if it was changed, uses the wrong key or replays an old counter.
+     * @throws GeneralSecurityException if it was changed, comes from the wrong sender, uses the
+     *   wrong key or replays an old counter.
      */
     public fun open(message: ByteArray): ByteArray {
-        if (message.size < COUNTER_BYTES + TAG_BITS / 8) throw GeneralSecurityException("Message too short")
-        val counter = ByteBuffer.wrap(message, 0, COUNTER_BYTES).long
+        if (message.size < OVERHEAD_BYTES || message.size > MAX_SEALED_BYTES) {
+            throw GeneralSecurityException("Sealed message of ${message.size} bytes")
+        }
+        val header = ByteBuffer.wrap(message, 0, NONCE_BYTES)
+        if (header.get() != remoteSender.id || header.get() != ZERO || header.get() != ZERO || header.get() != ZERO) {
+            throw GeneralSecurityException("Nonce is not from the other side")
+        }
+        val counter = header.long
         if (counter <= lastReceivedCounter) throw GeneralSecurityException("Replayed counter $counter")
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, nonce(remoteSender, counter)))
+        cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, message, 0, NONCE_BYTES))
         cipher.updateAAD(AAD)
-        val plaintext = cipher.doFinal(message, COUNTER_BYTES, message.size - COUNTER_BYTES)
+        val plaintext = cipher.doFinal(message, NONCE_BYTES, message.size - NONCE_BYTES)
         lastReceivedCounter = counter
         return plaintext
     }
@@ -100,13 +102,19 @@ public class BleChannelCrypto(
         /** Size of `ble_channel_key`. */
         public const val KEY_BYTES: Int = 32
 
-        /** Bytes a sealed message adds to its plaintext: counter and GCM tag. */
-        public const val OVERHEAD_BYTES: Int = 8 + 16
+        /** Largest sealed message on BLE; anything bigger goes over Wi‑Fi. */
+        public const val MAX_SEALED_BYTES: Int = 4096
+
+        /** Bytes sealing adds to the plaintext: the nonce in front and the GCM tag. */
+        public const val OVERHEAD_BYTES: Int = 12 + 16
+
+        /** Largest Envelope that still fits in [MAX_SEALED_BYTES]. */
+        public const val MAX_PLAINTEXT_BYTES: Int = MAX_SEALED_BYTES - OVERHEAD_BYTES
 
         private const val TRANSFORMATION = "AES/GCM/NoPadding"
         private const val TAG_BITS = 128
         private const val NONCE_BYTES = 12
-        private const val COUNTER_BYTES = 8
+        private const val ZERO: Byte = 0
         private val AAD = "fenpo-ble-v1".toByteArray(Charsets.US_ASCII)
     }
 }

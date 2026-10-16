@@ -101,11 +101,6 @@ class PairingClientTest {
                 val request = seen[1] as PairingRequest
                 assertEquals(token, request.token)
                 assertEquals(DevicePlatform.DEVICE_PLATFORM_ANDROID, request.platform)
-                assertEquals(
-                    ByteString.EMPTY,
-                    request.certificate_sha256,
-                    "fingerprint comes from TLS, not the request",
-                )
                 assertEquals("Pixel 9", (seen[2] as Hello).device_name)
             }
         }

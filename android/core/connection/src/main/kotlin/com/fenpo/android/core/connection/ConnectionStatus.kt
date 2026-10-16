@@ -1,6 +1,7 @@
 package com.fenpo.android.core.connection
 
 import com.fenpo.protocol.v1.Hello
+import com.fenpo.protocol.v1.PcStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,12 +16,14 @@ enum class LinkState { OFF, CONNECTING, CONNECTED }
  * What the UI shows about the connection: the two paths and the PC's last `Hello`.
  *
  * @property rssi Last signal strength of the BLE link in dBm, if measured.
+ * @property pcStatus What the PC last reported about its own links to the phone.
  */
 data class ConnectionSnapshot(
     val bluetooth: LinkState = LinkState.OFF,
     val wifi: LinkState = LinkState.OFF,
     val remote: Hello? = null,
     val rssi: Int? = null,
+    val pcStatus: PcStatus? = null,
 ) {
     val connected: Boolean get() = bluetooth == LinkState.CONNECTED || wifi == LinkState.CONNECTED
 }

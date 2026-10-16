@@ -88,8 +88,8 @@ public class TestTlsServer internal constructor(
     private val server: SSLServerSocket,
     private val handler: suspend (EnvelopeConnection) -> Unit,
 ) : Closeable {
-    /** Where to connect. */
-    public val endpoint: Endpoint = Endpoint("127.0.0.1", server.localPort)
+    /** Where to connect: the loopback address the server bound (IPv4 on a JVM, possibly ::1 on Android). */
+    public val endpoint: Endpoint = Endpoint(server.inetAddress.hostAddress.substringBefore('%'), server.localPort)
 
     /** Failures on the server side, including handshakes the server rejected. */
     public val errors: MutableList<Throwable> = CopyOnWriteArrayList()

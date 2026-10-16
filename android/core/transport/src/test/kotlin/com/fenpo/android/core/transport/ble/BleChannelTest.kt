@@ -21,7 +21,7 @@ class BleChannelTest {
         val envelope = Random(7).nextBytes(1500)
 
         for (mtu in listOf(23, 185, 247, 517)) {
-            val reassembler = BleReassembler(maxMessageBytes = 4096 + BleChannelCrypto.OVERHEAD_BYTES)
+            val reassembler = BleReassembler(maxMessageBytes = BleChannelCrypto.MAX_SEALED_BYTES)
             val fragments = BleFragmenter.split(phone.seal(envelope), mtu)
             fragments.forEach { assert(it.size <= mtu - BleFragmenter.ATT_OVERHEAD) }
 
@@ -31,13 +31,28 @@ class BleChannelTest {
     }
 
     @Test
-    fun nonceLayoutMatchesTheProposal() {
-        // Counter 1 from the phone, empty plaintext: [counter][tag]. The nonce is not sent, but a
-        // PC built from the same rules must produce this exact tag.
+    fun sealedLayoutIsNonceCiphertextTag() {
+        // protocol/README.md: nonce (12) || ciphertext || tag (16). Phone, counter 1, empty plaintext.
         val sealed = BleChannelCrypto(key, Sender.PHONE).seal(ByteArray(0))
-        assertEquals("0000000000000001", sealed.copyOfRange(0, 8).toByteString().hex())
-        assertEquals(24, sealed.size)
+        assertEquals("010000000000000000000001", sealed.copyOfRange(0, 12).toByteString().hex())
+        assertEquals(28, sealed.size)
         assertContentEquals(ByteArray(0), BleChannelCrypto(key, Sender.PC).open(sealed))
+    }
+
+    @Test
+    fun matchesAKnownVector() {
+        // Independent AES-GCM (javax.crypto, same key, nonce and AAD) must give the same bytes as
+        // the Windows and iPhone implementations; this pins the layout against accidental change.
+        val sealed = BleChannelCrypto(key, Sender.PC, nextSendCounter = 7).seal("hi".toByteArray())
+        val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(
+            javax.crypto.Cipher.ENCRYPT_MODE,
+            javax.crypto.spec.SecretKeySpec(key, "AES"),
+            javax.crypto.spec.GCMParameterSpec(128, "020000000000000000000007".decodeHex().toByteArray()),
+        )
+        cipher.updateAAD("fenpo-ble-v1".toByteArray())
+        val expected = "020000000000000000000007".decodeHex().toByteArray() + cipher.doFinal("hi".toByteArray())
+        assertContentEquals(expected, sealed)
     }
 
     @Test

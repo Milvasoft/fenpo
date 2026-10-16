@@ -87,8 +87,8 @@ public enum class PairingError {
  * TLS with the code's fingerprint pinned and this phone's certificate → `PairingRequest` with the
  * one-time token → `PairingResult` → `Hello` both ways on the same connection.
  *
- * The phone's certificate fingerprint is not sent in the request: the PC takes it from the TLS
- * handshake, which is the only value that proves anything (S5 protocol proposal 1).
+ * The phone's certificate fingerprint is not in the request: the PC takes it from the TLS
+ * handshake, which is the only value that proves anything (pairing.proto).
  *
  * @param resultTimeout How long to wait for `PairingResult`; the PC may ask its user first.
  */

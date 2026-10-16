@@ -179,6 +179,10 @@ class ConnectionService : Service() {
                 heartbeat.onPong(body.value.nonce)
             }
 
+            is Envelope.Body.PcStatus -> {
+                status.update { it.copy(pcStatus = body.value) }
+            }
+
             else -> {
                 Log.d(TAG, "Unhandled ${body?.javaClass?.simpleName}")
             }

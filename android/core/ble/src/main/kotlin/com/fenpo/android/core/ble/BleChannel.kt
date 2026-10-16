@@ -38,7 +38,7 @@ class BleChannel(
 ) {
     private val sendLock = Mutex()
     private val nextId = AtomicLong(1)
-    private val reassembler = BleReassembler(MAX_ENVELOPE_BYTES + BleChannelCrypto.OVERHEAD_BYTES)
+    private val reassembler = BleReassembler(BleChannelCrypto.MAX_SEALED_BYTES)
     private var mtu = 23
 
     /** Connects; see [GattConnection.connect] for [autoConnect]. */
@@ -87,8 +87,8 @@ class BleChannel(
     fun close() = gatt.close()
 
     companion object {
-        /** Largest Envelope sent over BLE (docs/ARCHITECTURE.md: "Sadece 4 KB'tan küçük mesajlar"). */
-        const val MAX_ENVELOPE_BYTES = 4096
+        /** Largest Envelope sent over BLE: a sealed message is at most 4096 bytes (protocol/README.md). */
+        const val MAX_ENVELOPE_BYTES = BleChannelCrypto.MAX_PLAINTEXT_BYTES
         private const val TAG = "FenpoBle"
     }
 }

@@ -36,6 +36,8 @@ internal class AndroidLocalDeviceRepository
                 appVersion = appVersion(),
                 capabilities = IMPLEMENTED_CAPABILITIES,
                 protocolVersions = ProtocolVersion.supported,
+                osVersion = "Android ${Build.VERSION.RELEASE}",
+                model = Build.MODEL,
             )
 
         /** Stable UUID created on first use. */

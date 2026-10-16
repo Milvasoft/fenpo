@@ -6,6 +6,7 @@ import com.fenpo.android.core.connection.ConnectionStatus
 import com.fenpo.android.core.connection.LinkState
 import com.fenpo.android.core.data.pc.PairedPcRepository
 import com.fenpo.protocol.v1.DevicePlatform
+import com.fenpo.protocol.v1.Hello
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,15 +33,7 @@ class HomeViewModel
                         pc?.let {
                             PcCardState(
                                 name = it.name,
-                                // The OS version arrives in Hello once the protocol carries it (DECISIONS #30).
-                                osLabel =
-                                    if (connection.remote?.platform ==
-                                        DevicePlatform.DEVICE_PLATFORM_WINDOWS
-                                    ) {
-                                        WINDOWS
-                                    } else {
-                                        null
-                                    },
+                                osLabel = connection.remote?.osLabel(),
                                 connected = connection.connected,
                                 bluetooth = connection.bluetooth == LinkState.CONNECTED,
                                 wifi = connection.wifi == LinkState.CONNECTED,
@@ -49,6 +42,10 @@ class HomeViewModel
                     now = Instant.now(),
                 )
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+        /** "Windows 11 26300" from Hello; just "Windows" from a PC that does not send the version yet. */
+        private fun Hello.osLabel(): String? =
+            os_version.ifBlank { if (platform == DevicePlatform.DEVICE_PLATFORM_WINDOWS) WINDOWS else null }
 
         private companion object {
             const val WINDOWS = "Windows"

@@ -11,6 +11,8 @@ import com.fenpo.protocol.v1.Hello
  * @property name User visible name, e.g. "Pixel 9".
  * @property appVersion Semantic version of the app.
  * @property capabilities Features this build actually implements; only these are offered.
+ * @property osVersion e.g. "Android 12".
+ * @property model Hardware model identifier, e.g. "SM-G975F".
  */
 public data class LocalDevice(
     val id: String,
@@ -18,6 +20,8 @@ public data class LocalDevice(
     val appVersion: String,
     val capabilities: Set<Capability>,
     val protocolVersions: List<Int>,
+    val osVersion: String = "",
+    val model: String = "",
 ) {
     /** The `Hello` this device sends first on every connection. */
     public fun hello(): Hello =
@@ -28,6 +32,8 @@ public data class LocalDevice(
             app_version = appVersion,
             protocol_versions = protocolVersions,
             capabilities = capabilities.sortedBy { it.value },
+            os_version = osVersion,
+            model = model,
         )
 }
 
