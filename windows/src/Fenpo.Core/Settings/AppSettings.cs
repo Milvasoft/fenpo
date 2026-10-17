@@ -168,6 +168,17 @@ public sealed record AppSettings
     /// Gets a value indicating whether the first-run pairing wizard has been completed or skipped.
     /// </summary>
     public bool SetupCompleted { get; init; }
+
+    /// <summary>
+    /// Gets the Fenpo version this PC first ran, kept so that people who used Fenpo while it was free keep what they
+    /// had if features become paid later.
+    /// </summary>
+    public string? FirstVersion { get; init; }
+
+    /// <summary>
+    /// Gets when this PC first ran Fenpo (see <see cref="FirstVersion"/>).
+    /// </summary>
+    public DateTimeOffset? FirstRunAt { get; init; }
 }
 
 /// <summary>
