@@ -12,7 +12,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 | Yapı | En son TestFlight yapısı (şu an 72'den sonrakiler). App Store Connect'te sürüme "Build" olarak seçilir. |
 | Platformlar | Sadece iPhone (`TARGETED_DEVICE_FAMILY = 1`), iPad ekran görüntüsü gerekmez. App Store Connect › Fiyat ve Kullanılabilirlik'te **Apple silikonlu Mac'lerde kullanılabilir** ve **Apple Vision Pro** seçeneklerini **kapat**: AccessorySetupKit ve arka plan Bluetooth'u oralarda çalışmaz. |
 | Demo videosu | İnceleyicinin Windows PC'si yok. 2–3 dakikalık bir video gerek (aşağıda "İnceleme notları"); YouTube "liste dışı" ya da Drive bağlantısı yeterli. |
-| Gizlilik politikası | `docs/PRIVACY.md` (Windows oturumu yazdı). iOS için düzeltme önerileri aşağıda. |
+| Gizlilik politikası | `docs/PRIVACY.md` (Windows oturumu yazdı), iOS düzeltmeleri dahil (e3acec0). |
 
 ## Kimlik bilgileri
 
@@ -155,6 +155,8 @@ içerikleri, gerçek şarkı/sanatçı adları ve diğer uygulamaların logolar�
 - Çökme raporları Apple'ın kendi tanılama verisidir (kullanıcı izin verdiyse); "toplanan veri" sayılmaz.
 
 ### `docs/PRIVACY.md` için iOS düzeltmeleri
+
+Yapıldı: hepsi `main`'de (e3acec0). Aşağıdaki liste kayıt için duruyor.
 
 1. **Mikrofon:** iPhone uygulaması mikrofon izni istemiyor (Fenpo Kamera sessiz). "İzinler" listesinde mikrofonu
    "Android'de" kısmına almak ya da "(Android)" eklemek doğru olur.
