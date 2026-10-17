@@ -230,7 +230,7 @@
                                         <FontIcon Glyph="&#xE892;" FontSize="14" />
                                     </Button>
                                     <Button Width="34" Height="34" CornerRadius="17" Padding="0" Background="{ThemeResource FenpoTextBrush}" BorderThickness="0" Command="{x:Bind ViewModel.PlayPauseCommand}" x:Uid="Media_PlayPause">
-                                        <FontIcon Glyph="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}" FontSize="14" Foreground="{ThemeResource FenpoCardBrush}" />
+                                        <FontIcon Glyph="{x:Bind ViewModel.PlayPauseGlyph, Mode=OneWay}" FontSize="14" Foreground="{ThemeResource FenpoSolidBrush}" />
                                     </Button>
                                     <Button Width="34" Height="34" CornerRadius="17" Padding="0" Background="Transparent" BorderThickness="0" Command="{x:Bind ViewModel.NextCommand}" x:Uid="Media_Next">
                                         <FontIcon Glyph="&#xE893;" FontSize="14" />

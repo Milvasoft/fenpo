@@ -681,6 +681,9 @@
   <data name="Notifications_ClearAll.Content" xml:space="preserve">
     <value>Clear all</value>
   </data>
+  <data name="Notifications_CountOne" xml:space="preserve">
+    <value>{0} notification</value>
+  </data>
   <data name="Notifications_Count" xml:space="preserve">
     <value>{0} notifications</value>
   </data>

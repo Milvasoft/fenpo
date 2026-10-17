@@ -112,7 +112,7 @@ public sealed partial class NotificationsViewModel : ObservableObject, IDisposab
             var icon = _icons.GetCachedIconPath(group.Key);
             var rows = group.Select(i => new NotificationRowViewModel(i, icon, NotificationRowViewModel.RelativeTime(i.Notification.Date ?? i.Notification.ReceivedAt, _localization))).ToList();
             var first = rows[0];
-            Groups.Add(new NotificationGroupViewModel(first.AppName, first.AppIcon, first.AppInitial, first.AppBrush, _localization.Format("Notifications_Count", rows.Count), rows));
+            Groups.Add(new NotificationGroupViewModel(first.AppName, first.AppIcon, first.AppInitial, first.AppBrush, _localization.Format(rows.Count == 1 ? "Notifications_CountOne" : "Notifications_Count", rows.Count), rows));
         }
 
         IsEmpty = Groups.Count == 0;
