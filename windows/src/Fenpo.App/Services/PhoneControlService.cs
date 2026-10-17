@@ -243,7 +243,11 @@ public sealed partial class PhoneControlService(HidPeripheral hid, ILogger<Phone
                 GetCursorPos(out var at);
                 var dx = mouse->X - at.X;
                 var dy = mouse->Y - at.Y;
-                _input.Writer.TryWrite(() => { _dx += dx; _dy += dy; });
+                _input.Writer.TryWrite(() =>
+                {
+                    _dx += dx;
+                    _dy += dy;
+                });
                 break;
             case 0x0201: Button(0x01, true); break;
             case 0x0202: Button(0x01, false); break;

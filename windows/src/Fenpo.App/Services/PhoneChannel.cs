@@ -283,8 +283,10 @@ public sealed class PhoneChannel(
     /// <param name="envelope">Message.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>False when the phone is not connected over Wi‑Fi.</returns>
-    public async Task<bool> SendOverWifiAsync(Envelope envelope, CancellationToken cancellationToken = default) =>
-        await EnsureWifiAsync(envelope.BodyCase.ToString(), cancellationToken) && Phone is { } phone && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken);
+    public async Task<bool> SendOverWifiAsync(Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        return await EnsureWifiAsync(envelope.BodyCase.ToString(), cancellationToken) && Phone is { } phone && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken);
+    }
 
     /// <summary>
     /// Answers a request on the channel it came on, so the phone can match <c>reply_to</c>; the other channel if that
@@ -340,6 +342,7 @@ public sealed class PhoneChannel(
         {
             Interlocked.Exchange(ref _wifiWaiter, null)?.TrySetResult();
         }
+
         _connected[device.DeviceId] = device;
         _logger.LogInformation("{Phone} offers {Capabilities} over {Channel}", device.Name, string.Join(", ", hello.Capabilities), overWifi ? "Wi-Fi" : "Bluetooth");
 
