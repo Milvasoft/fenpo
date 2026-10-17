@@ -40,6 +40,7 @@ message Envelope {
     Error error = 13;
     PairingRequest pairing_request = 14;
     PairingResult pairing_result = 15;
+    WifiWanted wifi_wanted = 16;
 
     // 20-29: content
     ClipboardItem clipboard = 20;

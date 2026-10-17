@@ -68,6 +68,10 @@ A sealed message is split to fit the ATT MTU. Each write (`rx`) or notification 
 
 The phone sends `Hello` as soon as it subscribes to `tx`, which means the encrypted bond is up. The PC answers with its own `Hello`, then `PcStatus`. `Ping`/`Pong` work on both channels.
 
+### Wi‑Fi on demand
+
+A phone in the background often keeps only the BLE channel (iOS suspends the app and its sockets; Android may lose its socket in Doze). When the PC has something that needs Wi‑Fi (a file, a clipboard item too large for BLE, photos, folders) and the phone has no control connection over Wi‑Fi, the PC sends `WifiWanted` on BLE and waits up to 10 seconds for the phone's Wi‑Fi `Hello` before giving up. The phone opens its control connection at once, also from the background (on iOS the BLE notification wakes the app; it holds a background task while the work lasts), and may close it again a while after the last message. A phone that does not know `WifiWanted` ignores it, and the PC gives up after the wait.
+
 ## File transfer
 
 - The phone opens every data connection; the PC never connects to the phone and the phone never listens. A server
