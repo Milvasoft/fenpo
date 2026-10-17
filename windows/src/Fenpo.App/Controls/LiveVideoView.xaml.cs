@@ -10,12 +10,15 @@ namespace Fenpo.App.Controls;
 
 /// <summary>
 /// Shows a <see cref="LiveH264Player"/>'s picture. The player decodes; every frame it has ready is copied into this
-/// control's own swap chain and shown at the next screen refresh. MediaPlayerElement drew the same frames unevenly
-/// (the picture froze and jumped while the phone's frames came on time), while Fenpo Kamera, which hands frames out
-/// itself, stayed smooth. The picture keeps its aspect ratio.
+/// control's own swap chain without waiting, and the compositor shows the newest at its next refresh.
+/// MediaPlayerElement drew the same frames unevenly (the picture froze and jumped while the phone's frames came on
+/// time), while Fenpo Kamera, which hands frames out itself, stayed smooth. The picture keeps its aspect ratio.
 /// </summary>
 public sealed unsafe partial class LiveVideoView : UserControl
 {
+    private const uint PresentDoNotWait = 0x8; // DXGI_PRESENT_DO_NOT_WAIT
+    private const int WasStillDrawing = unchecked((int)0x887A000A); // DXGI_ERROR_WAS_STILL_DRAWING
+
     private static readonly Guid IidDxgiDevice = new("54ec77fa-1377-44e6-8c32-88fd5f44c84c");
     private static readonly Guid IidDxgiFactory2 = new("50c83a1c-e072-4c48-87b0-3630fa36a6d0");
     private static readonly Guid IidDxgiSurface = new("cafcb56c-6ac3-4889-bf47-9e23bbd260ec");
@@ -92,7 +95,18 @@ public sealed unsafe partial class LiveVideoView : UserControl
             try
             {
                 sender.CopyFrameToVideoSurface(_surface);
-                Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, uint, uint, int>)Slot(_swapChain, 8))(_swapChain, 1, 0));
+
+                // Never wait here: this runs on the player's thread, and a callback that waits for the screen's refresh
+                // looks like a slow renderer to Media Foundation, which then drops every frame but the key frames (the
+                // picture showed one or two frames a second). The compositor shows the newest frame at its refresh.
+                var result = ((delegate* unmanaged[Stdcall]<nint, uint, uint, int>)Slot(_swapChain, 8))(_swapChain, 0, PresentDoNotWait);
+
+                if (result == WasStillDrawing)
+                {
+                    return;
+                }
+
+                Marshal.ThrowExceptionForHR(result);
                 Measure();
             }
             catch (Exception exception) when (exception is COMException or ObjectDisposedException or InvalidOperationException)
