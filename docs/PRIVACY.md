@@ -15,10 +15,11 @@ store, sell or share any personal data, and we cannot see what you send between 
 ### What stays between your devices
 
 To do what you ask of it, Fenpo moves data directly between your phone and the PC you paired it with, over Bluetooth
-and your local network (Wi‑Fi or USB). Depending on the features you turn on, this can include notifications,
-messages, call information, contacts' names, clipboard contents, files and photos you send, your phone's camera and
-screen while you use them on the PC, media playback information, battery level, whether a Focus is on, and the Personal Hotspot name and password if you
-enter them so the PC can join it. This data:
+and your local network (Wi‑Fi). Depending on the features you turn on, this can include notifications, messages,
+call information, contacts' names, clipboard contents, files and photos you send, your phone's camera and screen
+while you use them on the PC, media playback information, battery level, whether a Focus is on, the PC's
+notifications and shared folders you choose to see on the phone, and the Personal Hotspot name and password if you
+enter them so the PC can join it (stored encrypted on the phone). This data:
 
 - goes only to the device you paired, never to us or anyone else;
 - is encrypted on the way (TLS 1.3 with pinned certificates on the network, AES-GCM over Bluetooth);
@@ -29,9 +30,14 @@ Pairing uses a QR code shown on your PC; the keys it creates never leave your de
 
 ### Permissions
 
-Fenpo asks for permissions such as Bluetooth, local network, notifications, camera, photos, screen recording and,
-on Android, microphone, SMS, contacts and notification access. Each one is used only for the feature you turn on,
-and only to exchange data with your paired PC. You can turn any of them off in your phone's or PC's settings.
+Fenpo asks for permissions such as Bluetooth, local network, notifications, camera, photos and screen recording
+and, on Android, microphone, SMS (only on phones without Bluetooth message access), notification access and an
+accessibility service. Each one is used only for the feature you turn on, and only to exchange data with your paired
+PC. You can turn any of them off in your phone's or PC's settings.
+
+**Accessibility service (Android):** used only while you share your phone's screen with your PC, to carry out on the
+phone the taps, swipes and typing you make on the PC. It does not read screen content for any other purpose and
+sends nothing anywhere else.
 
 ### Internet use
 
@@ -64,10 +70,11 @@ kişisel veriyi toplamıyor, saklamıyor, satmıyor ya da paylaşmıyoruz; cihaz
 ### Cihazlarının arasında kalanlar
 
 Fenpo, istediğin işleri yapmak için verileri telefonunla eşleştirdiğin bilgisayar arasında doğrudan, Bluetooth ve
-yerel ağ (Wi‑Fi ya da USB) üzerinden taşır. Açtığın özelliklere göre bunlar bildirimler, mesajlar, arama bilgileri,
-kişi adları, pano içeriği, gönderdiğin dosya ve fotoğraflar, bilgisayarda kullandığın sürece telefonunun kamerası ve
-ekranı, çalan medya bilgisi, pil düzeyi, odağın açık olup olmadığı ve bilgisayarın katılabilmesi için girersen Kişisel Erişim
-Noktası'nın adı ve parolası olabilir. Bu veriler:
+yerel ağ (Wi‑Fi) üzerinden taşır. Açtığın özelliklere göre bunlar bildirimler, mesajlar, arama bilgileri, kişi
+adları, pano içeriği, gönderdiğin dosya ve fotoğraflar, bilgisayarda kullandığın sürece telefonunun kamerası ve
+ekranı, çalan medya bilgisi, pil düzeyi, odağın açık olup olmadığı, telefonda görmeyi seçtiğin bilgisayar bildirimleri
+ve paylaşılan klasörler, ve bilgisayarın katılabilmesi için girersen Kişisel Erişim Noktası'nın adı ve parolası
+(telefonda şifreli saklanır) olabilir. Bu veriler:
 
 - yalnızca eşleştirdiğin cihaza gider, bize ya da başkasına asla gitmez;
 - yolda şifrelenir (ağda sertifikası sabitlenmiş TLS 1.3, Bluetooth'ta AES-GCM);
@@ -78,9 +85,14 @@ Eşleşme bilgisayarında gösterilen bir QR koduyla yapılır; oluşan anahtarl
 
 ### İzinler
 
-Fenpo Bluetooth, yerel ağ, bildirimler, kamera, fotoğraflar, ekran kaydı ve Android'de mikrofon, SMS, kişiler ve
-bildirim erişimi gibi izinler ister. Her biri yalnızca açtığın özellik için ve yalnızca eşleştirdiğin bilgisayarla veri
-alışverişi için kullanılır. Hepsini telefonunun ya da bilgisayarının ayarlarından kapatabilirsin.
+Fenpo Bluetooth, yerel ağ, bildirimler, kamera, fotoğraflar ve ekran kaydı, Android'de ise mikrofon, SMS (yalnızca
+Bluetooth ile mesaj erişimi olmayan telefonlarda), bildirim erişimi ve erişilebilirlik hizmeti gibi izinler ister. Her
+biri yalnızca açtığın özellik için ve yalnızca eşleştirdiğin bilgisayarla veri alışverişi için kullanılır. Hepsini
+telefonunun ya da bilgisayarının ayarlarından kapatabilirsin.
+
+**Erişilebilirlik hizmeti (Android):** yalnızca telefonunun ekranını bilgisayarınla paylaşırken, bilgisayarda yaptığın
+dokunma, kaydırma ve yazmaları telefonda uygulamak için kullanılır. Ekran içeriğini başka hiçbir amaçla okumaz ve hiçbir
+yere göndermez.
 
 ### İnternet kullanımı
 
