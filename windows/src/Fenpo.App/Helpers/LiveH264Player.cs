@@ -19,14 +19,6 @@ public sealed class LiveH264Player : IDisposable
     private readonly CancellationTokenSource _feeding = new();
     private readonly System.Diagnostics.Stopwatch _sinceShown = System.Diagnostics.Stopwatch.StartNew();
 
-    // How long frames wait in the player between being handed over and being shown, measured every few seconds.
-    private readonly System.Collections.Concurrent.ConcurrentQueue<(TimeSpan Time, long HandedAt)> _handed = new();
-    private readonly System.Diagnostics.Stopwatch _waitWindow = System.Diagnostics.Stopwatch.StartNew();
-    private readonly ILogger _logger;
-    private double _waitSum;
-    private double _waitMax;
-    private int _waitCount;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="LiveH264Player"/> class and starts playing.
     /// </summary>
@@ -41,9 +33,8 @@ public sealed class LiveH264Player : IDisposable
         properties.Width = width == 0 ? 1280 : width;
         properties.Height = height == 0 ? 720 : height;
         Size = (properties.Width, properties.Height);
-        _logger = logger;
         var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position, () => _sinceShown.Elapsed, failed, Handed);
+        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position, () => _sinceShown.Elapsed, failed);
         source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
         source.SampleRequested += async (sender, args) =>
         {
@@ -69,7 +60,10 @@ public sealed class LiveH264Player : IDisposable
         };
 
         Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
-        Player.VideoFrameAvailable += (sender, args) => Shown();
+
+        // Only a stopwatch here: calling into the player from its own frame callback (its position, say) holds up
+        // its pipeline, and the picture froze for seconds at a time.
+        Player.VideoFrameAvailable += (sender, args) => _sinceShown.Restart();
         Player.MediaFailed += (sender, args) =>
         {
             logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
@@ -102,46 +96,6 @@ public sealed class LiveH264Player : IDisposable
         }
     }
 
-    private void Handed(TimeSpan time)
-    {
-        _handed.Enqueue((time, System.Diagnostics.Stopwatch.GetTimestamp()));
-
-        while (_handed.Count > 120 && _handed.TryDequeue(out _))
-        {
-        }
-    }
-
-    // On the player's thread, for every frame it has ready: the newest handed frame at or before the player's position
-    // is the one shown.
-    private void Shown()
-    {
-        _sinceShown.Restart();
-        var position = Position();
-        long? handedAt = null;
-
-        while (_handed.TryPeek(out var item) && item.Time <= position && _handed.TryDequeue(out item))
-        {
-            handedAt = item.HandedAt;
-        }
-
-        if (handedAt is { } at)
-        {
-            var wait = System.Diagnostics.Stopwatch.GetElapsedTime(at).TotalMilliseconds;
-            _waitSum += wait;
-            _waitMax = Math.Max(_waitMax, wait);
-            _waitCount++;
-        }
-
-        if (_waitWindow.Elapsed >= TimeSpan.FromSeconds(3) && _waitCount > 0)
-        {
-            _logger.LogInformation("Live picture: frames wait {Average:F0} ms in the player on average, {Max:F0} ms at most", _waitSum / _waitCount, _waitMax);
-            _waitSum = 0;
-            _waitMax = 0;
-            _waitCount = 0;
-            _waitWindow.Restart();
-        }
-    }
-
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -151,9 +105,8 @@ public sealed class LiveH264Player : IDisposable
         _feeding.Dispose();
     }
 
-    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position, Func<TimeSpan> sinceShown, Action stalled, Action<TimeSpan> handed)
+    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position, Func<TimeSpan> sinceShown, Action stalled)
     {
-        private readonly Action<TimeSpan> _handed = handed;
         // Frames go in but none has come out for this long: the decoder lost its reference (the phone switched lenses
         // or cameras and paused for a moment) and waits for the next key frame, up to two seconds away. Asking the
         // phone for one now ends the freeze at once.
@@ -198,6 +151,7 @@ public sealed class LiveH264Player : IDisposable
         private int _skipped;
         private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
         private int _framesInWindow;
+        private int _keyFrames;
         private TimeSpan _lastPhone = TimeSpan.FromTicks(-1);
         private TimeSpan _minSpacing = TimeSpan.MaxValue;
         private TimeSpan _maxSpacing;
@@ -226,6 +180,7 @@ public sealed class LiveH264Player : IDisposable
 
                 _firstPts ??= packet.PtsUs;
                 Measure();
+                _keyFrames += packet.KeyFrame ? 1 : 0;
                 WatchForStall(packet.KeyFrame);
                 var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
                 var phoneTime = Spacing(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
@@ -265,7 +220,6 @@ public sealed class LiveH264Player : IDisposable
                 _offset = time - phoneTime;
                 _last = time;
                 _early = time - position;
-                _handed(time);
                 var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
                 sample.KeyFrame = packet.KeyFrame;
                 return sample;
@@ -332,7 +286,8 @@ public sealed class LiveH264Player : IDisposable
 
             if (_window.Elapsed >= TimeSpan.FromSeconds(3))
             {
-                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms, phone spacing {MinSpacing:F1}-{MaxSpacing:F1} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds, _minSpacing == TimeSpan.MaxValue ? 0 : _minSpacing.TotalMilliseconds, _maxSpacing.TotalMilliseconds);
+                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms, phone spacing {MinSpacing:F1}-{MaxSpacing:F1} ms, {KeyFrames} key frames", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds, _minSpacing == TimeSpan.MaxValue ? 0 : _minSpacing.TotalMilliseconds, _maxSpacing.TotalMilliseconds, _keyFrames);
+                _keyFrames = 0;
                 _skipped = 0;
                 _minSpacing = TimeSpan.MaxValue;
                 _maxSpacing = TimeSpan.Zero;
