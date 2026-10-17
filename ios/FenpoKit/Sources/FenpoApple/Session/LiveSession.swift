@@ -118,6 +118,13 @@ public final class FenpoServices {
     public var extraHandlers: [(Fenpo_V1_Envelope, Channel) -> Bool] = []
 
     private var pcBattery: (percent: Int, charging: Bool)?
+    /// Wi-Fi opened in the background because the PC asked (`WifiWanted`): the background task
+    /// that keeps Fenpo running meanwhile, and when the channel was last used.
+    private var wifiTask: UIBackgroundTaskIdentifier = .invalid
+    private var lastWifiActivity = Date.distantPast
+    private var idleWatch: Task<Void, Never>?
+    /// The channel opened for the PC closes this long after its last message.
+    private static let wifiIdleLimit: TimeInterval = 30
     /// The PC name the Files location was last set up for (`.some(nil)`: removed).
     private var filesDomainName: String??
     private var isActive = false
@@ -199,6 +206,10 @@ public final class FenpoServices {
     /// Fenpo came to the front: open the Wi-Fi channel so the PC can send files and start the camera.
     public func appBecameActive() {
         isActive = true
+        // In front, Fenpo keeps the channel open anyway.
+        idleWatch?.cancel()
+        idleWatch = nil
+        endWifiTask()
         connectWiFiIfUseful()
         camera.appBecameActive()
         screenshots.check()
@@ -213,6 +224,11 @@ public final class FenpoServices {
         }
         if transfers.active.isEmpty {
             wifi.disconnect()
+        } else {
+            // Finish the transfer in the background, then close like a channel the PC asked for.
+            lastWifiActivity = .now
+            beginWifiTask()
+            watchWifiIdle()
         }
     }
 
@@ -287,7 +303,85 @@ public final class FenpoServices {
         }
     }
 
+    /// The PC has something that needs Wi-Fi while only Bluetooth is up, typically with Fenpo in the
+    /// background: open the control connection now, hold a background task while it is used, and
+    /// close it after half a minute without traffic.
+    private func wifiWanted(_ wanted: Fenpo_V1_WifiWanted) {
+        log.info("Wi-Fi wanted by PC for \(wanted.reason)")
+        lastWifiActivity = .now
+        guard !isActive else {
+            connectWiFiIfUseful()
+            return
+        }
+        beginWifiTask()
+        Task {
+            do {
+                try await wifi.connectIfNeeded()
+                log.info("Wi-Fi channel open for the PC")
+            } catch {
+                log.error("Wi-Fi channel for the PC failed: \(String(describing: error))")
+                endWifiTask()
+                return
+            }
+            watchWifiIdle()
+        }
+    }
+
+    private func beginWifiTask() {
+        guard wifiTask == .invalid else {
+            return
+        }
+        wifiTask = UIApplication.shared.beginBackgroundTask(withName: "Fenpo Wi-Fi for the PC") {
+            MainActor.assumeIsolated {
+                self.log.info("Background time ran out; closing the Wi-Fi channel")
+                if !self.isActive {
+                    self.wifi.disconnect()
+                }
+                self.endWifiTask()
+            }
+        }
+    }
+
+    private func endWifiTask() {
+        guard wifiTask != .invalid else {
+            return
+        }
+        UIApplication.shared.endBackgroundTask(wifiTask)
+        wifiTask = .invalid
+    }
+
+    /// Closes the channel opened for the PC once nothing used it for `wifiIdleLimit`; a transfer in
+    /// progress counts as use.
+    private func watchWifiIdle() {
+        idleWatch?.cancel()
+        idleWatch = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                guard let self, !Task.isCancelled else {
+                    return
+                }
+                if isActive || wifi.state != .connected {
+                    endWifiTask()
+                    return
+                }
+                if !transfers.active.isEmpty {
+                    lastWifiActivity = .now
+                    continue
+                }
+                if Date().timeIntervalSince(lastWifiActivity) > Self.wifiIdleLimit {
+                    log.info("Wi-Fi channel idle; closing it")
+                    wifi.disconnect()
+                    endWifiTask()
+                    return
+                }
+            }
+        }
+    }
+
     private func route(_ envelope: Fenpo_V1_Envelope, from channel: Channel) {
+        if channel == .wifi {
+            lastWifiActivity = .now
+        }
         for handler in extraHandlers where handler(envelope, channel) {
             return
         }
@@ -319,6 +413,8 @@ public final class FenpoServices {
             openFromPC(message.url)
         case .mediaState(let state):
             apply(state)
+        case .wifiWanted(let wanted):
+            wifiWanted(wanted)
         case .pcNotification(let notification):
             pcNotifications.show(notification)
         case .pcNotificationRemoved(let removed):

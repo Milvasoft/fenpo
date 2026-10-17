@@ -203,6 +203,7 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | F12 | Windows'tan iPhone'a 2 dosya gönderin | iPhone'da "Bilgisayardan dosya geldi" bildirimi; Dosyalar → iPhone'umda → Fenpo içinde iki dosya; Aktarımlar'da satırlar, dokununca önizleme |
 | F13 | Aynı adla bir dosyayı ikinci kez gönderin | İkincisi "ad (2).uzantı" olarak kaydedilir, ilki silinmez |
 | F14 | Aktarım sürerken PC'de iptal edin | iPhone'da satır "İptal edildi" ya da "Tamamlanmadı"; yarım dosya Fenpo klasöründe kalmaz |
+| F14b | Fenpo arka planda (kapatmadan başka uygulamaya geç), Windows'tan bir dosya ve bir resimli pano öğesi gönder | Kayıtta `Wi-Fi wanted by PC for …`, sonra `Wi-Fi channel open for the PC`; dosya Dosyalar › Fenpo'ya, resim panoya gelir. 30 sn sonra `Wi-Fi channel idle; closing it` |
 | F15 | iPhone'da Fenpo açıkken Windows'ta Fenpo → **Kamera** sayfasında önizlemeyi başlatın (PC 1920×1080, 30 fps, 6 Mbps, H.264, sessiz ister) | iPhone'da kamera ekranı açılır, PC'de görüntü gelir. Gecikme yaklaşık kaç saniye? Diğer uygulamalar için web kamerası aygıtı PC'de henüz yok |
 | F16 | Kamera açıkken 0,5 / 1× / 2, **Çevir**, **Ortala** (Center Stage'li ön kamerada) | PC'deki görüntü değişir; görüntü yan yatmıyor mu? |
 | F17 | Fenpo arka plandayken F15 | iPhone'da "Bilgisayarın kamerayı kullanmak istiyor" bildirimi; dokununca kamera başlar |
