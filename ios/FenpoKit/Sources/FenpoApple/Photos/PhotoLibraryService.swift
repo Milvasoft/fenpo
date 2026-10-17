@@ -34,6 +34,22 @@ public final class PhotoLibraryService {
     ///   - channel: Channel it came on.
     public func handle(_ envelope: Fenpo_V1_Envelope, from channel: FenpoServices.Channel) -> Bool {
         switch envelope.body {
+        case .photoListRequest, .photoThumbnailRequest, .photoFetch:
+            guard FeatureAccess.isAvailable(.photoLibrary) else {
+                var error = Fenpo_V1_Error()
+                error.code = .unsupported
+                error.message = "The photo library is not available"
+                reply?(.error(error), envelope.id, channel)
+                return true
+            }
+            return handleAvailable(envelope, from: channel)
+        default:
+            return false
+        }
+    }
+
+    private func handleAvailable(_ envelope: Fenpo_V1_Envelope, from channel: FenpoServices.Channel) -> Bool {
+        switch envelope.body {
         case .photoListRequest, .photoThumbnailRequest:
             guard channel == .wifi else {
                 var error = Fenpo_V1_Error()

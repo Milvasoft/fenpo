@@ -24,13 +24,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo sends files and photos to your PC on the same Wi-Fi network."
+            "value": "Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo, dosya ve fotoğrafları aynı Wi‑Fi ağındaki bilgisayarına gönderir."
+            "value": "Fenpo; dosya ve fotoğraf göndermek, PC’nin paylaşılan klasörlerini göstermek ve iPhone’unu PC’nin web kamerası ya da ekranı yapmak için aynı Wi‑Fi ağındaki eşleştirdiğin bilgisayara bağlanır."
           }
         }
       }

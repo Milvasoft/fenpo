@@ -49,8 +49,8 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
-        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Fenpo keeps the connection to your PC over Bluetooth, so it can receive what the PC sends even when the app is closed.
-        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Fenpo stays connected to your paired PC over Bluetooth to share the clipboard, your PC’s notifications and its media controls, even while Fenpo is in the background.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen.
         INFOPLIST_KEY_NSCameraUsageDescription: Fenpo uses the camera to scan the pairing code and to be your PC’s webcam.
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: Fenpo shows your photos on your PC when you browse them there, and sends new screenshots if you turn that on.
     dependencies:
@@ -96,7 +96,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fenpo.app.share
         TARGETED_DEVICE_FAMILY: "1"
-        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen.
         INFOPLIST_FILE: FenpoShare/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoShare/FenpoShare.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
@@ -139,7 +139,7 @@ targets:
         INFOPLIST_FILE: FenpoFiles/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoFiles/FenpoFiles.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
-        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen.
     dependencies:
       - package: FenpoKit
         product: FenpoProtocol
@@ -161,7 +161,7 @@ targets:
         INFOPLIST_FILE: FenpoBroadcast/Info.plist
         CODE_SIGN_ENTITLEMENTS: FenpoBroadcast/FenpoBroadcast.entitlements
         INFOPLIST_KEY_CFBundleDisplayName: Fenpo
-        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo sends files and photos to your PC on the same Wi-Fi network.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen.
     dependencies:
       - package: FenpoKit
         product: FenpoProtocol

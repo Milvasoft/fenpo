@@ -37,6 +37,10 @@ public final class ScreenBroadcaster: @unchecked Sendable {
 
     /// The broadcast started: connect to the PC.
     public func start() {
+        guard FeatureAccess.isAvailable(.screenMirror) else {
+            onStop("unsupported")
+            return
+        }
         Task { @MainActor in
             let channel = ScreenChannel { [weak self] reason in
                 self?.stop(reason)

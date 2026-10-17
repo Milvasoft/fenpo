@@ -93,3 +93,16 @@ struct PCMediaTests {
         #expect(media(playing: true).displayTitle == "Spotify")
     }
 }
+
+struct DemoContentTests {
+    /// The App Store screenshots show the sample session: made-up names only.
+    @Test
+    func demoContentIsMadeUpInBothLanguages() {
+        let turkish = SampleSession.pairedSnapshot(turkish: true)
+        let english = SampleSession.pairedSnapshot(turkish: false)
+        #expect(turkish.pc?.name == "Ofis PC")
+        #expect(english.pc?.name == "Office PC")
+        #expect(english.pcMedia?.appName == "Radio")
+        #expect(english.transfers.first?.fileName == "Contract_v3.pdf")
+    }
+}

@@ -71,7 +71,7 @@ struct HomeView: View {
             ) {
                 model.sendClipboard()
             }
-            .disabled(!snapshot.isConnected)
+            .disabled(!snapshot.isConnected || !FeatureAccess.isAvailable(.clipboard))
 
             QuickActionTile(
                 title: "home.pasteFromPC",
@@ -81,7 +81,7 @@ struct HomeView: View {
             ) {
                 model.pasteFromPC()
             }
-            .disabled(!snapshot.isConnected)
+            .disabled(!snapshot.isConnected || !FeatureAccess.isAvailable(.clipboard))
 
             QuickActionTile(
                 title: "home.sendPhotos",
@@ -91,7 +91,7 @@ struct HomeView: View {
             ) {
                 model.sendPhotos()
             }
-            .disabled(!snapshot.isConnected)
+            .disabled(!snapshot.isConnected || !FeatureAccess.isAvailable(.fileTransfer))
 
             QuickActionTile(
                 title: "home.camera",
@@ -102,7 +102,7 @@ struct HomeView: View {
                 // The PC starts the camera; until it does, the screen says how.
                 model.isCameraReadyPresented = true
             }
-            .disabled(!snapshot.isConnected)
+            .disabled(!snapshot.isConnected || !FeatureAccess.isAvailable(.camera))
         }
     }
 }

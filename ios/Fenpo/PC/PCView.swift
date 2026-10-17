@@ -16,7 +16,7 @@ struct PCView: View {
                         VStack(spacing: 0) {
                             PCCard(pc: pc, isConnected: model.snapshot.isConnected, proximity: model.snapshot.proximity, links: model.snapshot.links)
 
-                            if let media = model.snapshot.pcMedia {
+                            if let media = model.snapshot.pcMedia, FeatureAccess.isAvailable(.pcMedia) {
                                 SectionCaption(title: "pc.section.nowPlaying")
                                 NowPlayingCard(media: media) { command in
                                     model.pcMedia(command)
@@ -36,11 +36,14 @@ struct PCView: View {
                                     LinkRow(icon: .symbol("rectangle.and.hand.point.up.left"), color: .dusk, title: "remote.touchpad")
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(!FeatureAccess.isAvailable(.remoteControl))
                                 NavigationLink(value: AppModel.PCScreen.presenter) {
                                     LinkRow(icon: .symbol("play.rectangle"), color: .bloom, title: "remote.presenter")
                                 }
                                 .buttonStyle(.plain)
+                                .disabled(!FeatureAccess.isAvailable(.remoteControl))
                                 BroadcastPickerRow()
+                                    .disabled(!FeatureAccess.isAvailable(.screenMirror))
                             }
                             Text("remote.screen.hint")
                                 .font(.footnote)

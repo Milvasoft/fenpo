@@ -40,12 +40,16 @@ public struct SharedStatus: Codable, Equatable, Sendable {
     /// Nothing paired.
     public static let unpaired = SharedStatus(pcName: nil, isConnected: false)
 
-    /// The state in design/mobile/mobile.html, for widget previews and the gallery.
-    public static let sample = SharedStatus(
-        pcName: "BUGRA-PC",
-        isConnected: true,
-        pcBatteryPercent: 64,
-        pcCharging: false,
-        lastTransferName: "Sözleşme_v3.pdf"
-    )
+    /// The state in design/mobile/mobile.html, for widget previews and the gallery, with the
+    /// sample session's demo names.
+    public static var sample: SharedStatus {
+        let demo = SampleSession.pairedSnapshot()
+        return SharedStatus(
+            pcName: demo.pc?.name,
+            isConnected: true,
+            pcBatteryPercent: 64,
+            pcCharging: false,
+            lastTransferName: demo.transfers.first?.fileName
+        )
+    }
 }

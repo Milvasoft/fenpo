@@ -26,7 +26,7 @@ public final class CameraService {
 
         /// A state for previews and screenshots.
         public static let sample = UIState(
-            consumer: "Teams",
+            consumer: "",
             facing: .back,
             zoom: 1,
             zoomPresets: [0.5, 1, 2],
@@ -170,6 +170,10 @@ public final class CameraService {
         let token = generation
         request = start
         log.info("CameraStart \(start.video.width)x\(start.video.height)@\(start.video.fps), \(start.video.bitrateKbps) kbps")
+        guard FeatureAccess.isAvailable(.camera) else {
+            await report(.failed, reason: "Fenpo Kamera is not available on this iPhone")
+            return
+        }
         guard UIApplication.shared.applicationState == .active else {
             pendingStart = start
             await report(.waitingForTap)

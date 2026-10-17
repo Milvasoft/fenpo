@@ -24,7 +24,8 @@ public final class PcNotificationPresenter {
 
     /// Whether the user wants the PC's notifications on the iPhone.
     public var isEnabled: Bool {
-        UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: Self.enabledKey) as? Bool ?? true
+        FeatureAccess.isAvailable(.pcNotifications)
+            && (UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.object(forKey: Self.enabledKey) as? Bool ?? true)
     }
 
     /// Shows a notification from the PC.

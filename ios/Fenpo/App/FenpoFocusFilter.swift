@@ -19,6 +19,9 @@ struct FenpoFocusFilter: SetFocusFilterIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         IntentSupport.log.info("Focus filter: silence \(silencePC)")
+        guard FeatureAccess.isAvailable(.focusSync) else {
+            return .result()
+        }
         UserDefaults(suiteName: FenpoIdentifiers.appGroup)?.set(silencePC, forKey: FocusSync.stateKey)
         do {
             try await IntentSupport.actions(for: Self.self).reportFocus(silencePC)
