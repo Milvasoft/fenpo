@@ -121,7 +121,8 @@ public sealed class AndroidMediaSource(PhoneChannel channel, ILogger<AndroidMedi
     {
         switch (message.Envelope.BodyCase)
         {
-            case Envelope.BodyOneofCase.MediaState:
+            // The iPhone's player comes through AMS; a MediaState here is only ever Android's.
+            case Envelope.BodyOneofCase.MediaState when message.Device.Platform != DevicePlatform.Ios:
                 _volume = message.Envelope.MediaState.VolumePercent;
                 Publish(ToNowPlaying(message.Envelope.MediaState, DateTimeOffset.Now));
                 break;
