@@ -1,0 +1,51 @@
+{
+  "checked": "2026-10-18",
+  "languages": ["tr", "en"],
+  "themes": ["light", "dark"],
+  "screens": [
+    {"id": "01_home", "scene": "home"},
+    {"id": "02_transfers", "scene": "transfers"},
+    {"id": "03_webcam", "scene": "camera-ready"},
+    {"id": "04_pc", "scene": "pc"},
+    {"id": "05_touchpad", "scene": "touchpad"},
+    {"id": "06_presenter", "scene": "presenter"},
+    {"id": "07_settings", "scene": "settings"}
+  ],
+  "raw_size": [1320, 2868],
+  "screenshots": {
+    "iphone-6.3": {"size": [1206, 2622], "required": true, "asc": "iPhone › 6.3\" Display (iPhone with Dynamic Island, medium display)"},
+    "iphone-6.9": {"size": [1320, 2868], "required": false, "asc": "iPhone › 6.9\" Display (iPhone with Dynamic Island, large display)"}
+  },
+  "max_per_size": 10,
+  "creative": {
+    "header-21x9": {"size": [3840, 1646], "format": "png", "asc": "App Store › Product Page Header (21:9)"},
+    "search-3x2": {"size": [3840, 2560], "format": "png", "asc": "App Store › Search Results (3:2)"},
+    "universal-16x9": {"size": [5244, 2950], "format": "png", "asc": "App Store › Universal (16:9), instead of both", "crops": [[21, 9], [3, 2]]}
+  },
+  "preview": {
+    "size": [886, 1920],
+    "fps": 30,
+    "min_seconds": 15,
+    "max_seconds": 30,
+    "video_kbps": 11000,
+    "video_max_kbps": 12000,
+    "profile": "high",
+    "level": "4.0",
+    "audio_kbps": 256,
+    "audio_rate": 48000,
+    "max_mb": 500,
+    "max_per_language": 3,
+    "poster_seconds": 5,
+    "first_step_seconds": 5.5,
+    "step_seconds": 3.5,
+    "theme": "light",
+    "music": {
+      "title": "Digital Clouds",
+      "artist": "Alejandro Magaña (A. M.)",
+      "url": "https://assets.mixkit.co/music/623/623.mp3",
+      "page": "https://mixkit.co/free-stock-music/tag/technology/",
+      "license": "Mixkit Stock Music Free License, https://mixkit.co/license/#musicFree"
+    }
+  },
+  "metadata_limits": {"name": 30, "subtitle": 30, "keywords": 100, "promotional_text": 170, "description": 4000, "whats_new": 4000}
+}

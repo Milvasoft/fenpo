@@ -19,7 +19,7 @@ on:
         type: boolean
         default: false
       store_screenshots:
-        description: "Only take the App Store screenshots (6.9-inch iPhone, Turkish and English, demo content)"
+        description: "Only build the App Store assets (design/store: screenshots, creative assets, app preview)"
         type: boolean
         default: false
       without:
@@ -351,10 +351,11 @@ jobs:
             xcrun dwarfdump --lookup "$address" "$dwarf" | grep -E "DW_AT_(linkage_)?name|Line info" | head -6
           done | tee -a "$GITHUB_STEP_SUMMARY"
 
-  # The App Store's required 6.9-inch set (1320 x 2868), in Turkish and English, from the same
-  # screenshot scenes with the sample session's demo content. Started by hand.
+  # Every App Store asset in design/store (README.md there): the screens and the demo tour from a
+  # 6.9-inch simulator with the sample session's demo content, laid out by design/store/scripts/build.
+  # Started by hand.
   store-screenshots:
-    name: App Store screenshots
+    name: App Store assets
     if: github.event_name == 'workflow_dispatch' && inputs.store_screenshots
     runs-on: macos-26
     steps:
@@ -367,7 +368,9 @@ jobs:
           xcodebuild -version
 
       - name: Install tools
-        run: brew install xcodegen protobuf
+        run: |
+          brew install xcodegen protobuf ffmpeg
+          python3 -m pip install --quiet --break-system-packages pillow
 
       - name: Generate protocol code and project
         run: |
@@ -387,32 +390,21 @@ jobs:
           xcodebuild build             -project Fenpo.xcodeproj             -scheme Fenpo             -destination "id=$SIMULATOR_ID"             -derivedDataPath "$RUNNER_TEMP/DerivedData"             CODE_SIGNING_ALLOWED=NO             > "$log" 2>&1 || { grep -E "error:" "$log"; tail -60 "$log"; exit 1; }
           tail -3 "$log"
 
-      - name: Screenshots
-        env:
-          SCENES: home pc transfers transfer-detail touchpad presenter camera-ready settings
-          APPEARANCES: light dark
-          STATUS_TIME: "9:41"
+      - name: Capture and build
         run: |
-          ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/app-store"
-          sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP"/app-store/home-light-en.png
+          status=0
+          bash design/store/scripts/build --capture "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" || status=$?
+          cat design/store/CHECK.md >> "$GITHUB_STEP_SUMMARY" || true
+          exit $status
 
-      # Headline, phone frame and Fenpo's colors around each screen: the images to upload.
-      - name: Store images
-        run: |
-          python3 -m pip install --quiet --break-system-packages pillow
-          python3 ios/scripts/store-frames.py "$RUNNER_TEMP/app-store" "$RUNNER_TEMP/app-store-final"
-          sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP"/app-store-final/en/light/1-home.png
-
-      - name: Upload screenshots
+      - name: Upload assets
+        if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: app-store-screenshots
-          path: ${{ runner.temp }}/app-store
-          if-no-files-found: error
-
-      - name: Upload store images
-        uses: actions/upload-artifact@v5
-        with:
-          name: app-store-final
-          path: ${{ runner.temp }}/app-store-final
+          name: app-store-assets
+          path: |
+            design/store/appstore
+            design/store/raw
+            design/store/recordings
+            design/store/CHECK.md
           if-no-files-found: error

@@ -1,6 +1,7 @@
 #if DEBUG
 import FenpoCore
 import Foundation
+import SwiftUI
 
 /// Screens CI opens directly to take simulator screenshots (`-fenpo.screenshot <name>`, see ios/scripts/screenshots.sh).
 enum ScreenshotScene: String {
@@ -18,6 +19,8 @@ enum ScreenshotScene: String {
     case presenter
     case transferDetail = "transfer-detail"
     case cameraReady = "camera-ready"
+    /// The App Store preview: the screens one after the other, recorded from the simulator.
+    case demo
 
     /// The scene requested by the launch arguments, if any.
     static var current: ScreenshotScene? {
@@ -51,6 +54,9 @@ enum ScreenshotScene: String {
             model.pcPath = [.presenter]
         case .cameraReady:
             model.isCameraReadyPresented = true
+        case .demo:
+            model.selectedTab = .home
+            Self.runDemoTour(model)
         case .transferDetail:
             model.selectedTab = .transfers
             if let first = SampleSession.pairedSnapshot().transfers.first {
@@ -58,6 +64,40 @@ enum ScreenshotScene: String {
             }
         }
         return model
+    }
+
+    /// Seconds each screen of the demo tour stays; the App Store preview's captions follow the same
+    /// steps (design/store/scripts).
+    static let demoStep: Duration = .milliseconds(3_500)
+
+    /// Home, Transfers, the webcam screen, the PC tab, the touchpad, the presentation remote and
+    /// Settings, `demoStep` each. Home stays longer (3 s more) so the preview's poster frame at 5 s
+    /// still shows it.
+    @MainActor
+    private static func runDemoTour(_ model: AppModel) {
+        let steps: [@MainActor (AppModel) -> Void] = [
+            { $0.selectedTab = .transfers },
+            { $0.isCameraReadyPresented = true },
+            { model in
+                model.isCameraReadyPresented = false
+                model.selectedTab = .pc
+            },
+            { $0.pcPath = [.touchpad] },
+            { $0.pcPath = [.presenter] },
+            { model in
+                model.pcPath = []
+                model.selectedTab = .settings
+            },
+        ]
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(3))
+            for step in steps {
+                try? await Task.sleep(for: demoStep)
+                withAnimation(.snappy) {
+                    step(model)
+                }
+            }
+        }
     }
 }
 #endif

@@ -1,0 +1,37 @@
+{
+  "screens": {
+    "01_home": {
+      "tr": ["Telefonun ve bilgisayarın tek ekip", "Pano, dosya ve kamera tek dokunuşta"],
+      "en": ["Your phone and PC, one team", "Clipboard, files and camera in one tap"]
+    },
+    "02_transfers": {
+      "tr": ["Dosyalar saniyeler içinde", "Fotoğraf ve videolar Wi‑Fi ile gider"],
+      "en": ["Files across in seconds", "Photos and videos go over Wi‑Fi"]
+    },
+    "03_webcam": {
+      "tr": ["iPhone’un web kameran olsun", "Görüntülü görüşmelerde net bir görüntü"],
+      "en": ["Your iPhone is your webcam", "A sharp picture for every video call"]
+    },
+    "04_pc": {
+      "tr": ["Bilgisayarın avucunda", "Müzik, sunum, fare ve klavye"],
+      "en": ["Your PC in your hand", "Music, slides, mouse and keyboard"]
+    },
+    "05_touchpad": {
+      "tr": ["Telefonun fare ve klavye olsun", "Kanepeden bilgisayarı kullan"],
+      "en": ["A touchpad in your pocket", "Use your PC from across the room"]
+    },
+    "06_presenter": {
+      "tr": ["Sunumu cebinden yönet", "İleri, geri ve lazer işaretçi"],
+      "en": ["Present from your pocket", "Next, back and a laser pointer"]
+    },
+    "07_settings": {
+      "tr": ["Sunucu yok, hesap yok", "Her şey kendi cihazlarında kalır"],
+      "en": ["No server, no account", "Everything stays on your devices"]
+    }
+  },
+  "creative": {
+    "tr": ["Telefonun ve bilgisayarın tek ekip", "Pano, dosyalar, kamera ve bildirimler, iPhone ile Windows PC arasında"],
+    "en": ["Your phone and PC, one team", "Clipboard, files, camera and notifications between iPhone and Windows PC"]
+  },
+  "creative_phones": ["01_home", "04_pc", "02_transfers"]
+}

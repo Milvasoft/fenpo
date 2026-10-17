@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Builds every App Store asset into design/store/appstore and writes CHECK.md (README.md has the list).
+#   build                         lay out from raw/ and recordings/ (any OS with Python, Pillow, ffmpeg)
+#   build --capture <udid> <app>  first take raw/ and recordings/ from a simulator (Mac only)
+#   build --skip-preview          images and checks only
+set -euo pipefail
+
+scripts="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+store="$(dirname "$scripts")"
+python="$(command -v python3 || command -v python)"
+
+if [[ "${1:-}" == "--capture" ]]; then
+    bash "$scripts/capture.sh" "$2" "$3" "$store"
+    shift 3
+fi
+"$python" "$scripts/build.py" "$store" "$@"

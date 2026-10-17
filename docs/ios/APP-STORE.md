@@ -34,6 +34,10 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 
 ## Metinler
 
+Yapıştırmaya hazır hali ve sınır denetimi `design/store/metadata/` içinde (`design/store/CHECK.md`). Anahtar
+kelimeler ad ve alt başlıktaki kelimeleri (Fenpo, Link, iPhone, Windows, PC) tekrar etmez; her biri en az üç harf. Mağaza
+metinlerinde başka bir uygulama mağazasının adı geçmez.
+
 ### Türkçe
 
 **Alt başlık** (30 karakter sınırı, 30): `iPhone ve Windows PC bir arada`
@@ -72,10 +76,10 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 > GİZLİLİK
 > Fenpo'nun sunucusu ve hesabı yok. Veriler yalnızca iPhone'unla eşleştirdiğin bilgisayar arasında, Bluetooth ve yerel ağ üzerinden şifreli olarak gider. Hiçbir veri toplanmaz.
 >
-> Gereken: Windows 11 (22H2 ya da sonrası) çalıştıran, Bluetooth'lu bir bilgisayarda Fenpo for Windows (Microsoft Store ya da GitHub). Fenpo açık kaynaklıdır.
+> Gereken: Windows 11 (22H2 ya da sonrası) çalıştıran, Bluetooth'lu bir bilgisayarda Fenpo for Windows. Fenpo açık kaynaklıdır.
 
-**Anahtar kelimeler** (100 sınırı, 99):
-`windows,bilgisayar,pc,pano,dosya aktarımı,web kamerası,kumanda,sunum,bildirim,ekran,yansıtma,eşitle`
+**Anahtar kelimeler** (100 bayt sınırı, Türkçe harfler iki bayt; 100):
+`bilgisayar,pano,dosya aktarımı,web kamerası,kumanda,sunum,bildirim,ekran,yansıtma,eşitle,klavye`
 
 **Bu sürümdeki yenilikler:**
 > Fenpo'nun ilk sürümü.
@@ -118,29 +122,23 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 > PRIVACY
 > Fenpo has no servers and no accounts. Data moves only between your iPhone and the PC you paired, encrypted, over Bluetooth and your local network. Nothing is collected.
 >
-> Requires Fenpo for Windows (Microsoft Store or GitHub) on a Windows 11 (22H2 or later) PC with Bluetooth. Fenpo is open source.
+> Requires Fenpo for Windows on a Windows 11 (22H2 or later) PC with Bluetooth. Fenpo is open source.
 
-**Keywords** (100, 91):
-`windows,pc,clipboard,file transfer,webcam,remote,presenter,notifications,screen,mirror,sync`
+**Keywords** (100 bytes, 98):
+`clipboard,file transfer,webcam,remote,presenter,notifications,screen,mirror,sync,touchpad,keyboard`
 
 **What's new:**
 > The first release of Fenpo.
 
-## Ekran görüntüleri
+## Ekran görüntüleri, önizleme ve yaratıcı varlıklar
 
-App Store Connect, iPhone için **6.9 inç** (1320 × 2868, dikey) ya da **6.5 inç** (1242 × 2688 veya 1284 × 2778) setini
-zorunlu tutuyor; küçük ekranlarınkini bunlardan kendisi üretiyor. iPhone 13/14/15'in 6.1 inç görüntüleri (1170 × 2532,
-1179 × 2556) zorunlu set olarak **kabul edilmez**.
+Hepsi `design/store/` altında koddan üretilir; neyin nereye yüklendiği `design/store/README.md`'de, Apple'ın ölçüleri
+`design/store/SPECS.md`'de. Zorunlu set **6.3 inç** (1206 × 2622, Dinamik Ada orta ekran); 6.9 inç (1320 × 2868)
+isteğe bağlı, ikisi de üretiliyor. CI: Actions › iOS › Run workflow › **Only build the App Store assets** işaretli;
+çıktı `app-store-assets` artifact'i. İçerik tamamen uydurma: PC adı "Ofis PC" / "Office PC", dosya, şarkı ve sanatçı
+adları hayali, başka uygulama markası yok.
 
-**CI ile (önerilen):** Actions › iOS › Run workflow › **Only take the App Store screenshots** işaretli. İş, 6.9 inç
-simülatörde (iPhone 17 Pro Max ya da 16 Pro Max), saat 9:41, açık temada, Türkçe ve İngilizce şu ekranları çeker:
-Ana ekran, PC (şu an çalıyor dahil), Aktarımlar, Aktarım ayrıntısı, Fare ve klavye, Sunum kumandası, Web kamerası,
-Ayarlar. Çıktı `app-store-screenshots` artifact'i. İçerik tamamen uydurma: PC adı "Ofis PC" / "Office PC", dosya,
-şarkı ve sanatçı adları hayali, başka uygulama markası yok. Her dil için en fazla 10 görüntü yüklenebilir; sırayı
-sen seç.
-
-**Kendi telefonunla çekersen:** 6.9 inç ya da 6.5 inç bir iPhone gerekir (16/17 Pro Max, 15 Plus, 11 Pro Max, XS Max
-gibi). Görüntülerde olmaması gerekenler: gerçek PC adı (ör. "BUGRAKOSEN", Windows'ta Fenpo › Ayarlar'dan geçici olarak
+**Kendi telefonunla çekersen:** 6.3 inç (iPhone 15/16/17, 14 Pro–17 Pro) ya da 6.9 inç bir iPhone gerekir. Görüntülerde olmaması gerekenler: gerçek PC adı (ör. "BUGRAKOSEN", Windows'ta Fenpo › Ayarlar'dan geçici olarak
 "Ofis PC" yap), gerçek kişi adları, telefon numaraları, mesaj ve bildirim içerikleri, kendi fotoğrafların, pano
 içerikleri, gerçek şarkı/sanatçı adları ve diğer uygulamaların logoları. Durum çubuğunda saat 9:41, tam pil iyi durur.
 
