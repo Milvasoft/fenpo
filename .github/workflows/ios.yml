@@ -390,7 +390,7 @@ jobs:
       - name: Screenshots
         env:
           SCENES: home pc transfers transfer-detail touchpad presenter camera-ready settings
-          APPEARANCES: light
+          APPEARANCES: light dark
           STATUS_TIME: "9:41"
         run: |
           ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/app-store"
