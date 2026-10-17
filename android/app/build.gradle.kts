@@ -5,13 +5,38 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// The Google Play upload key (docs/android/PLAY-LISTING.md). Buğra keeps the keystore and its
+// passwords outside the repository: in ~/.gradle/gradle.properties or in environment variables.
+// Without them the release bundle is built unsigned. Play App Signing signs what users install.
+fun secret(name: String): String? = providers.gradleProperty(name).orNull ?: providers.environmentVariable(name).orNull
+
+val uploadStore = secret("FENPO_UPLOAD_STORE_FILE")
+
 android {
     namespace = "com.fenpo.android"
 
     defaultConfig {
         applicationId = "com.fenpo.android"
+        // Every upload to Play needs a higher versionCode.
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
+    }
+
+    signingConfigs {
+        if (uploadStore != null) {
+            create("upload") {
+                storeFile = file(uploadStore)
+                storePassword = secret("FENPO_UPLOAD_STORE_PASSWORD")
+                keyAlias = secret("FENPO_UPLOAD_KEY_ALIAS")
+                keyPassword = secret("FENPO_UPLOAD_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (uploadStore != null) signingConfig = signingConfigs.getByName("upload")
+        }
     }
 
     androidResources {

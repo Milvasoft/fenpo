@@ -10,6 +10,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.fenpo.android.core.data.entitlements.Entitlements
 import com.fenpo.android.core.data.settings.SettingsRepository
 import com.fenpo.android.core.protocol.ProtocolVersion
 import com.fenpo.android.core.transport.session.LocalDevice
@@ -33,13 +34,14 @@ internal class AndroidLocalDeviceRepository
         @param:ApplicationContext private val context: Context,
         private val dataStore: DataStore<Preferences>,
         private val settingsRepository: SettingsRepository,
+        private val entitlements: Entitlements,
     ) : LocalDeviceRepository {
         override suspend fun localDevice(): LocalDevice =
             LocalDevice(
                 id = deviceId(),
                 name = deviceName(),
                 appVersion = appVersion(),
-                capabilities = IMPLEMENTED_CAPABILITIES + optionalCapabilities(),
+                capabilities = entitlements.filter(IMPLEMENTED_CAPABILITIES + optionalCapabilities()),
                 protocolVersions = ProtocolVersion.supported,
                 osVersion = "Android ${Build.VERSION.RELEASE}",
                 model = Build.MODEL,

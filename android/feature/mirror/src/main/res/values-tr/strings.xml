@@ -12,4 +12,10 @@
     <string name="mirror_stop">Durdur</string>
     <string name="mirror_accessibility_description">Ekranı Fenpo ile paylaşırken PC’nin bu telefonda dokunmasına, kaydırmasına ve yazmasına izin verir. Başka zaman hiçbir şey yapmaz.</string>
     <string name="mirror_accessibility_label">Fenpo: PC’den kontrol</string>
+    <string name="mirror_disclosure_title">Telefonu PC’den kullan</string>
+    <string name="mirror_disclosure_what">Fenpo, bu telefonun ekranını PC’nle paylaşırken PC’de yaptığın dokunma, kaydırma ve yazmanın telefonda olması için Android’in erişilebilirlik hizmetini kullanır. Bunun için ekranda yazdığın alanı bulur.</string>
+    <string name="mirror_disclosure_data">Yalnızca ekranı paylaşırken çalışır. Ekranını başka bir şey için okumaz, saklamaz ve kendi PC’nden başka kimseye bir şey göndermez.</string>
+    <string name="mirror_disclosure_how">Sonra Erişilebilirlik’te “Fenpo: PC’den kontrol”ü aç. İstediğin zaman oradan kapatabilirsin.</string>
+    <string name="mirror_disclosure_accept">Kabul et ve ayarları aç</string>
+    <string name="mirror_disclosure_decline">Şimdi değil</string>
 </resources>

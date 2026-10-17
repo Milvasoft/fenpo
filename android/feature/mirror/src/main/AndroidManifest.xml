@@ -13,6 +13,14 @@
             android:taskAffinity=""
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
+        <!-- What control from the PC does, before the accessibility settings (Play's prominent disclosure). -->
+        <activity
+            android:name=".MirrorControlDisclosureActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <service
             android:name=".MirrorService"
             android:exported="false"

@@ -161,12 +161,12 @@ class MirrorCoordinator
                     .setAutoCancel(true)
                     .addAction(0, context.getString(R.string.mirror_share), share)
             if (askForControl) {
-                // The PC also wants control: one tap to the accessibility switch.
+                // The PC also wants control: what the service does first, then the accessibility switch.
                 val settings =
                     PendingIntent.getActivity(
                         context,
                         1,
-                        Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                        MirrorControlDisclosureActivity.intent(context),
                         PendingIntent.FLAG_IMMUTABLE,
                     )
                 builder

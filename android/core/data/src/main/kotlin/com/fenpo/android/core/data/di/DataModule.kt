@@ -7,6 +7,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.fenpo.android.core.data.device.AndroidLocalDeviceRepository
 import com.fenpo.android.core.data.device.LocalDeviceRepository
+import com.fenpo.android.core.data.entitlements.DataStoreInstallRecord
+import com.fenpo.android.core.data.entitlements.Entitlements
+import com.fenpo.android.core.data.entitlements.FreeEntitlements
+import com.fenpo.android.core.data.entitlements.InstallRecord
 import com.fenpo.android.core.data.hotspot.DataStoreHotspotRepository
 import com.fenpo.android.core.data.hotspot.HotspotRepository
 import com.fenpo.android.core.data.notifications.DataStoreNotificationAppsRepository
@@ -49,6 +53,12 @@ internal abstract class DataModule {
 
     @Binds
     abstract fun transferHistory(impl: DataStoreTransferHistory): TransferHistory
+
+    @Binds
+    abstract fun entitlements(impl: FreeEntitlements): Entitlements
+
+    @Binds
+    abstract fun installRecord(impl: DataStoreInstallRecord): InstallRecord
 
     @Binds
     abstract fun hotspotRepository(impl: DataStoreHotspotRepository): HotspotRepository
