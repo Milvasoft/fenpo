@@ -47,6 +47,9 @@ public sealed partial class ScreenMirrorWindow : Window
         _dispatcher = DispatcherQueue;
 
         Title = localization.GetString("Mirror_Title");
+        TitleText.Text = Title;
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
         AppWindow.SetIcon("Assets/Fenpo.ico");
         AppWindow.Resize(new Windows.Graphics.SizeInt32(Scale(440), Scale(900)));
         themeService.Register(this);
@@ -150,7 +153,7 @@ public sealed partial class ScreenMirrorWindow : Window
         _stream = stream;
         _player?.Dispose();
         _player = new LiveH264Player(stream.Packets, video?.Width ?? 0, video?.Height ?? 0, _logger, () => _ = _mirror.RequestKeyFrameAsync());
-        Player.SetMediaPlayer(_player.Player);
+        Player.Show(_player);
 
         // A resize restarts only the picture; the sound of the same stream keeps playing.
         if (_sound is null || !ReferenceEquals(_soundStream, stream))

@@ -79,7 +79,7 @@ public sealed partial class CameraPage : Page
     {
         _player?.Dispose();
         _player = new LiveH264Player(feed.Packets, feed.Open.Video?.Width ?? 0, feed.Open.Video?.Height ?? 0, _logger, () => _ = _camera.RequestKeyFrameAsync());
-        Preview.SetMediaPlayer(_player.Player);
+        Preview.Show(_player);
     });
 
     private void OnVirtualCameraChanged(object? sender, EventArgs e) => _dispatcher.TryEnqueue(ApplyVirtualCamera);
@@ -136,7 +136,7 @@ public sealed partial class CameraPage : Page
         {
             _player?.Dispose();
             _player = null;
-            Preview.SetMediaPlayer(null);
+            Preview.Show(null);
         }
     }
 }

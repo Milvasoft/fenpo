@@ -201,7 +201,7 @@ public sealed class FileTransferService(
             return SendFilesResult.Unsupported;
         }
 
-        if (!_channel.WifiConnected)
+        if (!await _channel.EnsureWifiAsync("file transfer"))
         {
             return SendFilesResult.NeedsWifi;
         }
