@@ -47,6 +47,12 @@ public partial class App : Application
             settings.Update(s => s with { PcId = Guid.NewGuid().ToString() });
         }
 
+        if (settings.Current.FirstVersion is null)
+        {
+            var version = Windows.ApplicationModel.Package.Current.Id.Version;
+            settings.Update(s => s with { FirstVersion = $"{version.Major}.{version.Minor}.{version.Build}", FirstRunAt = DateTimeOffset.Now });
+        }
+
         // Resources load with the first XAML, so the language override has to come before InitializeComponent.
         LocalizationService.ApplyAtStartup(settings.Current.Language);
         _crashLog = Path.Combine(localFolder, "crash.log");
