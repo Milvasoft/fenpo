@@ -396,9 +396,23 @@ jobs:
           ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/app-store"
           sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP"/app-store/home-light-en.png
 
+      # Headline, phone frame and Fenpo's colors around each screen: the images to upload.
+      - name: Store images
+        run: |
+          python3 -m pip install --quiet --break-system-packages pillow
+          python3 ios/scripts/store-frames.py "$RUNNER_TEMP/app-store" "$RUNNER_TEMP/app-store-final"
+          sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP"/app-store-final/en/light/1-home.png
+
       - name: Upload screenshots
         uses: actions/upload-artifact@v5
         with:
           name: app-store-screenshots
           path: ${{ runner.temp }}/app-store
+          if-no-files-found: error
+
+      - name: Upload store images
+        uses: actions/upload-artifact@v5
+        with:
+          name: app-store-final
+          path: ${{ runner.temp }}/app-store-final
           if-no-files-found: error
