@@ -2,6 +2,18 @@
 
 Dağıtım kararı: DECISIONS #41 (Store + GitHub Releases). Paket: `tools/Build-Release.ps1 -Channel Store`.
 
+## Store kimliği (Partner Center, 17 Ekim)
+
+| Alan | Değer |
+|---|---|
+| Store ID | `9MTTKJ8BV1LG` (<https://apps.microsoft.com/detail/9MTTKJ8BV1LG>) |
+| Package/Identity/Name | `Milvasoft.Fenpo` |
+| Package/Identity/Publisher | `CN=934D5176-C6E5-455B-9AAC-3ECA3C954CB4` |
+| PublisherDisplayName | `Milvasoft` |
+| Package Family Name | `Milvasoft.Fenpo_tzmzhd3z3x8ea` |
+
+Paket: `tools/Build-Release.ps1 -Channel Store -Version 1.0.0.0 -IdentityName Milvasoft.Fenpo -Publisher "CN=934D5176-C6E5-455B-9AAC-3ECA3C954CB4"`
+
 ## Partner Center'da Buğra'nın yapacakları
 
 1. Partner Center'da geliştirici hesabı (bireysel hesap ücretsiz; şirket hesabı Milvasoft adına).
