@@ -49,6 +49,8 @@ import com.fenpo.android.feature.settings.NotificationAppsKey
 import com.fenpo.android.feature.settings.NotificationAppsRoute
 import com.fenpo.android.feature.settings.SettingsKey
 import com.fenpo.android.feature.settings.SettingsRoute
+import com.fenpo.android.feature.transfers.TransferDetailKey
+import com.fenpo.android.feature.transfers.TransferDetailRoute
 import com.fenpo.android.feature.transfers.TransfersKey
 import com.fenpo.android.feature.transfers.TransfersRoute
 
@@ -106,10 +108,20 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                                 onPair = { backStack.add(ScannerKey) },
                                 onOpenNotificationSettings = { backStack.add(NotificationAppsKey) },
                                 onOpenCamera = { context.startActivity(CameraActivity.intent(context)) },
+                                onOpenTransfer = { backStack.add(TransferDetailKey(it)) },
                             )
                         }
                     }
-                    entry<TransfersKey> { Inset { TransfersRoute() } }
+                    entry<TransfersKey> {
+                        Inset {
+                            TransfersRoute(
+                                onOpenTransfer = { backStack.add(TransferDetailKey(it)) },
+                            )
+                        }
+                    }
+                    entry<TransferDetailKey> { key ->
+                        Inset(bottom = true) { TransferDetailRoute(id = key.id, onBack = pop) }
+                    }
                     entry<PcKey> {
                         Inset {
                             PcRoute(

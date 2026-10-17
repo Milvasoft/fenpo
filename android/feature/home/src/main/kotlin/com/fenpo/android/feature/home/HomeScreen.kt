@@ -66,6 +66,7 @@ fun HomeRoute(
     onOpenNotificationSettings: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenCamera: () -> Unit = {},
+    onOpenTransfer: (String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -90,6 +91,7 @@ fun HomeRoute(
         onPair = onPair,
         onOpenNotificationSettings = onOpenNotificationSettings,
         modifier = modifier,
+        onOpenTransfer = onOpenTransfer,
         onQuickAction = { action ->
             when (action) {
                 QuickAction.SEND_CLIPBOARD -> {
@@ -127,6 +129,7 @@ fun HomeScreen(
     onOpenNotificationSettings: () -> Unit,
     modifier: Modifier = Modifier,
     onQuickAction: (QuickAction) -> Unit = {},
+    onOpenTransfer: (String) -> Unit = {},
 ) {
     Column(
         modifier =
@@ -151,7 +154,7 @@ fun HomeScreen(
             FenpoCard(modifier = Modifier.padding(horizontal = 16.dp)) {
                 state.transfers.forEachIndexed { index, item ->
                     if (index > 0) RowDivider()
-                    TransferRow(item = item, state = state)
+                    TransferRow(item = item, state = state, onOpen = onOpenTransfer)
                 }
             }
         }
@@ -303,6 +306,7 @@ private fun MirroringRow(
 private fun TransferRow(
     item: TransferItem,
     state: HomeUiState,
+    onOpen: (String) -> Unit,
 ) {
     val extension =
         item.fileName
@@ -328,5 +332,13 @@ private fun TransferRow(
                 contentColor = if (isImage) colors.onTertiaryContainer else colors.onPrimaryContainer,
             )
         },
+        trailing = {
+            Icon(
+                painterResource(FenpoIcons.Chevron),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+        modifier = Modifier.clickable { onOpen(item.id) },
     )
 }

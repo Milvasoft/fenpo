@@ -26,4 +26,26 @@
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>
     </plurals>
+    <string name="transfer_detail_title">Transfer</string>
+    <string name="transfer_detail_gone">This transfer is no longer in the list.</string>
+    <string name="transfer_detail_from_pc">From your PC</string>
+    <string name="transfer_detail_to_pc">To your PC</string>
+    <string name="transfer_detail_status">Status</string>
+    <string name="transfer_detail_files">Files</string>
+    <string name="transfer_detail_size">Size</string>
+    <string name="transfer_detail_time">Time</string>
+    <string name="transfer_detail_location">Location</string>
+    <string name="transfer_detail_downloads">Downloads › Fenpo</string>
+    <string name="transfer_detail_pc">Fenpo’s folder on the PC</string>
+    <string name="transfer_detail_in_progress">In progress</string>
+    <string name="transfer_detail_completed">Completed</string>
+    <string name="transfer_detail_declined">The PC declined it</string>
+    <string name="transfer_detail_cancelled">Cancelled</string>
+    <string name="transfer_detail_failed">Did not finish</string>
+    <string name="transfer_detail_open">Open</string>
+    <string name="transfer_detail_share">Share</string>
+    <string name="transfer_detail_others">Open and Share use the first file; the others are in Downloads › Fenpo.</string>
+    <string name="transfer_detail_missing">The file is no longer on this phone. It may have been moved or deleted.</string>
+    <string name="transfer_detail_send_again">Choose and send again</string>
+    <string name="transfer_detail_send_again_note">Fenpo keeps no copy of what it sends, so choose the files again.</string>
 </resources>

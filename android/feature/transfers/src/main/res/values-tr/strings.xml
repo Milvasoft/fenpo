@@ -26,4 +26,26 @@
         <item quantity="one">%d dosya</item>
         <item quantity="other">%d dosya</item>
     </plurals>
+    <string name="transfer_detail_title">Aktarım</string>
+    <string name="transfer_detail_gone">Bu aktarım artık listede yok.</string>
+    <string name="transfer_detail_from_pc">PC’den geldi</string>
+    <string name="transfer_detail_to_pc">PC’ye gönderildi</string>
+    <string name="transfer_detail_status">Durum</string>
+    <string name="transfer_detail_files">Dosyalar</string>
+    <string name="transfer_detail_size">Boyut</string>
+    <string name="transfer_detail_time">Zaman</string>
+    <string name="transfer_detail_location">Konum</string>
+    <string name="transfer_detail_downloads">İndirilenler › Fenpo</string>
+    <string name="transfer_detail_pc">PC’deki Fenpo klasörü</string>
+    <string name="transfer_detail_in_progress">Sürüyor</string>
+    <string name="transfer_detail_completed">Tamamlandı</string>
+    <string name="transfer_detail_declined">PC almadı</string>
+    <string name="transfer_detail_cancelled">İptal edildi</string>
+    <string name="transfer_detail_failed">Yarıda kaldı</string>
+    <string name="transfer_detail_open">Aç</string>
+    <string name="transfer_detail_share">Paylaş</string>
+    <string name="transfer_detail_others">Aç ve Paylaş ilk dosyayı kullanır; diğerleri İndirilenler › Fenpo klasöründe.</string>
+    <string name="transfer_detail_missing">Dosya artık bu telefonda yok. Taşınmış ya da silinmiş olabilir.</string>
+    <string name="transfer_detail_send_again">Seç ve yeniden gönder</string>
+    <string name="transfer_detail_send_again_note">Fenpo gönderdiklerinin kopyasını tutmaz; dosyaları yeniden seç.</string>
 </resources>

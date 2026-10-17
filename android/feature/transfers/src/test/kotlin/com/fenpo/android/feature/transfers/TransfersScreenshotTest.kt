@@ -43,6 +43,67 @@ class TransfersScreenshotTest {
             )
         }
 
+    @Test
+    fun receivedFile() =
+        captureScreenVariants("transfer_detail_received") {
+            TransferDetailScreen(
+                state =
+                    TransferDetailUiState(
+                        record =
+                            record(
+                                "b",
+                                "Sözleşme_v3.pdf",
+                                incoming = true,
+                                minutesAgo = 2,
+                            ).copy(bytes = 2_480_000, uri = "content://x/1"),
+                        fileExists = true,
+                        now = NOW,
+                    ),
+                onBack = {},
+            )
+        }
+
+    @Test
+    fun sendThatFailed() =
+        captureScreenVariants("transfer_detail_failed") {
+            TransferDetailScreen(
+                state =
+                    TransferDetailUiState(
+                        record =
+                            record(
+                                "d",
+                                "sunum.pptx",
+                                incoming = false,
+                                minutesAgo = 180,
+                                outcome = TransferOutcome.FAILED,
+                            ).copy(fileCount = 3, bytes = 18_400_000),
+                        now = NOW,
+                    ),
+                onBack = {},
+            )
+        }
+
+    @Test
+    fun transferInProgress() =
+        captureScreenVariants("transfer_detail_active") {
+            TransferDetailScreen(
+                state =
+                    TransferDetailUiState(
+                        active =
+                            ActiveTransfer(
+                                "a",
+                                incoming = false,
+                                "IMG_20261016_1501.jpg",
+                                12,
+                                64_000_000,
+                                100_000_000,
+                            ),
+                        now = NOW,
+                    ),
+                onBack = {},
+            )
+        }
+
     private fun record(
         id: String,
         name: String,

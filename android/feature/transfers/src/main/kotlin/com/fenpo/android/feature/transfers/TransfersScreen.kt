@@ -1,6 +1,5 @@
 package com.fenpo.android.feature.transfers
 
-import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,11 +18,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fenpo.android.core.connection.transfer.ActiveTransfer
@@ -35,41 +34,37 @@ import com.fenpo.android.core.designsystem.component.FileTypeBadge
 import com.fenpo.android.core.designsystem.component.RowDivider
 import com.fenpo.android.core.designsystem.component.SectionLabel
 import com.fenpo.android.core.designsystem.format.relativeTime
+import com.fenpo.android.core.designsystem.icon.FenpoIcons
 import java.time.Instant
 import java.util.Locale
 
 /** Transfers tab with its view model. */
 @Composable
 fun TransfersRoute(
+    onOpenTransfer: (String) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TransfersViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     TransfersScreen(
         state = state,
         modifier = modifier,
         onCancel = viewModel::cancel,
-        onOpen = { record ->
-            record.uri?.let { uri ->
-                val intent =
-                    Intent(Intent.ACTION_VIEW, uri.toUri()).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                runCatching { context.startActivity(intent) }
-            }
-        },
+        onOpen = onOpenTransfer,
     )
 }
 
 /**
  * Transfers tab. The design does not detail this screen; it uses the rows of "Recent transfers" on
- * the home screen: transfers in progress with their bar and "Cancel", then the history.
+ * the home screen: transfers in progress with their bar and "Cancel", then the history. Every row
+ * opens the transfer's screen ([TransferDetailScreen]), so none looks tappable without doing anything.
  */
 @Composable
 fun TransfersScreen(
     modifier: Modifier = Modifier,
     state: TransfersUiState = TransfersUiState(),
     onCancel: (String) -> Unit = {},
-    onOpen: (TransferRecord) -> Unit = {},
+    onOpen: (String) -> Unit = {},
 ) {
     Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         FenpoRootTopBar(title = stringResource(R.string.transfers_title))
@@ -82,7 +77,7 @@ fun TransfersScreen(
             FenpoCard(modifier = Modifier.padding(horizontal = 16.dp)) {
                 state.active.forEachIndexed { index, transfer ->
                     if (index > 0) RowDivider()
-                    ActiveRow(transfer, onCancel)
+                    ActiveRow(transfer, onCancel, onOpen)
                 }
             }
         }
@@ -118,8 +113,9 @@ private fun EmptyCard() {
 private fun ActiveRow(
     transfer: ActiveTransfer,
     onCancel: (String) -> Unit,
+    onOpen: (String) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(modifier = Modifier.clickable { onOpen(transfer.id) }, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         FenpoListRow(
             title = transfer.fileName,
             supporting =
@@ -127,7 +123,7 @@ private fun ActiveRow(
                     stringResource(if (transfer.incoming) R.string.transfers_receiving else R.string.transfers_sending),
                     transfer.fileCount,
                 ),
-            leading = { Badge(transfer.fileName) },
+            leading = { TransferBadge(transfer.fileName) },
             trailing = {
                 TextButton(onClick = { onCancel(transfer.id) }) { Text(stringResource(R.string.transfers_cancel)) }
             },
@@ -144,7 +140,7 @@ private fun ActiveRow(
 private fun HistoryRow(
     record: TransferRecord,
     now: Instant,
-    onOpen: (TransferRecord) -> Unit,
+    onOpen: (String) -> Unit,
 ) {
     val time = relativeTime(record.at, now)
     val supporting =
@@ -168,8 +164,9 @@ private fun HistoryRow(
     FenpoListRow(
         title = record.fileName,
         supporting = withCount(supporting, record.fileCount),
-        leading = { Badge(record.fileName) },
-        modifier = if (record.uri != null) Modifier.clickable { onOpen(record) } else Modifier,
+        leading = { TransferBadge(record.fileName) },
+        trailing = { Chevron() },
+        modifier = Modifier.clickable { onOpen(record.id) },
     )
 }
 
@@ -189,8 +186,19 @@ private fun withCount(
         )
     }
 
+/** The chevron of a row that opens another screen. */
 @Composable
-private fun Badge(fileName: String) {
+internal fun Chevron() {
+    Icon(
+        painterResource(FenpoIcons.Chevron),
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/** The file type badge of a transfer row. */
+@Composable
+internal fun TransferBadge(fileName: String) {
     val extension =
         fileName
             .substringAfterLast('.', "")
