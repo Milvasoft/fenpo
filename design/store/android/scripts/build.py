@@ -187,16 +187,14 @@ def build_video(lang: str, captions: list[tuple[str, str]]) -> Path:
         args += ["-loop", "1", "-framerate", str(fps), "-t", str(seconds), "-i", str(scene)]
     args += ["-i", str(music())]
     filters = []
-    # A slow push-in on every scene, so the stills feel alive.
+    # Still scenes (a moving zoom made the picture shake: zoompan rounds to whole pixels every frame);
+    # one scene slides smoothly into the next.
     for i in range(len(scenes)):
-        filters.append(
-            f"[{i}:v]scale=2112:1188,zoompan=z='min(1+0.0006*on,1.06)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
-            f":d={seconds * fps}:s={spec['width']}x{spec['height']}:fps={fps},setsar=1,format=yuv420p[v{i}]"
-        )
+        filters.append(f"[{i}:v]scale={spec['width']}:{spec['height']},setsar=1,fps={fps},format=yuv420p[v{i}]")
     last = "v0"
     for i in range(1, len(scenes)):
         offset = i * (seconds - fade)
-        filters.append(f"[{last}][v{i}]xfade=transition=fade:duration={fade}:offset={offset}[x{i}]")
+        filters.append(f"[{last}][v{i}]xfade=transition={spec['transition']}:duration={fade}:offset={offset}[x{i}]")
         last = f"x{i}"
     audio = len(scenes)
     filters.append(f"[{audio}:a]atrim=0:{total},afade=t=in:d=1,afade=t=out:st={total - 2}:d=2,volume=0.8[a]")

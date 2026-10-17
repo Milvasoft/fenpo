@@ -13,6 +13,7 @@
     "fps": 30,
     "sceneSeconds": 5,
     "fadeSeconds": 0.6,
+    "transition": "slideleft",
     "music": {
       "title": "Digital Clouds",
       "artist": "Alejandro Magaña (A. M.)",

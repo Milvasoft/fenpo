@@ -80,7 +80,8 @@ Play videoyu YouTube bağlantısı olarak alır; dosya üretilir, yükleme notla
 | 24–30 | Logo ve "Fenpo for Windows ile çalışır" | Fenpo / Fenpo |
 
 **Karar (Buğra):** video gerçek ekranların örnek verili görüntülerinden yapılır. Her sahne 1920×1080: solda altyazı,
-sağda telefonun içinde ekran; sahneler 5 sn, yavaş bir yakınlaşma ve 0,6 sn geçişle. İlk sahnelerden itibaren uygulamanın
+sağda telefonun içinde ekran; sahneler 5 sn ve sabit (yakınlaşma efekti görüntüyü titrettiği için kaldırıldı), bir sahneden ötekine 0,6 sn'lik
+bir kayma geçişiyle. İlk sahnelerden itibaren uygulamanın
 gerçek ekranları görünür. Sıra ve altyazılar `metadata/<dil>.md`'de (ana ekran, aktarımlar, PC, fare, kamera, kapanış).
 Müzik: Mixkit'ten "Digital Clouds" (LICENSES.md); ffmpeg winget ile kuruldu.
 

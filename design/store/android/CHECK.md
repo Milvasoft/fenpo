@@ -18,8 +18,8 @@
 
 ## Video
 
-- `play/video/promo-tr.mp4`: 1920×1080, h264 yuv420p 30/1 fps, ses aac, 27.0 sn, 7214 KB
-- `play/video/promo-en.mp4`: 1920×1080, h264 yuv420p 30/1 fps, ses aac, 27.0 sn, 7328 KB
+- `play/video/promo-tr.mp4`: 1920×1080, h264 yuv420p 30/1 fps, ses aac, 27.0 sn, 2639 KB
+- `play/video/promo-en.mp4`: 1920×1080, h264 yuv420p 30/1 fps, ses aac, 27.0 sn, 2613 KB
 
 ## Görseller
 
