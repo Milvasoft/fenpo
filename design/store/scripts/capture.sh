@@ -50,8 +50,8 @@ for lang in tr en; do
     recorder=$!
     sleep 1.5
     launch "$lang" demo
-    # Home for 3 s + 3.5 s, then six steps of 3.5 s each, the last screen and a margin.
-    sleep 30
+    # Home for 3 s + 3.5 s, then six steps of 3.5 s each, the last screen and a margin for a slow launch.
+    sleep 34
     kill -INT "$recorder"
     wait "$recorder" || true
 done

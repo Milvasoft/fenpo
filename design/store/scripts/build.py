@@ -19,7 +19,7 @@ import sys
 import tempfile
 import urllib.request
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageStat
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import frames  # noqa: E402
@@ -162,27 +162,38 @@ def run(args):
     return subprocess.run(args, check=True, capture_output=True, text=True)
 
 
-def transitions(recording, count, step):
-    """The demo tour's screen changes in the recording: the `count` picture changes `step` apart
-    that fit best (the app's launch and animations inside a screen are changes too)."""
-    result = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-i", recording, "-vf", "select='gt(scene,0.06)',showinfo", "-f", "null", "-"],
-        capture_output=True, text=True,
-    )
-    times = [float(line.split("pts_time:")[1].split()[0]) for line in result.stderr.splitlines() if "pts_time:" in line]
-    best, best_score = None, -1
-    for first in times:
-        found = []
-        for k in range(count):
-            near = [t for t in times if abs(t - (first + k * step)) < 0.7]
-            found.append(min(near, key=lambda t: abs(t - (first + k * step))) if near else None)
-        score = sum(t is not None for t in found)
-        if score > best_score:
-            best, best_score = (first, found), score
-    if best is None or best_score < count - 1:
-        return None
-    first, found = best
-    return [t if t is not None else first + k * step for k, t in enumerate(found)]
+SAMPLE_FPS = 10
+SAMPLE_SIZE = (66, 144)
+
+
+def recording_labels(recording, references):
+    """For every tenth of a second of the recording, the index of the raw screen it looks most like."""
+    width, height = SAMPLE_SIZE
+    data = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", recording, "-vf",
+         f"setpts=PTS-STARTPTS,fps={SAMPLE_FPS},scale={width}:{height},format=gray", "-f", "rawvideo", "-"],
+        check=True, capture_output=True,
+    ).stdout
+    refs = [Image.open(path).convert("L").resize(SAMPLE_SIZE, Image.BILINEAR) for path in references]
+    size = width * height
+    labels = []
+    for index in range(len(data) // size):
+        frame = Image.frombytes("L", SAMPLE_SIZE, data[index * size:(index + 1) * size])
+        diffs = [ImageStat.Stat(ImageChops.difference(frame, ref)).mean[0] for ref in refs]
+        best = min(range(len(refs)), key=diffs.__getitem__)
+        # Nothing like any of the screens (the launch, the system's home screen): no label.
+        labels.append(best if diffs[best] < 40 else None)
+    return labels
+
+
+def screen_times(labels, count):
+    """When each of the tour's screens first holds still (three samples in a row) in the recording."""
+    times, wanted = [], 0
+    for index in range(len(labels) - 2):
+        if wanted < count and labels[index] == labels[index + 1] == labels[index + 2] == wanted:
+            times.append(index / SAMPLE_FPS)
+            wanted += 1
+    return times if len(times) == count else None
 
 
 def build_preview(store, specs, copy, bold, regular):
@@ -190,18 +201,23 @@ def build_preview(store, specs, copy, bold, regular):
     width, height = preview["size"]
     step = preview["step_seconds"]
     screens = [screen["id"] for screen in specs["screens"]]
+    downloads = tempfile.mkdtemp()
     music = None
     made = 0
     for lang in specs["languages"]:
         recording = os.path.join(store, "recordings", f"{lang}.mov")
         if not os.path.exists(recording):
             continue
-        cuts = transitions(recording, len(screens) - 1, step)
-        if cuts is None:
-            sys.exit(f"{lang}: the demo tour's {len(screens) - 1} screen changes are not in the recording")
-        print(f"{lang}: screen changes at " + ", ".join(f"{t:.2f}" for t in cuts))
-        starts = [max(0.0, cuts[0] - preview["first_step_seconds"])] + cuts
-        ends = cuts + [cuts[-1] + step]
+        # Which screen is showing when, by comparing the recording with the raw screenshots.
+        references = [raw_path(store, lang, preview["theme"], screen_id) for screen_id in screens]
+        labels = recording_labels(recording, references)
+        appear = screen_times(labels, len(screens))
+        if appear is None:
+            sys.exit(f"{lang}: the demo tour's screens are not all in the recording: {labels}")
+        print(f"{lang}: screens appear at " + ", ".join(f"{t:.1f}" for t in appear))
+        recorded = len(labels) / SAMPLE_FPS
+        starts = [max(appear[0], appear[1] - preview["first_step_seconds"])] + appear[1:]
+        ends = appear[1:] + [min(appear[-1] + step, recorded - 0.2)]
         durations = [end - start for start, end in zip(starts, ends)]
         total = sum(durations)
 
@@ -235,13 +251,13 @@ def build_preview(store, specs, copy, bold, regular):
         os.makedirs(folder, exist_ok=True)
         for with_music in (False, True):
             if with_music and music is None:
-                music = os.path.join(work, "music.mp3")
+                music = os.path.join(downloads, "music.mp3")
                 urllib.request.urlretrieve(preview["music"]["url"], music)
             audio = ["-i", music] if with_music else ["-f", "lavfi", "-t", f"{total:.3f}", "-i", f"anullsrc=r={preview['audio_rate']}:cl=stereo"]
             fade = f"afade=t=in:d=0.6,afade=t=out:st={total - 1.8:.3f}:d=1.8," if with_music else ""
             graph = (
-                f"[1:v]trim=start={starts[0]:.3f}:end={ends[-1]:.3f},setpts=PTS-STARTPTS,fps={preview['fps']},"
-                f"scale={screen_w}:{screen_h},format=rgba[screen];"
+                f"[1:v]setpts=PTS-STARTPTS,trim=start={starts[0]:.3f}:end={ends[-1]:.3f},setpts=PTS-STARTPTS,"
+                f"fps={preview['fps']},scale={screen_w}:{screen_h},format=rgba[screen];"
                 f"[2:v]format=gray,scale={screen_w}:{screen_h}[mask];"
                 f"[screen][mask]alphamerge[rounded];"
                 f"[0:v]fps={preview['fps']},format=rgba[cards];"
@@ -249,6 +265,8 @@ def build_preview(store, specs, copy, bold, regular):
                 f"[3:a]atrim=0:{total:.3f},{fade}aresample={preview['audio_rate']},aformat=channel_layouts=stereo[audio]"
             )
             name = "fenpo-preview-music.mp4" if with_music else "fenpo-preview.mp4"
+            # Constant bit rate inside Apple's 10-12 Mbps; the still parts would otherwise come out far lower.
+            kbps = preview["video_kbps"]
             run([
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
                 "-f", "concat", "-safe", "0", "-i", os.path.join(work, "cards.txt"),
@@ -256,16 +274,25 @@ def build_preview(store, specs, copy, bold, regular):
                 "-filter_complex", graph, "-map", "[video]", "-map", "[audio]",
                 "-t", f"{total:.3f}", "-r", str(preview["fps"]),
                 "-c:v", "libx264", "-profile:v", preview["profile"], "-level:v", preview["level"],
-                "-b:v", f"{preview['video_kbps']}k", "-maxrate", f"{preview['video_max_kbps']}k",
-                "-bufsize", f"{2 * preview['video_max_kbps']}k", "-pix_fmt", "yuv420p",
+                "-b:v", f"{kbps}k", "-minrate", f"{kbps}k", "-maxrate", f"{kbps}k", "-bufsize", f"{kbps}k",
+                "-x264-params", "nal-hrd=cbr", "-pix_fmt", "yuv420p",
                 "-c:a", "aac", "-b:a", f"{preview['audio_kbps']}k", "-ar", str(preview["audio_rate"]), "-ac", "2",
                 "-movflags", "+faststart", os.path.join(folder, name),
             ])
             made += 1
-        # The poster frame App Store Connect picks by default.
+        # The poster frame App Store Connect picks by default, and a frame from the middle of every
+        # step to see that each caption sits on its screen (frames/contact.jpg).
+        video = os.path.join(folder, "fenpo-preview.mp4")
         run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-ss", str(preview["poster_seconds"]),
-             "-i", os.path.join(folder, "fenpo-preview.mp4"), "-frames:v", "1", os.path.join(folder, "poster-5s.png")])
+             "-i", video, "-frames:v", "1", os.path.join(folder, "poster-5s.png")])
+        os.makedirs(os.path.join(folder, "frames"), exist_ok=True)
+        elapsed = 0.0
+        for screen_id, duration in zip(screens, durations):
+            run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-ss", f"{elapsed + duration / 2:.3f}",
+                 "-i", video, "-frames:v", "1", os.path.join(folder, "frames", f"{screen_id}.png")])
+            elapsed += duration
         shutil.rmtree(work, ignore_errors=True)
+    shutil.rmtree(downloads, ignore_errors=True)
     print(f"App previews: {made}")
 
 

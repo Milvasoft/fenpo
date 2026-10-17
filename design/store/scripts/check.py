@@ -97,7 +97,7 @@ def check_previews(store, specs, rows, problems):
                 (f"{duration:.2f} s", preview["min_seconds"] <= duration <= preview["max_seconds"]),
                 (f"{video['codec_name']} {video.get('profile', '')} L{video.get('level', 0) / 10:.1f}",
                  video["codec_name"] == "h264" and video.get("profile") == "High" and video.get("level", 99) <= 40),
-                (f"{video_kbps:.0f} kbps", 0 < video_kbps <= preview["video_max_kbps"]),
+                (f"{video_kbps:.0f} kbps", preview["video_min_kbps"] <= video_kbps <= preview["video_max_kbps"]),
                 (video.get("pix_fmt", ""), video.get("pix_fmt") == "yuv420p"),
             ]
             if audio:

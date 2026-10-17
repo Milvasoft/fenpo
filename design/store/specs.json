@@ -28,6 +28,7 @@
     "min_seconds": 15,
     "max_seconds": 30,
     "video_kbps": 11000,
+    "video_min_kbps": 10000,
     "video_max_kbps": 12000,
     "profile": "high",
     "level": "4.0",
