@@ -8,6 +8,9 @@ import UserNotifications
 /// Session state from the stored pairing, the BLE channel, the Wi-Fi channel and the transfers.
 @MainActor
 public final class LiveSession: SessionProviding {
+    /// What plays on the PC, from its `MediaState`; set by `FenpoServices`.
+    public var pcMedia: PCMedia?
+
     private let store: PairedPCStore
     private let central: BLECentral
     private let wifi: WiFiChannel
@@ -51,7 +54,8 @@ public final class LiveSession: SessionProviding {
             pcClipboardPreview: nil,
             readyPhotoCount: 0,
             transfers: transferStore.load(),
-            activeTransfers: transfers.active.values.sorted { $0.id < $1.id }
+            activeTransfers: transfers.active.values.sorted { $0.id < $1.id },
+            pcMedia: pcMedia
         )
     }
 
@@ -146,6 +150,7 @@ public final class FenpoServices {
         central.onStateChange = { [weak self] state in
             if state != .ready {
                 self?.pcBattery = nil
+                self?.clearMediaIfDisconnected()
             }
             self?.publishStatus()
         }
@@ -158,6 +163,8 @@ public final class FenpoServices {
         wifi.onStateChange = { [weak self] state in
             if state == .connected {
                 self?.channelGreeted(.wifi)
+            } else {
+                self?.clearMediaIfDisconnected()
             }
             self?.onChange?()
         }
@@ -310,6 +317,8 @@ public final class FenpoServices {
             ringer.handle(request)
         case .openURL(let message):
             openFromPC(message.url)
+        case .mediaState(let state):
+            apply(state)
         case .pcNotification(let notification):
             pcNotifications.show(notification)
         case .pcNotificationRemoved(let removed):
@@ -331,6 +340,43 @@ public final class FenpoServices {
         default:
             break
         }
+    }
+
+    /// The PC's player: shown on the PC tab while something plays or is paused. A state over
+    /// Bluetooth comes without artwork; the cover of the same track is kept until Wi-Fi sends it.
+    private func apply(_ state: Fenpo_V1_MediaState) {
+        guard state.active else {
+            session.pcMedia = nil
+            onChange?()
+            return
+        }
+        let previous = session.pcMedia
+        var artwork = state.artworkJpeg.isEmpty ? nil : state.artworkJpeg
+        if artwork == nil, previous?.title == state.title, previous?.appName == state.appName {
+            artwork = previous?.artwork
+        }
+        session.pcMedia = PCMedia(
+            appName: state.appName,
+            title: state.title,
+            artist: state.artist,
+            isPlaying: state.playing,
+            durationMs: state.durationMs,
+            positionMs: state.positionMs,
+            positionAt: state.hasPositionAt ? Date(timeIntervalSince1970: TimeInterval(state.positionAt.seconds) + TimeInterval(state.positionAt.nanos) / 1_000_000_000) : .now,
+            volumePercent: Int(state.volumePercent),
+            canPrevious: state.canPrevious,
+            canNext: state.canNext,
+            artwork: artwork
+        )
+        onChange?()
+    }
+
+    private func clearMediaIfDisconnected() {
+        guard central.state != .ready, wifi.state != .connected, session.pcMedia != nil else {
+            return
+        }
+        session.pcMedia = nil
+        onChange?()
     }
 
     private func apply(_ state: Fenpo_V1_DeviceState) {

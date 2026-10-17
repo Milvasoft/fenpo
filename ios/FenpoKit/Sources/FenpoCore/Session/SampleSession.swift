@@ -41,7 +41,19 @@ public actor SampleSession: SessionProviding {
             ],
             activeTransfers: [
                 ActiveTransfer(id: "sample", firstFileName: "IMG_4836.MOV", fileCount: 1, direction: .toPC, bytesDone: 123_731_968, totalBytes: 192_937_984),
-            ]
+            ],
+            pcMedia: PCMedia(
+                appName: "Spotify",
+                title: "Bir Derdim Var",
+                artist: "mor ve ötesi",
+                isPlaying: true,
+                durationMs: 248_000,
+                positionMs: 81_000,
+                positionAt: now,
+                volumePercent: 60,
+                canPrevious: true,
+                canNext: true
+            )
         )
     }
 }

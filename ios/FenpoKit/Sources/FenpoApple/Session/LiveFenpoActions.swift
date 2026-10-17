@@ -51,6 +51,26 @@ public final class LiveFenpoActions: FenpoActions {
         try await performPresenter(command)
     }
 
+    public nonisolated func pcMedia(_ command: PCMediaCommand) async throws {
+        try await performPCMedia(command)
+    }
+
+    private func performPCMedia(_ command: PCMediaCommand) async throws {
+        var message = Fenpo_V1_MediaCommand()
+        switch command {
+        case .toggle:
+            message.action = .toggle
+        case .next:
+            message.action = .next
+        case .previous:
+            message.action = .previous
+        case .volume(let percent):
+            message.action = .setVolume
+            message.volumePercent = UInt32(min(100, max(0, percent)))
+        }
+        try await deliver(.mediaCommand(message), what: "media command")
+    }
+
     private func performPresenter(_ command: PresenterCommand) async throws {
         let input = Fenpo_V1_PcInput.presenter(command == .next ? .next : .previous)
         try await deliver(.pcInput(input), what: "presenter step")

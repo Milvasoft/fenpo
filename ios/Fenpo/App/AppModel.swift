@@ -81,6 +81,10 @@ final class AppModel {
     /// The camera screen's state while the iPhone is the PC's webcam.
     var cameraState: CameraService.UIState?
 
+    /// The camera screen opened from Home before the PC asked: it says how to start the camera
+    /// on the PC and goes live when the PC's CameraStart arrives.
+    var isCameraReadyPresented = false
+
     /// Creates the model.
     /// - Parameters:
     ///   - session: Source of the session state.
@@ -125,10 +129,16 @@ final class AppModel {
     /// Camera screen actions.
     var cameraActions: CameraActions {
         guard let camera else {
-            return CameraActions(stop: { [weak self] in self?.cameraState = nil })
+            return CameraActions(stop: { [weak self] in
+                self?.cameraState = nil
+                self?.isCameraReadyPresented = false
+            })
         }
         return CameraActions(
-            stop: { camera.stopFromPhone() },
+            stop: { [weak self] in
+                self?.isCameraReadyPresented = false
+                camera.stopFromPhone()
+            },
             zoom: { camera.setZoom($0) },
             centerStage: { camera.setCenterStage($0) },
             flip: { camera.flip() }
@@ -243,6 +253,19 @@ final class AppModel {
             try await actions.reportFocus(active)
         } catch {
             log.info("Focus state not delivered now: \(String(describing: error))")
+        }
+    }
+
+    /// Controls what plays on the PC; only failures show a message.
+    func pcMedia(_ command: PCMediaCommand) {
+        Task {
+            do {
+                try await actions.pcMedia(command)
+            } catch let error as FenpoActionError {
+                show(Toast(message: error.localizedStringResource, isError: true))
+            } catch {
+                show(Toast(message: "action.error.generic", isError: true))
+            }
         }
     }
 

@@ -53,6 +53,13 @@ struct HomeView: View {
         }
     }
 
+    private var cameraSubtitle: Text {
+        guard let state = model.cameraState else {
+            return Text("home.camera.subtitle")
+        }
+        return state.consumer.isEmpty ? Text("camera.live") : Text("camera.live.consumer \(state.consumer)")
+    }
+
     private var quickActions: some View {
         let snapshot = model.snapshot
         return LazyVGrid(columns: [GridItem(.flexible(), spacing: 10), GridItem(.flexible(), spacing: 10)], spacing: 10) {
@@ -86,15 +93,16 @@ struct HomeView: View {
             }
             .disabled(!snapshot.isConnected)
 
-            // Phase 4: shown as in the design, not available yet.
             QuickActionTile(
                 title: "home.camera",
-                subtitle: Text("home.camera.subtitle"),
+                subtitle: cameraSubtitle,
                 icon: .camera,
                 color: .ink
             ) {
+                // The PC starts the camera; until it does, the screen says how.
+                model.isCameraReadyPresented = true
             }
-            .disabled(true)
+            .disabled(!snapshot.isConnected)
         }
     }
 }

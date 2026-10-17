@@ -67,3 +67,29 @@ struct PairingProgressTests {
         #expect(progress.state(of: .bluetooth) == .inProgress)
     }
 }
+
+struct PCMediaTests {
+    func media(playing: Bool, duration: UInt64 = 200_000, volume: Int = 50) -> PCMedia {
+        PCMedia(appName: "Spotify", title: "", artist: "", isPlaying: playing, durationMs: duration, positionMs: 10_000, positionAt: Date(timeIntervalSince1970: 1_000), volumePercent: volume, canPrevious: true, canNext: true)
+    }
+
+    @Test
+    func positionMovesOnlyWhilePlaying() {
+        let now = Date(timeIntervalSince1970: 1_005)
+        #expect(media(playing: true).position(at: now) == 15_000)
+        #expect(media(playing: false).position(at: now) == 10_000)
+        #expect(media(playing: true, duration: 12_000).position(at: now) == 12_000)
+    }
+
+    @Test
+    func volumeStepsStayInRange() {
+        #expect(media(playing: true, volume: 95).volumeStep(up: true) == 100)
+        #expect(media(playing: true, volume: 5).volumeStep(up: false) == 0)
+        #expect(media(playing: true, volume: 50).volumeStep(up: true) == 60)
+    }
+
+    @Test
+    func titleFallsBackToTheApp() {
+        #expect(media(playing: true).displayTitle == "Spotify")
+    }
+}
