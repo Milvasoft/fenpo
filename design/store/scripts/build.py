@@ -256,8 +256,10 @@ def build_preview(store, specs, copy, bold, regular):
             audio = ["-i", music] if with_music else ["-f", "lavfi", "-t", f"{total:.3f}", "-i", f"anullsrc=r={preview['audio_rate']}:cl=stereo"]
             fade = f"afade=t=in:d=0.6,afade=t=out:st={total - 1.8:.3f}:d=1.8," if with_music else ""
             graph = (
-                f"[1:v]setpts=PTS-STARTPTS,trim=start={starts[0]:.3f}:end={ends[-1]:.3f},setpts=PTS-STARTPTS,"
-                f"fps={preview['fps']},scale={screen_w}:{screen_h},format=rgba[screen];"
+                # The simulator writes a frame only when the screen changes: fill in the frames
+                # before trimming, or the screen runs ahead of the captions.
+                f"[1:v]setpts=PTS-STARTPTS,fps={preview['fps']},trim=start={starts[0]:.3f}:end={ends[-1]:.3f},"
+                f"setpts=PTS-STARTPTS,scale={screen_w}:{screen_h},format=rgba[screen];"
                 f"[2:v]format=gray,scale={screen_w}:{screen_h}[mask];"
                 f"[screen][mask]alphamerge[rounded];"
                 f"[0:v]fps={preview['fps']},format=rgba[cards];"

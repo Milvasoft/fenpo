@@ -46,9 +46,15 @@ mkdir -p "$store/recordings"
 for lang in tr en; do
     xcrun simctl terminate "$udid" "$bundle_id" >/dev/null 2>&1 || true
     sleep 1
-    xcrun simctl io "$udid" recordVideo --codec=h264 --force "$store/recordings/$lang.mov" &
+    log="$store/recordings/$lang.log"
+    xcrun simctl io "$udid" recordVideo --codec=h264 --force "$store/recordings/$lang.mov" 2>"$log" &
     recorder=$!
-    sleep 1.5
+    # The recorder can take seconds to start on a CI machine; launch once it says it has.
+    for _ in $(seq 1 60); do
+        grep -q "Recording started" "$log" && break
+        sleep 0.5
+    done
+    sleep 1
     launch "$lang" demo
     # Home for 3 s + 3.5 s, then six steps of 3.5 s each, the last screen and a margin for a slow launch.
     sleep 34
@@ -56,4 +62,4 @@ for lang in tr en; do
     wait "$recorder" || true
 done
 
-echo "Raw screens: $(find "$store/raw" -name '*.png' | wc -l | tr -d ' '), recordings: $(ls "$store/recordings" | wc -l | tr -d ' ')"
+echo "Raw screens: $(find "$store/raw" -name '*.png' | wc -l | tr -d ' '), recordings: $(ls "$store/recordings"/*.mov | wc -l | tr -d ' ')"
