@@ -24,7 +24,7 @@ Sürümler Ekim 2026 itibarıyla. Her seçimin yanında neden seçildiği ve ney
 | Tema | Sistem / Açık / Koyu. Kök `FrameworkElement.RequestedTheme` + `AppWindowTitleBar` renkleri; "Sistem" seçiliyken `UISettings.ColorValuesChanged` dinlenir. Ana pencere, tepsi paneli ve Ada aynı servisten beslenir | WinUI 3'te `Application.RequestedTheme` çalışırken değiştirilemiyor, kök eleman üzerinden değiştirmek anında çalışıyor |
 | Dil | Sistem dili / Türkçe / English. `ApplicationLanguages.PrimaryLanguageOverride` + `.resw` kaynakları; değişince "Şimdi yeniden başlat" bilgi çubuğu | Kaynaklar açılışta yükleniyor; yeniden başlatma en güvenilir yol. Windows bildirimleri de aynı dili kullanır |
 | Sanal kamera | `MFCreateVirtualCamera` + .NET 10 Native AOT COM medya kaynağı (smourier/VCamNetSample, MIT, referans) | C#'ta kalıyoruz; Native AOT, Frame Server sürecine .NET çalışma zamanı yüklemiyor |
-| Video çözme | Media Foundation (donanım H.264/HEVC) | GPU hızlandırmalı, ek kütüphane yok |
+| Video çözme | Media Foundation'ın H.264 çözücüsü (MFT, DirectNAot ile), kendi swap chain'imize BGRA | Kamera önizlemesi, ekran yansıtma ve Fenpo Kamera aynı çözücüyü kullanır. Windows'un medya oynatıcısı (`MediaPlayer`, `MediaStreamSource`) canlı akışta birkaç saniye sonra yalnızca anahtar kareleri gösterdiği için bırakıldı (17 Ekim) |
 | Ekran yansıtma | iOS ReplayKit yayın uzantısı → Fenpo veri kanalı. Alternatif: UxPlay (GPLv3) ayrı süreç | ReplayKit yolu MIT kalıyor ve App Store uyumlu. UxPlay daha "yerel" (Denetim Merkezi > Ekran Yansıtma) ama lisansı ayrı tutulmalı |
 | Test | xUnit v3, NSubstitute | ANCS/MAP ayrıştırıcıları kayıtlı bayt dizileriyle test edilir |
 | Kod stili | Milvaion'un `.editorconfig`'i (repoda) | Milvasoft projeleriyle aynı stil |
