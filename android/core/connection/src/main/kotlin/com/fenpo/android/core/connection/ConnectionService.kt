@@ -249,6 +249,8 @@ class ConnectionService : Service() {
                         wifiLink?.retryNow()
                     },
                     onOther = messenger::deliver,
+                    // The PC has a file or a large clipboard item and waits 10 s for Wi-Fi.
+                    onWifiWanted = { wifiLink?.reconnectNow() },
                 )
             status.update { it.copy(bluetooth = LinkState.CONNECTING) }
             try {

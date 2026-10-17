@@ -54,9 +54,23 @@ internal class WifiLink(
     private val discovery = PcDiscovery(context)
     private val retry = Channel<Unit>(Channel.CONFLATED)
 
+    @Volatile private var current: EnvelopeConnection? = null
+
     /** Ask for a new attempt now, e.g. because the PC sent new addresses over Bluetooth. */
     fun retryNow() {
         retry.trySend(Unit)
+    }
+
+    /**
+     * The PC says it has no Wi-Fi channel to this phone (`WifiWanted`): a connection the phone
+     * still holds is dead on the PC's side, so drop it and connect again at once.
+     */
+    fun reconnectNow() {
+        current?.let {
+            Log.i(TAG, "The PC lost the Wi-Fi link; reconnecting")
+            it.close()
+        }
+        retryNow()
     }
 
     /** Runs until cancelled. */
@@ -95,6 +109,7 @@ internal class WifiLink(
                 status.update { it.copy(wifi = LinkState.OFF) }
                 return Outcome.UNREACHABLE
             }
+        current = connection
         val pin = pc.certificateSha256.decodeHex()
         val session =
             PcSession(
@@ -135,6 +150,7 @@ internal class WifiLink(
             Log.i(TAG, "Wi-Fi link ended: ${e.message}")
             return Outcome.ENDED
         } finally {
+            current = null
             onSession(null)
             connection.close()
             status.update { it.copy(wifi = LinkState.OFF) }
@@ -246,6 +262,7 @@ internal class WifiLink(
     private companion object {
         const val TAG = "FenpoWifi"
         val MIN_BACKOFF = 5.seconds
+
         // A PC that restarts is back within seconds; a connect attempt on the local network is cheap.
         val MAX_BACKOFF = 30.seconds
         val DISCOVERY_TIMEOUT = 8.seconds

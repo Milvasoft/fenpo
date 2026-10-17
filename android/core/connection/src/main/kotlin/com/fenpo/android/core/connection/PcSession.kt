@@ -22,6 +22,8 @@ enum class LinkPath { BLUETOOTH, WIFI }
  * @param onAddresses Called with the PC's current data channel addresses.
  * @param openData Opens a file transfer data connection to the PC on this path (Wi-Fi only);
  *   the argument is `TransferAccept.data_port`, 0 for the control port.
+ * @param onWifiWanted Called when the PC needs the Wi-Fi channel for something too large for
+ *   Bluetooth (`WifiWanted`, sent only on Bluetooth), with its reason.
  */
 internal class PcSession(
     val path: LinkPath,
@@ -30,6 +32,7 @@ internal class PcSession(
     private val onAddresses: suspend (List<String>) -> Unit,
     private val onOther: (Envelope, LinkPath) -> Unit = { _, _ -> },
     val openData: (suspend (Int) -> DataConnection)? = null,
+    private val onWifiWanted: (String) -> Unit = {},
 ) {
     private val hello = CompletableDeferred<Hello>()
 
@@ -68,6 +71,11 @@ internal class PcSession(
 
             is Envelope.Body.PcStatus -> {
                 status.update { it.copy(pcStatus = body.value) }
+            }
+
+            is Envelope.Body.WifiWanted -> {
+                Log.i(TAG, "Wi-Fi wanted by PC for ${body.value.reason}")
+                onWifiWanted(body.value.reason)
             }
 
             is Envelope.Body.DeviceState -> {

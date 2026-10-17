@@ -9,6 +9,7 @@ import com.fenpo.protocol.v1.Hello
 import com.fenpo.protocol.v1.PcStatus
 import com.fenpo.protocol.v1.Ping
 import com.fenpo.protocol.v1.Pong
+import com.fenpo.protocol.v1.WifiWanted
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,5 +67,18 @@ class PcSessionTest {
 
             assertEquals(pcStatus, status.snapshot.value.pcStatus)
             assertEquals(listOf(listOf("10.0.0.5:52817")), addresses)
+        }
+
+    @Test
+    fun wifiWantedAsksForTheWifiChannelWithoutAnAnswer() =
+        runTest {
+            val reasons = mutableListOf<String>()
+            val ble =
+                PcSession(LinkPath.BLUETOOTH, status, { _, _ -> 1L }, {}, onWifiWanted = { reasons += it })
+
+            ble.onEnvelope(Envelope(id = 3, body = Envelope.Body.WifiWanted(WifiWanted(reason = "file"))))
+
+            assertEquals(listOf("file"), reasons)
+            assertEquals(emptyList(), sent)
         }
 }
