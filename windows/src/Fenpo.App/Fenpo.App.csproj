@@ -77,6 +77,8 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
     <PackageReference Include="QRCoder" />
+    <!-- Media Foundation's H.264 decoder for the live camera preview and screen mirror (as in Fenpo.VirtualCamera). -->
+    <PackageReference Include="DirectNAot.Extensions" />
   </ItemGroup>
 
   <ItemGroup>

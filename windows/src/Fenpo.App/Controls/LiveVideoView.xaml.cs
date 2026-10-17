@@ -3,37 +3,30 @@ using System.Runtime.InteropServices;
 using Fenpo.App.Helpers;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Graphics.DirectX.Direct3D11;
-using Windows.Media.Playback;
 
 namespace Fenpo.App.Controls;
 
 /// <summary>
-/// Shows a <see cref="LiveH264Player"/>'s picture. The player decodes; every frame it has ready is copied into this
-/// control's own swap chain without waiting, and the compositor shows the newest at its next refresh.
-/// MediaPlayerElement drew the same frames unevenly (the picture froze and jumped while the phone's frames came on
-/// time), while Fenpo Kamera, which hands frames out itself, stayed smooth. The picture keeps its aspect ratio.
+/// Shows a <see cref="LiveH264Player"/>'s pictures on this control's own swap chain: each decoded picture is copied
+/// into the back buffer and presented right away, as Fenpo Kamera hands its frames to the apps that use it. The
+/// picture keeps its aspect ratio.
 /// </summary>
 public sealed unsafe partial class LiveVideoView : UserControl
 {
-    private const uint PresentDoNotWait = 0x8; // DXGI_PRESENT_DO_NOT_WAIT
-    private const int WasStillDrawing = unchecked((int)0x887A000A); // DXGI_ERROR_WAS_STILL_DRAWING
-
     private static readonly Guid IidDxgiDevice = new("54ec77fa-1377-44e6-8c32-88fd5f44c84c");
     private static readonly Guid IidDxgiFactory2 = new("50c83a1c-e072-4c48-87b0-3630fa36a6d0");
-    private static readonly Guid IidDxgiSurface = new("cafcb56c-6ac3-4889-bf47-9e23bbd260ec");
+    private static readonly Guid IidTexture2D = new("6f15aaf2-d208-4e89-9ab4-489535d34f9c");
     private static readonly Guid IidSwapChainPanelNative = new("63aad0b8-7c24-40ff-85a8-640d944cc325");
 
     private readonly ILogger<LiveVideoView> _logger = App.GetService<ILogger<LiveVideoView>>();
     private readonly Lock _gate = new();
-    private readonly Stopwatch _window = Stopwatch.StartNew();
-    private readonly Stopwatch _sinceFrame = new();
-    private MediaPlayer? _player;
+    private LiveH264Player? _player;
     private nint _device;
+    private nint _context;
     private nint _swapChain;
-    private IDirect3DSurface? _surface;
-    private int _frames;
-    private TimeSpan _longestGap;
+    private nint _backBuffer;
+    private uint _width;
+    private uint _height;
     private int _failures;
 
     /// <summary>
@@ -46,7 +39,7 @@ public sealed unsafe partial class LiveVideoView : UserControl
     }
 
     /// <summary>
-    /// Shows a player's picture, or nothing. Called on the UI thread.
+    /// Shows a player's pictures, or nothing. Called on the UI thread.
     /// </summary>
     /// <param name="player">The player, or null to clear.</param>
     public void Show(LiveH264Player? player)
@@ -76,77 +69,52 @@ public sealed unsafe partial class LiveVideoView : UserControl
 
         lock (_gate)
         {
-            _player = player.Player;
+            _player = player;
         }
 
-        player.Player.VideoFrameAvailable += OnVideoFrameAvailable;
+        player.FrameReady += OnFrameReady;
     }
 
-    // On the player's thread, for every frame that is due.
-    private void OnVideoFrameAvailable(MediaPlayer sender, object args)
+    // On the player's thread, for every decoded picture.
+    private void OnFrameReady(ReadOnlySpan<byte> bgra)
     {
         lock (_gate)
         {
-            if (!ReferenceEquals(sender, _player) || _surface is null)
+            if (_backBuffer == 0 || bgra.Length < _width * _height * 4)
             {
                 return;
             }
 
             try
             {
-                sender.CopyFrameToVideoSurface(_surface);
-
-                // Never wait here: this runs on the player's thread, and a callback that waits for the screen's refresh
-                // looks like a slow renderer to Media Foundation, which then drops every frame but the key frames (the
-                // picture showed one or two frames a second). The compositor shows the newest frame at its refresh.
-                var result = ((delegate* unmanaged[Stdcall]<nint, uint, uint, int>)Slot(_swapChain, 8))(_swapChain, 0, PresentDoNotWait);
-
-                if (result == WasStillDrawing)
+                fixed (byte* pixels = bgra)
                 {
-                    return;
+                    // ID3D11DeviceContext::UpdateSubresource, then IDXGISwapChain::Present at the next refresh.
+                    ((delegate* unmanaged[Stdcall]<nint, nint, uint, nint, byte*, uint, uint, void>)Slot(_context, 48))(_context, _backBuffer, 0, 0, pixels, _width * 4, 0);
                 }
 
-                Marshal.ThrowExceptionForHR(result);
-                Measure();
+                Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, uint, uint, int>)Slot(_swapChain, 8))(_swapChain, 1, 0));
             }
-            catch (Exception exception) when (exception is COMException or ObjectDisposedException or InvalidOperationException)
+            catch (COMException exception)
             {
                 if (_failures++ % 100 == 0)
                 {
-                    _logger.LogWarning("Showing a live frame failed ({Count} so far): {Reason}", _failures, exception.Message);
+                    _logger.LogWarning("Showing a live picture failed ({Count} so far): {Reason}", _failures, exception.Message);
                 }
             }
-        }
-    }
-
-    // Every few seconds: how many frames went to the screen and the longest wait between two.
-    private void Measure()
-    {
-        var gap = _sinceFrame.IsRunning ? _sinceFrame.Elapsed : TimeSpan.Zero;
-        _sinceFrame.Restart();
-        _longestGap = gap > _longestGap ? gap : _longestGap;
-        _frames++;
-
-        if (_window.Elapsed >= TimeSpan.FromSeconds(3))
-        {
-            _logger.LogInformation("Live picture: {Fps:F1} frames/s shown, longest gap {Gap} ms", _frames / _window.Elapsed.TotalSeconds, (int)_longestGap.TotalMilliseconds);
-            _frames = 0;
-            _longestGap = TimeSpan.Zero;
-            _window.Restart();
         }
     }
 
     private void CreateSwapChain(uint width, uint height)
     {
-        // BGRA for the swap chain, video support for the player's copies.
-        Marshal.ThrowExceptionForHR(D3D11CreateDevice(0, 1, 0, 0x20 | 0x800, 0, 0, 7, out _device, out _, out var context));
-        Marshal.Release(context);
+        // BGRA for the swap chain.
+        Marshal.ThrowExceptionForHR(D3D11CreateDevice(0, 1, 0, 0x20, 0, 0, 7, out var device, out _, out var context));
 
-        nint dxgiDevice = 0, adapter = 0, factory = 0, buffer = 0, inspectable = 0, panel = 0;
+        nint dxgiDevice = 0, adapter = 0, factory = 0, backBuffer = 0, panel = 0, swapChain = 0;
 
         try
         {
-            Marshal.ThrowExceptionForHR(Marshal.QueryInterface(_device, in IidDxgiDevice, out dxgiDevice));
+            Marshal.ThrowExceptionForHR(Marshal.QueryInterface(device, in IidDxgiDevice, out dxgiDevice));
             Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, nint*, int>)Slot(dxgiDevice, 7))(dxgiDevice, &adapter));
             var iidFactory = IidDxgiFactory2;
             Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, Guid*, nint*, int>)Slot(adapter, 6))(adapter, &iidFactory, &factory));
@@ -161,29 +129,27 @@ public sealed unsafe partial class LiveVideoView : UserControl
                 BufferCount = 2,
                 Scaling = 0, // DXGI_SCALING_STRETCH
                 SwapEffect = 3, // DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
-                AlphaMode = 3, // DXGI_ALPHA_MODE_IGNORE: every frame covers the whole buffer
+                AlphaMode = 3, // DXGI_ALPHA_MODE_IGNORE: every picture covers the whole buffer
             };
-            nint swapChain;
-            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, nint, SwapChainDescription*, nint, nint*, int>)Slot(factory, 24))(factory, _device, &description, 0, &swapChain));
-            _swapChain = swapChain;
+            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, nint, SwapChainDescription*, nint, nint*, int>)Slot(factory, 24))(factory, device, &description, 0, &swapChain));
 
             // With the flip model, buffer 0 is always the one to draw into next.
-            var iidSurface = IidDxgiSurface;
-            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, uint, Guid*, nint*, int>)Slot(_swapChain, 9))(_swapChain, 0, &iidSurface, &buffer));
-            Marshal.ThrowExceptionForHR(CreateDirect3D11SurfaceFromDXGISurface(buffer, out inspectable));
-            var surface = WinRT.MarshalInterface<IDirect3DSurface>.FromAbi(inspectable);
+            var iidTexture = IidTexture2D;
+            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, uint, Guid*, nint*, int>)Slot(swapChain, 9))(swapChain, 0, &iidTexture, &backBuffer));
 
             Marshal.ThrowExceptionForHR(Marshal.QueryInterface(((WinRT.IWinRTObject)Panel).NativeObject.ThisPtr, in IidSwapChainPanelNative, out panel));
-            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, nint, int>)Slot(panel, 3))(panel, _swapChain));
+            Marshal.ThrowExceptionForHR(((delegate* unmanaged[Stdcall]<nint, nint, int>)Slot(panel, 3))(panel, swapChain));
 
             lock (_gate)
             {
-                _surface = surface;
+                (_device, _context, _swapChain, _backBuffer, _width, _height) = (device, context, swapChain, backBuffer, width, height);
             }
+
+            (device, context, swapChain, backBuffer) = (0, 0, 0, 0);
         }
         finally
         {
-            foreach (var pointer in (ReadOnlySpan<nint>)[dxgiDevice, adapter, factory, buffer, inspectable, panel])
+            foreach (var pointer in (ReadOnlySpan<nint>)[dxgiDevice, adapter, factory, panel, backBuffer, swapChain, context, device])
             {
                 if (pointer != 0)
                 {
@@ -195,27 +161,18 @@ public sealed unsafe partial class LiveVideoView : UserControl
 
     private void Release()
     {
-        MediaPlayer? player;
-        IDirect3DSurface? surface;
-        nint swapChain, device;
+        LiveH264Player? player;
+        nint device, context, swapChain, backBuffer;
 
         lock (_gate)
         {
-            (player, surface, swapChain, device) = (_player, _surface, _swapChain, _device);
-            (_player, _surface, _swapChain, _device) = (null, null, 0, 0);
-            _sinceFrame.Reset();
+            (player, device, context, swapChain, backBuffer) = (_player, _device, _context, _swapChain, _backBuffer);
+            (_player, _device, _context, _swapChain, _backBuffer) = (null, 0, 0, 0, 0);
         }
 
-        // The page may have disposed the player already.
-        try
+        if (player is not null)
         {
-            if (player is not null)
-            {
-                player.VideoFrameAvailable -= OnVideoFrameAvailable;
-            }
-        }
-        catch (Exception exception) when (exception is ObjectDisposedException or COMException)
-        {
+            player.FrameReady -= OnFrameReady;
         }
 
         if (swapChain != 0 && Marshal.QueryInterface(((WinRT.IWinRTObject)Panel).NativeObject.ThisPtr, in IidSwapChainPanelNative, out var panel) == 0)
@@ -224,16 +181,12 @@ public sealed unsafe partial class LiveVideoView : UserControl
             Marshal.Release(panel);
         }
 
-        surface?.Dispose();
-
-        if (swapChain != 0)
+        foreach (var pointer in (ReadOnlySpan<nint>)[backBuffer, swapChain, context, device])
         {
-            Marshal.Release(swapChain);
-        }
-
-        if (device != 0)
-        {
-            Marshal.Release(device);
+            if (pointer != 0)
+            {
+                Marshal.Release(pointer);
+            }
         }
     }
 
@@ -242,9 +195,6 @@ public sealed unsafe partial class LiveVideoView : UserControl
 
     [LibraryImport("d3d11.dll")]
     private static partial int D3D11CreateDevice(nint adapter, int driverType, nint software, uint flags, nint featureLevels, uint featureLevelCount, uint sdkVersion, out nint device, out int featureLevel, out nint context);
-
-    [LibraryImport("d3d11.dll")]
-    private static partial int CreateDirect3D11SurfaceFromDXGISurface(nint dxgiSurface, out nint graphicsSurface);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct SwapChainDescription
