@@ -1,14 +1,14 @@
 # Fenpo for Android: Google Play gönderimi
 
-Taslak, 17 Ekim 2026. Buğra'nın onayını bekliyor. Mağaza metinleri, grafikler, sürüm ve imzalama, politika denetimi
+Taslak, 17 Ekim 2026. Kararlar verildi (§0); metinler Buğra'nın son okumasını bekliyor. Mağaza metinleri, grafikler, sürüm ve imzalama, politika denetimi
 ve Data safety yanıtları burada; Play Console'a girilecek her şey bu belgeden kopyalanır.
 
 ## 0. Önce Buğra'nın vermesi gereken kararlar
 
 | Konu | Neden | Öneri |
 |---|---|---|
-| Geliştirici hesabı türü | Kasım 2023'ten sonra açılan **kişisel** hesaplar üretime çıkmadan önce **12 test kullanıcısıyla 14 gün kapalı test** yapmak zorunda. **Kuruluş** hesabı (Milvasoft, D-U-N-S numarası gerekir) bunu atlar. | Milvasoft için D-U-N-S varsa kuruluş hesabı. Yoksa kişisel hesapla kapalı teste hemen başla; 14 gün o sırada işler. |
-| SMS izinleri | `READ_SMS`, `RECEIVE_SMS`, `SEND_SMS` kısıtlı izinler. "Cihazlar arası SMS eşitleme" istisnası Fenpo'ya uyuyor ama inceleme "başka yol yoksa" diyor ve MAP (Bluetooth) çoğu telefonda başka bir yol. Reddedilirse tüm sürüm bekler. | **İlk sürümü SMS izinleri olmadan çıkar** (§4.1), istisna başvurusunu ayrı bir sonraki güncellemede yap. |
+| **Karar: kuruluş hesabı (Milvasoft).** Geliştirici hesabı türü | Kasım 2023'ten sonra açılan **kişisel** hesaplar üretime çıkmadan önce **12 test kullanıcısıyla 14 gün kapalı test** yapmak zorunda. **Kuruluş** hesabı (Milvasoft, D-U-N-S numarası gerekir) bunu atlar. | Kapalı test zorunluluğu yok; doğrudan üretime (ya da isteğe bağlı kısa bir iç teste) gönderilebilir. |
+| **Karar: ilk sürüm SMS'le çıkıyor (Buğra).** SMS izinleri | `READ_SMS`, `RECEIVE_SMS`, `SEND_SMS` kısıtlı izinler. "Cihazlar arası SMS eşitleme" istisnası Fenpo'ya uyuyor ama inceleme "başka yol yoksa" diyor ve MAP (Bluetooth) çoğu telefonda başka bir yol. Reddedilirse tüm sürüm bekler. | İzin Beyan Formu "Cihazlar arası SMS eşitleme" istisnasıyla doldurulur (§4.7), video hazırlanır. Reddedilirse SMS izinleri `tools:node="remove"` ile çıkarılıp yeniden gönderilir; özellik kendiliğinden kapanır. |
 | Fotoğraf ve video izinleri | `READ_MEDIA_IMAGES/VIDEO` için beyan gerekiyor; onay "fotoğraf seçici yetmiyorsa" veriliyor. | Beyanla gönder (§4.3). Reddedilirse bu iki özellik kapatılıp yeniden gönderilir. |
 | Sürüm numarası | Play'deki ilk sürüm. | `versionName` 1.0.0, `versionCode` 1. Her yüklemede `versionCode` artar. |
 
@@ -125,8 +125,7 @@ Ekran görüntüleri uygulamanın gerçek ekranları ama örnek verilerle çizil
 ürün adları (Teams, Meet) yok; kamera önizlemesi bir renk geçişi, kimsenin fotoğrafı değil.
 
 Yeniden üretmek için: `FENPO_PLAYSHOTS=1 ./gradlew recordRoborazziDebug --rerun-tasks`, sonra simge dışındaki PNG'lerin
-alfa kanalını kaldır (Play ekran görüntülerinde ve öne çıkan grafikte saydamlık kabul etmiyor). SMS ilk sürümde
-çıkarılırsa 07 Ayarlar'daki "Mesajları eşitle" satırı da gizlenmeli ve görüntü yeniden alınmalı.
+alfa kanalını kaldır (Play ekran görüntülerinde ve öne çıkan grafikte saydamlık kabul etmiyor).
 
 ## 3. Sürüm ve imzalama
 
@@ -157,7 +156,7 @@ alfa kanalını kaldır (Play ekran görüntülerinde ve öne çıkan grafikte s
 
 | # | Konu | Fenpo'da | Gerekli olan | Öneri |
 |---|---|---|---|---|
-| 4.1 | SMS izinleri (`READ_SMS`, `RECEIVE_SMS`, `SEND_SMS`) | MAP'i olmayan telefonlarda SMS'leri PC'de okumak ve yanıtlamak (`messages.proto`). | Varsayılan SMS uygulaması olmayanlar için yalnızca istisnayla; "Cihazlar arası SMS ve arama eşitleme" istisnası bu izinlerin hepsini kapsıyor. İzin Beyan Formu ve video gerekiyor; "başka yol yoksa" şartı var. | İlk sürümde izinleri çıkar: `app/src/main/AndroidManifest.xml` içine `tools:node="remove"` ile üç satır. Özellik kendiliğinden kapanır (Hello'da `MESSAGES` sunulmaz; MAP'li telefonlarda PC zaten Bluetooth'la okur). Sonraki güncellemede beyanla geri ekle. |
+| 4.1 | SMS izinleri (`READ_SMS`, `RECEIVE_SMS`, `SEND_SMS`) | MAP'i olmayan telefonlarda SMS'leri PC'de okumak ve yanıtlamak (`messages.proto`). | Varsayılan SMS uygulaması olmayanlar için yalnızca istisnayla; "Cihazlar arası SMS ve arama eşitleme" istisnası bu izinlerin hepsini kapsıyor. İzin Beyan Formu ve video gerekiyor; "başka yol yoksa" şartı var. | İlk sürüm SMS'le gidiyor: beyan §4.7'de. Gerekçe: bazı Android telefonları Bluetooth MAP'i hiç sunmuyor ya da mesaj göndermeden sunuyor (Fenpo bunu kendi telefonlarımızda görmedi; S10+ MAP'i destekliyor); o telefonlarda SMS'i PC'ye taşımanın başka yolu yok. Fenpo varsayılan SMS uygulaması olmaz; mesajlar yalnızca kullanıcının eşleştirdiği PC'ye, şifreli gider. Reddedilirse izinleri `tools:node="remove"` ile çıkar; özellik kendiliğinden kapanır. |
 | 4.2 | Erişilebilirlik hizmeti ("Fenpo: PC'den kontrol") | `isAccessibilityTool="false"`; yalnızca ekran paylaşılırken PC'nin dokunma, kaydırma ve yazma girdisini telefonda uygular. | Erişilebilirlik API beyanı (Play Console, App content), **uygulama içinde göze çarpan açıklama ve onay** (kullanıcı ayarlara gitmeden önce), gizlilik politikasında anlatım, beyan videosu. | Açıklama ve onay ekranı bu dalda eklendi (`MirrorControlDisclosureActivity`). Beyan metni §4.7'de. Gizlilik politikasına eklenmesi gerekiyor (§6). |
 | 4.3 | Fotoğraf ve video (`READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_VISUAL_USER_SELECTED`) | PC'den fotoğraf arşivine göz atmak ve yeni ekran görüntülerini kendiliğinden göndermek. İkisi de seçiciyle yapılamaz. | Beyan formu: sistem fotoğraf seçicisinin neden yetmediği. İzni vermeyen için çalışan bir yol. | Beyan: "PC'den telefonun tüm fotoğraf arşivine göz atılıyor ve yeni ekran görüntüleri arka planda PC'ye gönderiliyor; seçici, kullanıcı telefonun başında değilken çalışamaz." İzin verilmezse PC "erişim yok" der, ekran görüntüsü anahtarı kapalı kalır; Android 14+ kısmi izin `LIMITED` olarak destekleniyor. |
 | 4.4 | Ön plan servisleri | `connectedDevice` (bağlantı), `mediaProjection` (ekran), `camera` + `microphone` (web kamerası). | Play Console > App content > Foreground service permissions: her tür için açıklama ve kısa video. | Açıklamalar §4.7'de. Videolar: eşleşmiş telefonla PC'ye dosya gönderimi (connectedDevice), PC'den ekran yansıtma (mediaProjection), PC'de web kamerası (camera, microphone). |
@@ -165,6 +164,15 @@ alfa kanalını kaldır (Play ekran görüntülerinde ve öne çıkan grafikte s
 | 4.6 | Diğer | targetSdk 37 (Play şartı 36+), `QUERY_ALL_PACKAGES` yok (yalnızca başlatıcı uygulamaları için `<queries>`), `BLUETOOTH_SCAN` `neverForLocation` ile (konum için kullanılmıyor), konum izni yok, `USE_FULL_SCREEN_INTENT` yok. | — | Uygun. |
 
 ### 4.7 Beyan metinleri (Play Console'a kopyalanacak)
+
+**SMS (Permissions Declaration Form, EN)** — Core functionality: *Cross-device synchronization or transfer of SMS or
+calls.* Fenpo links the user's phone to their own Windows PC. With "Sync messages" turned on, the user reads their
+text messages on the PC and replies from the PC; the phone sends the reply. READ_SMS lists the conversations,
+RECEIVE_SMS shows new messages on the PC as they arrive, SEND_SMS sends the user's replies. Messages go only to the PC
+the user paired with a QR code, end-to-end encrypted over Bluetooth or the local network; there is no server and
+nothing is collected. Fenpo is not the default SMS app. Some Android phones do not offer Bluetooth MAP (or offer it
+without sending), so there is no alternative way to bring texts to the PC. Video: turn on "Sync messages", grant the
+SMS permission, receive a text and see it on the PC, reply on the PC and see it sent from the phone.
 
 **Erişilebilirlik (EN):** Fenpo lets the user control their own phone from their paired Windows PC while they share the
 phone's screen with that PC. The accessibility service performs the taps, swipes and typing the user makes on the PC.
@@ -223,10 +231,10 @@ satın alma (Play Billing) olur. Kod tarafında hazırlık yapıldı, ödeme kod
 
 ## 8. Gönderim adımları
 
-1. Hesap türüne karar ver (§0); kişiselse kapalı test kanalı aç, 12 test kullanıcısını ekle.
+1. Kuruluş hesabıyla (Milvasoft) uygulamayı oluştur.
 2. Yükleme anahtarını oluştur (§3), `./gradlew :app:bundleRelease`.
 3. Play Console: uygulama oluştur (ücretsiz, uygulama), Play App Signing'i kabul et, AAB'yi yükle.
 4. Mağaza sayfası: §1 metinleri, §2 grafikler.
 5. App content: gizlilik politikası, reklam yok, Data safety (§5), hedef kitle, içerik derecelendirmesi, erişilebilirlik ve
-   ön plan servisi beyanları (§4.7), fotoğraf beyanı (§4.3), SMS (§4.1 kararına göre).
+   ön plan servisi beyanları (§4.7), fotoğraf beyanı (§4.3), SMS İzin Beyan Formu (§4.7).
 6. İncelemeye gönder.
