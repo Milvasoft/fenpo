@@ -154,4 +154,4 @@ Kararlaşmış her şey [DECISIONS.md](DECISIONS.md) içinde. Açık kalanlar:
 2. **Android'in en düşük sürümü:** Android oturumu önerir.
 3. **HFP (aramalar PC'den):** kararlı Windows 11'de deneme ve Microsoft'a `phonelinetransportdevice_v1` LAF talebi (DECISIONS #34).
 4. **Antivirüs yanlış alarmları:** S5'te Windows Defender kendi derlediğimiz TLS sunucusunu `Backdoor:Win32/Farfli!pz` sandı. Yayından önce kod imzalama, her sürümü Microsoft'a önceden gönderme ve CI'da Defender taraması gerekiyor.
-5. **Dağıtım:** Microsoft Store kısıtlı yetenekleri (HFP için `phoneLineTransportManagement`) büyük ihtimalle onaylamaz. Öneri: GitHub Releases üzerinden imzalı MSIX + winget. Store'a sonra, aramasız bir sürümle girilebilir.
+5. **Dağıtım:** Karar verildi (DECISIONS #41): Microsoft Store ve GitHub Releases + winget birlikte. GitHub sürümü için kod imzalama sertifikası seçilecek (öneri: Certum açık kaynak sertifikası).
