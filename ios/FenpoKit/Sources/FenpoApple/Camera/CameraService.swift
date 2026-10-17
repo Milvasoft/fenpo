@@ -120,6 +120,8 @@ public final class CameraService {
             return
         }
         pipeline?.setZoom(ratio)
+        // Switching lenses inside the camera changes the picture: start the next frame afresh.
+        encoder?.requestKeyFrame()
         current.zoom = ratio
         state = current
         sendSettingsChange()
@@ -154,6 +156,7 @@ public final class CameraService {
             return
         }
         pipeline?.setCenterStage(isOn)
+        encoder?.requestKeyFrame()
         current.centerStage = isOn
         state = current
         sendSettingsChange()
@@ -241,6 +244,9 @@ public final class CameraService {
             self.encoder = encoder
             pipeline.setFrameHandler { image, time in
                 encoder.encode(image, at: time)
+            }
+            pipeline.setReconfiguredHandler {
+                encoder.requestKeyFrame()
             }
             // The rotation coordinator follows the phone's physical orientation, also while the
             // interface stays in portrait.

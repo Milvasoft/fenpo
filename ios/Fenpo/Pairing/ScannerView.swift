@@ -127,7 +127,8 @@ struct GlassCircleButton: View {
                 .font(.title3)
                 .foregroundStyle(.textPrimary)
                 .frame(width: 44, height: 44)
-                .fenpoGlass(in: .circle)
+                .fenpoGlass(in: .circle, interactive: false)
+                .contentShape(.circle)
                 .opacity(isEnabled ? 1 : 0.4)
         }
         .buttonStyle(.plain)
