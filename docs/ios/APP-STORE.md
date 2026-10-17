@@ -8,7 +8,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 
 | Konu | Öneri |
 |---|---|
-| Sürüm | `ios/Config/Base.xcconfig` → `MARKETING_VERSION` şu an `0.1.0`. İlk mağaza sürümü için `1.0.0` öneririm; söylersen değiştirip TestFlight'a yeni yapı gönderirim. |
+| Sürüm | `MARKETING_VERSION` = `1.0.0` (`ios/Config/Base.xcconfig`), App Store Connect'teki sürümle aynı. |
 | Yapı | En son TestFlight yapısı (şu an 72'den sonrakiler). App Store Connect'te sürüme "Build" olarak seçilir. |
 | Platformlar | Sadece iPhone (`TARGETED_DEVICE_FAMILY = 1`), iPad ekran görüntüsü gerekmez. App Store Connect › Fiyat ve Kullanılabilirlik'te **Apple silikonlu Mac'lerde kullanılabilir** ve **Apple Vision Pro** seçeneklerini **kapat**: AccessorySetupKit ve arka plan Bluetooth'u oralarda çalışmaz. |
 | Demo videosu | İnceleyicinin Windows PC'si yok. 2–3 dakikalık bir video gerek (aşağıda "İnceleme notları"); YouTube "liste dışı" ya da Drive bağlantısı yeterli. |
@@ -18,7 +18,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 
 | Alan | Değer |
 |---|---|
-| Ad | Fenpo |
+| Ad | Fenpo Link (App Store Connect kaydındaki ad; cihazda görünen ad Fenpo) |
 | Paket kimliği | com.fenpo.app |
 | SKU | fenpo-ios |
 | Birincil dil | Türkçe (İngilizce de eklenecek) |
@@ -72,7 +72,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 > GİZLİLİK
 > Fenpo'nun sunucusu ve hesabı yok. Veriler yalnızca iPhone'unla eşleştirdiğin bilgisayar arasında, Bluetooth ve yerel ağ üzerinden şifreli olarak gider. Hiçbir veri toplanmaz.
 >
-> Gereken: Windows 10 ya da 11 çalıştıran, Bluetooth'lu bir bilgisayarda Fenpo for Windows (Microsoft Store ya da GitHub). Fenpo açık kaynaklıdır.
+> Gereken: Windows 11 (22H2 ya da sonrası) çalıştıran, Bluetooth'lu bir bilgisayarda Fenpo for Windows (Microsoft Store ya da GitHub). Fenpo açık kaynaklıdır.
 
 **Anahtar kelimeler** (100 sınırı, 99):
 `windows,bilgisayar,pc,pano,dosya aktarımı,web kamerası,kumanda,sunum,bildirim,ekran,yansıtma,eşitle`
@@ -118,7 +118,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 > PRIVACY
 > Fenpo has no servers and no accounts. Data moves only between your iPhone and the PC you paired, encrypted, over Bluetooth and your local network. Nothing is collected.
 >
-> Requires Fenpo for Windows (Microsoft Store or GitHub) on a Windows 10 or 11 PC with Bluetooth. Fenpo is open source.
+> Requires Fenpo for Windows (Microsoft Store or GitHub) on a Windows 11 (22H2 or later) PC with Bluetooth. Fenpo is open source.
 
 **Keywords** (100, 91):
 `windows,pc,clipboard,file transfer,webcam,remote,presenter,notifications,screen,mirror,sync`
