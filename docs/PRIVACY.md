@@ -17,25 +17,27 @@ store, sell or share any personal data, and we cannot see what you send between 
 To do what you ask of it, Fenpo moves data directly between your phone and the PC you paired it with, over Bluetooth
 and your local network (Wi‑Fi or USB). Depending on the features you turn on, this can include notifications,
 messages, call information, contacts' names, clipboard contents, files and photos you send, your phone's camera and
-screen while you use them on the PC, media playback information and battery level. This data:
+screen while you use them on the PC, media playback information, battery level, whether a Focus is on, and the Personal Hotspot name and password if you
+enter them so the PC can join it. This data:
 
 - goes only to the device you paired, never to us or anyone else;
 - is encrypted on the way (TLS 1.3 with pinned certificates on the network, AES-GCM over Bluetooth);
-- is kept only on your devices, in Fenpo's own storage, and is deleted when you remove Fenpo or unpair the device.
+- is kept only on your devices, in Fenpo's own storage. Pairing keys are deleted when you unpair; received files and
+  settings are deleted when you remove Fenpo.
 
 Pairing uses a QR code shown on your PC; the keys it creates never leave your devices.
 
 ### Permissions
 
-Fenpo asks for permissions such as Bluetooth, local network, notifications, camera, microphone, photos, screen
-recording and, on Android, SMS, contacts and notification access. Each one is used only for the feature you turn on,
+Fenpo asks for permissions such as Bluetooth, local network, notifications, camera, photos, screen recording and,
+on Android, microphone, SMS, contacts and notification access. Each one is used only for the feature you turn on,
 and only to exchange data with your paired PC. You can turn any of them off in your phone's or PC's settings.
 
 ### Internet use
 
 Fenpo for Windows uses the internet only to download app icons for phone notifications from Apple's public App Store
-lookup service; the request contains the app's identifier, nothing about you. Fenpo has no analytics, advertising or
-tracking.
+lookup service; the request contains the app's identifier, nothing about you. Fenpo for iPhone does not use the
+internet at all. Fenpo has no analytics, advertising or tracking.
 
 ### Crash reports
 
@@ -64,25 +66,27 @@ kişisel veriyi toplamıyor, saklamıyor, satmıyor ya da paylaşmıyoruz; cihaz
 Fenpo, istediğin işleri yapmak için verileri telefonunla eşleştirdiğin bilgisayar arasında doğrudan, Bluetooth ve
 yerel ağ (Wi‑Fi ya da USB) üzerinden taşır. Açtığın özelliklere göre bunlar bildirimler, mesajlar, arama bilgileri,
 kişi adları, pano içeriği, gönderdiğin dosya ve fotoğraflar, bilgisayarda kullandığın sürece telefonunun kamerası ve
-ekranı, çalan medya bilgisi ve pil düzeyi olabilir. Bu veriler:
+ekranı, çalan medya bilgisi, pil düzeyi, odağın açık olup olmadığı ve bilgisayarın katılabilmesi için girersen Kişisel Erişim
+Noktası'nın adı ve parolası olabilir. Bu veriler:
 
 - yalnızca eşleştirdiğin cihaza gider, bize ya da başkasına asla gitmez;
 - yolda şifrelenir (ağda sertifikası sabitlenmiş TLS 1.3, Bluetooth'ta AES-GCM);
-- yalnızca cihazlarında, Fenpo'nun kendi alanında tutulur; Fenpo'yu kaldırdığında ya da eşleşmeyi sildiğinde silinir.
+- yalnızca cihazlarında, Fenpo'nun kendi alanında tutulur. Eşleşme anahtarları eşleşmeyi silince, gelen dosyalar ve
+  ayarlar Fenpo'yu kaldırınca silinir.
 
 Eşleşme bilgisayarında gösterilen bir QR koduyla yapılır; oluşan anahtarlar cihazlarından hiç çıkmaz.
 
 ### İzinler
 
-Fenpo Bluetooth, yerel ağ, bildirimler, kamera, mikrofon, fotoğraflar, ekran kaydı ve Android'de SMS, kişiler ve
+Fenpo Bluetooth, yerel ağ, bildirimler, kamera, fotoğraflar, ekran kaydı ve Android'de mikrofon, SMS, kişiler ve
 bildirim erişimi gibi izinler ister. Her biri yalnızca açtığın özellik için ve yalnızca eşleştirdiğin bilgisayarla veri
 alışverişi için kullanılır. Hepsini telefonunun ya da bilgisayarının ayarlarından kapatabilirsin.
 
 ### İnternet kullanımı
 
 Fenpo for Windows interneti yalnızca telefon bildirimlerindeki uygulama simgelerini Apple'ın herkese açık App Store
-arama servisinden indirmek için kullanır; istekte uygulamanın kimliği vardır, seninle ilgili bir şey yoktur. Fenpo'da
-analiz, reklam ya da takip yoktur.
+arama servisinden indirmek için kullanır; istekte uygulamanın kimliği vardır, seninle ilgili bir şey yoktur. Fenpo for
+iPhone interneti hiç kullanmaz. Fenpo'da analiz, reklam ya da takip yoktur.
 
 ### Çökme raporları
 
