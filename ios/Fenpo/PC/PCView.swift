@@ -16,6 +16,13 @@ struct PCView: View {
                         VStack(spacing: 0) {
                             PCCard(pc: pc, isConnected: model.snapshot.isConnected, proximity: model.snapshot.proximity, links: model.snapshot.links)
 
+                            if let media = model.snapshot.pcMedia {
+                                SectionCaption(title: "pc.section.nowPlaying")
+                                NowPlayingCard(media: media) { command in
+                                    model.pcMedia(command)
+                                }
+                            }
+
                             SectionCaption(title: "pc.section.links")
                             CardRows {
                                 StatusRow(icon: .bluetooth, color: .blue, title: "link.bluetooth", isUp: model.snapshot.links.bluetooth)

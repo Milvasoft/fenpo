@@ -17,6 +17,7 @@ enum ScreenshotScene: String {
     case touchpad
     case presenter
     case transferDetail = "transfer-detail"
+    case cameraReady = "camera-ready"
 
     /// The scene requested by the launch arguments, if any.
     static var current: ScreenshotScene? {
@@ -48,6 +49,8 @@ enum ScreenshotScene: String {
         case .presenter:
             model.selectedTab = .pc
             model.pcPath = [.presenter]
+        case .cameraReady:
+            model.isCameraReadyPresented = true
         case .transferDetail:
             model.selectedTab = .transfers
             if let first = SampleSession.pairedSnapshot().transfers.first {

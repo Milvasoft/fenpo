@@ -79,6 +79,7 @@ public enum Handshake {
         .hotspot,
         .fileProvider,
         .screenMirror,
+        .media,
     ]
 
     /// Builds this device's `Hello`.

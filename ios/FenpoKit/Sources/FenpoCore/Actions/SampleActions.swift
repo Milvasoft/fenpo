@@ -30,4 +30,7 @@ public struct SampleActions: FenpoActions {
 
     public func presenter(_ command: PresenterCommand) async throws {
     }
+
+    public func pcMedia(_ command: PCMediaCommand) async throws {
+    }
 }

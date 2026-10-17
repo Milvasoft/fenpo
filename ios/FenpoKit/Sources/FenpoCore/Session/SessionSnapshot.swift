@@ -30,6 +30,9 @@ public struct SessionSnapshot: Equatable, Sendable {
     /// Transfers in progress.
     public var activeTransfers: [ActiveTransfer]
 
+    /// What plays on the PC; `nil` when nothing does or the PC is not connected.
+    public var pcMedia: PCMedia?
+
     /// Creates a snapshot.
     public init(
         pc: PairedPC?,
@@ -40,7 +43,8 @@ public struct SessionSnapshot: Equatable, Sendable {
         pcClipboardPreview: String?,
         readyPhotoCount: Int,
         transfers: [TransferRecord],
-        activeTransfers: [ActiveTransfer] = []
+        activeTransfers: [ActiveTransfer] = [],
+        pcMedia: PCMedia? = nil
     ) {
         self.pc = pc
         self.links = links
@@ -51,6 +55,7 @@ public struct SessionSnapshot: Equatable, Sendable {
         self.readyPhotoCount = readyPhotoCount
         self.transfers = transfers
         self.activeTransfers = activeTransfers
+        self.pcMedia = pcMedia
     }
 
     /// State before any pairing.

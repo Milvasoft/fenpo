@@ -32,6 +32,10 @@ public protocol FenpoActions: Sendable {
     /// A presentation remote step, for Shortcuts and the Action button.
     /// - Parameter command: Next or previous slide.
     func presenter(_ command: PresenterCommand) async throws
+
+    /// Controls what plays on the PC.
+    /// - Parameter command: Play/pause, next, previous or a volume.
+    func pcMedia(_ command: PCMediaCommand) async throws
 }
 
 /// What the presentation remote intents send.

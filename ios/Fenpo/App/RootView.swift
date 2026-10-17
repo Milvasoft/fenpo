@@ -34,11 +34,15 @@ struct RootView: View {
         // Only the close button and the PC end the camera; SwiftUI writing false here (for example
         // when a presentation is busy) must not stop it.
         .fullScreenCover(isPresented: Binding(
-            get: { model.cameraState != nil },
+            get: { model.cameraState != nil || model.isCameraReadyPresented },
             set: { _ in }
         )) {
             if let state = model.cameraState {
                 CameraModeView(state: state, session: model.cameraSession, actions: model.cameraActions)
+            } else {
+                CameraReadyView {
+                    model.isCameraReadyPresented = false
+                }
             }
         }
         .fullScreenCover(isPresented: $model.isRinging) {
