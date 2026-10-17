@@ -18,6 +18,10 @@ on:
         description: "Upload a Release build to TestFlight after the tests pass"
         type: boolean
         default: false
+      store_screenshots:
+        description: "Only take the App Store screenshots (6.9-inch iPhone, Turkish and English, demo content)"
+        type: boolean
+        default: false
       without:
         description: "TestFlight without these extension targets (e.g. FenpoFiles FenpoBroadcast), while their App IDs are not registered"
         type: string
@@ -35,7 +39,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ios-${{ github.ref }}-${{ inputs.symbolicate != '' && 'symbolicate' || 'build' }}
+  group: ios-${{ github.ref }}-${{ inputs.symbolicate != '' && 'symbolicate' || (inputs.store_screenshots && 'store' || 'build') }}
   cancel-in-progress: true
 
 env:
@@ -45,7 +49,7 @@ jobs:
   # The platform independent part of FenpoKit must keep building with the Swift toolchain on Windows.
   core-windows:
     name: FenpoKit core (Windows)
-    if: inputs.symbolicate == ''
+    if: inputs.symbolicate == '' && !inputs.store_screenshots
     runs-on: windows-latest
     defaults:
       run:
@@ -73,7 +77,7 @@ jobs:
 
   app-macos:
     name: App and FenpoKit (iOS Simulator)
-    if: inputs.symbolicate == ''
+    if: inputs.symbolicate == '' && !inputs.store_screenshots
     runs-on: macos-26
     steps:
       - uses: actions/checkout@v5
@@ -346,3 +350,52 @@ jobs:
             echo "$offset nearest: $(echo "$nearest" | xcrun swift-demangle --simplified)"
             xcrun dwarfdump --lookup "$address" "$dwarf" | grep -E "DW_AT_(linkage_)?name|Line info" | head -6
           done | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # The App Store's required 6.9-inch set (1320 x 2868), in Turkish and English, from the same
+  # screenshot scenes with the sample session's demo content. Started by hand.
+  store-screenshots:
+    name: App Store screenshots
+    if: github.event_name == 'workflow_dispatch' && inputs.store_screenshots
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select newest Xcode
+        run: |
+          xcode="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Install tools
+        run: brew install xcodegen protobuf
+
+      - name: Generate protocol code and project
+        run: |
+          ios/scripts/generate-proto.sh
+          (cd ios && xcodegen generate)
+
+      - name: Pick a 6.9-inch simulator
+        run: echo "SIMULATOR_ID=$(ios/scripts/store-simulator-id.sh)" >> "$GITHUB_ENV"
+
+      - name: Build app
+        working-directory: ios
+        run: |
+          log="$RUNNER_TEMP/app-build.log"
+          xcodebuild build             -project Fenpo.xcodeproj             -scheme Fenpo             -destination "id=$SIMULATOR_ID"             -derivedDataPath "$RUNNER_TEMP/DerivedData"             CODE_SIGNING_ALLOWED=NO             > "$log" 2>&1 || { grep -E "error:" "$log"; tail -60 "$log"; exit 1; }
+          tail -3 "$log"
+
+      - name: Screenshots
+        env:
+          SCENES: home pc transfers transfer-detail touchpad presenter camera-ready settings
+          APPEARANCES: light
+          STATUS_TIME: "9:41"
+        run: |
+          ios/scripts/screenshots.sh "$SIMULATOR_ID" "$RUNNER_TEMP/DerivedData/Build/Products/Debug-iphonesimulator/Fenpo.app" "$RUNNER_TEMP/app-store"
+          sips -g pixelWidth -g pixelHeight "$RUNNER_TEMP"/app-store/home-light-en.png
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v5
+        with:
+          name: app-store-screenshots
+          path: ${{ runner.temp }}/app-store
+          if-no-files-found: error

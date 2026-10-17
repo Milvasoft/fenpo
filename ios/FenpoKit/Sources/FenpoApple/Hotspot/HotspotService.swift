@@ -73,7 +73,7 @@ public final class HotspotService {
     /// Answers the PC's "Connect to hotspot".
     public func handleRequest() -> Fenpo_V1_HotspotStatus {
         var status = Fenpo_V1_HotspotStatus()
-        guard details != nil else {
+        guard FeatureAccess.isAvailable(.hotspot), details != nil else {
             status.state = .notSetUp
             log.info("Hotspot requested, not set up")
             return status

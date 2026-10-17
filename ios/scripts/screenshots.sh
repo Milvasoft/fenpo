@@ -9,15 +9,20 @@ app="$2"
 out="$3"
 bundle_id="com.fenpo.app"
 scenes=(home home-unpaired transfers pc settings developer scan steps ringing camera touchpad presenter transfer-detail camera-ready)
+# The App Store set picks its own scenes, appearances and status bar time.
+if [[ -n "${SCENES:-}" ]]; then
+    read -r -a scenes <<< "$SCENES"
+fi
+read -r -a appearances <<< "${APPEARANCES:-light dark}"
 
 mkdir -p "$out"
 xcrun simctl bootstatus "$udid" -b >/dev/null
 xcrun simctl install "$udid" "$app"
 # The scanner asks for the camera; a pending system alert would cover the following screenshots.
 xcrun simctl privacy "$udid" grant camera "$bundle_id"
-xcrun simctl status_bar "$udid" override --time "18:51" --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4 || true
+xcrun simctl status_bar "$udid" override --time "${STATUS_TIME:-18:51}" --batteryState charged --batteryLevel 100 --wifiBars 3 --cellularBars 4 || true
 
-for appearance in light dark; do
+for appearance in "${appearances[@]}"; do
     xcrun simctl ui "$udid" appearance "$appearance"
     for lang in tr en; do
         for scene in "${scenes[@]}"; do

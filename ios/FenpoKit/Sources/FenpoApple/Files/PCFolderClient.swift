@@ -121,6 +121,9 @@ public final class PCFolderClient {
         guard store.load() != nil else {
             throw PCFolderError.notPaired
         }
+        guard FeatureAccess.isAvailable(.filesApp) else {
+            throw FenpoActionError.unavailableHere
+        }
         try await wifi.connectIfNeeded()
         guard wifi.session?.supports(.fileProvider) == true else {
             throw FenpoActionError.unsupportedByPC

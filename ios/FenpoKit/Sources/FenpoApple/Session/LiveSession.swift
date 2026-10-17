@@ -197,6 +197,7 @@ public final class FenpoServices {
 
     /// Activates AccessorySetupKit and reconnects to the paired PC.
     public func start() {
+        InstallRecord.recordFirstLaunch(pairedStore: pairedStore, identityStore: identityStore)
         FenpoActionsRegistry.shared.register(actions)
         accessories.activate()
         pairing.resumeChannel()

@@ -27,7 +27,7 @@ public final class ScreenshotSender: NSObject, PHPhotoLibraryChangeObserver {
 
     /// Whether the user turned the feature on.
     public var isEnabled: Bool {
-        defaults?.bool(forKey: Self.enabledKey) ?? false
+        FeatureAccess.isAvailable(.screenshots) && (defaults?.bool(forKey: Self.enabledKey) ?? false)
     }
 
     /// The switch changed: from now on, new screenshots go to the PC.

@@ -49,7 +49,7 @@ struct PairingFlowView: View {
         #if DEBUG
         switch ScreenshotScene.current {
         case .steps:
-            pcName = "BUGRA-PC"
+            pcName = SampleSession.pairedSnapshot().pc?.name ?? ""
             progress.complete(.dataChannel)
             stage = .setup
         default:

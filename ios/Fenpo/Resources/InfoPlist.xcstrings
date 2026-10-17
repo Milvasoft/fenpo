@@ -24,13 +24,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo keeps the connection to your PC over Bluetooth, so it can receive what the PC sends even when the app is closed."
+            "value": "Fenpo stays connected to your paired PC over Bluetooth to share the clipboard, your PC’s notifications and its media controls, even while Fenpo is in the background."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo, bilgisayarınla bağlantıyı Bluetooth üzerinden açık tutar; uygulama kapalıyken de PC’nin gönderdiklerini alır."
+            "value": "Fenpo; panoyu, bilgisayarının bildirimlerini ve medya kontrollerini paylaşmak için eşleştirdiğin PC’ye Bluetooth üzerinden bağlı kalır, Fenpo arka plandayken de."
           }
         }
       }
@@ -58,13 +58,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo sends files and photos to your PC on the same Wi-Fi network."
+            "value": "Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo, dosya ve fotoğrafları aynı Wi‑Fi ağındaki bilgisayarına gönderir."
+            "value": "Fenpo; dosya ve fotoğraf göndermek, PC’nin paylaşılan klasörlerini göstermek ve iPhone’unu PC’nin web kamerası ya da ekranı yapmak için aynı Wi‑Fi ağındaki eşleştirdiğin bilgisayara bağlanır."
           }
         }
       }
