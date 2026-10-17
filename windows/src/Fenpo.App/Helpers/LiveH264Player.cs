@@ -19,6 +19,14 @@ public sealed class LiveH264Player : IDisposable
     private readonly CancellationTokenSource _feeding = new();
     private readonly System.Diagnostics.Stopwatch _sinceShown = System.Diagnostics.Stopwatch.StartNew();
 
+    // How long frames wait in the player between being handed over and being shown, measured every few seconds.
+    private readonly System.Collections.Concurrent.ConcurrentQueue<(TimeSpan Time, long HandedAt)> _handed = new();
+    private readonly System.Diagnostics.Stopwatch _waitWindow = System.Diagnostics.Stopwatch.StartNew();
+    private readonly ILogger _logger;
+    private double _waitSum;
+    private double _waitMax;
+    private int _waitCount;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="LiveH264Player"/> class and starts playing.
     /// </summary>
@@ -33,8 +41,9 @@ public sealed class LiveH264Player : IDisposable
         properties.Width = width == 0 ? 1280 : width;
         properties.Height = height == 0 ? 720 : height;
         Size = (properties.Width, properties.Height);
+        _logger = logger;
         var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position, () => _sinceShown.Elapsed, failed);
+        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position, () => _sinceShown.Elapsed, failed, Handed);
         source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
         source.SampleRequested += async (sender, args) =>
         {
@@ -60,7 +69,7 @@ public sealed class LiveH264Player : IDisposable
         };
 
         Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
-        Player.VideoFrameAvailable += (sender, args) => _sinceShown.Restart();
+        Player.VideoFrameAvailable += (sender, args) => Shown();
         Player.MediaFailed += (sender, args) =>
         {
             logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
@@ -93,6 +102,46 @@ public sealed class LiveH264Player : IDisposable
         }
     }
 
+    private void Handed(TimeSpan time)
+    {
+        _handed.Enqueue((time, System.Diagnostics.Stopwatch.GetTimestamp()));
+
+        while (_handed.Count > 120 && _handed.TryDequeue(out _))
+        {
+        }
+    }
+
+    // On the player's thread, for every frame it has ready: the newest handed frame at or before the player's position
+    // is the one shown.
+    private void Shown()
+    {
+        _sinceShown.Restart();
+        var position = Position();
+        long? handedAt = null;
+
+        while (_handed.TryPeek(out var item) && item.Time <= position && _handed.TryDequeue(out item))
+        {
+            handedAt = item.HandedAt;
+        }
+
+        if (handedAt is { } at)
+        {
+            var wait = System.Diagnostics.Stopwatch.GetElapsedTime(at).TotalMilliseconds;
+            _waitSum += wait;
+            _waitMax = Math.Max(_waitMax, wait);
+            _waitCount++;
+        }
+
+        if (_waitWindow.Elapsed >= TimeSpan.FromSeconds(3) && _waitCount > 0)
+        {
+            _logger.LogInformation("Live picture: frames wait {Average:F0} ms in the player on average, {Max:F0} ms at most", _waitSum / _waitCount, _waitMax);
+            _waitSum = 0;
+            _waitMax = 0;
+            _waitCount = 0;
+            _waitWindow.Restart();
+        }
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -102,8 +151,9 @@ public sealed class LiveH264Player : IDisposable
         _feeding.Dispose();
     }
 
-    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position, Func<TimeSpan> sinceShown, Action stalled)
+    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position, Func<TimeSpan> sinceShown, Action stalled, Action<TimeSpan> handed)
     {
+        private readonly Action<TimeSpan> _handed = handed;
         // Frames go in but none has come out for this long: the decoder lost its reference (the phone switched lenses
         // or cameras and paused for a moment) and waits for the next key frame, up to two seconds away. Asking the
         // phone for one now ends the freeze at once.
@@ -148,9 +198,7 @@ public sealed class LiveH264Player : IDisposable
         private int _skipped;
         private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
         private int _framesInWindow;
-        private TimeSpan _interval;
         private TimeSpan _lastPhone = TimeSpan.FromTicks(-1);
-        private TimeSpan _lastEven;
         private TimeSpan _minSpacing = TimeSpan.MaxValue;
         private TimeSpan _maxSpacing;
         private byte[] _config = [];
@@ -180,7 +228,7 @@ public sealed class LiveH264Player : IDisposable
                 Measure();
                 WatchForStall(packet.KeyFrame);
                 var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
-                var phoneTime = Even(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
+                var phoneTime = Spacing(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
                 var now = _arrivals.Elapsed;
                 var gap = now - _lastArrival;
                 _lastArrival = now;
@@ -217,6 +265,7 @@ public sealed class LiveH264Player : IDisposable
                 _offset = time - phoneTime;
                 _last = time;
                 _early = time - position;
+                _handed(time);
                 var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
                 sample.KeyFrame = packet.KeyFrame;
                 return sample;
@@ -225,41 +274,18 @@ public sealed class LiveH264Player : IDisposable
             return null;
         }
 
-        // Capture times wobble by a few milliseconds around the frame interval (the iPhone's camera does); shown as
-        // they are, a frame now and then misses its screen refresh and the next one stays twice as long, which reads
-        // as stutter. Frames about one interval apart are spaced evenly instead, following the phone's clock slowly;
-        // a dropped frame, a pause or a jump keeps its real length.
-        private TimeSpan Even(TimeSpan phoneTime)
+        // Only measured: the phone's spacing is kept as it is (a screen sends frames only when something changes).
+        private TimeSpan Spacing(TimeSpan phoneTime)
         {
-            if (_lastPhone < TimeSpan.Zero)
+            if (_lastPhone >= TimeSpan.Zero)
             {
-                _lastPhone = phoneTime;
-                _lastEven = phoneTime;
-                return phoneTime;
+                var spacing = phoneTime - _lastPhone;
+                _minSpacing = spacing < _minSpacing ? spacing : _minSpacing;
+                _maxSpacing = spacing > _maxSpacing ? spacing : _maxSpacing;
             }
 
-            var spacing = phoneTime - _lastPhone;
             _lastPhone = phoneTime;
-            _minSpacing = spacing < _minSpacing ? spacing : _minSpacing;
-            _maxSpacing = spacing > _maxSpacing ? spacing : _maxSpacing;
-
-            if (_interval == TimeSpan.Zero && spacing >= TimeSpan.FromMilliseconds(10) && spacing <= TimeSpan.FromMilliseconds(100))
-            {
-                _interval = spacing;
-            }
-
-            if (_interval > TimeSpan.Zero && spacing > _interval / 2 && spacing < _interval * 3 / 2)
-            {
-                _interval += (spacing - _interval) / 32;
-                var even = _lastEven + _interval;
-                _lastEven = even + ((phoneTime - even) / 16);
-            }
-            else
-            {
-                _lastEven += spacing;
-            }
-
-            return _lastEven;
+            return phoneTime;
         }
 
         private void WatchForStall(bool keyFrame)
