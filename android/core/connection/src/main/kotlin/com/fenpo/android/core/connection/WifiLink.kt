@@ -246,7 +246,8 @@ internal class WifiLink(
     private companion object {
         const val TAG = "FenpoWifi"
         val MIN_BACKOFF = 5.seconds
-        val MAX_BACKOFF = 5.minutes
+        // A PC that restarts is back within seconds; a connect attempt on the local network is cheap.
+        val MAX_BACKOFF = 30.seconds
         val DISCOVERY_TIMEOUT = 8.seconds
 
         // Pings every 30 s keep traffic flowing; this only catches a socket that went silent.

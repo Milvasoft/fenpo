@@ -154,7 +154,12 @@ class ConnectionService : Service() {
             notification(bluetooth = false, wifi = false),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE,
         )
-        if (link?.isActive != true) link = scope.launch { runLinks() }
+        if (link?.isActive != true) {
+            link = scope.launch { runLinks() }
+        } else {
+            // Started again while running: the PC came back in range, so try Wi-Fi now, not after the backoff.
+            wifiLink?.retryNow()
+        }
         return START_STICKY
     }
 

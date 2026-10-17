@@ -187,9 +187,17 @@ class GattConnection(
             val tx = characteristic(FenpoBleUuids.TX)
             check(gatt.setCharacteristicNotification(tx, true)) { "setCharacteristicNotification failed" }
             val cccd = tx.getDescriptor(FenpoBleUuids.CCCD) ?: throw GattException("tx has no CCCD")
-            run("enable notifications", BOND_TIMEOUT) {
-                gatt.writeDescriptorCompat(cccd, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
-            }.check("enable notifications")
+            try {
+                run("enable notifications", BOND_TIMEOUT) {
+                    gatt.writeDescriptorCompat(cccd, BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+                }.check("enable notifications")
+            } catch (e: GattException) {
+                // After the PC restarts, Android may still hold its old attribute table and write the
+                // CCCD to a handle that no longer exists (device test, 17 October: every reconnect
+                // failed here until Bluetooth was turned off). Drop the cache so the next try reads it.
+                refreshCache(gatt)
+                throw e
+            }
             _state.value = GattState.Ready(mtu)
             return mtu
         } catch (e: Exception) {
@@ -224,6 +232,15 @@ class GattConnection(
                 rssiResult = null
             }
         }
+    }
+
+    /**
+     * Clears Android's cached attribute table for the PC. `BluetoothGatt.refresh` is not public;
+     * BLE libraries call it the same way, and nothing breaks when a phone does not have it.
+     */
+    private fun refreshCache(gatt: BluetoothGatt) {
+        val refreshed = runCatching { gatt.javaClass.getMethod("refresh").invoke(gatt) as Boolean }.getOrDefault(false)
+        Log.i(TAG, "GATT cache ${if (refreshed) "cleared" else "could not be cleared"}")
     }
 
     /** Disconnects and releases the GATT client; required before reconnecting (error 133 otherwise). */
