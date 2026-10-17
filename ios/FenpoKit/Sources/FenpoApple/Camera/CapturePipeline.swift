@@ -30,6 +30,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     private var notificationTokens: [NSObjectProtocol] = []
     private let lastAngle = Mutex<CGFloat>(-1)
     private let droppedFrames = Mutex(0)
+    private let reconfigured = Mutex<ReconfigureBox?>(nil)
     private let log = FenpoLog("Camera")
 
     /// What the current camera can do.
@@ -37,6 +38,18 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         let zoomPresets: [Float]
         let frontAvailable: Bool
         let centerStageAvailable: Bool
+    }
+
+    /// Called after the picture changed under the encoder (rotation, an interruption ending, a
+    /// restart), so the next frame is a key frame and the PC's decoder does not stall.
+    /// - Parameter handler: Called on any queue.
+    func setReconfiguredHandler(_ handler: (@Sendable () -> Void)?) {
+        let box = handler.map(ReconfigureBox.init)
+        reconfigured.withLock { $0 = box }
+    }
+
+    private func notifyReconfigured() {
+        reconfigured.withLock { $0 }?.body()
     }
 
     /// Sets who receives frames.
@@ -152,6 +165,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         }
         if changed {
             log.info("Capture rotation \(Int(angle))°")
+            notifyReconfigured()
         }
         let output = output
         queue.async {
@@ -178,6 +192,7 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         }
         notificationTokens = []
         setFrameHandler(nil)
+        setReconfiguredHandler(nil)
         let session = session
         queue.async {
             session.stopRunning()
@@ -196,12 +211,14 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
                 let reason = notification.userInfo?[AVCaptureSessionInterruptionReasonKey] as? Int ?? -1
                 log.error("Capture interrupted, reason \(reason)")
             },
-            center.addObserver(forName: AVCaptureSession.interruptionEndedNotification, object: session, queue: nil) { _ in
+            center.addObserver(forName: AVCaptureSession.interruptionEndedNotification, object: session, queue: nil) { [weak self] _ in
                 log.info("Capture interruption ended")
+                self?.notifyReconfigured()
             },
-            center.addObserver(forName: AVCaptureSession.runtimeErrorNotification, object: session, queue: nil) { notification in
+            center.addObserver(forName: AVCaptureSession.runtimeErrorNotification, object: session, queue: nil) { [weak self] notification in
                 let error = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError
                 log.error("Capture runtime error \(error?.code ?? 0); restarting")
+                self?.notifyReconfigured()
                 queue.async {
                     session.startRunning()
                 }
@@ -243,6 +260,15 @@ extension CapturePipeline: AVCaptureVideoDataOutputSampleBufferDelegate {
         }
     }
 }
+/// Holds the reconfigured handler by reference, like `FrameHandlerBox`.
+final class ReconfigureBox: Sendable {
+    let body: @Sendable () -> Void
+
+    init(_ body: @escaping @Sendable () -> Void) {
+        self.body = body
+    }
+}
+
 /// Holds a frame handler by reference (see `CapturePipeline.handler`).
 final class FrameHandlerBox: Sendable {
     let body: CapturePipeline.FrameHandler

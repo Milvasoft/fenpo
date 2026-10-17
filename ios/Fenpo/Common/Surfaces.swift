@@ -14,9 +14,13 @@ extension View {
 
     /// Liquid Glass on iOS 26, a thin material before that.
     @ViewBuilder
-    func fenpoGlass<S: Shape>(in shape: S) -> some View {
+    /// - Parameters:
+    ///   - shape: Shape of the glass.
+    ///   - interactive: The glass reacts to touches. Off for a glass button's own label: interactive
+    ///     glass there takes the tap and the button never fires (the camera screen's close button).
+    func fenpoGlass<S: Shape>(in shape: S, interactive: Bool = true) -> some View {
         if #available(iOS 26, *) {
-            glassEffect(.regular.interactive(), in: shape)
+            glassEffect(interactive ? .regular.interactive() : .regular, in: shape)
         } else {
             background(.ultraThinMaterial, in: shape)
         }
