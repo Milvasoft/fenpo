@@ -115,9 +115,9 @@ Fenpo needs Fenpo for Windows on your PC.
 
 | Öğe | Ölçü | Durum |
 |---|---|---|
-| Uygulama simgesi | 512×512 PNG, 32 bit | `docs/android/play/icon-512.png` (Çekirdek logosu, uyarlanabilir simgeyle aynı). |
-| Öne çıkan grafik | 1024×500 PNG/JPG | `docs/android/play/feature-graphic.png` |
-| Telefon ekran görüntüleri | 9:16, 1080×1920, 24 bit PNG; her dil için 7 adet | `docs/android/play/tr/` ve `docs/android/play/en/`: 01 Ana ekran, 02 PC sekmesi, 03 Aktarımlar, 04 Fare ve klavye, 05 Sunum kumandası, 06 Web kamerası (koyu, ekran hep koyu), 07 Ayarlar. Açık tema. |
+| Uygulama simgesi | 512×512 PNG, 32 bit | `design/logo/store/android/icon-512x512.png` (Çekirdek logosu, uyarlanabilir simgeyle aynı). |
+| Öne çıkan grafik | 1024×500 PNG/JPG | `design/logo/store/android/feature-graphic-1024x500-{tr,en}.png` |
+| Telefon ekran görüntüleri | 9:16, 1080×1920, 24 bit PNG; her dil için 7 adet | `design/screenshots/android/tr/` ve `design/screenshots/android/en/`: 01 Ana ekran, 02 PC sekmesi, 03 Aktarımlar, 04 Fare ve klavye, 05 Sunum kumandası, 06 Web kamerası (koyu, ekran hep koyu), 07 Ayarlar. Açık tema. |
 
 Ekran görüntüleri uygulamanın gerçek ekranları ama örnek verilerle çiziliyor (Robolectric, her modülde
 `StoreScreenshotTest`). Buğra'nın gerçek kişileri, mesajları, dosyaları ve cihaz adı herkese açık bir mağaza sayfasına

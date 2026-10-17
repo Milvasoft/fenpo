@@ -116,7 +116,7 @@ class StoreScreenshotTest {
     /** 512 × 512, full square; Play rounds the corners itself. */
     @Test
     fun icon() =
-        captureStoreAsset("icon-512", 512, 512) {
+        captureStoreAsset("icon-512x512", 512, 512, perLanguage = false) {
             Box(Modifier.fillMaxSize().background(BLOOM)) {
                 Image(painterResource(FenpoIcons.Logo), contentDescription = null, modifier = Modifier.fillMaxSize())
             }
@@ -125,7 +125,7 @@ class StoreScreenshotTest {
     /** 1024 × 500: logo, name and one line on Mürekkep. */
     @Test
     fun featureGraphic() =
-        captureStoreAsset("feature-graphic", 1024, 500) {
+        captureStoreAsset("feature-graphic-1024x500", 1024, 500) {
             val turkish = LocalConfiguration.current.locales[0].language == "tr"
             Row(
                 modifier = Modifier.fillMaxSize().background(INK).padding(horizontal = 88.dp),
