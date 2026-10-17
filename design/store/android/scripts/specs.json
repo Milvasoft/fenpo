@@ -1,0 +1,34 @@
+{
+  "checked": "2026-10-18",
+  "languages": ["tr", "en"],
+  "themes": ["light", "dark"],
+  "uploadTheme": "light",
+  "phone": { "width": 1080, "height": 1920, "min": 2, "max": 8, "ids": ["01-home", "02-pc", "03-transfers", "04-touchpad", "05-presenter", "06-camera", "07-settings"] },
+  "icon": { "file": "icon-512.png", "width": 512, "height": 512, "maxBytes": 1048576, "alpha": true },
+  "featureGraphic": { "file": "feature-graphic-{lang}.png", "width": 1024, "height": 500 },
+  "video": {
+    "file": "promo-{lang}.mp4",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "sceneSeconds": 5,
+    "fadeSeconds": 0.6,
+    "music": {
+      "title": "Digital Clouds",
+      "artist": "Alejandro Magaña (A. M.)",
+      "source": "https://mixkit.co/free-stock-music/tag/technology/",
+      "url": "https://assets.mixkit.co/music/744/744.mp3",
+      "license": "Mixkit Stock Music Free License, https://mixkit.co/license/#musicFree"
+    }
+  },
+  "metadata": {
+    "title": 30,
+    "short": 80,
+    "full": 4000,
+    "featureGraphicAlt": 140,
+    "screenshotHeadline": 28,
+    "videoCaption": 50
+  },
+  "forbidden": ["App Store", "iPhone", "iPad", "Apple", "iOS", "Mac", "AirDrop", "Phone Link", "ücretsiz", "bedava", "free", "en iyi", "best", "#1", "1 numara", "number one"],
+  "allowedCaps": ["PC", "SMS", "QR", "TLS", "AES-GCM", "USB", "DO", "OTP", "LAN"]
+}

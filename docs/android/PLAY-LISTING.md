@@ -111,21 +111,13 @@ Fenpo collects no data. Your data moves only to the PC you paired, over Bluetoot
 Fenpo needs Fenpo for Windows on your PC.
 ```
 
-## 2. Grafikler
+## 2. Grafikler ve video
 
-| Öğe | Ölçü | Durum |
-|---|---|---|
-| Uygulama simgesi | 512×512 PNG, 32 bit | `design/logo/store/android/icon-512x512.png` (Çekirdek logosu, uyarlanabilir simgeyle aynı). |
-| Öne çıkan grafik | 1024×500 PNG/JPG | `design/logo/store/android/feature-graphic-1024x500-{tr,en}.png` |
-| Telefon ekran görüntüleri | 9:16, 1080×1920, 24 bit PNG; her dil için 7 adet | `design/screenshots/android/tr/` ve `design/screenshots/android/en/`: 01 Ana ekran, 02 PC sekmesi, 03 Aktarımlar, 04 Fare ve klavye, 05 Sunum kumandası, 06 Web kamerası (koyu, ekran hep koyu), 07 Ayarlar. Açık tema. |
-
-Ekran görüntüleri uygulamanın gerçek ekranları ama örnek verilerle çiziliyor (Robolectric, her modülde
-`StoreScreenshotTest`). Buğra'nın gerçek kişileri, mesajları, dosyaları ve cihaz adı herkese açık bir mağaza sayfasına
-çıkmasın diye cihazdan alınmadı. PC adı "Ofis PC" / "Office PC"; dosya, kişi ve şarkı adları uydurma; başka şirketlerin
-ürün adları (Teams, Meet) yok; kamera önizlemesi bir renk geçişi, kimsenin fotoğrafı değil.
-
-Yeniden üretmek için: `FENPO_PLAYSHOTS=1 ./gradlew recordRoborazziDebug --rerun-tasks`, sonra simge dışındaki PNG'lerin
-alfa kanalını kaldır (Play ekran görüntülerinde ve öne çıkan grafikte saydamlık kabul etmiyor).
+Hepsi `design/store/android/` altında, tek komutla üretiliyor (`python design/store/android/scripts/build.py`):
+simge, iki dilde öne çıkan grafik ve alt metni, her dilde açık ve koyu 7'şer tasarlanmış ekran görüntüsü, ham ekranlar,
+tanıtım videoları. Nereye yükleneceği `design/store/android/README.md`'de, nasıl tasarlandığı `PLAN.md`'de. Mağaza
+metinlerinin güncel hali de orada (`metadata/<dil>.md`); §1'deki metinlerden farkı bölüm başlıklarının büyük harfle
+yazılmaması ve SMS satırı.
 
 ## 3. Sürüm ve imzalama
 
