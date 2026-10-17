@@ -167,9 +167,8 @@ public sealed partial class ScreenMirrorWindow : Window
     // Where the frame is inside the element (letterboxed, Uniform) and a point on it as 0..1.
     private ScreenPoint? ToFrame(Point point)
     {
-        var session = _player?.Player.PlaybackSession;
-        double frameWidth = session?.NaturalVideoWidth ?? 0;
-        double frameHeight = session?.NaturalVideoHeight ?? 0;
+        double frameWidth = _player?.Size.Width ?? 0;
+        double frameHeight = _player?.Size.Height ?? 0;
 
         if (frameWidth == 0 || frameHeight == 0)
         {
