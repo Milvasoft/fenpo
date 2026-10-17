@@ -98,6 +98,15 @@ public final class BLECentral: NSObject {
     private var outbox: [[UInt8]] = []
     private var changeWaiters: [CheckedContinuation<Void, Never>] = []
     private var pendingReplies: [UInt64: CheckedContinuation<Fenpo_V1_Envelope, Swift.Error>] = [:]
+    /// Rediscovery tries since the link was last ready; sets the wait before the next one.
+    private var rediscoveryAttempt = 0
+    private var rediscoveryTask: Task<Void, Never>?
+    private var watchdog: Task<Void, Never>?
+    /// When the link to the PC came up without the Fenpo channel being ready yet.
+    private var connectedSince: Date?
+    private static let rediscoveryDelays: [Duration] = [.seconds(2), .seconds(4), .seconds(8), .seconds(15), .seconds(30)]
+    /// A link that is up for this long without the Fenpo channel gets its service discovered again.
+    private static let notReadyLimit: TimeInterval = 10
 
     private let log = FenpoLog("BLE")
 
@@ -224,7 +233,9 @@ public final class BLECentral: NSObject {
         }
         peripheral.delegate = self
         state = .connecting
+        startWatchdog()
         if peripheral.state == .connected {
+            connectedSince = .now
             peripheral.discoverServices([Self.serviceUUID])
         } else {
             manager.connect(peripheral, options: nil)
@@ -306,7 +317,67 @@ public final class BLECentral: NSObject {
         onEnvelope?(envelope)
     }
 
+    /// Discovers the Fenpo service again on a link that is up: after the PC re-added it (Fenpo
+    /// restarted on the PC keeps the Bluetooth link and only replaces its service) or when it was
+    /// missing. Waits longer after each try; works in the background with bluetooth-central.
+    private func rediscover(after delay: Duration, reason: String) {
+        rediscoveryTask?.cancel()
+        rediscoveryTask = Task { [weak self] in
+            try? await Task.sleep(for: delay)
+            guard let self, !Task.isCancelled else {
+                return
+            }
+            rediscoveryTask = nil
+            guard let peripheral, peripheral.state == .connected, state != .ready else {
+                return
+            }
+            log.info("Rediscovering the Fenpo service (\(reason))")
+            peripheral.discoverServices([Self.serviceUUID])
+        }
+    }
+
+    private func retryDiscovery(reason: String) {
+        let delays = Self.rediscoveryDelays
+        let delay = delays[min(rediscoveryAttempt, delays.count - 1)]
+        rediscoveryAttempt += 1
+        rediscover(after: delay, reason: reason)
+    }
+
+    /// Checks every few seconds that a connected link has a ready Fenpo channel.
+    private func startWatchdog() {
+        guard watchdog == nil else {
+            return
+        }
+        watchdog = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                guard let self else {
+                    return
+                }
+                guard let peripheral, peripheral.state == .connected, targetIdentifier != nil else {
+                    connectedSince = nil
+                    continue
+                }
+                if state == .ready, tx?.isNotifying == true {
+                    connectedSince = nil
+                    continue
+                }
+                let since = connectedSince ?? .now
+                connectedSince = since
+                if Date().timeIntervalSince(since) > Self.notReadyLimit, rediscoveryTask == nil {
+                    log.info("Link up for \(Int(Self.notReadyLimit)) s without the Fenpo channel")
+                    connectedSince = .now
+                    retryDiscovery(reason: "watchdog")
+                }
+            }
+        }
+    }
+
     private func becameReady() {
+        rediscoveryAttempt = 0
+        rediscoveryTask?.cancel()
+        rediscoveryTask = nil
+        connectedSince = nil
         state = .ready
         if let localHello {
             do {
@@ -370,6 +441,8 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
 
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         log.info("Connected to \(peripheral.identifier)")
+        connectedSince = .now
+        startWatchdog()
         peripheral.discoverServices([Self.serviceUUID])
     }
 
@@ -395,11 +468,27 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
 }
 
 extension BLECentral: @preconcurrency CBPeripheralDelegate {
-    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Swift.Error)?) {
-        guard let service = peripheral.services?.first(where: { $0.uuid == Self.serviceUUID }) else {
-            log.error("Fenpo service missing: \(String(describing: error))")
+    /// The PC changed its GATT services without dropping the link, e.g. Fenpo restarted on the PC.
+    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        guard invalidatedServices.contains(where: { $0.uuid == Self.serviceUUID }) else {
             return
         }
+        log.info("Fenpo service changed on the PC; rediscovering")
+        resetLink()
+        state = .connecting
+        connectedSince = .now
+        rediscoveryAttempt = 0
+        peripheral.discoverServices([Self.serviceUUID])
+    }
+
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Swift.Error)?) {
+        guard let service = peripheral.services?.first(where: { $0.uuid == Self.serviceUUID }) else {
+            // The PC may be between removing and re-adding its service: try again shortly.
+            log.error("Fenpo service missing: \(String(describing: error)); trying again")
+            retryDiscovery(reason: "service missing")
+            return
+        }
+        log.info("Fenpo service found")
         peripheral.discoverCharacteristics([Self.rxUUID, Self.txUUID], for: service)
     }
 
@@ -407,7 +496,8 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
         rx = service.characteristics?.first { $0.uuid == Self.rxUUID }
         tx = service.characteristics?.first { $0.uuid == Self.txUUID }
         guard let tx, rx != nil else {
-            log.error("Fenpo characteristics missing: \(String(describing: error))")
+            log.error("Fenpo characteristics missing: \(String(describing: error)); trying again")
+            retryDiscovery(reason: "characteristics missing")
             return
         }
         // tx requires encryption: the first subscription makes iOS pair (bond) with the PC.
@@ -419,10 +509,12 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
             return
         }
         if let error {
-            log.error("Subscribing to tx failed: \(String(describing: error))")
+            log.error("Subscribing to tx failed: \(String(describing: error)); trying again")
+            retryDiscovery(reason: "subscribe failed")
             return
         }
         if characteristic.isNotifying {
+            log.info("Subscribed to tx; sending Hello")
             becameReady()
         }
     }

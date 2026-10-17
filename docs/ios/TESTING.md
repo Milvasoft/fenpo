@@ -178,6 +178,7 @@ Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşm
 | M6 | Başka bir telefondan bu iPhone'a mesaj gönderin | Windows'ta bildirim görünür (ANCS, aynı Bluetooth bağı) |
 | M7 | Windows'ta Fenpo'yu kapatıp açın; iPhone'da Fenpo'yu açmayın | 1 dakika içinde yeniden bağlanır: Windows'ta telefon bağlı görünür, iPhone kaydında `Received Hello` |
 | M8 | PC'yi yeniden başlatın | M7 ile aynı |
+| M8b | iPhone'da Fenpo arka plandayken Windows'ta yalnızca Fenpo'yu yeniden başlatın (ya da PC'nin Bluetooth'unu kapatıp açın) | Birkaç saniye içinde Windows kaydında "Fenpo BLE channel opened"; iPhone kaydında `Fenpo service changed on the PC; rediscovering` (ya da `Fenpo service missing; trying again`), `Subscribed to tx; sending Hello` |
 | M9 | Tarayıcıyı tekrar açıp 10 saniye bekleyin, kapatın. Geliştirici → Kayıt | `[Bonjour] Found ...` satırında PC'nin `_fenpo._tcp` kaydı ve TXT'deki `id`, `v`. Windows tarafı bunun telefonda doğrulanmasını istedi |
 | M10 | iPhone hücresel veride, Wi‑Fi kapalıyken QR okutun | "Tamamlanmadı" ve **Yeniden dene**. Mesaj, ne yapılacağını anlatıyor mu? |
 | M11 | QR'ın fotoğrafını çekin, 6 dakika bekleyin (QR 5 dakikada yenilenir), fotoğraftaki eski QR'ı okutun | Eşleşme reddedilir (`TOKEN_INVALID`), "Tamamlanmadı" |
