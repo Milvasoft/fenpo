@@ -34,9 +34,9 @@ public sealed class PhotoLibraryService(PhoneChannel channel, FileTransferServic
     public event EventHandler<string>? ThumbnailArrived;
 
     /// <summary>
-    /// Gets a value indicating whether the phone in use shares its photo library now (it offers it and Wi‑Fi is up).
+    /// Gets a value indicating whether the phone in use shares its photo library now (it offers it; a phone in the background is asked to come to Wi‑Fi when the library is read).
     /// </summary>
-    public bool Available => _channel.IsConnected && _channel.WifiConnected && _channel.Supports(Capability.Photos);
+    public bool Available => _channel.IsConnected && _channel.Supports(Capability.Photos);
 
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)

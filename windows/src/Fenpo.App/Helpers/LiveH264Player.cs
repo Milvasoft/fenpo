@@ -11,7 +11,8 @@ namespace Fenpo.App.Helpers;
 /// <summary>
 /// Plays a live H.264 stream from the phone (video.proto) with Windows' own decoder: a live
 /// <see cref="MediaStreamSource"/> without buffering, starting at a key frame with the SPS/PPS in front, time from the
-/// phone's clock relative to the first sample. Used by the screen mirror window and the camera preview.
+/// phone's clock relative to the first sample. The player only decodes and times the frames (frame server mode);
+/// <see cref="Controls.LiveVideoView"/> puts them on the screen. Used by the screen mirror window and the camera preview.
 /// </summary>
 public sealed class LiveH264Player : IDisposable
 {
@@ -57,7 +58,7 @@ public sealed class LiveH264Player : IDisposable
             }
         };
 
-        Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true };
+        Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
         Player.MediaFailed += (sender, args) =>
         {
             logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
@@ -68,7 +69,7 @@ public sealed class LiveH264Player : IDisposable
     }
 
     /// <summary>
-    /// Gets the player to attach to a MediaPlayerElement.
+    /// Gets the player; its frames are shown by a LiveVideoView.
     /// </summary>
     public MediaPlayer Player { get; }
 
