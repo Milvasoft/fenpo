@@ -375,7 +375,10 @@ jobs:
           (cd ios && xcodegen generate)
 
       - name: Pick a 6.9-inch simulator
-        run: echo "SIMULATOR_ID=$(ios/scripts/store-simulator-id.sh)" >> "$GITHUB_ENV"
+        run: |
+          id="$(bash ios/scripts/store-simulator-id.sh)"
+          echo "Simulator $id"
+          echo "SIMULATOR_ID=$id" >> "$GITHUB_ENV"
 
       - name: Build app
         working-directory: ios
