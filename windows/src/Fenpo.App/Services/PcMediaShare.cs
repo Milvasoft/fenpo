@@ -8,9 +8,9 @@ using Windows.Media.Control;
 namespace Fenpo.App.Services;
 
 /// <summary>
-/// The PC's own player for Fenpo on the Android phone (CAPABILITY_MEDIA both ways): what Windows plays goes to the
-/// phone as MediaState, and the phone's MediaCommand controls it through the system media sessions. Fenpo's own
-/// session (the phone's player shown in Windows) is left out.
+/// The PC's own player for Fenpo on the phones that offer CAPABILITY_MEDIA (Android both ways, the iPhone for the PC
+/// tab only): what Windows plays goes to them as MediaState, and their MediaCommand controls it through the system
+/// media sessions. Fenpo's own session (the phone's player shown in Windows) is left out.
 /// </summary>
 public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> logger) : IHostedService
 {
@@ -40,7 +40,7 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
 
         _channel.HelloReceived += (sender, hello) =>
         {
-            if (hello.Envelope.Hello.Platform == DevicePlatform.Android)
+            if (hello.Envelope.Hello.Capabilities.Contains(Capability.Media))
             {
                 _ = SendStateAsync();
             }
@@ -101,7 +101,7 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
 
     private async Task SendStateAsync()
     {
-        if (!_channel.AndroidConnected || !await _sending.WaitAsync(0))
+        if (!_channel.AnyOffers(Capability.Media) || !await _sending.WaitAsync(0))
         {
             return;
         }
@@ -130,7 +130,7 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
                 state.CanSeek = playback.Controls.IsPlaybackPositionEnabled;
             }
 
-            await _channel.SendToAndroidAsync(new Envelope { MediaState = state });
+            await _channel.SendToEveryAsync(Capability.Media, new Envelope { MediaState = state });
         }
         catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or ObjectDisposedException)
         {

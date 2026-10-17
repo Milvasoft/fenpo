@@ -4,10 +4,15 @@ param([string]$Platform = 'x64', [string]$Configuration = 'Debug')
 $ErrorActionPreference = 'Stop'
 $project = Join-Path $PSScriptRoot '..\src\Fenpo.App\Fenpo.App.csproj'
 
-Get-Process Fenpo -ErrorAction SilentlyContinue | Stop-Process -Force
-Start-Sleep -Milliseconds 300
-dotnet build $project -c $Configuration -p:Platform=$Platform
-if ($LASTEXITCODE -ne 0) { throw 'Build failed' }
+# Fenpo can come back while building (a notification click, the tray, a phone waking it): stop it again and retry
+# once when the build could not overwrite its files.
+for ($attempt = 1; $attempt -le 2; $attempt++) {
+    Get-Process Fenpo -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Sleep -Milliseconds 500
+    $output = dotnet build $project -c $Configuration -p:Platform=$Platform 2>&1
+    if ($LASTEXITCODE -eq 0) { $output | Select-String 'Build succeeded' | Select-Object -First 1; break }
+    if ($attempt -eq 2 -or -not ($output -match 'MSB3027|MSB3021')) { $output | Select-String ' error ' ; throw 'Build failed' }
+}
 
 $layout = Join-Path $PSScriptRoot "..\src\Fenpo.App\bin\$Platform\$Configuration\net10.0-windows10.0.22621.0"
 Get-AppxPackage Milvasoft.Fenpo | Where-Object { $_.InstallLocation -ne (Resolve-Path $layout).Path } | Remove-AppxPackage

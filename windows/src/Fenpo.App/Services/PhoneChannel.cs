@@ -164,6 +164,34 @@ public sealed class PhoneChannel(
     }
 
     /// <summary>
+    /// Gets a value indicating whether a connected phone, in use or not, offered a feature in its Hello.
+    /// </summary>
+    /// <param name="capability">Feature.</param>
+    /// <returns>True when one did.</returns>
+    public bool AnyOffers(Capability capability) => _connected.Values.Any(d => HelloOf(d.DeviceId) is { } hello && hello.Capabilities.Contains(capability));
+
+    /// <summary>
+    /// Sends a message to every connected phone, in use or not, that offered a feature in its Hello (the PC's player
+    /// goes to both phones).
+    /// </summary>
+    /// <param name="capability">Feature the phone must have offered.</param>
+    /// <param name="envelope">Message.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>False when no such phone took it.</returns>
+    public async Task<bool> SendToEveryAsync(Capability capability, Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        var sent = false;
+
+        foreach (var phone in _connected.Values.Where(d => HelloOf(d.DeviceId) is { } hello && hello.Capabilities.Contains(capability)).ToList())
+        {
+            var copy = envelope.Clone();
+            sent |= (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, copy, cancellationToken)) || _ble.Send(phone.DeviceId, copy);
+        }
+
+        return sent;
+    }
+
+    /// <summary>
     /// Forgets the paired Android phone: its record goes, its connections close and it shows as not paired. Pairing
     /// again takes the QR code.
     /// </summary>
