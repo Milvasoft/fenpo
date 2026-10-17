@@ -30,6 +30,13 @@ message Pong {
   uint64 nonce = 1;
 }
 
+// PC → phone, on the BLE channel while the phone has no control connection over Wi‑Fi: the PC has something that
+// needs Wi‑Fi (a file, a large clipboard item, photos, folders). The phone opens its control connection now, also
+// from the background, and keeps it while the work lasts. Not answered; the PC waits for the phone's Wi‑Fi Hello.
+message WifiWanted {
+  string reason = 1;                     // Developer facing, English, e.g. "file transfer". Never shown to users.
+}
+
 // Generic failure reply to a request.
 message Error {
   ErrorCode code = 1;

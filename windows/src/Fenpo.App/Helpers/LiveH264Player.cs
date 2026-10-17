@@ -11,7 +11,8 @@ namespace Fenpo.App.Helpers;
 /// <summary>
 /// Plays a live H.264 stream from the phone (video.proto) with Windows' own decoder: a live
 /// <see cref="MediaStreamSource"/> without buffering, starting at a key frame with the SPS/PPS in front, time from the
-/// phone's clock relative to the first sample. Used by the screen mirror window and the camera preview.
+/// phone's clock relative to the first sample. The player only decodes and times the frames (frame server mode);
+/// <see cref="Controls.LiveVideoView"/> puts them on the screen. Used by the screen mirror window and the camera preview.
 /// </summary>
 public sealed class LiveH264Player : IDisposable
 {
@@ -57,7 +58,7 @@ public sealed class LiveH264Player : IDisposable
             }
         };
 
-        Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true };
+        Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
         Player.MediaFailed += (sender, args) =>
         {
             logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
@@ -68,7 +69,7 @@ public sealed class LiveH264Player : IDisposable
     }
 
     /// <summary>
-    /// Gets the player to attach to a MediaPlayerElement.
+    /// Gets the player; its frames are shown by a LiveVideoView.
     /// </summary>
     public MediaPlayer Player { get; }
 
@@ -137,6 +138,11 @@ public sealed class LiveH264Player : IDisposable
         private int _skipped;
         private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
         private int _framesInWindow;
+        private TimeSpan _interval;
+        private TimeSpan _lastPhone = TimeSpan.FromTicks(-1);
+        private TimeSpan _lastEven;
+        private TimeSpan _minSpacing = TimeSpan.MaxValue;
+        private TimeSpan _maxSpacing;
         private byte[] _config = [];
         private ulong? _firstPts;
 
@@ -163,7 +169,7 @@ public sealed class LiveH264Player : IDisposable
                 _firstPts ??= packet.PtsUs;
                 Measure();
                 var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
-                var phoneTime = TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10);
+                var phoneTime = Even(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
                 var now = _arrivals.Elapsed;
                 var gap = now - _lastArrival;
                 _lastArrival = now;
@@ -208,6 +214,43 @@ public sealed class LiveH264Player : IDisposable
             return null;
         }
 
+        // Capture times wobble by a few milliseconds around the frame interval (the iPhone's camera does); shown as
+        // they are, a frame now and then misses its screen refresh and the next one stays twice as long, which reads
+        // as stutter. Frames about one interval apart are spaced evenly instead, following the phone's clock slowly;
+        // a dropped frame, a pause or a jump keeps its real length.
+        private TimeSpan Even(TimeSpan phoneTime)
+        {
+            if (_lastPhone < TimeSpan.Zero)
+            {
+                _lastPhone = phoneTime;
+                _lastEven = phoneTime;
+                return phoneTime;
+            }
+
+            var spacing = phoneTime - _lastPhone;
+            _lastPhone = phoneTime;
+            _minSpacing = spacing < _minSpacing ? spacing : _minSpacing;
+            _maxSpacing = spacing > _maxSpacing ? spacing : _maxSpacing;
+
+            if (_interval == TimeSpan.Zero && spacing >= TimeSpan.FromMilliseconds(10) && spacing <= TimeSpan.FromMilliseconds(100))
+            {
+                _interval = spacing;
+            }
+
+            if (_interval > TimeSpan.Zero && spacing > _interval / 2 && spacing < _interval * 3 / 2)
+            {
+                _interval += (spacing - _interval) / 32;
+                var even = _lastEven + _interval;
+                _lastEven = even + ((phoneTime - even) / 16);
+            }
+            else
+            {
+                _lastEven += spacing;
+            }
+
+            return _lastEven;
+        }
+
         private void TrimLead(TimeSpan early, TimeSpan now)
         {
             _leastEarly = early < _leastEarly ? early : _leastEarly;
@@ -236,8 +279,10 @@ public sealed class LiveH264Player : IDisposable
 
             if (_window.Elapsed >= TimeSpan.FromSeconds(3))
             {
-                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds);
+                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms, phone spacing {MinSpacing:F1}-{MaxSpacing:F1} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds, _minSpacing == TimeSpan.MaxValue ? 0 : _minSpacing.TotalMilliseconds, _maxSpacing.TotalMilliseconds);
                 _skipped = 0;
+                _minSpacing = TimeSpan.MaxValue;
+                _maxSpacing = TimeSpan.Zero;
                 _maxGap = TimeSpan.Zero;
                 _framesInWindow = 0;
                 _window.Restart();

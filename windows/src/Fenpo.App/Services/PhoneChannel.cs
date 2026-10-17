@@ -35,6 +35,10 @@ public sealed class PhoneChannel(
     ILogger<PhoneChannel> logger) : IHostedService
 {
     private readonly System.Collections.Concurrent.ConcurrentDictionary<Envelope, TaskCompletionSource<Envelope>> _requests = new(ReferenceEqualityComparer.Instance);
+
+    // How long the PC waits for a phone it asked to come to Wi‑Fi (protocol/README.md, "Wi‑Fi on demand").
+    private static readonly TimeSpan WifiWait = TimeSpan.FromSeconds(10);
+    private TaskCompletionSource? _wifiWaiter;
     private readonly ControlServer _wifi = wifi;
     private readonly FenpoGattServer _ble = ble;
     private readonly PhoneStatusTracker _status = status;
@@ -139,7 +143,57 @@ public sealed class PhoneChannel(
             return false;
         }
 
-        return (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken)) || _ble.Send(phone.DeviceId, envelope);
+        if ((_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken)) || _ble.Send(phone.DeviceId, envelope))
+        {
+            return true;
+        }
+
+        // Too large for Bluetooth while the phone sleeps in the background: wake its Wi‑Fi and send there.
+        return await EnsureWifiAsync(envelope.BodyCase.ToString(), cancellationToken) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken);
+    }
+
+    /// <summary>
+    /// Makes sure the phone in use is on Wi‑Fi. When only Bluetooth is up (the phone's app is in the background), the
+    /// phone is asked over Bluetooth to open its Wi‑Fi connection (WifiWanted) and the PC waits a few seconds for it.
+    /// </summary>
+    /// <param name="reason">What needs Wi‑Fi, for the log and the phone's log.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True when the phone is on Wi‑Fi.</returns>
+    public async Task<bool> EnsureWifiAsync(string reason, CancellationToken cancellationToken = default)
+    {
+        if (WifiConnected)
+        {
+            return true;
+        }
+
+        if (Phone is not { } phone || !_bleHellos.ContainsKey(phone.DeviceId))
+        {
+            return false;
+        }
+
+        var created = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var waiter = Interlocked.CompareExchange(ref _wifiWaiter, created, null) ?? created;
+
+        if (!_ble.Send(phone.DeviceId, new Envelope { WifiWanted = new WifiWanted { Reason = reason } }))
+        {
+            return WifiConnected;
+        }
+
+        _logger.LogInformation("Asked {Phone} to come to Wi-Fi for {Reason}", phone.Name, reason);
+
+        try
+        {
+            if (!WifiConnected)
+            {
+                await waiter.Task.WaitAsync(WifiWait, cancellationToken);
+            }
+        }
+        catch (TimeoutException)
+        {
+            _logger.LogInformation("{Phone} did not come to Wi-Fi within {Seconds} s", phone.Name, WifiWait.TotalSeconds);
+        }
+
+        return WifiConnected;
     }
 
     /// <summary>
@@ -161,6 +215,34 @@ public sealed class PhoneChannel(
         }
 
         return (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken)) || _ble.Send(phone.DeviceId, envelope);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether a connected phone, in use or not, offered a feature in its Hello.
+    /// </summary>
+    /// <param name="capability">Feature.</param>
+    /// <returns>True when one did.</returns>
+    public bool AnyOffers(Capability capability) => _connected.Values.Any(d => HelloOf(d.DeviceId) is { } hello && hello.Capabilities.Contains(capability));
+
+    /// <summary>
+    /// Sends a message to every connected phone, in use or not, that offered a feature in its Hello (the PC's player
+    /// goes to both phones).
+    /// </summary>
+    /// <param name="capability">Feature the phone must have offered.</param>
+    /// <param name="envelope">Message.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>False when no such phone took it.</returns>
+    public async Task<bool> SendToEveryAsync(Capability capability, Envelope envelope, CancellationToken cancellationToken = default)
+    {
+        var sent = false;
+
+        foreach (var phone in _connected.Values.Where(d => HelloOf(d.DeviceId) is { } hello && hello.Capabilities.Contains(capability)).ToList())
+        {
+            var copy = envelope.Clone();
+            sent |= (_wifiHellos.ContainsKey(phone.DeviceId) && await _wifi.SendAsync(phone.DeviceId, copy, cancellationToken)) || _ble.Send(phone.DeviceId, copy);
+        }
+
+        return sent;
     }
 
     /// <summary>
@@ -196,12 +278,13 @@ public sealed class PhoneChannel(
     }
 
     /// <summary>
-    /// Sends a message over Wi‑Fi only (file transfers).
+    /// Sends a message over Wi‑Fi only (file transfers), asking a phone in the background to come to Wi‑Fi first.
     /// </summary>
     /// <param name="envelope">Message.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>False when the phone is not connected over Wi‑Fi.</returns>
-    public Task<bool> SendOverWifiAsync(Envelope envelope, CancellationToken cancellationToken = default) => Phone is { } phone ? _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken) : Task.FromResult(false);
+    public async Task<bool> SendOverWifiAsync(Envelope envelope, CancellationToken cancellationToken = default) =>
+        await EnsureWifiAsync(envelope.BodyCase.ToString(), cancellationToken) && Phone is { } phone && await _wifi.SendAsync(phone.DeviceId, envelope, cancellationToken);
 
     /// <summary>
     /// Answers a request on the channel it came on, so the phone can match <c>reply_to</c>; the other channel if that
@@ -252,6 +335,11 @@ public sealed class PhoneChannel(
     private void OnHello(PairedAppDevice device, Hello hello, bool overWifi)
     {
         (overWifi ? _wifiHellos : _bleHellos)[device.DeviceId] = hello;
+
+        if (overWifi)
+        {
+            Interlocked.Exchange(ref _wifiWaiter, null)?.TrySetResult();
+        }
         _connected[device.DeviceId] = device;
         _logger.LogInformation("{Phone} offers {Capabilities} over {Channel}", device.Name, string.Join(", ", hello.Capabilities), overWifi ? "Wi-Fi" : "Bluetooth");
 
