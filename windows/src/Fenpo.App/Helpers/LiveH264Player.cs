@@ -1,22 +1,48 @@
-using System.Runtime.InteropServices.WindowsRuntime;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading.Channels;
+using DirectN;
+using DirectN.Extensions;
+using DirectN.Extensions.Com;
+using DirectN.Extensions.Utilities;
 using Fenpo.Protocol.V1;
 using Microsoft.Extensions.Logging;
-using Windows.Media.Core;
-using Windows.Media.MediaProperties;
-using Windows.Media.Playback;
+using ComObject = DirectN.Extensions.Com.ComObject;
 
 namespace Fenpo.App.Helpers;
 
 /// <summary>
-/// Plays a live H.264 stream from the phone (video.proto) with Windows' own decoder: a live
-/// <see cref="MediaStreamSource"/> without buffering, starting at a key frame with the SPS/PPS in front, time from the
-/// phone's clock relative to the first sample. The player only decodes and times the frames (frame server mode);
-/// <see cref="Controls.LiveVideoView"/> puts them on the screen. Used by the screen mirror window and the camera preview.
+/// Plays a live H.264 stream from the phone (video.proto): Windows' H.264 decoder (the same one Fenpo Kamera uses)
+/// turns every frame into a picture as soon as it arrives, and <see cref="FrameReady"/> hands it to
+/// <see cref="Controls.LiveVideoView"/>. Windows' media player was dropped: after a few seconds it showed only the key
+/// frames of a stream that came in evenly at 30 frames a second. Used by the screen mirror window and the camera preview.
 /// </summary>
 public sealed class LiveH264Player : IDisposable
 {
-    private readonly CancellationTokenSource _feeding = new();
+    // Frames go in but no picture has come out for this long: the decoder lost its reference (the phone switched
+    // lenses or paused) and waits for a key frame; the phone is asked for one at once.
+    private static readonly TimeSpan Stall = TimeSpan.FromMilliseconds(500);
+
+    private static int _mediaFoundation;
+
+    private readonly ChannelReader<StreamPacket> _packets;
+    private readonly ILogger _logger;
+    private readonly Action _keyFrameNeeded;
+    private readonly CancellationTokenSource _stop = new();
+    private readonly Thread _thread;
+    private readonly Stopwatch _sinceShown = Stopwatch.StartNew();
+    private readonly Stopwatch _sinceKeyFrameAsked = Stopwatch.StartNew();
+    private readonly Stopwatch _window = Stopwatch.StartNew();
+    private IComObject<IMFTransform>? _decoder;
+    private byte[] _config = [];
+    private byte[] _picture = [];
+    private int _decodedWidth;
+    private int _decodedHeight;
+    private int _decodedStride;
+    private int _framesIn;
+    private int _picturesOut;
+    private int _keyFrames;
+    private TimeSpan _longestGap;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LiveH264Player"/> class and starts playing.
@@ -25,132 +51,76 @@ public sealed class LiveH264Player : IDisposable
     /// <param name="width">Encoded width.</param>
     /// <param name="height">Encoded height.</param>
     /// <param name="logger">Logger.</param>
-    /// <param name="failed">Called when Windows cannot show the stream (ask the phone for a key frame).</param>
-    public LiveH264Player(ChannelReader<StreamPacket> packets, uint width, uint height, ILogger logger, Action failed)
+    /// <param name="keyFrameNeeded">Called when the picture cannot go on without a key frame (ask the phone for one).</param>
+    public LiveH264Player(ChannelReader<StreamPacket> packets, uint width, uint height, ILogger logger, Action keyFrameNeeded)
     {
-        var properties = VideoEncodingProperties.CreateH264();
-        properties.Width = width == 0 ? 1280 : width;
-        properties.Height = height == 0 ? 720 : height;
-        Size = (properties.Width, properties.Height);
-        var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position);
-        source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
-        source.SampleRequested += async (sender, args) =>
-        {
-            var deferral = args.Request.GetDeferral();
+        _packets = packets;
+        _logger = logger;
+        _keyFrameNeeded = keyFrameNeeded;
+        Size = (width == 0 ? 1280 : width, height == 0 ? 720 : height);
 
-            try
-            {
-                args.Request.Sample = await feeder.NextAsync();
-            }
-            catch (OperationCanceledException)
-            {
-                args.Request.Sample = null;
-            }
-            catch (Exception exception)
-            {
-                logger.LogWarning(exception, "Feeding the live stream failed");
-                args.Request.Sample = null;
-            }
-            finally
-            {
-                deferral.Complete();
-            }
-        };
-
-        Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
-        Player.MediaFailed += (sender, args) =>
+        if (Interlocked.Exchange(ref _mediaFoundation, 1) == 0)
         {
-            logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
-            failed();
-        };
-        Player.Source = MediaSource.CreateFromMediaStreamSource(source);
-        Player.Play();
+            Functions.MFStartup(0x00020070, 1).ThrowOnError(); // MF_VERSION, MFSTARTUP_LITE
+        }
+
+        _thread = new Thread(Run) { IsBackground = true, Name = "Fenpo live video" };
+        _thread.SetApartmentState(ApartmentState.MTA);
+        _thread.Start();
     }
 
     /// <summary>
-    /// Gets the player; its frames are shown by a LiveVideoView.
+    /// Receives a decoded picture.
     /// </summary>
-    public MediaPlayer Player { get; }
+    /// <param name="bgra">The picture, valid only during the call.</param>
+    public delegate void FrameHandler(ReadOnlySpan<byte> bgra);
 
     /// <summary>
-    /// Gets the size the player was started with.
+    /// A picture is ready, on the decoding thread: BGRA at <see cref="Size"/>, 4 bytes a pixel, rows without padding.
+    /// The span is valid only during the call.
+    /// </summary>
+    public event FrameHandler? FrameReady;
+
+    /// <summary>
+    /// Gets the size the stream was announced with; pictures have this size.
     /// </summary>
     public (uint Width, uint Height) Size { get; }
-
-    // Where the picture is now on the player's clock.
-    private TimeSpan Position()
-    {
-        try
-        {
-            return Player.PlaybackSession.Position;
-        }
-        catch (Exception exception) when (exception is ObjectDisposedException or InvalidOperationException or System.Runtime.InteropServices.COMException)
-        {
-            return TimeSpan.Zero;
-        }
-    }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        // The pending sample request ends here, so a new player can read the same packets.
-        _feeding.Cancel();
-        Player.Dispose();
-        _feeding.Dispose();
+        _stop.Cancel();
+        _thread.Join(TimeSpan.FromSeconds(2));
     }
 
-    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position)
+    private void Run()
     {
-        // Frames still waiting here beyond this many are behind live: they are given times that are already due, so
-        // the player decodes them (later frames need them) and shows only the newest instead of playing them out.
-        private const int Backlog = 2;
-
-        private static readonly TimeSpan MinLead = TimeSpan.FromMilliseconds(30);
-
-        // A frame this far ahead of the picture means the phone's clock jumped (its camera restarted, say); waiting
-        // for it would freeze the picture, so the timeline starts again from here.
-        private static readonly TimeSpan MaxLead = TimeSpan.FromSeconds(1);
-
-        private readonly Func<TimeSpan> _position = position;
-        private readonly ChannelReader<StreamPacket> _packets = packets;
-        private readonly CancellationToken _cancellationToken = cancellationToken;
-        private readonly ILogger _logger = logger;
-
-        // Over this much lead for a whole second, the picture trails live by more than Wi‑Fi needs.
-        private static readonly TimeSpan Spare = TimeSpan.FromMilliseconds(60);
-
-        // Trimmed off the lead per frame while there is spare: 1 ms a frame is 3 % faster, which nobody sees.
-        private static readonly TimeSpan Trim = TimeSpan.FromMilliseconds(1);
-
-        private readonly System.Diagnostics.Stopwatch _arrivals = System.Diagnostics.Stopwatch.StartNew();
-        private TimeSpan _lastArrival;
-        private TimeSpan _maxGap;
-
-        // Frame time = phone time since the first frame + this offset, so frames keep the phone's even spacing even
-        // when Wi‑Fi delivers them in pairs or bursts. The offset only grows when a frame would be late (a visible
-        // hitch, rare) and shrinks slowly while every frame of the last second had lead to spare.
-        private TimeSpan _offset;
-        private TimeSpan _leastEarly = TimeSpan.MaxValue;
-        private TimeSpan _spareSince;
-        private TimeSpan _last = TimeSpan.FromTicks(-1);
-        private TimeSpan _early;
-        private int _skipped;
-        private readonly System.Diagnostics.Stopwatch _window = System.Diagnostics.Stopwatch.StartNew();
-        private int _framesInWindow;
-        private TimeSpan _interval;
-        private TimeSpan _lastPhone = TimeSpan.FromTicks(-1);
-        private TimeSpan _lastEven;
-        private TimeSpan _minSpacing = TimeSpan.MaxValue;
-        private TimeSpan _maxSpacing;
-        private byte[] _config = [];
-        private ulong? _firstPts;
-
-        public async Task<MediaStreamSample?> NextAsync()
+        try
         {
-            while (await _packets.WaitToReadAsync(_cancellationToken))
+            RunAsync().GetAwaiter().GetResult();
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (ChannelClosedException)
+        {
+        }
+        finally
+        {
+            _decoder?.Dispose();
+            _decoder = null;
+        }
+    }
+
+    private async Task RunAsync()
+    {
+        var cancellationToken = _stop.Token;
+
+        while (await _packets.WaitToReadAsync(cancellationToken))
+        {
+            while (!cancellationToken.IsCancellationRequested && _packets.TryRead(out var packet))
             {
-                if (!_packets.TryRead(out var packet) || packet.Track != StreamTrack.Video)
+                if (packet.Track != StreamTrack.Video)
                 {
                     continue;
                 }
@@ -161,132 +131,230 @@ public sealed class LiveH264Player : IDisposable
                     continue;
                 }
 
-                if (_firstPts is null && !packet.KeyFrame)
+                if (_decoder is null && !packet.KeyFrame)
                 {
                     continue;
                 }
 
-                _firstPts ??= packet.PtsUs;
-                Measure();
-                var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
-                var phoneTime = Even(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
-                var now = _arrivals.Elapsed;
-                var gap = now - _lastArrival;
-                _lastArrival = now;
-                _maxGap = gap > _maxGap ? gap : _maxGap;
-                var position = _position();
-                var time = phoneTime + _offset;
-
-                if (_packets.Count > Backlog)
-                {
-                    time = position;
-                    _skipped++;
-                }
-                else if (time > position + MaxLead)
-                {
-                    _logger.LogInformation("Live stream: the phone's clock jumped {Jump} ms ahead; the timeline starts again", (int)(time - position).TotalMilliseconds);
-                    time = position + MinLead;
-                    _leastEarly = TimeSpan.MaxValue;
-                    _spareSince = now;
-                }
-                else if (time < position + MinLead)
-                {
-                    // Late: from here on frames get this much more lead, and the spare is measured afresh.
-                    time = position + MinLead;
-                    _leastEarly = TimeSpan.MaxValue;
-                    _spareSince = now;
-                }
-                else
-                {
-                    TrimLead(time - position, now);
-                }
-
-                // Times only go forward.
-                time = time > _last ? time : _last + TimeSpan.FromMilliseconds(1);
-                _offset = time - phoneTime;
-                _last = time;
-                _early = time - position;
-                var sample = MediaStreamSample.CreateFromBuffer(data.AsBuffer(), time);
-                sample.KeyFrame = packet.KeyFrame;
-                return sample;
+                Decode(packet);
+                Measure(packet.KeyFrame);
             }
+        }
+    }
 
-            return null;
+    private void Decode(StreamPacket packet)
+    {
+        try
+        {
+            EnsureDecoder();
+            byte[] data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
+            Feed(data, (long)packet.PtsUs * 10);
+            Drain();
+        }
+        catch (Exception exception) when (exception is COMException or InvalidOperationException or ArgumentException)
+        {
+            _logger.LogWarning("Decoding the live stream failed, starting again at the next key frame: {Reason}", exception.Message);
+            _decoder?.Dispose();
+            _decoder = null;
+            AskForKeyFrame();
+        }
+    }
+
+    private void EnsureDecoder()
+    {
+        if (_decoder is not null)
+        {
+            return;
         }
 
-        // Capture times wobble by a few milliseconds around the frame interval (the iPhone's camera does); shown as
-        // they are, a frame now and then misses its screen refresh and the next one stays twice as long, which reads
-        // as stutter. Frames about one interval apart are spaced evenly instead, following the phone's clock slowly;
-        // a dropped frame, a pause or a jump keeps its real length.
-        private TimeSpan Even(TimeSpan phoneTime)
+        var decoder = ComObject.CoCreate<IMFTransform>(Constants.CLSID_MSH264DecoderMFT) ?? throw new InvalidOperationException("No H.264 decoder");
+
+        if (decoder.Object.GetAttributes(out var attributes).IsSuccess && attributes is not null)
         {
-            if (_lastPhone < TimeSpan.Zero)
-            {
-                _lastPhone = phoneTime;
-                _lastEven = phoneTime;
-                return phoneTime;
-            }
-
-            var spacing = phoneTime - _lastPhone;
-            _lastPhone = phoneTime;
-            _minSpacing = spacing < _minSpacing ? spacing : _minSpacing;
-            _maxSpacing = spacing > _maxSpacing ? spacing : _maxSpacing;
-
-            if (_interval == TimeSpan.Zero && spacing >= TimeSpan.FromMilliseconds(10) && spacing <= TimeSpan.FromMilliseconds(100))
-            {
-                _interval = spacing;
-            }
-
-            if (_interval > TimeSpan.Zero && spacing > _interval / 2 && spacing < _interval * 3 / 2)
-            {
-                _interval += (spacing - _interval) / 32;
-                var even = _lastEven + _interval;
-                _lastEven = even + ((phoneTime - even) / 16);
-            }
-            else
-            {
-                _lastEven += spacing;
-            }
-
-            return _lastEven;
+            attributes.SetUINT32(Constants.MF_LOW_LATENCY, 1);
         }
 
-        private void TrimLead(TimeSpan early, TimeSpan now)
-        {
-            _leastEarly = early < _leastEarly ? early : _leastEarly;
+        Functions.MFCreateMediaType(out var inputObject).ThrowOnError();
+        using var input = new ComObject<IMFMediaType>(inputObject);
+        input.Set(Constants.MF_MT_MAJOR_TYPE, Constants.MFMediaType_Video);
+        input.Set(Constants.MF_MT_SUBTYPE, Constants.MFVideoFormat_H264);
+        input.SetSize(Constants.MF_MT_FRAME_SIZE, Size.Width, Size.Height);
+        input.SetRatio(Constants.MF_MT_FRAME_RATE, 30, 1);
+        decoder.Object.SetInputType(0, input.Object, 0).ThrowOnError();
+        _decoder = decoder;
+        SetOutputType();
+    }
 
-            if (now - _spareSince < TimeSpan.FromSeconds(1))
+    // NV12 out; the size comes from the stream (a 1080p stream decodes as 1088 lines, the last 8 cropped).
+    private void SetOutputType()
+    {
+        for (uint index = 0; _decoder!.Object.GetOutputAvailableType(0, index, out var typeObject).IsSuccess; index++)
+        {
+            using var type = new ComObject<IMFMediaType>(typeObject);
+
+            if (type.Object.GetGUID(Constants.MF_MT_SUBTYPE, out var subtype).IsSuccess && subtype == Constants.MFVideoFormat_NV12)
+            {
+                _decoder.Object.SetOutputType(0, type.Object, 0).ThrowOnError();
+                type.Object.GetUINT64(Constants.MF_MT_FRAME_SIZE, out var size).ThrowOnError();
+                _decodedWidth = (int)(size >> 32);
+                _decodedHeight = (int)(size & 0xFFFFFFFF);
+                _decodedStride = type.Object.GetUINT32(Constants.MF_MT_DEFAULT_STRIDE, out var stride).IsSuccess ? (int)stride : _decodedWidth;
+                return;
+            }
+        }
+
+        throw new InvalidOperationException("The decoder offers no NV12 output");
+    }
+
+    private unsafe void Feed(byte[] data, long time)
+    {
+        Functions.MFCreateMemoryBuffer((uint)data.Length, out var bufferObject).ThrowOnError();
+        using var buffer = new ComObject<IMFMediaBuffer>(bufferObject);
+        buffer.WithLock((target, max, _) => data.AsSpan().CopyTo(new Span<byte>((void*)target, data.Length)));
+        buffer.Object.SetCurrentLength((uint)data.Length).ThrowOnError();
+        Functions.MFCreateSample(out var sampleObject).ThrowOnError();
+        using var sample = new ComObject<IMFSample>(sampleObject);
+        sample.Object.AddBuffer(buffer.Object).ThrowOnError();
+        sample.Object.SetSampleTime(time).ThrowOnError();
+        _decoder!.Object.ProcessInput(0, sample.Object, 0).ThrowOnError();
+    }
+
+    private unsafe void Drain()
+    {
+        while (true)
+        {
+            _decoder!.Object.GetOutputStreamInfo(0, out var info).ThrowOnError();
+            Functions.MFCreateMemoryBuffer(Math.Max(info.cbSize, (uint)(_decodedStride * _decodedHeight * 3 / 2)), out var bufferObject).ThrowOnError();
+            using var buffer = new ComObject<IMFMediaBuffer>(bufferObject);
+            Functions.MFCreateSample(out var sampleObject).ThrowOnError();
+            using var sample = new ComObject<IMFSample>(sampleObject);
+            sample.Object.AddBuffer(buffer.Object).ThrowOnError();
+
+            var output = new MFT_OUTPUT_DATA_BUFFER[1];
+            HRESULT result = Constants.S_OK;
+            ComObject.WithComInstance(sample, unknown =>
+            {
+                output[0].pSample = unknown;
+                result = _decoder.Object.ProcessOutput(0, 1, output, out _);
+            });
+
+            if (result == Constants.MF_E_TRANSFORM_NEED_MORE_INPUT)
             {
                 return;
             }
 
-            // A second in which no frame came closer than this: take the spare off, a millisecond a frame.
-            if (_leastEarly > MinLead + Spare)
+            if (result == Constants.MF_E_TRANSFORM_STREAM_CHANGE)
             {
-                _offset -= Trim;
-                _leastEarly -= Trim;
-                return;
+                SetOutputType();
+                continue;
             }
 
-            _leastEarly = TimeSpan.MaxValue;
-            _spareSince = now;
+            result.ThrowOnError();
+            buffer.WithLock((data, max, current) => Show((byte*)data));
+        }
+    }
+
+    // Decoded NV12 (decoder's size and stride) to BGRA at the announced size, then out to the view.
+    private unsafe void Show(byte* nv12)
+    {
+        var width = (int)Math.Min(Size.Width, (uint)_decodedWidth) & ~1;
+        var height = (int)Math.Min(Size.Height, (uint)_decodedHeight) & ~1;
+        var length = (int)(Size.Width * Size.Height * 4);
+
+        if (_picture.Length != length)
+        {
+            _picture = new byte[length];
         }
 
-        // Every few seconds: how many frames the player took and how many wait behind it.
-        private void Measure()
+        fixed (byte* bgra = _picture)
         {
-            _framesInWindow++;
+            ToBgra(nv12, _decodedStride, _decodedHeight, bgra, (int)Size.Width * 4, width, height);
+        }
 
-            if (_window.Elapsed >= TimeSpan.FromSeconds(3))
+        _longestGap = _sinceShown.Elapsed > _longestGap ? _sinceShown.Elapsed : _longestGap;
+        _sinceShown.Restart();
+        _picturesOut++;
+        FrameReady?.Invoke(_picture);
+    }
+
+    // BT.709 limited range, the phones' HD default; rows in parallel bands.
+    private static unsafe void ToBgra(byte* nv12, int stride, int decodedHeight, byte* bgra, int bgraStride, int width, int height)
+    {
+        var luma = (nint)nv12;
+        var chroma = (nint)(nv12 + (stride * decodedHeight));
+        var target = (nint)bgra;
+        var bands = Math.Clamp(Environment.ProcessorCount, 1, 8);
+        var rowsPerBand = ((height / 2) + bands - 1) / bands * 2;
+
+        Parallel.For(0, bands, band =>
+        {
+            var first = band * rowsPerBand;
+            var last = Math.Min(height, first + rowsPerBand);
+
+            for (var row = first; row < last; row++)
             {
-                _logger.LogInformation("Live stream: {Fps:F1} frames/s handed over, {Queued} packets waiting, {Skipped} caught up, last frame {Early} ms early, longest gap {Gap} ms, phone spacing {MinSpacing:F1}-{MaxSpacing:F1} ms", _framesInWindow / _window.Elapsed.TotalSeconds, _packets.Count, _skipped, (int)_early.TotalMilliseconds, (int)_maxGap.TotalMilliseconds, _minSpacing == TimeSpan.MaxValue ? 0 : _minSpacing.TotalMilliseconds, _maxSpacing.TotalMilliseconds);
-                _skipped = 0;
-                _minSpacing = TimeSpan.MaxValue;
-                _maxSpacing = TimeSpan.Zero;
-                _maxGap = TimeSpan.Zero;
-                _framesInWindow = 0;
-                _window.Restart();
+                var y = (byte*)luma + (row * stride);
+                var uv = (byte*)chroma + ((row / 2) * stride);
+                var output = (byte*)target + (row * bgraStride);
+
+                for (var column = 0; column < width; column += 2)
+                {
+                    var u = uv[column] - 128;
+                    var v = uv[column + 1] - 128;
+                    var red = (459 * v) + 128;
+                    var green = (-55 * u) - (136 * v) + 128;
+                    var blue = (541 * u) + 128;
+
+                    for (var pixel = 0; pixel < 2; pixel++)
+                    {
+                        var c = (y[column + pixel] - 16) * 298;
+                        var o = output + ((column + pixel) * 4);
+                        o[0] = Clamp((c + blue) >> 8);
+                        o[1] = Clamp((c + green) >> 8);
+                        o[2] = Clamp((c + red) >> 8);
+                        o[3] = 255;
+                    }
+                }
             }
+        });
+    }
+
+    private static byte Clamp(int value) => (byte)Math.Clamp(value, 0, 255);
+
+    private void AskForKeyFrame()
+    {
+        if (_sinceKeyFrameAsked.Elapsed > Stall)
+        {
+            _sinceKeyFrameAsked.Restart();
+            _keyFrameNeeded();
+        }
+    }
+
+    // Every few seconds: frames in, pictures out, key frames, and the longest wait between two pictures.
+    private void Measure(bool keyFrame)
+    {
+        _framesIn++;
+        _keyFrames += keyFrame ? 1 : 0;
+
+        if (keyFrame)
+        {
+            _sinceKeyFrameAsked.Restart();
+        }
+        else if (_sinceShown.Elapsed > Stall)
+        {
+            _logger.LogInformation("Live stream: no picture for {Ms} ms while frames come in; asking the phone for a key frame", (int)_sinceShown.Elapsed.TotalMilliseconds);
+            AskForKeyFrame();
+        }
+
+        if (_window.Elapsed >= TimeSpan.FromSeconds(3))
+        {
+            var seconds = _window.Elapsed.TotalSeconds;
+            _logger.LogInformation("Live stream: {In:F1} frames/s in, {Out:F1} pictures/s out, {KeyFrames} key frames, {Queued} waiting, longest gap {Gap} ms", _framesIn / seconds, _picturesOut / seconds, _keyFrames, _packets.Count, (int)_longestGap.TotalMilliseconds);
+            _framesIn = 0;
+            _picturesOut = 0;
+            _keyFrames = 0;
+            _longestGap = TimeSpan.Zero;
+            _window.Restart();
         }
     }
 }
