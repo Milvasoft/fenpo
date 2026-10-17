@@ -142,7 +142,7 @@ Taslak v1 dosyaları hazır: `protocol/fenpo/v1/` (ayrıntı `protocol/README.md
 | `content.proto` | `ClipboardItem` (hassas işaretiyle), `ClipboardRequest`, `OpenUrl` |
 | `transfer.proto` | `TransferOffer`, `TransferAccept`, `TransferStreamHeader`, `TransferProgress`, `TransferCancel` |
 | `device.proto` | `DeviceState` (Android'in ölçtüğü BLE RSSI dahil), `PcStatus`, `RingDevice`, `LockPc` |
-| `media.proto` | `MediaState`, `MediaCommand`: Android'in ve PC'nin şu an çalanı ve kontrolü |
+| `media.proto` | `MediaState`, `MediaCommand`: Android'in ve PC'nin şu an çalanı ve kontrolü; iPhone yalnızca PC'ninkini alır ve kontrol eder (kendi çalanı AMS'ten gelir) |
 | `messages.proto` | MAP'i olmayan Android telefonlarda SMS: konuşmalar, mesajlar, gönderme |
 | `pc_input.proto` | Telefonun PC'ye dokunmatik yüzey, klavye ve sunum kumandası olması: `PcInput` |
 | `video.proto` | Görüntü ve ses bağlantıları: biçimler, PC'nin çözebildikleri (`AcceptedFormats`), `MediaStreamOpen`, `StreamPacket`, `RequestKeyFrame` |

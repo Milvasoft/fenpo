@@ -46,6 +46,20 @@ Kalan açıklama: bu Windows sürümünde `PhoneLineTransportDevice` kaydı LAF 
 
 Denenmeyen: Sefirah'ın Windows'tan çıkarılmış bir anahtarla LAF token'ı üretmesi. Microsoft'un erişim kontrolünü dolanmak olduğu için Fenpo'da kullanılmıyor (DECISIONS #6).
 
+## Yeniden deneme (17 Ekim 2026, Windows 11 26H2 build 26300.9711, Insider kanalı yok, Galaxy S10+)
+
+Bu makinenin Insider'da olmadığı görüldü (WindowsSelfHost kanalı boş): yukarıdaki "Insider" notu yanlış olabilir, bu Windows 11'in normal sürümü. iPhone yeniden eşleştirildikten sonra HFP taşıyıcısı olarak sadece Galaxy S10+ göründü; aynı paket onunla çalıştırıldı.
+
+| Adım | Sonuç |
+|---|---|
+| `PhoneLineTransportDevice` | Galaxy S10+ (HFP Audio Gateway) bulundu |
+| LAF `phonelinetransportdevice_v1` | **`Unavailable`** |
+| `RequestAccessAsync` | `Allowed` |
+| `RegisterApp` / `IsRegistered` | Hata yok, **false** |
+| `ConnectAsync` | `False` |
+
+Sonuç iPhone'dakiyle aynı: telefondan bağımsız olarak Windows, LAF token'ı olmayan uygulamanın HFP kaydını sessizce reddediyor. "Kararlı Windows'ta denemek" seçeneği bu makinede zaten denenmiş oldu. Geriye Microsoft'tan LAF erişimi istemek kalıyor.
+
 ## Karar
 
 - **Aşama 2'de aramalar yedek yolla yapılır:** gelen arama ANCS'nin `IncomingCall` bildiriminden Ada'da gösterilir. "Yanıtla" ANCS olumlu aksiyonu, "Reddet" olumsuz aksiyonu gönderir. Ses iPhone'da kalır; arama başlatma PC'den yapılamaz. ANCS aksiyonları S1'de çalıştı, `IncomingCall` kategorisi henüz cihazda görülmedi.

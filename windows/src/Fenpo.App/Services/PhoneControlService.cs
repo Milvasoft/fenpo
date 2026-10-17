@@ -36,6 +36,13 @@ public sealed partial class PhoneControlService(HidPeripheral hid, ILogger<Phone
     private int _dy;
     private int _wheel;
 
+    // The phone takes about one report per Bluetooth connection event (15 ms on the iPhone); sending a report per
+    // mouse event (up to 1000 a second) queues them up, and the pointer lags and then jumps. Moves wait until the
+    // previous report is out and this much time has passed, summed meanwhile.
+    private static readonly TimeSpan MoveInterval = TimeSpan.FromMilliseconds(15);
+    private readonly System.Diagnostics.Stopwatch _sinceMove = System.Diagnostics.Stopwatch.StartNew();
+    private Task _lastMove = Task.CompletedTask;
+
     /// <summary>
     /// Raised from any thread when control starts or ends, or the phone's link changes.
     /// </summary>
@@ -259,8 +266,8 @@ public sealed partial class PhoneControlService(HidPeripheral hid, ILogger<Phone
         Flush(force: true);
     });
 
-    // Input is handled off the hook thread (hooks must return at once); moves are summed and sent about 120 times a
-    // second.
+    // Input is handled off the hook thread (hooks must return at once); moves are summed and sent at most every
+    // MoveInterval.
     private async Task SendLoopAsync()
     {
         var reader = _input.Reader;
@@ -287,10 +294,17 @@ public sealed partial class PhoneControlService(HidPeripheral hid, ILogger<Phone
             return;
         }
 
+        if (!force && (!_lastMove.IsCompleted || _sinceMove.Elapsed < MoveInterval))
+        {
+            return;
+        }
+
         foreach (var report in HidReports.Mouse(_dx, _dy, _wheel, _buttons))
         {
-            _ = _hid.SendMouseAsync(report);
+            _lastMove = _hid.SendMouseAsync(report);
         }
+
+        _sinceMove.Restart();
 
         _dx = 0;
         _dy = 0;
