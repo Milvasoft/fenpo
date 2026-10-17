@@ -17,6 +17,7 @@ namespace Fenpo.App.Helpers;
 public sealed class LiveH264Player : IDisposable
 {
     private readonly CancellationTokenSource _feeding = new();
+    private readonly System.Diagnostics.Stopwatch _sinceShown = System.Diagnostics.Stopwatch.StartNew();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="LiveH264Player"/> class and starts playing.
@@ -25,7 +26,7 @@ public sealed class LiveH264Player : IDisposable
     /// <param name="width">Encoded width.</param>
     /// <param name="height">Encoded height.</param>
     /// <param name="logger">Logger.</param>
-    /// <param name="failed">Called when Windows cannot show the stream (ask the phone for a key frame).</param>
+    /// <param name="failed">Called when Windows cannot show the stream or the picture stalls (ask the phone for a key frame).</param>
     public LiveH264Player(ChannelReader<StreamPacket> packets, uint width, uint height, ILogger logger, Action failed)
     {
         var properties = VideoEncodingProperties.CreateH264();
@@ -33,7 +34,7 @@ public sealed class LiveH264Player : IDisposable
         properties.Height = height == 0 ? 720 : height;
         Size = (properties.Width, properties.Height);
         var source = new MediaStreamSource(new VideoStreamDescriptor(properties)) { BufferTime = TimeSpan.Zero, IsLive = true, CanSeek = false };
-        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position);
+        var feeder = new SampleFeeder(packets, _feeding.Token, logger, Position, () => _sinceShown.Elapsed, failed);
         source.Starting += (sender, args) => args.Request.SetActualStartPosition(TimeSpan.Zero);
         source.SampleRequested += async (sender, args) =>
         {
@@ -59,6 +60,7 @@ public sealed class LiveH264Player : IDisposable
         };
 
         Player = new MediaPlayer { RealTimePlayback = true, IsMuted = true, IsVideoFrameServerEnabled = true };
+        Player.VideoFrameAvailable += (sender, args) => _sinceShown.Restart();
         Player.MediaFailed += (sender, args) =>
         {
             logger.LogWarning("Live stream could not be shown: {Error} {Message}", args.Error, args.ErrorMessage);
@@ -100,8 +102,16 @@ public sealed class LiveH264Player : IDisposable
         _feeding.Dispose();
     }
 
-    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position)
+    private sealed class SampleFeeder(ChannelReader<StreamPacket> packets, CancellationToken cancellationToken, ILogger logger, Func<TimeSpan> position, Func<TimeSpan> sinceShown, Action stalled)
     {
+        // Frames go in but none has come out for this long: the decoder lost its reference (the phone switched lenses
+        // or cameras and paused for a moment) and waits for the next key frame, up to two seconds away. Asking the
+        // phone for one now ends the freeze at once.
+        private static readonly TimeSpan Stall = TimeSpan.FromMilliseconds(500);
+
+        private readonly Func<TimeSpan> _sinceShown = sinceShown;
+        private readonly Action _stalled = stalled;
+        private readonly System.Diagnostics.Stopwatch _sinceKeyFrameAsked = System.Diagnostics.Stopwatch.StartNew();
         // Frames still waiting here beyond this many are behind live: they are given times that are already due, so
         // the player decodes them (later frames need them) and shows only the newest instead of playing them out.
         private const int Backlog = 2;
@@ -168,6 +178,7 @@ public sealed class LiveH264Player : IDisposable
 
                 _firstPts ??= packet.PtsUs;
                 Measure();
+                WatchForStall(packet.KeyFrame);
                 var data = packet.KeyFrame ? [.. _config, .. packet.Data.Span] : packet.Data.ToByteArray();
                 var phoneTime = Even(TimeSpan.FromTicks((long)(packet.PtsUs - Math.Min(packet.PtsUs, _firstPts.Value)) * 10));
                 var now = _arrivals.Elapsed;
@@ -249,6 +260,22 @@ public sealed class LiveH264Player : IDisposable
             }
 
             return _lastEven;
+        }
+
+        private void WatchForStall(bool keyFrame)
+        {
+            if (keyFrame)
+            {
+                _sinceKeyFrameAsked.Restart();
+                return;
+            }
+
+            if (_sinceShown() > Stall && _sinceKeyFrameAsked.Elapsed > Stall)
+            {
+                _logger.LogInformation("Live stream: nothing shown for {Ms} ms while frames come in; asking the phone for a key frame", (int)_sinceShown().TotalMilliseconds);
+                _sinceKeyFrameAsked.Restart();
+                _stalled();
+            }
         }
 
         private void TrimLead(TimeSpan early, TimeSpan now)
