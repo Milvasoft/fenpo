@@ -1,3 +1,4 @@
+using Fenpo.App.Demo;
 using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
 using Fenpo.Bluetooth;
@@ -17,7 +18,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
 using Serilog;
-using Windows.Storage;
 
 namespace Fenpo.App;
 
@@ -39,7 +39,13 @@ public partial class App : Application
     /// </summary>
     public App()
     {
-        var localFolder = ApplicationData.Current.LocalFolder.Path;
+        // "--demo": a made-up phone for the store screenshots, on an emptied folder of its own (see DemoMode).
+        if (DemoMode.IsOn)
+        {
+            DemoMode.PrepareFolder();
+        }
+
+        var localFolder = AppFolders.Local;
         var settings = new JsonSettingsStore(Path.Combine(localFolder, "settings.json"));
 
         if (settings.Current.PcId is null)
@@ -56,6 +62,7 @@ public partial class App : Application
         // Resources load with the first XAML, so the language override has to come before InitializeComponent.
         LocalizationService.ApplyAtStartup(settings.Current.Language);
         _crashLog = Path.Combine(localFolder, "crash.log");
+        var pcName = DemoMode.IsOn ? DemoContent.Current.PcName : Environment.MachineName;
 
         try
         {
@@ -111,7 +118,7 @@ public partial class App : Application
                 .AddSingleton<PairedAppDeviceStore>()
                 .AddSingleton<IPairedAppDevices>(sp => sp.GetRequiredService<PairedAppDeviceStore>())
                 .AddSingleton<IBleCounters, BleCounterStore>()
-                .AddSingleton(sp => PcCertificate.LoadOrCreate(Path.Combine(localFolder, "pc-certificate.pfx"), Environment.MachineName))
+                .AddSingleton(sp => PcCertificate.LoadOrCreate(Path.Combine(localFolder, "pc-certificate.pfx"), pcName))
                 .AddSingleton(new PairingTokens())
                 .AddSingleton<FileTransferService>()
                 .AddHostedService(sp => sp.GetRequiredService<FileTransferService>())
@@ -131,7 +138,7 @@ public partial class App : Application
                 .AddHostedService(sp => sp.GetRequiredService<PhoneActions>())
                 .AddSingleton<ClipboardSync>()
                 .AddHostedService(sp => sp.GetRequiredService<ClipboardSync>())
-                .AddSingleton(new PcIdentity(settings.Current.PcId!, Environment.MachineName, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0", $"Windows {Environment.OSVersion.Version}", string.Empty))
+                .AddSingleton(new PcIdentity(settings.Current.PcId!, pcName, typeof(App).Assembly.GetName().Version?.ToString(3) ?? "0.1.0", $"Windows {Environment.OSVersion.Version}", string.Empty))
                 .AddSingleton<SentMessages>()
                 .AddSingleton<NotificationRouter>()
                 .AddHostedService(sp => sp.GetRequiredService<NotificationRouter>())
@@ -157,6 +164,13 @@ public partial class App : Application
                 .AddTransient<PairingViewModel>()
                 .AddTransient<AppPairingViewModel>()
                 .AddTransient<SettingsViewModel>())
+            .ConfigureServices(services =>
+            {
+                if (DemoMode.IsOn)
+                {
+                    services.AddFenpoDemo();
+                }
+            })
             .Build();
 
         // Written straight to a file as well: a XAML failure can end the process before the logger flushes.
@@ -272,7 +286,17 @@ public partial class App : Application
         var dispatcher = _window.DispatcherQueue;
         var calls = GetService<CallService>();
         calls.AttachUi(dispatcher);
-        GetService<ClipboardSync>().AttachUi(dispatcher);
+
+        // The demo shows its own clipboard history, not what is copied on this PC.
+        if (DemoMode.IsOn)
+        {
+            DemoMode.Fill(_host.Services);
+        }
+        else
+        {
+            GetService<ClipboardSync>().AttachUi(dispatcher);
+        }
+
         GetService<PcInputService>().AttachUi(dispatcher);
         GetService<ScreenMirrorService>().StreamOpened += (sender, feed) => dispatcher.TryEnqueue(() => ShowScreenMirror(askPhone: false));
         var control = GetService<PhoneControlService>();

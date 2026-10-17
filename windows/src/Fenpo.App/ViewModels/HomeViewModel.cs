@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Fenpo.App.Demo;
 using Fenpo.App.Services;
 using Fenpo.Core.Devices;
 using Fenpo.Core.Media;
@@ -258,7 +259,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
 
     private void ApplyHotspot()
     {
-        CanHotspot = _hotspot.Available && _hotspot.State != HotspotJoinState.Joining;
+        CanHotspot = (_hotspot.Available || DemoMode.IsOn) && _hotspot.State != HotspotJoinState.Joining;
         HotspotText = _localization.GetString(_hotspot.State switch
         {
             HotspotJoinState.Joining => "Hotspot_Joining",
@@ -326,7 +327,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
         UsbText = _localization.GetString(status.UsbConnected ? "Chip_UsbOn" : "Chip_UsbOff");
         AppConnected = status.AppConnected;
         NotificationsRefused = _status.Active == PhoneKind.Iphone && status.NotificationsRefused;
-        CanRing = _actions.CanRing;
+        CanRing = _actions.CanRing || DemoMode.IsOn;
         CanMirror = _mirror.CanMirror;
         var other = _status.StatusOf(_status.Active == PhoneKind.Iphone ? PhoneKind.Android : PhoneKind.Iphone);
         OtherPhoneText = other.State == PhoneConnectionState.NotPaired ? string.Empty : _localization.Format("Phone_SwitchTo", PhoneStatusText.Name(other, _localization));
@@ -360,7 +361,7 @@ public sealed partial class HomeViewModel : ObservableObject, IDisposable
 
     private void Tick()
     {
-        var now = DateTime.Now;
+        var now = DemoMode.IsOn ? DemoMode.Now.LocalDateTime : DateTime.Now;
         ClockText = now.ToString("HH:mm", CultureInfo.CurrentUICulture);
         DateText = now.ToString("d MMMM dddd", CultureInfo.CurrentUICulture);
         UpdatePosition(_media.Current);

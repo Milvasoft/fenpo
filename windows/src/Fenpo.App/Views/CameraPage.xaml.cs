@@ -1,3 +1,4 @@
+using Fenpo.App.Demo;
 using Fenpo.App.Helpers;
 using Fenpo.App.Services;
 using Fenpo.App.ViewModels;
@@ -118,6 +119,14 @@ public sealed partial class CameraPage : Page
 
     private void ApplyState()
     {
+        if (DemoMode.IsOn)
+        {
+            DemoPreview.Visibility = Visibility.Visible;
+            PreviewState.Visibility = Visibility.Collapsed;
+            PreviewStop.Visibility = Visibility.Visible;
+            return;
+        }
+
         var state = _camera.State;
         var live = state == CameraState.Streaming;
         PreviewState.Visibility = live ? Visibility.Collapsed : Visibility.Visible;

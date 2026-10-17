@@ -119,7 +119,24 @@ without the app too.
 Store en az 1, en çok 10 ekran görüntüsü ister (1366×768 ya da daha büyük, 16:9). Herkese açık olacakları için gerçek
 kişisel veri olmamalı: isimler, numaralar, mesaj içerikleri, bilgisayar adı. Önerilen sıra: Ana sayfa (bağlı telefon),
 Bildirimler, Mesajlar, Dosyalar, Kamera, Ekran yansıtma, Ayarlar; açık ve koyu tema karışık, Türkçe ve İngilizce
-listelerde kendi dilinde. Gösterim verisiyle çekilecek (Buğra'nın onayıyla).
+listelerde kendi dilinde.
+
+Görüntüler gösterim kipiyle çekilir: `fenpo --demo` uydurma bir iPhone ("Ayşe’nin iPhone’u" / "Office phone", %82 pil,
+Bluetooth ve Wi‑Fi bağlı) ve uydurma içerik gösterir (`windows/src/Fenpo.App/Demo/`). Kişiler uydurma, numaralar
+kurgu için ayrılmış aralıklardan (+1 415 555 01xx, +90 500 010 20 3x), uygulama adları düz kelimeler (Mesajlar, Takvim,
+Posta), logo yok, kamera önizlemesi ve son fotoğraflar marka renklerinde geçişler, saat 9:41. Gösterim kipinde hiçbir arka plan servisi
+başlamaz (Bluetooth, ağ, PC panosu yok) ve Fenpo kendi dosyalarını boş bir `LocalState\demo` klasöründe tutar; gerçek
+telefonun verisi ne okunur ne değişir.
+
+```powershell
+dotnet build windows/src/Fenpo.App -p:Platform=x64
+windows/tools/Capture-Store.ps1
+```
+
+`Capture-Store.ps1` derlemeyi geçici olarak ayrı bir paket kimliğiyle (`Milvasoft.Fenpo.Demo`) kaydeder, yüklü Fenpo'ya
+ve verisine dokunmaz; her sayfayı açık/koyu × Türkçe/English olarak pencerenin görünen çerçevesi tam 1920×1080 olacak
+şekilde `windows/artifacts/store-screenshots/` altına çeker (`<Sayfa>-<Tema>-<dil>.png`), bitince paketi kaldırır.
+Ekran yansıtma yalnızca Android'de olduğu için gösterim setinde yok.
 
 ## Açık işler
 

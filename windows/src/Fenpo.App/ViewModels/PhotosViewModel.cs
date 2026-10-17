@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Fenpo.App.Demo;
 using Fenpo.App.Services;
 using Fenpo.Protocol.V1;
 using Microsoft.UI.Dispatching;
@@ -139,6 +140,22 @@ public sealed partial class PhotosViewModel : ObservableObject, IDisposable
     {
         if (IsLoading)
         {
+            return;
+        }
+
+        // The demo phone's photos are made up; nothing is asked of a phone.
+        if (DemoMode.IsOn)
+        {
+            if (Items.Count == 0)
+            {
+                foreach (var item in await DemoPhotos.CreateAsync())
+                {
+                    Items.Add(item);
+                }
+            }
+
+            HasItems = true;
+            Notice = string.Empty;
             return;
         }
 

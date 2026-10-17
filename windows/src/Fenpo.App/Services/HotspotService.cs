@@ -5,7 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Windows.Devices.WiFi;
 using Windows.Security.Credentials;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -45,7 +44,7 @@ public sealed class HotspotService(PhoneChannel channel, ILogger<HotspotService>
 
     private readonly PhoneChannel _channel = channel;
     private readonly ILogger<HotspotService> _logger = logger;
-    private readonly string _path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "hotspots.bin");
+    private readonly string _path = Path.Combine(AppFolders.Local, "hotspots.bin");
     private Dictionary<string, Details> _details = [];
     private CancellationTokenSource? _joining;
 

@@ -254,9 +254,18 @@ public sealed class FileTransferService(
         var sent = new FileTransfer("sample-4", "sample", incoming: false, [File("Sunum.pptx", 5_872_025)], []);
         sent.SetState(FileTransferState.Completed);
 
+        Show([sending, sent, received, failed]);
+    }
+
+    /// <summary>
+    /// Puts transfers at the top of the list without a phone (screenshot samples and demo mode).
+    /// </summary>
+    /// <param name="transfers">Transfers, newest first.</param>
+    public void Show(IReadOnlyList<FileTransfer> transfers)
+    {
         lock (_lock)
         {
-            _transfers.InsertRange(0, [sending, sent, received, failed]);
+            _transfers.InsertRange(0, transfers);
         }
 
         Changed?.Invoke(this, EventArgs.Empty);

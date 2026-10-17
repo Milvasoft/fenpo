@@ -60,7 +60,7 @@ public sealed class FileTransfer
     public string Id { get; }
 
     /// <summary>Gets when the transfer was offered.</summary>
-    public DateTimeOffset StartedAt { get; } = DateTimeOffset.Now;
+    public DateTimeOffset StartedAt { get; internal init; } = DateTimeOffset.Now;
 
     /// <summary>Gets the phone id.</summary>
     public string DeviceId { get; }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Fenpo.App.Demo;
 using Fenpo.App.Services;
 using Fenpo.Core.Contacts;
 using Fenpo.Core.Messages;
@@ -266,6 +267,13 @@ public sealed partial class MessagesViewModel : ObservableObject, IDisposable
         var local = _sentMessages.All.Where(m => !sent.Any(s => PhoneNumbers.Normalize(s.Address) == PhoneNumbers.Normalize(m.Address) && s.Text == m.Text && (s.Date - m.Date).Duration() < TimeSpan.FromMinutes(5)));
         _messages = [.. inbox, .. sent, .. local];
         Rebuild();
+
+        // The demo opens its newest conversation, as the store screenshot shows it.
+        if (DemoMode.IsOn && Selected is null)
+        {
+            Selected = Conversations.FirstOrDefault();
+        }
+
         await LearnContactsAsync();
     }
 

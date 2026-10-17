@@ -2,7 +2,6 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Fenpo.Core.Channel;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -15,7 +14,7 @@ public sealed class PairedAppDeviceStore(ILogger<PairedAppDeviceStore> logger) :
     private static readonly byte[] _entropy = "fenpo-ble-channel-key"u8.ToArray();
 
     private readonly ILogger<PairedAppDeviceStore> _logger = logger;
-    private readonly string _path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "paired-apps.json");
+    private readonly string _path = Path.Combine(AppFolders.Local, "paired-apps.json");
     private readonly Lock _lock = new();
     private List<PairedAppDevice>? _devices;
 

@@ -196,7 +196,7 @@ public sealed class NotificationRouter(
 
         try
         {
-            var folder = Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "people");
+            var folder = Path.Combine(AppFolders.Local, "people");
             var path = Path.Combine(folder, Convert.ToHexStringLower(SHA256.HashData(png))[..16] + ".png");
 
             if (!File.Exists(path))

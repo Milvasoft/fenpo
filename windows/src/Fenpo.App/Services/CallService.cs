@@ -9,7 +9,6 @@ using Microsoft.Win32;
 using Windows.Media.Control;
 using Windows.Media.Core;
 using Windows.Media.Playback;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -29,7 +28,7 @@ public sealed class CallService(
     private readonly ISettingsStore _settings = settings;
     private readonly LocalizationService _localization = localization;
     private readonly ILogger<CallService> _logger = logger;
-    private readonly string _logPath = Path.Combine(ApplicationData.Current.LocalFolder.Path, "calls.json");
+    private readonly string _logPath = Path.Combine(AppFolders.Local, "calls.json");
     private DispatcherQueue? _dispatcher;
     private IslandWindow? _island;
     private string? _ringingId;

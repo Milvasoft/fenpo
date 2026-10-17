@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Fenpo.Core.Messages;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -14,7 +13,7 @@ public sealed class SentMessages(ILogger<SentMessages> logger)
     private const int _capacity = 500;
 
     private readonly ILogger<SentMessages> _logger = logger;
-    private readonly string _path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "sent-messages.json");
+    private readonly string _path = Path.Combine(AppFolders.Local, "sent-messages.json");
     private List<SentMessage>? _messages;
 
     /// <summary>

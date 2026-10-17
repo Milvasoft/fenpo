@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -17,7 +16,7 @@ public sealed class AppIconService(ILogger<AppIconService> logger)
     private static readonly SemaphoreSlim _rateGate = new(1, 1);
 
     private readonly ILogger<AppIconService> _logger = logger;
-    private readonly string _folder = Path.Combine(ApplicationData.Current.LocalFolder.Path, "icons");
+    private readonly string _folder = Path.Combine(AppFolders.Local, "icons");
     private readonly ConcurrentDictionary<string, Task<string?>> _pending = new();
 
     /// <summary>

@@ -1,7 +1,6 @@
 using System.Text.Json;
 using Fenpo.Core.Channel;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -15,7 +14,7 @@ public sealed class BleCounterStore(ILogger<BleCounterStore> logger) : IBleCount
     private const ulong _block = 1000;
 
     private readonly ILogger<BleCounterStore> _logger = logger;
-    private readonly string _path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "ble-counters.json");
+    private readonly string _path = Path.Combine(AppFolders.Local, "ble-counters.json");
     private readonly Lock _lock = new();
     private readonly Dictionary<string, ulong> _nextSend = [];
     private Counters? _saved;

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -11,7 +10,7 @@ namespace Fenpo.App.Services;
 public sealed class MessageContacts(ILogger<MessageContacts> logger)
 {
     private readonly ILogger<MessageContacts> _logger = logger;
-    private readonly string _path = Path.Combine(ApplicationData.Current.LocalFolder.Path, "message-contacts.json");
+    private readonly string _path = Path.Combine(AppFolders.Local, "message-contacts.json");
     private Dictionary<string, string>? _contacts;
 
     /// <summary>

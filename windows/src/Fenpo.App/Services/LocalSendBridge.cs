@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
-using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -87,7 +86,7 @@ public sealed class LocalSendBridge(
             }
 
             // Its own certificate: LocalSend apps do not pin it, and the paired phones' one stays apart.
-            _certificate ??= PcCertificate.LoadOrCreate(Path.Combine(ApplicationData.Current.LocalFolder.Path, "localsend-certificate.pfx"), Environment.MachineName);
+            _certificate ??= PcCertificate.LoadOrCreate(Path.Combine(AppFolders.Local, "localsend-certificate.pfx"), Environment.MachineName);
             _server.Start(Environment.MachineName, _certificate.Certificate);
         }
         finally

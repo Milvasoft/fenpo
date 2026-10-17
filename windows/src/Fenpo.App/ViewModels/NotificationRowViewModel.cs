@@ -1,3 +1,4 @@
+using Fenpo.App.Demo;
 using Fenpo.App.Services;
 using Fenpo.Core.Notifications;
 using Microsoft.UI.Xaml.Media;
@@ -91,7 +92,7 @@ public sealed class NotificationRowViewModel
     /// <returns>Short text.</returns>
     public static string RelativeTime(DateTimeOffset when, LocalizationService localization)
     {
-        var age = DateTimeOffset.Now - when;
+        var age = (DemoMode.IsOn ? DemoMode.Now : DateTimeOffset.Now) - when;
 
         if (age < TimeSpan.FromMinutes(1))
         {

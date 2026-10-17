@@ -102,6 +102,18 @@ public sealed class ClipboardSync(PhoneChannel channel, ISettingsStore settings,
     }
 
     /// <summary>
+    /// Adds entries to the list without a phone or the PC clipboard (demo mode).
+    /// </summary>
+    /// <param name="entries">Entries, oldest first.</param>
+    public void Show(IEnumerable<ClipboardEntry> entries)
+    {
+        foreach (var entry in entries)
+        {
+            Remember(entry);
+        }
+    }
+
+    /// <summary>
     /// Puts an entry from the list back on the PC's clipboard (without sending it to the phone again).
     /// </summary>
     /// <param name="entry">Entry.</param>
