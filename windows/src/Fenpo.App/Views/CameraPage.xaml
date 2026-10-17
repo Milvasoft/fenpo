@@ -20,7 +20,7 @@
                 <StackPanel Spacing="10">
                     <!-- Live preview from the phone's camera, with what is going on while it is not live. -->
                     <Grid CornerRadius="8" Background="{ThemeResource FenpoIslandBrush}" Height="300">
-                        <MediaPlayerElement x:Name="Preview" AreTransportControlsEnabled="False" Stretch="Uniform" />
+                        <controls:LiveVideoView x:Name="Preview" />
                         <StackPanel x:Name="PreviewState" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" MaxWidth="300">
                             <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
                             <TextBlock x:Name="PreviewText" TextWrapping="Wrap" TextAlignment="Center" FontSize="13" Foreground="{ThemeResource FenpoIslandTextSecondaryBrush}" />
