@@ -21,6 +21,7 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
 {
     private static readonly TimeSpan _settleDelay = TimeSpan.FromSeconds(4);
     private static readonly TimeSpan _brokenBondWindow = TimeSpan.FromSeconds(15);
+    private const int _brokenBondDiscoveries = 2;
 
     private readonly ILogger<IphoneLink> _logger = logger;
     private readonly SemaphoreSlim _discoveryGate = new(1, 1);
@@ -31,6 +32,7 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
     private CancellationTokenSource? _pendingDiscovery;
     private DateTimeOffset _connectedAt;
     private int _generation;
+    private int _unencryptedDiscoveries;
     private bool _wasDisconnected = true;
 
     /// <summary>
@@ -49,7 +51,8 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
     public event EventHandler<bool>? ConnectionChanged;
 
     /// <summary>
-    /// Raised when the link looks like a broken bond: it connects and drops again within seconds, repeatedly (S1).
+    /// Raised when the link looks like a broken bond: it connects and drops again within seconds, repeatedly (S1), or
+    /// it cannot be encrypted. Windows stops reconnecting by itself from then on.
     /// </summary>
     public event EventHandler? BrokenBondDetected;
 
@@ -173,8 +176,37 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
             _shortConnections.Clear();
         }
 
-        _logger.LogWarning("{Name} keeps dropping right after connecting; the bond looks broken", Name);
+        ReportBrokenBond("it keeps dropping right after connecting");
+    }
+
+    // A phone without this PC's bond asks its user to pair whenever the link tries to encrypt, for example a phone that
+    // was paired with this PC once and forgot it, while it is used with another PC in the same house. Reconnecting would
+    // ask again and again, so Windows stops keeping the connection.
+    private void ReportBrokenBond(string why)
+    {
+        _logger.LogWarning("{Name}: {Why}; the bond looks broken, so the link stops reconnecting", Name, why);
+
+        if (_session is { } session)
+        {
+            session.MaintainConnection = false;
+        }
+
         BrokenBondDetected?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void TrackEncryption(bool failed)
+    {
+        if (!failed)
+        {
+            _unencryptedDiscoveries = 0;
+            return;
+        }
+
+        if (++_unencryptedDiscoveries >= _brokenBondDiscoveries)
+        {
+            _unencryptedDiscoveries = 0;
+            ReportBrokenBond("the link cannot be encrypted");
+        }
     }
 
     private void InvalidateAndRediscover(string reason)
@@ -234,6 +266,10 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
             }
 
             // ANCS shows up only on an encrypted link; touching the battery level makes Windows encrypt with the bond.
+            // When that read fails the phone has no bond for this PC and is showing its user a pairing request; reading
+            // again would show another one, so the discovery ends there.
+            var unencrypted = false;
+
             for (var attempt = 1; attempt <= 3; attempt++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -250,15 +286,21 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
 
                 if (!services.ContainsKey(GattUuids.Ancs) && attempt < 3 && services.TryGetValue(GattUuids.Battery, out var battery) && await battery.GetCharacteristicAsync(GattUuids.BatteryLevel) is { } level)
                 {
-                    await level.ReadAsync();
-                    await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
-                    continue;
+                    if (await level.ReadAsync() is not null)
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
+                        continue;
+                    }
+
+                    _logger.LogInformation("Discovery ({Reason}): reading the battery level failed, the link is not encrypted", reason);
+                    unencrypted = true;
                 }
 
                 var generation = Interlocked.Increment(ref _generation);
                 Current = new LinkServices(generation, services);
                 _logger.LogInformation("Discovery ({Reason}) generation {Generation}: {Count} services, ANCS {Ancs}, AMS {Ams}", reason, generation, services.Count, services.ContainsKey(GattUuids.Ancs), services.ContainsKey(GattUuids.Ams));
                 ServicesReady?.Invoke(this, Current);
+                TrackEncryption(unencrypted);
                 return;
             }
         }

@@ -120,6 +120,12 @@ public sealed record AppSettings
     public IReadOnlyList<string> NonApplePhoneIds { get; init; } = [];
 
     /// <summary>
+    /// Gets the Bluetooth LE ids of paired iPhones that no longer have this PC's bond. Connecting to one makes it ask its
+    /// user to pair again every time, so Fenpo leaves it alone until Windows forgets it or it is forgotten in Fenpo.
+    /// </summary>
+    public IReadOnlyList<string> BrokenPhoneIds { get; init; } = [];
+
+    /// <summary>
     /// Gets a value indicating whether the PC's notifications from the picked apps go to the phone.
     /// </summary>
     public bool PcNotificationsToPhone { get; init; }
