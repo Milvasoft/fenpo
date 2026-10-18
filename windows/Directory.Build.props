@@ -14,7 +14,7 @@
     <Company>Milvasoft</Company>
     <Product>Fenpo</Product>
     <Copyright>Copyright © Milvasoft</Copyright>
-    <Version>0.1.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <!-- Test projects do not document their members. -->
