@@ -58,4 +58,4 @@ https://github.com/Milvasoft/fenpo/issues
 https://github.com/Milvasoft/fenpo
 
 ## privacy_url
-https://fenpo-website.vercel.app/privacy
+https://fenpo.milvasoft.com/privacy

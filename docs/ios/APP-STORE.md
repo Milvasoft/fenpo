@@ -27,7 +27,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 | Telif | 2026 Milvasoft |
 | Destek URL'si | https://github.com/Milvasoft/fenpo/issues |
 | Pazarlama URL'si | https://github.com/Milvasoft/fenpo |
-| Gizlilik politikası URL'si | https://fenpo-website.vercel.app/privacy (sitedeki sayfa, kaynağı `docs/PRIVACY.md`; GitHub bağlantısı 1.0 incelemesi için çalışmaya devam ediyor) |
+| Gizlilik politikası URL'si | https://fenpo.milvasoft.com/privacy (sitedeki sayfa, kaynağı `docs/PRIVACY.md`; GitHub bağlantısı 1.0 incelemesi için çalışmaya devam ediyor) |
 | Fiyat | Ücretsiz |
 
 "Fenpo" adı mağazada alınmışsa yedek: "Fenpo: Telefon ve PC" / "Fenpo: Phone and PC".
