@@ -26,7 +26,7 @@ DOSYA VE FOTOĞRAF
 • Bilgisayardan iPhone'unun fotoğraf arşivine göz at.
 
 KAMERA VE EKRAN
-• iPhone'unu bilgisayarın web kamerası yap: lens seçimi, yakınlaştırma, Ortala.
+• iPhone'unu bilgisayarın web kamerası yap: lens seçimi ve yakınlaştırma.
 • iPhone'unun ekranını bilgisayarında göster.
 
 BİLGİSAYARI KUMANDA ET

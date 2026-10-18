@@ -494,23 +494,6 @@
         }
       }
     },
-    "camera.centerStage": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Center"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ortala"
-          }
-        }
-      }
-    },
     "camera.close": {
       "extractionState": "manual",
       "localizations": {
@@ -609,23 +592,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Canlı · %@"
-          }
-        }
-      }
-    },
-    "camera.microphone": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Microphone"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mikrofon"
           }
         }
       }

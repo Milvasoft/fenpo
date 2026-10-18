@@ -86,18 +86,8 @@ struct CameraModeView: View {
                 }
             }
 
-            HStack(spacing: 8) {
-                OptionButton(title: "camera.centerStage", systemImage: "person.crop.rectangle", isOn: state.centerStage) {
-                    actions.centerStage(!state.centerStage)
-                }
-                .disabled(!state.centerStageAvailable)
-                // The PC has no virtual microphone yet, so it never asks for the phone's sound.
-                OptionButton(title: "camera.microphone", systemImage: "mic", isOn: false) {
-                }
-                .disabled(true)
-                OptionButton(title: "camera.flip", systemImage: "arrow.triangle.2.circlepath.camera", isOn: false, action: actions.flip)
-                    .disabled(!state.frontAvailable)
-            }
+            OptionButton(title: "camera.flip", systemImage: "arrow.triangle.2.circlepath.camera", isOn: false, action: actions.flip)
+                .disabled(!state.frontAvailable)
 
             Button("camera.dim") {
                 isDimmed = true
@@ -133,7 +123,6 @@ struct CameraModeView: View {
 struct CameraActions {
     var stop: () -> Void = {}
     var zoom: (Float) -> Void = { _ in }
-    var centerStage: (Bool) -> Void = { _ in }
     var flip: () -> Void = {}
 }
 

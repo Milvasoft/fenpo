@@ -206,7 +206,7 @@ Windows tarafı bunların hepsini sunuyor (pano, `ClipboardRequest`, `LockPc`, `
 | F14 | Aktarım sürerken PC'de iptal edin | iPhone'da satır "İptal edildi" ya da "Tamamlanmadı"; yarım dosya Fenpo klasöründe kalmaz |
 | F14b | Fenpo arka planda (kapatmadan başka uygulamaya geç), Windows'tan bir dosya ve bir resimli pano öğesi gönder | Kayıtta `Wi-Fi wanted by PC for …`, sonra `Wi-Fi channel open for the PC`; dosya Dosyalar › Fenpo'ya, resim panoya gelir. 30 sn sonra `Wi-Fi channel idle; closing it` |
 | F15 | iPhone'da Fenpo açıkken Windows'ta Fenpo → **Kamera** sayfasında önizlemeyi başlatın (PC 1920×1080, 30 fps, 6 Mbps, H.264, sessiz ister) | iPhone'da kamera ekranı açılır, PC'de görüntü gelir. Gecikme yaklaşık kaç saniye? Diğer uygulamalar için web kamerası aygıtı PC'de henüz yok |
-| F16 | Kamera açıkken 0,5 / 1× / 2, **Çevir**, **Ortala** (Center Stage'li ön kamerada) | PC'deki görüntü değişir; görüntü yan yatmıyor mu? |
+| F16 | Kamera açıkken 0,5 / 1× / 2, **Çevir**; Ortala ve Mikrofon düğmeleri yok (18 Ekim'de kaldırıldı) | PC'deki görüntü değişir; görüntü yan yatmıyor mu? |
 | F17 | Fenpo arka plandayken F15 | iPhone'da "Bilgisayarın kamerayı kullanmak istiyor" bildirimi; dokununca kamera başlar |
 | F18 | Kamera açıkken **Ekranı karart**, 5 dakika bekleyin | Görüntü sürer; telefon ne kadar ısındı, pil ne kadar düştü? |
 | F19 | Kamerayı iPhone'da **Kamerayı kapat** ile, sonra PC'deki önizlemeyi kapatarak durdurun | İki yolda da kamera kapanır, PC'de görüntü donmuş kalmaz |

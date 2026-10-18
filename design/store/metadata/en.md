@@ -26,7 +26,7 @@ FILES AND PHOTOS
 • Browse your iPhone's photo library from your PC.
 
 CAMERA AND SCREEN
-• Use your iPhone as your PC's webcam, with lens choice, zoom and Center Stage.
+• Use your iPhone as your PC's webcam, with lens choice and zoom.
 • Show your iPhone's screen on your PC.
 
 CONTROL YOUR PC

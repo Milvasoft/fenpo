@@ -19,8 +19,6 @@ public final class CameraService {
         public var facing: Fenpo_V1_CameraFacing
         public var zoom: Float
         public var zoomPresets: [Float]
-        public var centerStage: Bool
-        public var centerStageAvailable: Bool
         public var frontAvailable: Bool
         public var isStreaming: Bool
 
@@ -30,8 +28,6 @@ public final class CameraService {
             facing: .back,
             zoom: 1,
             zoomPresets: [0.5, 1, 2],
-            centerStage: true,
-            centerStageAvailable: true,
             frontAvailable: true,
             isStreaming: true
         )
@@ -138,28 +134,13 @@ public final class CameraService {
             current.facing = facing
             current.zoom = 1
             current.zoomPresets = capabilities.zoomPresets
-            current.centerStageAvailable = capabilities.centerStageAvailable
             pipeline.setZoom(1)
-            pipeline.setCenterStage(current.centerStage)
             encoder?.requestKeyFrame()
             state = current
             sendSettingsChange()
         } catch {
             log.error("Flipping the camera failed: \(String(describing: error))")
         }
-    }
-
-    /// Center Stage ("Ortala").
-    /// - Parameter isOn: Desired state.
-    public func setCenterStage(_ isOn: Bool) {
-        guard var current = state else {
-            return
-        }
-        pipeline?.setCenterStage(isOn)
-        encoder?.requestKeyFrame()
-        current.centerStage = isOn
-        state = current
-        sendSettingsChange()
     }
 
     // MARK: - Private
@@ -217,13 +198,10 @@ public final class CameraService {
                 facing: facing,
                 zoom: start.settings.zoom > 0 ? start.settings.zoom : 1,
                 zoomPresets: capabilities.zoomPresets,
-                centerStage: start.settings.centerStage && capabilities.centerStageAvailable,
-                centerStageAvailable: capabilities.centerStageAvailable,
                 frontAvailable: capabilities.frontAvailable,
                 isStreaming: false
             )
             pipeline.setZoom(current.zoom)
-            pipeline.setCenterStage(current.centerStage)
             self.pipeline = pipeline
             state = current
             await report(.starting)
@@ -409,9 +387,8 @@ public final class CameraService {
         if settings.zoom > 0 {
             setZoom(settings.zoom)
         }
-        if settings.centerStage != current.centerStage {
-            setCenterStage(settings.centerStage)
-        }
+        // Center Stage and the microphone are not offered (CapturePipeline keeps Center Stage off);
+        // the PC's center_stage and microphone fields are ignored.
         Task {
             await report(.streaming)
         }
@@ -422,7 +399,7 @@ public final class CameraService {
         settings.facing = state?.facing ?? .back
         settings.zoom = state?.zoom ?? 1
         settings.microphone = false
-        settings.centerStage = state?.centerStage ?? false
+        settings.centerStage = false
         return settings
     }
 

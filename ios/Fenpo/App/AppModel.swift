@@ -170,7 +170,6 @@ final class AppModel {
                 camera.stopFromPhone()
             },
             zoom: { camera.setZoom($0) },
-            centerStage: { camera.setCenterStage($0) },
             flip: { camera.flip() }
         )
     }

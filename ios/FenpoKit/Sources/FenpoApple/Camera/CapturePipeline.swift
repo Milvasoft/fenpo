@@ -37,7 +37,6 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
     struct Capabilities: Sendable {
         let zoomPresets: [Float]
         let frontAvailable: Bool
-        let centerStageAvailable: Bool
     }
 
     /// Called after the picture changed under the encoder (rotation, an interruption ending, a
@@ -99,13 +98,13 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         let size = dimensions
         fitter.withLock { $0 = FrameFitter(width: size.width, height: size.height) }
         followRotation(of: device)
+        Self.keepCenterStageOff()
 
         let ultraWide = [.builtInTripleCamera, .builtInDualWideCamera].contains(device.deviceType)
         let presets: [Float] = facing == .front ? [1] : (ultraWide ? [0.5, 1, 2] : [1, 2])
         return Capabilities(
             zoomPresets: presets,
-            frontAvailable: Self.device(facing: .front) != nil,
-            centerStageAvailable: device.activeFormat.isCenterStageSupported
+            frontAvailable: Self.device(facing: .front) != nil
         )
     }
 
@@ -132,14 +131,11 @@ final class CapturePipeline: NSObject, @unchecked Sendable {
         }
     }
 
-    /// Turns Center Stage on or off where the camera supports it.
-    /// - Parameter isOn: Desired state.
-    func setCenterStage(_ isOn: Bool) {
-        guard input?.device.activeFormat.isCenterStageSupported == true else {
-            return
-        }
-        AVCaptureDevice.centerStageControlMode = .cooperative
-        AVCaptureDevice.isCenterStageEnabled = isOn
+    /// Center Stage stays off (Buğra, 18 Oct 2026: it did not work well enough for the PC).
+    /// In app mode Control Center cannot turn it on for Fenpo either.
+    private static func keepCenterStageOff() {
+        AVCaptureDevice.centerStageControlMode = .app
+        AVCaptureDevice.isCenterStageEnabled = false
     }
 
     /// Keeps the output upright: the coordinator reports the angle that levels the picture with the

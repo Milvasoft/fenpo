@@ -59,7 +59,7 @@ metinlerinde başka bir uygulama mağazasının adı geçmez.
 > • Bilgisayardan iPhone'unun fotoğraf arşivine göz at.
 >
 > KAMERA VE EKRAN
-> • iPhone'unu bilgisayarın web kamerası yap: lens seçimi, yakınlaştırma, Ortala (Center Stage).
+> • iPhone'unu bilgisayarın web kamerası yap: lens seçimi ve yakınlaştırma.
 > • iPhone'unun ekranını bilgisayarında göster.
 >
 > BİLGİSAYARI KUMANDA ET
@@ -105,7 +105,7 @@ metinlerinde başka bir uygulama mağazasının adı geçmez.
 > • Browse your iPhone's photo library from your PC.
 >
 > CAMERA AND SCREEN
-> • Use your iPhone as your PC's webcam, with lens choice, zoom and Center Stage.
+> • Use your iPhone as your PC's webcam, with lens choice and zoom.
 > • Show your iPhone's screen on your PC.
 >
 > CONTROL YOUR PC

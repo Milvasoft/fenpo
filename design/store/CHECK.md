@@ -89,11 +89,11 @@ Written by `scripts/check.py` after every build; do not edit. Limits from `specs
 | metadata/tr.md | subtitle | 30 / 30 characters | ✓ |
 | metadata/tr.md | keywords | 100 / 100 bytes | ✓ |
 | metadata/tr.md | promotional_text | 165 / 170 characters | ✓ |
-| metadata/tr.md | description | 1556 / 4000 characters | ✓ |
+| metadata/tr.md | description | 1550 / 4000 characters | ✓ |
 | metadata/tr.md | whats_new | 21 / 4000 characters | ✓ |
 | metadata/en.md | name | 10 / 30 characters | ✓ |
 | metadata/en.md | subtitle | 26 / 30 characters | ✓ |
 | metadata/en.md | keywords | 98 / 100 bytes | ✓ |
 | metadata/en.md | promotional_text | 163 / 170 characters | ✓ |
-| metadata/en.md | description | 1467 / 4000 characters | ✓ |
+| metadata/en.md | description | 1453 / 4000 characters | ✓ |
 | metadata/en.md | whats_new | 27 / 4000 characters | ✓ |
