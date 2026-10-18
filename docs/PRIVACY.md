@@ -2,6 +2,9 @@
 
 Last updated / Son güncelleme: 17 October 2026
 
+Published at / Yayınlandığı yer: <https://fenpo-website.vercel.app/privacy>. This file is its source; the two are
+updated together. / Bu dosya o sayfanın kaynağıdır; ikisi birlikte güncellenir.
+
 [English](#english) · [Türkçe](#türkçe)
 
 ## English
