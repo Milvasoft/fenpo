@@ -56,40 +56,6 @@
                             </Border>
                         </StackPanel>
                     </Border>
-
-                    <Border Style="{StaticResource FenpoCardStyle}">
-                        <StackPanel>
-                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel VerticalAlignment="Center">
-                                    <TextBlock x:Uid="Camera_CenterStage" Style="{StaticResource FenpoRowLabelStyle}" />
-                                    <TextBlock x:Uid="Camera_CenterStageHint" Style="{StaticResource FenpoCaptionTextStyle}" TextWrapping="Wrap" />
-                                </StackPanel>
-                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.CenterStage, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_CenterStageToggle" />
-                            </Grid>
-                            <Border Style="{StaticResource FenpoRowDividerStyle}" />
-                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock x:Uid="Camera_Portrait" Style="{StaticResource FenpoRowLabelStyle}" VerticalAlignment="Center" />
-                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.PortraitBlur, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_PortraitToggle" />
-                            </Grid>
-                            <Border Style="{StaticResource FenpoRowDividerStyle}" />
-                            <Grid Style="{StaticResource FenpoSettingRowStyle}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock x:Uid="Camera_Microphone" Style="{StaticResource FenpoRowLabelStyle}" VerticalAlignment="Center" />
-                                <ToggleSwitch Grid.Column="1" IsOn="{x:Bind ViewModel.UseMicrophone, Mode=TwoWay}" OnContent="" OffContent="" MinWidth="0" x:Uid="Camera_MicrophoneToggle" />
-                            </Grid>
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </Grid>
 

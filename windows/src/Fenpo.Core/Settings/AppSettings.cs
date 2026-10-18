@@ -99,21 +99,6 @@ public sealed record AppSettings
     public CameraLens CameraLens { get; init; } = CameraLens.Wide;
 
     /// <summary>
-    /// Gets a value indicating whether the camera keeps the person in the frame.
-    /// </summary>
-    public bool CameraCenterStage { get; init; } = true;
-
-    /// <summary>
-    /// Gets a value indicating whether the camera blurs the background.
-    /// </summary>
-    public bool CameraPortraitBlur { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether the iPhone microphone comes with the camera.
-    /// </summary>
-    public bool CameraUseMicrophone { get; init; } = true;
-
-    /// <summary>
     /// Gets the folder for files received from the phone, or null for Downloads\Fenpo.
     /// </summary>
     public string? IncomingFolder { get; init; }

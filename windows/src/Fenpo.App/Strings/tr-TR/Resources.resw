@@ -129,15 +129,6 @@
   <data name="Camera_Apps.Text" xml:space="preserve">
     <value>Uygulamalarda Fenpo Kamera</value>
   </data>
-  <data name="Camera_CenterStage.Text" xml:space="preserve">
-    <value>Kişiyi ortala</value>
-  </data>
-  <data name="Camera_CenterStageHint.Text" xml:space="preserve">
-    <value>Hareket ettikçe kadraj seni takip eder</value>
-  </data>
-  <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Kişiyi ortala</value>
-  </data>
   <data name="Camera_Failed" xml:space="preserve">
     <value>Kamera açılamadı. Kamerayı kullanan başka bir uygulamayı kapatıp yeniden dene.</value>
   </data>
@@ -162,23 +153,11 @@
   <data name="Camera_LensWide.Content" xml:space="preserve">
     <value>Geniş</value>
   </data>
-  <data name="Camera_Microphone.Text" xml:space="preserve">
-    <value>Telefonun mikrofonunu kullan</value>
-  </data>
-  <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Telefonun mikrofonunu kullan</value>
-  </data>
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Telefonu kamera olarak kullanmak için uygulamayı aç.</value>
   </data>
   <data name="Camera_NotOffered" xml:space="preserve">
     <value>Telefondaki Fenpo kamerayı paylaşmıyor. Telefonda Fenpo'yu güncelle ve açık tut.</value>
-  </data>
-  <data name="Camera_Portrait.Text" xml:space="preserve">
-    <value>Portre bulanıklığı</value>
-  </data>
-  <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Portre bulanıklığı</value>
   </data>
   <data name="Camera_Remove.Content" xml:space="preserve">
     <value>Kaldır</value>

@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 namespace Fenpo.App.Services;
 
 /// <summary>
-/// The phone's camera (CAPABILITY_CAMERA, camera.proto): starts and stops it, keeps the lens, Center Stage and
-/// microphone choices in step both ways (the Camera page's settings and changes made on the phone), and takes the
-/// camera stream from <see cref="MediaStreamRouter"/> for the preview.
+/// The phone's camera (CAPABILITY_CAMERA, camera.proto): starts and stops it, keeps the lens choice in step both
+/// ways (the Camera page and changes made on the phone), and takes the camera stream from
+/// <see cref="MediaStreamRouter"/> for the preview. Center Stage, portrait blur and the phone's microphone are not
+/// offered (removed 17 Oct: they did not work reliably), so both are always sent off.
 /// </summary>
 public sealed class CameraService(PhoneChannel channel, ISettingsStore settings, ILogger<CameraService> logger) : IHostedService
 {
@@ -139,8 +140,8 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
     {
         Facing = settings.CameraLens == CameraLens.Front ? CameraFacing.Front : CameraFacing.Back,
         Zoom = settings.CameraLens == CameraLens.UltraWide ? 0.5f : 1f,
-        Microphone = settings.CameraUseMicrophone,
-        CenterStage = settings.CameraCenterStage,
+        Microphone = false,
+        CenterStage = false,
     };
 
     private static CameraLens LensOf(CameraSettings settings) => settings.Facing == CameraFacing.Front ? CameraLens.Front : settings.Zoom is > 0 and < 1 ? CameraLens.UltraWide : CameraLens.Wide;
@@ -198,7 +199,7 @@ public sealed class CameraService(PhoneChannel channel, ISettingsStore settings,
 
         try
         {
-            _settings.Update(s => s with { CameraLens = LensOf(applied), CameraCenterStage = applied.CenterStage, CameraUseMicrophone = applied.Microphone });
+            _settings.Update(s => s with { CameraLens = LensOf(applied) });
         }
         finally
         {

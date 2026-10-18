@@ -129,15 +129,6 @@
   <data name="Camera_Apps.Text" xml:space="preserve">
     <value>Fenpo Kamera in apps</value>
   </data>
-  <data name="Camera_CenterStage.Text" xml:space="preserve">
-    <value>Keep me centered</value>
-  </data>
-  <data name="Camera_CenterStageHint.Text" xml:space="preserve">
-    <value>The frame follows you as you move</value>
-  </data>
-  <data name="Camera_CenterStageToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Keep me centered</value>
-  </data>
   <data name="Camera_Failed" xml:space="preserve">
     <value>The camera did not open. Close any other app using it and try again.</value>
   </data>
@@ -162,23 +153,11 @@
   <data name="Camera_LensWide.Content" xml:space="preserve">
     <value>Wide</value>
   </data>
-  <data name="Camera_Microphone.Text" xml:space="preserve">
-    <value>Use the phone’s microphone</value>
-  </data>
-  <data name="Camera_MicrophoneToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Use the phone’s microphone</value>
-  </data>
   <data name="Camera_NeedsApp.Message" xml:space="preserve">
     <value>Open the app to use the phone as a camera.</value>
   </data>
   <data name="Camera_NotOffered" xml:space="preserve">
     <value>Fenpo on the phone does not share its camera. Update Fenpo on the phone and keep it open.</value>
-  </data>
-  <data name="Camera_Portrait.Text" xml:space="preserve">
-    <value>Portrait blur</value>
-  </data>
-  <data name="Camera_PortraitToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
-    <value>Portrait blur</value>
   </data>
   <data name="Camera_Remove.Content" xml:space="preserve">
     <value>Remove</value>

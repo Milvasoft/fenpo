@@ -30,9 +30,6 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
         var current = settings.Current;
         ShareClipboard = current.ShareClipboard;
         LensIndex = (int)current.CameraLens;
-        CenterStage = current.CameraCenterStage;
-        PortraitBlur = current.CameraPortraitBlur;
-        UseMicrophone = current.CameraUseMicrophone;
         _loaded = true;
     }
 
@@ -49,18 +46,6 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial int LensIndex { get; set; }
 
-    /// <summary>Gets or sets a value indicating whether the camera keeps the person in the frame.</summary>
-    [ObservableProperty]
-    public partial bool CenterStage { get; set; }
-
-    /// <summary>Gets or sets a value indicating whether the camera blurs the background.</summary>
-    [ObservableProperty]
-    public partial bool PortraitBlur { get; set; }
-
-    /// <summary>Gets or sets a value indicating whether the iPhone microphone comes with the camera.</summary>
-    [ObservableProperty]
-    public partial bool UseMicrophone { get; set; }
-
     /// <summary>Gets a value indicating whether the needs-app banner is shown.</summary>
     public bool NeedsApp => !AppConnected;
 
@@ -73,12 +58,6 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
     partial void OnShareClipboardChanged(bool value) => Save(s => s with { ShareClipboard = value });
 
     partial void OnLensIndexChanged(int value) => Save(s => s with { CameraLens = (CameraLens)value });
-
-    partial void OnCenterStageChanged(bool value) => Save(s => s with { CameraCenterStage = value });
-
-    partial void OnPortraitBlurChanged(bool value) => Save(s => s with { CameraPortraitBlur = value });
-
-    partial void OnUseMicrophoneChanged(bool value) => Save(s => s with { CameraUseMicrophone = value });
 
     private void Save(Func<AppSettings, AppSettings> change)
     {
