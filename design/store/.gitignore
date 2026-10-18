@@ -1,1 +1,4 @@
 __pycache__/
+# Simulator material, rebuilt by CI (README.md); only the finished images are kept.
+raw/
+recordings/
