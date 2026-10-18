@@ -45,6 +45,12 @@
   <data name="Action_SendFileText.Text" xml:space="preserve">
     <value>Send file</value>
   </data>
+  <data name="AnotherCopy_Text" xml:space="preserve">
+    <value>Another installation of Fenpo is running. Two copies would both try to connect to the same phone. Quit the other one from the system tray, then open Fenpo again.</value>
+  </data>
+  <data name="AnotherCopy_Title" xml:space="preserve">
+    <value>Fenpo is already running</value>
+  </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Your phone and Windows, at the same desk.</value>
   </data>

@@ -7,8 +7,16 @@ namespace Fenpo.App;
 /// </summary>
 internal static partial class NativeMethods
 {
+    /// <summary>
+    /// MB_ICONINFORMATION.
+    /// </summary>
+    internal const uint MessageBoxIconInformation = 0x40;
+
     [LibraryImport("user32.dll")]
     internal static partial uint GetDpiForWindow(nint hwnd);
+
+    [LibraryImport("user32.dll", EntryPoint = "MessageBoxW", StringMarshalling = StringMarshalling.Utf16)]
+    internal static partial int MessageBox(nint owner, string text, string caption, uint type);
 
     /// <summary>
     /// Splits a command line the way Windows does for a program's arguments.

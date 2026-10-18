@@ -45,6 +45,12 @@
   <data name="Action_SendFileText.Text" xml:space="preserve">
     <value>Dosya gönder</value>
   </data>
+  <data name="AnotherCopy_Text" xml:space="preserve">
+    <value>Fenpo'nun başka bir kurulumu şu anda çalışıyor. İki kopya aynı telefona bağlanmaya çalışır. Önce diğerini sistem tepsisinden kapat, sonra Fenpo'yu yeniden aç.</value>
+  </data>
+  <data name="AnotherCopy_Title" xml:space="preserve">
+    <value>Fenpo zaten açık</value>
+  </data>
   <data name="AppDescription" xml:space="preserve">
     <value>Telefonun ve Windows, aynı masada.</value>
   </data>

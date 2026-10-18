@@ -1,6 +1,7 @@
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace Fenpo.App;
 
@@ -9,6 +10,13 @@ namespace Fenpo.App;
 /// </summary>
 public static class Program
 {
+    // Each installation (Store, GitHub, a development build) is its own package with its own instance key, but two
+    // copies would share the Bluetooth adapter: both advertise the Fenpo service and both connect to the phone, which
+    // then talks to whichever answers. Full-trust packages share the session's named objects, so a mutex spans them.
+    private const string _anyCopyMutexName = @"Local\Fenpo.AnyCopy";
+
+    private static Mutex? _anyCopy;
+
     [STAThread]
     private static int Main()
     {
@@ -16,6 +24,15 @@ public static class Program
 
         if (RedirectedToRunningInstance())
         {
+            return 0;
+        }
+
+        _anyCopy = new Mutex(true, _anyCopyMutexName, out var first);
+
+        if (!first)
+        {
+            var loader = new ResourceLoader();
+            _ = NativeMethods.MessageBox(0, loader.GetString("AnotherCopy_Text"), loader.GetString("AnotherCopy_Title"), NativeMethods.MessageBoxIconInformation);
             return 0;
         }
 
