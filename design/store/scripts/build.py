@@ -187,13 +187,51 @@ def recording_labels(recording, references):
 
 
 def screen_times(labels, count):
-    """When each of the tour's screens first holds still (three samples in a row) in the recording."""
-    times, wanted = [], 0
-    for index in range(len(labels) - 2):
-        if wanted < count and labels[index] == labels[index + 1] == labels[index + 2] == wanted:
-            times.append(index / SAMPLE_FPS)
-            wanted += 1
-    return times if len(times) == count else None
+    """When each of the tour's screens first holds still (three samples in a row) in the recording,
+    in the tour's order; None for a screen the recording missed."""
+    times, start = [], 0
+    for wanted in range(count):
+        found = None
+        for index in range(start, len(labels) - 2):
+            if labels[index] == labels[index + 1] == labels[index + 2] == wanted:
+                found = index
+                break
+        times.append(None if found is None else found / SAMPLE_FPS)
+        if found is not None:
+            start = found
+    return times
+
+
+def screen_clips(recording, appear, durations, references, size, fps, recorded, work):
+    """One clip per step of the tour, exactly as long as its caption: the recording from the moment
+    the screen starts to come in, the last frame held to the end. The simulator's recorder sometimes
+    skips seconds; a screen it missed is its raw screenshot (the same screen) standing still."""
+    width, height = size
+    lines = []
+    for index, duration in enumerate(durations):
+        clip = os.path.join(work, f"clip{index}.mp4")
+        encode = ["-an", "-c:v", "libx264", "-preset", "fast", "-crf", "12", "-pix_fmt", "yuv420p", "-r", str(fps), clip]
+        if appear[index] is None:
+            run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-loop", "1", "-framerate", str(fps),
+                 "-t", f"{duration:.3f}", "-i", references[index], "-vf", f"scale={width}:{height}", *encode])
+        else:
+            following = next((t for t in appear[index + 1:] if t is not None), recorded)
+            if index == 0:
+                # Home holds still before the tour starts: its last seconds.
+                start = max(appear[0], following - 0.4 - duration)
+            else:
+                start = appear[index] - 0.4
+            end = min(following - 0.4, start + duration)
+            run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", "-i", recording, "-vf",
+                 # The simulator writes a frame only when the screen changes: fill them in first.
+                 f"setpts=PTS-STARTPTS,fps={fps},trim=start={start:.3f}:end={end:.3f},setpts=PTS-STARTPTS,"
+                 f"tpad=stop_mode=clone:stop_duration={duration:.3f},trim=duration={duration:.3f},scale={width}:{height}",
+                 *encode])
+        lines.append(f"file '{clip}'")
+    path = os.path.join(work, "clips.txt")
+    with open(path, "w", encoding="utf-8") as file:
+        file.write("\n".join(lines) + "\n")
+    return path
 
 
 def build_preview(store, specs, copy, bold, regular):
@@ -212,13 +250,11 @@ def build_preview(store, specs, copy, bold, regular):
         references = [raw_path(store, lang, preview["theme"], screen_id) for screen_id in screens]
         labels = recording_labels(recording, references)
         appear = screen_times(labels, len(screens))
-        if appear is None:
-            sys.exit(f"{lang}: the demo tour's screens are not all in the recording: {labels}")
-        print(f"{lang}: screens appear at " + ", ".join(f"{t:.1f}" for t in appear))
+        print(f"{lang}: screens appear at " + ", ".join("still" if t is None else f"{t:.1f}" for t in appear))
+        if appear[0] is None or sum(t is None for t in appear) > 2:
+            sys.exit(f"{lang}: the recording does not show the demo tour: {labels}")
         recorded = len(labels) / SAMPLE_FPS
-        starts = [max(appear[0], appear[1] - preview["first_step_seconds"])] + appear[1:]
-        ends = appear[1:] + [min(appear[-1] + step, recorded - 0.2)]
-        durations = [end - start for start, end in zip(starts, ends)]
+        durations = [preview["first_step_seconds"]] + [step] * (len(screens) - 1)
         total = sum(durations)
 
         work = tempfile.mkdtemp()
@@ -246,6 +282,9 @@ def build_preview(store, specs, copy, bold, regular):
         mask = frames.rounded_mask((screen_w, screen_h), round(frames.SCREEN_CORNER * scale))
         mask_path = os.path.join(work, "mask.png")
         mask.save(mask_path)
+        # The clips are encoded at an even width (4:2:0) and scaled to the screen in the last step.
+        clips = screen_clips(recording, appear, durations, references, (screen_w + screen_w % 2, screen_h),
+                             preview["fps"], recorded, work)
 
         folder = os.path.join(store, "appstore", "preview", lang)
         os.makedirs(folder, exist_ok=True)
@@ -256,10 +295,7 @@ def build_preview(store, specs, copy, bold, regular):
             audio = ["-i", music] if with_music else ["-f", "lavfi", "-t", f"{total:.3f}", "-i", f"anullsrc=r={preview['audio_rate']}:cl=stereo"]
             fade = f"afade=t=in:d=0.6,afade=t=out:st={total - 1.8:.3f}:d=1.8," if with_music else ""
             graph = (
-                # The simulator writes a frame only when the screen changes: fill in the frames
-                # before trimming, or the screen runs ahead of the captions.
-                f"[1:v]setpts=PTS-STARTPTS,fps={preview['fps']},trim=start={starts[0]:.3f}:end={ends[-1]:.3f},"
-                f"setpts=PTS-STARTPTS,scale={screen_w}:{screen_h},format=rgba[screen];"
+                f"[1:v]setpts=PTS-STARTPTS,fps={preview['fps']},scale={screen_w}:{screen_h},format=rgba[screen];"
                 f"[2:v]format=gray,scale={screen_w}:{screen_h}[mask];"
                 f"[screen][mask]alphamerge[rounded];"
                 f"[0:v]fps={preview['fps']},format=rgba[cards];"
@@ -272,7 +308,7 @@ def build_preview(store, specs, copy, bold, regular):
             run([
                 "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
                 "-f", "concat", "-safe", "0", "-i", os.path.join(work, "cards.txt"),
-                "-i", recording, "-loop", "1", "-i", mask_path, *audio,
+                "-f", "concat", "-safe", "0", "-i", clips, "-loop", "1", "-i", mask_path, *audio,
                 "-filter_complex", graph, "-map", "[video]", "-map", "[audio]",
                 "-t", f"{total:.3f}", "-r", str(preview["fps"]),
                 "-c:v", "libx264", "-profile:v", preview["profile"], "-level:v", preview["level"],
