@@ -22,8 +22,9 @@ struct SendTextToPCIntent: AppIntent {
     }
 }
 
-/// Sends the iPhone's clipboard. iOS only lets the foreground app read the pasteboard, so this opens
-/// Fenpo; for the Control Center, the Action button and Back Tap.
+/// Sends the iPhone's clipboard: text, a link or an image. iOS only lets the foreground app read the
+/// pasteboard, so this opens Fenpo; for the Control Center, the Action button and Siri. Back Tap
+/// without opening Fenpo uses a shortcut with "Get Clipboard" and `SendTextToPCIntent` instead.
 struct SendClipboardToPCIntent: AppIntent {
     static let title: LocalizedStringResource = "intent.sendClipboard.title"
     static let description = IntentDescription("intent.sendClipboard.description")
@@ -32,10 +33,11 @@ struct SendClipboardToPCIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let text = UIPasteboard.general.string, !text.isEmpty else {
+        guard let payload = PhoneClipboard.read() else {
             throw FenpoActionError.emptyText
         }
-        try await IntentSupport.actions(for: Self.self).sendText(text)
+        try await IntentSupport.actions(for: Self.self).sendClipboard(payload)
+        PhoneClipboard.markHandled()
         return .result(dialog: "intent.sendText.done")
     }
 }
@@ -52,6 +54,7 @@ struct PasteFromPCIntent: AppIntent {
         let pasteboard = UIPasteboard.general
         let before = pasteboard.changeCount
         pasteboard.string = text
+        PhoneClipboard.markHandled()
         // UIApplication is unavailable in the widget extension, which compiles this file too.
         IntentSupport.log.info("Paste from PC wrote \(text.count) characters, changeCount \(before) -> \(pasteboard.changeCount)")
         return .result(value: text, dialog: "intent.pasteFromPC.done")
@@ -104,6 +107,8 @@ extension FenpoActionError: @retroactive CustomLocalizedStringResourceConvertibl
             "action.error.declinedByPC"
         case .transferFailed:
             "action.error.transferFailed"
+        case .sharingOff:
+            "action.error.sharingOff"
         }
     }
 }

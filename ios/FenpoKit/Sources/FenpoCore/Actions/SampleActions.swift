@@ -12,6 +12,12 @@ public struct SampleActions: FenpoActions {
         }
     }
 
+    public func sendClipboard(_ payload: ClipboardPayload) async throws {
+        guard !payload.isEmpty else {
+            throw FenpoActionError.emptyText
+        }
+    }
+
     public func fetchPCClipboard() async throws -> String {
         SampleSession.pairedSnapshot().pcClipboardPreview ?? ""
     }

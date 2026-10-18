@@ -116,5 +116,21 @@ public struct DataChannelClient: Sendable {
         message.url = url.absoluteString
         try await connection.send(channel.sequencer.envelope(.openURL(message)))
     }
+
+    /// Puts something on the PC's clipboard over a short-lived Wi-Fi connection (share extension).
+    /// - Parameter payload: Text, link or image.
+    public func sendClipboard(_ payload: ClipboardPayload) async throws {
+        var channel = try await connect()
+        let connection = channel.connection
+        defer {
+            Task {
+                await connection.cancel()
+            }
+        }
+        guard channel.session.supports(.clipboard) else {
+            throw FenpoActionError.unsupportedByPC
+        }
+        try await connection.send(channel.sequencer.envelope(.clipboard(payload.item())))
+    }
 }
 #endif

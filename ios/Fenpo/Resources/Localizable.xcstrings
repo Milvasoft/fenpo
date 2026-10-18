@@ -103,6 +103,23 @@
         }
       }
     },
+    "action.error.sharingOff": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard sharing is off. Turn it on in Fenpo’s Settings."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pano paylaşımı kapalı. Fenpo’nun Ayarlar’ından aç."
+          }
+        }
+      }
+    },
     "action.error.tooLarge": {
       "extractionState": "manual",
       "localizations": {
@@ -235,6 +252,244 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sistem"
+          }
+        }
+      }
+    },
+    "backTap.explanation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS doesn’t let apps in the background read the clipboard, but the Shortcuts app can. Set up this shortcut once, and a double tap on the back of your iPhone sends what you copied to your PC without opening Fenpo."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS arka plandaki uygulamaların panoyu okumasına izin vermez, ama Kestirmeler okuyabilir. Bu kestirmeyi bir kez kurarsan iPhone’un arkasına iki kez dokunmak kopyaladığını Fenpo’yu açmadan PC’ye gönderir."
+          }
+        }
+      }
+    },
+    "backTap.firstRun": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The first time, Shortcuts asks to use the clipboard: choose Always Allow. This way sends text and links; for images, use one of the ways below."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İlk seferde Kestirmeler panoyu kullanmak için izin ister: Her Zaman İzin Ver’i seç. Bu yol metin ve bağlantı gönderir; resimler için aşağıdaki yollardan birini kullan."
+          }
+        }
+      }
+    },
+    "backTap.openShortcuts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Shortcuts"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kestirmeler’i aç"
+          }
+        }
+      }
+    },
+    "backTap.other.actionButton": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Action button: Settings › Action Button › Shortcut › Fenpo › Send clipboard to PC. Fenpo opens for a moment."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eylem düğmesi: Ayarlar › Eylem Düğmesi › Kestirme › Fenpo › Panoyu PC’ye gönder. Fenpo bir an açılır."
+          }
+        }
+      }
+    },
+    "backTap.other.controls": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control Center or Lock Screen: add a control › Fenpo › Send clipboard. Fenpo opens for a moment."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denetim Merkezi veya kilit ekranı: Denetim ekle › Fenpo › Panoyu gönder. Fenpo bir an açılır."
+          }
+        }
+      }
+    },
+    "backTap.other.onOpen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Just open Fenpo: with “Send clipboard on open”, what you copied is offered or sent right away."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo’yu açman yeter: “Açılınca panoyu gönder” açıkken kopyaladığın şey hemen sunulur veya gönderilir."
+          }
+        }
+      }
+    },
+    "backTap.other.share": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share menu: on text, a link or an image, tap Share › Fenpo › Copy to PC clipboard."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paylaş menüsü: metinde, bağlantıda veya resimde Paylaş › Fenpo › PC panosuna kopyala."
+          }
+        }
+      }
+    },
+    "backTap.section.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other ways"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Başka yollar"
+          }
+        }
+      }
+    },
+    "backTap.section.steps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up once"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir kez kur"
+          }
+        }
+      }
+    },
+    "backTap.step.backTap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Settings › Accessibility › Touch › Back Tap › Double Tap, choose this shortcut."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ayarlar › Erişilebilirlik › Dokunma › Arkaya Dokun › Çift Dokunma’da bu kestirmeyi seç."
+          }
+        }
+      }
+    },
+    "backTap.step.create": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Shortcuts and make a new shortcut."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kestirmeler’i aç ve yeni bir kestirme yap."
+          }
+        }
+      }
+    },
+    "backTap.step.getClipboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add the “Get Clipboard” action."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "“Panoyu Al” eylemini ekle."
+          }
+        }
+      }
+    },
+    "backTap.step.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name the shortcut “Send clipboard to PC”."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kestirmeye “Panoyu PC’ye gönder” adını ver."
+          }
+        }
+      }
+    },
+    "backTap.step.sendText": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search for Fenpo and add “Send text to PC”. Its Text field should show Clipboard."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo’yu ara ve “Metni PC’ye gönder”i ekle. Metin alanında Pano yazmalı."
           }
         }
       }
@@ -1225,6 +1480,108 @@
         }
       }
     },
+    "home.clipboardOffer.dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don’t send"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gönderme"
+          }
+        }
+      }
+    },
+    "home.clipboardOffer.image": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An image. Tap Paste to send it to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir resim. PC’ye göndermek için Yapıştır’a dokun."
+          }
+        }
+      }
+    },
+    "home.clipboardOffer.link": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A link. Tap Paste to send it to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir bağlantı. PC’ye göndermek için Yapıştır’a dokun."
+          }
+        }
+      }
+    },
+    "home.clipboardOffer.sensitive": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Might be a password or a code, so it isn’t sent by itself. Tap Paste to send it; your PC keeps it out of its list."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parola veya kod olabilir, bu yüzden kendiliğinden gitmez. Göndermek için Yapıştır’a dokun; PC bunu listesinde tutmaz."
+          }
+        }
+      }
+    },
+    "home.clipboardOffer.text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Text. Tap Paste to send it to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metin. PC’ye göndermek için Yapıştır’a dokun."
+          }
+        }
+      }
+    },
+    "home.clipboardOffer.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New on your clipboard"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panoda yeni bir şey var"
+          }
+        }
+      }
+    },
     "home.notificationsOff.message %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1442,6 +1799,23 @@
         }
       }
     },
+    "home.toast.pasteNotAllowed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t read the clipboard. To stop iOS asking, set Settings › Apps › Fenpo › Paste from Other Apps to Allow."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pano okunamadı. iOS’un sormaması için Ayarlar › Uygulamalar › Fenpo › Diğer Uygulamalardan Yapıştır’ı İzin Ver yap."
+          }
+        }
+      }
+    },
     "home.toast.pasted": {
       "extractionState": "manual",
       "localizations": {
@@ -1472,6 +1846,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "PC’ye gönderildi."
+          }
+        }
+      }
+    },
+    "home.toast.sentOnOpen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your clipboard went to your PC."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pano PC’ye gitti."
           }
         }
       }
@@ -1924,13 +2315,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opens Fenpo briefly and sends what you copied to your PC."
+            "value": "Opens Fenpo briefly and sends the text, link or image you copied to your PC."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo’yu kısa bir an açar ve kopyaladığını bilgisayara gönderir."
+            "value": "Fenpo’yu kısa bir an açar ve kopyaladığın metni, bağlantıyı veya resmi bilgisayara gönderir."
           }
         }
       }
@@ -1975,13 +2366,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Puts the text on your PC’s clipboard. Use it after “Get Clipboard” in a shortcut."
+            "value": "Puts the text on your PC’s clipboard. Use it after “Get Clipboard” in a shortcut: Fenpo stays closed."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Metni bilgisayarın panosuna koyar. Bir kısayolda “Panoyu Al”dan sonra kullan."
+            "value": "Metni bilgisayarın panosuna koyar. Bir kestirmede “Panoyu Al”dan sonra kullan; Fenpo açılmaz."
           }
         }
       }
@@ -3329,6 +3720,108 @@
         }
       }
     },
+    "settings.clipboardOnOpen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send clipboard on open"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açılınca panoyu gönder"
+          }
+        }
+      }
+    },
+    "settings.clipboardOnOpen.ask": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sor"
+          }
+        }
+      }
+    },
+    "settings.clipboardOnOpen.ask.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you open Fenpo after copying something, Home shows a Paste button that sends it to your PC. iOS doesn’t ask for permission for that button."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bir şey kopyalayıp Fenpo’yu açtığında Ana Sayfa’da bir Yapıştır düğmesi çıkar; dokununca PC’ye gider. iOS bu düğme için izin sormaz."
+          }
+        }
+      }
+    },
+    "settings.clipboardOnOpen.automatic": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Otomatik"
+          }
+        }
+      }
+    },
+    "settings.clipboardOnOpen.automatic.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you copied goes to your PC as soon as you open Fenpo. To stop iOS asking each time, set Settings › Apps › Fenpo › Paste from Other Apps to Allow. Passwords and codes still wait for your tap."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopyaladığın şey Fenpo’yu açar açmaz PC’ye gider. iOS’un her seferinde sormaması için Ayarlar › Uygulamalar › Fenpo › Diğer Uygulamalardan Yapıştır’ı İzin Ver yap. Parola ve kodlar yine senin dokunuşunu bekler."
+          }
+        }
+      }
+    },
+    "settings.clipboardOnOpen.off": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapalı"
+          }
+        }
+      }
+    },
     "settings.clipboardSharing": {
       "extractionState": "manual",
       "localizations": {
@@ -3522,13 +4015,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "iOS doesn’t show apps the paste setting. If iOS asks every time you send the clipboard, open Settings › Fenpo and set Paste from Other Apps to Allow."
+            "value": "iOS doesn’t show apps the paste setting. If iOS asks every time you send the clipboard, open Settings › Apps › Fenpo and set Paste from Other Apps to Allow."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "iOS yapıştırma ayarını uygulamalara göstermez. Panoyu her gönderişinde onay soruyorsa Ayarlar › Fenpo’da Diğer Uygulamalardan Yapıştır’ı İzin Ver yap."
+            "value": "iOS yapıştırma ayarını uygulamalara göstermez. Panoyu her gönderişinde onay soruyorsa Ayarlar › Uygulamalar › Fenpo’da Diğer Uygulamalardan Yapıştır’ı İzin Ver yap."
           }
         }
       }

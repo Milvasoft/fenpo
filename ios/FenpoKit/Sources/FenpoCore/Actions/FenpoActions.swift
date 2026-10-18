@@ -11,6 +11,10 @@ public protocol FenpoActions: Sendable {
     /// - Parameter text: Text to send.
     func sendText(_ text: String) async throws
 
+    /// Puts text, a link or an image on the PC's clipboard.
+    /// - Parameter payload: What the iPhone's clipboard held.
+    func sendClipboard(_ payload: ClipboardPayload) async throws
+
     /// Asks the PC for its latest clipboard text.
     func fetchPCClipboard() async throws -> String
 
@@ -75,6 +79,9 @@ public enum FenpoActionError: Error, Equatable, Sendable {
 
     /// The transfer stopped before every byte arrived.
     case transferFailed
+
+    /// Clipboard sharing is off in Fenpo's Settings.
+    case sharingOff
 }
 
 /// Holds the app's `FenpoActions` for intents that run in the app process.

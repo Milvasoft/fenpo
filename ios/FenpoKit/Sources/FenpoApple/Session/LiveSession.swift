@@ -122,6 +122,12 @@ public final class FenpoServices {
     /// that keeps Fenpo running meanwhile, and when the channel was last used.
     private var wifiTask: UIBackgroundTaskIdentifier = .invalid
     private var lastWifiActivity = Date.distantPast
+    /// When the PC last asked for Wi-Fi, and whether it was for a clipboard item that has not come yet.
+    private var wifiWantedAt: Date?
+    private var awaitingClipboardOverWifi = false
+    /// Messages that arrived over BLE while Fenpo was not in front, by type, and when Fenpo left.
+    private var backgroundMessages: [String: Int] = [:]
+    private var enteredBackgroundAt: Date?
     private var idleWatch: Task<Void, Never>?
     /// The channel opened for the PC closes this long after its last message.
     private static let wifiIdleLimit: TimeInterval = 30
@@ -207,6 +213,8 @@ public final class FenpoServices {
     /// Fenpo came to the front: open the Wi-Fi channel so the PC can send files and start the camera.
     public func appBecameActive() {
         isActive = true
+        logReturnToFront()
+        clipboard.appBecameActive()
         // In front, Fenpo keeps the channel open anyway.
         idleWatch?.cancel()
         idleWatch = nil
@@ -219,6 +227,9 @@ public final class FenpoServices {
     /// Fenpo went to the background: iOS suspends sockets, so close the channel unless a transfer runs.
     public func appEnteredBackground() {
         isActive = false
+        enteredBackgroundAt = .now
+        backgroundMessages = [:]
+        log.info("Background: BLE \(String(describing: central.state)), PC Hello \(central.session != nil ? "received" : "missing"), Wi-Fi \(String(describing: wifi.state))")
         if camera.state != nil {
             // iOS stops the camera in the background; tell the PC instead of freezing its picture.
             camera.stopFromPhone(reason: "Fenpo went to the background")
@@ -308,8 +319,12 @@ public final class FenpoServices {
     /// background: open the control connection now, hold a background task while it is used, and
     /// close it after half a minute without traffic.
     private func wifiWanted(_ wanted: Fenpo_V1_WifiWanted) {
-        log.info("Wi-Fi wanted by PC for \(wanted.reason)")
+        let remaining = UIApplication.shared.backgroundTimeRemaining
+        let budget = remaining > 1_000_000 ? "unlimited" : String(format: "%.1f s", remaining)
+        log.info("Wi-Fi wanted by PC for \(wanted.reason); app \(UIApplication.shared.applicationState.logName), background time \(budget), Wi-Fi \(String(describing: wifi.state))")
         lastWifiActivity = .now
+        wifiWantedAt = .now
+        awaitingClipboardOverWifi = wanted.reason.localizedCaseInsensitiveContains("clipboard")
         guard !isActive else {
             connectWiFiIfUseful()
             return
@@ -318,9 +333,14 @@ public final class FenpoServices {
         Task {
             do {
                 try await wifi.connectIfNeeded()
-                log.info("Wi-Fi channel open for the PC")
+                // The PC waits 10 s for the Wi-Fi Hello, then gives up on the item.
+                log.info("Wi-Fi channel open for the PC after \(Self.seconds(since: wifiWantedAt))")
             } catch {
-                log.error("Wi-Fi channel for the PC failed: \(String(describing: error))")
+                log.error("Wi-Fi channel for the PC failed after \(Self.seconds(since: wifiWantedAt)): \(String(describing: error))")
+                if awaitingClipboardOverWifi {
+                    log.error("The PC's clipboard image cannot arrive: no Wi-Fi channel")
+                    awaitingClipboardOverWifi = false
+                }
                 endWifiTask()
                 return
             }
@@ -334,7 +354,8 @@ public final class FenpoServices {
         }
         wifiTask = UIApplication.shared.beginBackgroundTask(withName: "Fenpo Wi-Fi for the PC") {
             MainActor.assumeIsolated {
-                self.log.info("Background time ran out; closing the Wi-Fi channel")
+                self.log.info("Background time ran out; closing the Wi-Fi channel\(self.awaitingClipboardOverWifi ? " before the PC's clipboard item arrived" : "")")
+                self.awaitingClipboardOverWifi = false
                 if !self.isActive {
                     self.wifi.disconnect()
                 }
@@ -371,6 +392,10 @@ public final class FenpoServices {
                 }
                 if Date().timeIntervalSince(lastWifiActivity) > Self.wifiIdleLimit {
                     log.info("Wi-Fi channel idle; closing it")
+                    if awaitingClipboardOverWifi {
+                        log.error("Closing Wi-Fi without the clipboard item the PC asked Wi-Fi for")
+                        awaitingClipboardOverWifi = false
+                    }
                     wifi.disconnect()
                     endWifiTask()
                     return
@@ -382,6 +407,8 @@ public final class FenpoServices {
     private func route(_ envelope: Fenpo_V1_Envelope, from channel: Channel) {
         if channel == .wifi {
             lastWifiActivity = .now
+        } else if !isActive {
+            backgroundMessages[envelope.bodyName, default: 0] += 1
         }
         for handler in extraHandlers where handler(envelope, channel) {
             return
@@ -398,7 +425,11 @@ public final class FenpoServices {
         }
         switch envelope.body {
         case .clipboard(let item):
-            clipboard.handle(item)
+            if channel == .wifi, awaitingClipboardOverWifi {
+                awaitingClipboardOverWifi = false
+                log.info("Clipboard item over Wi-Fi \(Self.seconds(since: wifiWantedAt)) after the PC asked for Wi-Fi")
+            }
+            clipboard.handle(item, over: channel == .bluetooth ? "BLE" : "Wi-Fi")
         case .clipboardRequest:
             // iOS does not let a background app read the pasteboard; the iPhone sends its
             // clipboard on purpose instead (App Intents, controls).
@@ -466,6 +497,24 @@ public final class FenpoServices {
             artwork: artwork
         )
         onChange?()
+    }
+
+    /// Tells apart "the channel was down" from "messages came but did nothing" after a stay in the background.
+    private func logReturnToFront() {
+        guard let since = enteredBackgroundAt else {
+            return
+        }
+        enteredBackgroundAt = nil
+        let received = backgroundMessages.sorted { $0.key < $1.key }.map { "\($0.key) \($0.value)" }.joined(separator: ", ")
+        log.info("Front again after \(Self.seconds(since: since)) away: BLE \(String(describing: central.state)), PC Hello \(central.session != nil ? "received" : "missing"); over BLE meanwhile: \(received.isEmpty ? "nothing" : received)")
+        backgroundMessages = [:]
+    }
+
+    private static func seconds(since date: Date?) -> String {
+        guard let date else {
+            return "?"
+        }
+        return String(format: "%.1f s", Date().timeIntervalSince(date))
     }
 
     private func clearMediaIfDisconnected() {

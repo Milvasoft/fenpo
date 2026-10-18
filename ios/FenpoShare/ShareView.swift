@@ -1,7 +1,8 @@
 import FenpoCore
 import SwiftUI
 
-/// The share extension: "Open on PC" for links, "Send to PC" for files and photos. Both go over Wi-Fi.
+/// The share extension: "Open on PC" for links, "Send to PC" for files and photos, "Copy to PC clipboard"
+/// for text, links and a single image. All go over Wi-Fi.
 struct ShareView: View {
     @State var model: ShareModel
     let close: () -> Void
@@ -25,6 +26,11 @@ struct ShareView: View {
                                     .font(.footnote)
                                     .foregroundStyle(.textSecondary)
                                     .lineLimit(1)
+                            } else if let text = model.text {
+                                Text(verbatim: text)
+                                    .font(.footnote)
+                                    .foregroundStyle(.textSecondary)
+                                    .lineLimit(2)
                             }
                         }
                     }
@@ -34,7 +40,7 @@ struct ShareView: View {
                             Task { await model.sendFiles() }
                         } label: {
                             HStack {
-                                if model.state == .sending {
+                                if model.state == .sending, model.job == .sendFiles {
                                     ProgressView()
                                         .tint(.onAccent)
                                 }
@@ -50,12 +56,28 @@ struct ShareView: View {
                         }
                     }
 
+                    if model.canCopyToPC {
+                        Button {
+                            Task { await model.copyToPC() }
+                        } label: {
+                            HStack {
+                                if model.state == .sending, model.job == .copyToPC {
+                                    ProgressView()
+                                        .tint(.onAccent)
+                                }
+                                Text("share.copyToPC")
+                            }
+                        }
+                        .buttonStyle(SharePillButtonStyle())
+                        .disabled(model.state == .sending || model.state == .done)
+                    }
+
                     if model.url != nil {
                         Button {
                             Task { await model.openOnPC() }
                         } label: {
                             HStack {
-                                if model.state == .sending {
+                                if model.state == .sending, model.job == .openOnPC {
                                     ProgressView()
                                         .tint(.onAccent)
                                 }
@@ -105,16 +127,29 @@ struct ShareView: View {
     private var status: some View {
         switch model.state {
         case .done:
-            Label(model.files.isEmpty ? "share.openOnPC.done" : "share.sendFiles.done", systemImage: "checkmark.circle.fill")
+            Label(doneMessage, systemImage: "checkmark.circle.fill")
                 .foregroundStyle(.leaf)
         case .failed(let error):
             Text(error.shareMessage)
                 .foregroundStyle(.red)
         case .idle, .sending:
-            if model.url == nil && model.files.isEmpty && !model.isLoading {
+            if model.url == nil && model.files.isEmpty && model.text == nil && !model.isLoading {
                 Text("share.nothing")
                     .foregroundStyle(.textSecondary)
             }
+        }
+    }
+}
+
+extension ShareView {
+    private var doneMessage: LocalizedStringKey {
+        switch model.job {
+        case .copyToPC:
+            "share.copyToPC.done"
+        case .openOnPC:
+            "share.openOnPC.done"
+        case .sendFiles, nil:
+            "share.sendFiles.done"
         }
     }
 }

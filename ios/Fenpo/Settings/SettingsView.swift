@@ -9,8 +9,11 @@ struct SettingsView: View {
     @Environment(AppearanceStore.self) private var appearance
     @Environment(\.openURL) private var openURL
 
-    @AppStorage("feature.clipboard", store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    @AppStorage(ClipboardOnOpen.sharingKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var clipboardSharing = true
+
+    @AppStorage(ClipboardOnOpen.modeKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    private var clipboardOnOpen: ClipboardOnOpen.Mode = .ask
 
     @AppStorage(FocusSync.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var focusSync = true
@@ -52,7 +55,29 @@ struct SettingsView: View {
                     SectionCaption(title: "settings.section.features")
                     CardRows {
                         ToggleRow(icon: .clipboard, color: .bloom, title: "settings.clipboardSharing", isOn: $clipboardSharing)
-                        ValueRow(icon: .hand, color: .ink, title: "settings.backTap", value: Text("home.sendClipboard"))
+                        SettingsRowLayout(icon: .symbol("arrow.up.doc"), color: .bloom, title: "settings.clipboardOnOpen") {
+                            Picker("settings.clipboardOnOpen", selection: $clipboardOnOpen) {
+                                ForEach(ClipboardOnOpen.Mode.allCases, id: \.self) { mode in
+                                    Text(mode.title).tag(mode)
+                                }
+                            }
+                            .labelsHidden()
+                            .pickerStyle(.menu)
+                            .tint(.textSecondary)
+                        }
+                        .disabled(!clipboardSharing)
+                        .opacity(clipboardSharing ? 1 : 0.5)
+                        NavigationLink {
+                            BackTapGuideView()
+                        } label: {
+                            SettingsRowLayout(icon: .hand, color: .ink, title: "settings.backTap") {
+                                Text("home.sendClipboard")
+                                    .foregroundStyle(.textSecondary)
+                                chevron
+                            }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
                         ToggleRow(icon: .moon, color: .orange, title: "settings.focus", isOn: $focusSync)
                             .onChange(of: focusSync) {
                                 Task { await model.focusSyncChanged() }
@@ -73,6 +98,14 @@ struct SettingsView: View {
                             .onChange(of: sendsScreenshots) { _, isOn in
                                 model.screenshots?.setEnabled(isOn)
                             }
+                    }
+                    if clipboardSharing, let hint = clipboardOnOpen.hint {
+                        Text(hint)
+                            .font(.footnote)
+                            .foregroundStyle(.textSecondary)
+                            .padding(.horizontal, 16)
+                            .padding(.top, 6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     Text("settings.focus.hint")
                         .font(.footnote)
@@ -194,6 +227,32 @@ extension AppearancePreference {
             "appearance.light"
         case .dark:
             "appearance.dark"
+        }
+    }
+}
+
+extension ClipboardOnOpen.Mode {
+    /// User visible name.
+    var title: LocalizedStringKey {
+        switch self {
+        case .ask:
+            "settings.clipboardOnOpen.ask"
+        case .automatic:
+            "settings.clipboardOnOpen.automatic"
+        case .off:
+            "settings.clipboardOnOpen.off"
+        }
+    }
+
+    /// What the choice does, under the features.
+    var hint: LocalizedStringKey? {
+        switch self {
+        case .ask:
+            "settings.clipboardOnOpen.ask.hint"
+        case .automatic:
+            "settings.clipboardOnOpen.automatic.hint"
+        case .off:
+            nil
         }
     }
 }

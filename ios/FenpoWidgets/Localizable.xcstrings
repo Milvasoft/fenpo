@@ -86,6 +86,23 @@
         }
       }
     },
+    "action.error.sharingOff": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clipboard sharing is off. Turn it on in Fenpo’s Settings."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pano paylaşımı kapalı. Fenpo’nun Ayarlar’ından aç."
+          }
+        }
+      }
+    },
     "action.error.tooLarge": {
       "extractionState": "manual",
       "localizations": {
@@ -534,13 +551,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opens Fenpo briefly and sends what you copied to your PC."
+            "value": "Opens Fenpo briefly and sends the text, link or image you copied to your PC."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo’yu kısa bir an açar ve kopyaladığını bilgisayara gönderir."
+            "value": "Fenpo’yu kısa bir an açar ve kopyaladığın metni, bağlantıyı veya resmi bilgisayara gönderir."
           }
         }
       }
@@ -585,13 +602,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Puts the text on your PC’s clipboard. Use it after “Get Clipboard” in a shortcut."
+            "value": "Puts the text on your PC’s clipboard. Use it after “Get Clipboard” in a shortcut: Fenpo stays closed."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Metni bilgisayarın panosuna koyar. Bir kısayolda “Panoyu Al”dan sonra kullan."
+            "value": "Metni bilgisayarın panosuna koyar. Bir kestirmede “Panoyu Al”dan sonra kullan; Fenpo açılmaz."
           }
         }
       }

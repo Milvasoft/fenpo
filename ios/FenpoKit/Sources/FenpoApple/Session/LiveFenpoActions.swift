@@ -25,6 +25,10 @@ public final class LiveFenpoActions: FenpoActions {
         try await performSendText(text)
     }
 
+    public nonisolated func sendClipboard(_ payload: ClipboardPayload) async throws {
+        try await performSendClipboard(payload)
+    }
+
     public nonisolated func fetchPCClipboard() async throws -> String {
         try await performFetchPCClipboard()
     }
@@ -128,13 +132,17 @@ public final class LiveFenpoActions: FenpoActions {
     }
 
     private func performSendText(_ text: String) async throws {
-        guard !text.isEmpty else {
+        try await performSendClipboard(ClipboardPayload(.text(text)))
+    }
+
+    private func performSendClipboard(_ payload: ClipboardPayload) async throws {
+        guard !payload.isEmpty else {
             throw FenpoActionError.emptyText
         }
-        var item = Fenpo_V1_ClipboardItem()
-        item.itemID = UUID().uuidString
-        item.text = text
-        try await deliver(.clipboard(item), what: "clipboard text, \(text.count) characters")
+        guard ClipboardOnOpen.isSharingEnabled(in: UserDefaults(suiteName: FenpoIdentifiers.appGroup)) else {
+            throw FenpoActionError.sharingOff
+        }
+        try await deliver(.clipboard(payload.item()), what: "clipboard \(payload.logDescription)")
     }
 
     private func performFetchPCClipboard() async throws -> String {

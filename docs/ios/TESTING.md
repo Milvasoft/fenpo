@@ -252,6 +252,48 @@ Kayıtta aranacaklar: `[Transfer]`, `[Camera]`, `[LiveActivity]`, `[Actions]`, `
 
 Geri bildirim kilometre taşı 1'deki gibi: tablo, iPhone kaydı (Geliştirici → Kayıt → Dışa aktar) ve Windows'un kaydı.
 
+## Pano, Fenpo'yu açmadan
+
+Ne beklendiği ve iOS'un neye izin verip vermediği: [CLIPBOARD.md](CLIPBOARD.md). Windows'ta Fenpo açık (tepside de olur) ve **Pano paylaşımı** açık olsun. Her testten önce iPhone'da Fenpo'yu açıp kapatın ki Bluetooth bağlı olsun; Geliştirici → Durum'da **BLE** `ready` görünmeli. Panoyu kontrol etmek için Notlar'da yeni bir nota yapıştırın. Kayıtta `[Clipboard]`, `[Services]`, `[BLE]`, `[AppModel]` satırlarına bakın; kayıt pano içeriğini yazmaz, sadece türünü ve boyunu.
+
+**PC → iPhone**
+
+| # | Adım | Beklenen | Olmazsa kayıtta neye bakılır |
+|---|---|---|---|
+| C1 | Fenpo açıkken PC'de bir kelime kopyalayın | Notlar'a aynı kelime yapışır; kayıtta `Clipboard from PC over BLE: text …, app active, … written` | — |
+| C2 | Fenpo'dan başka uygulamaya geçin (kapatmayın), 1 dakika bekleyin, PC'de bir kelime kopyalayın, 5 saniye sonra Notlar'a yapıştırın | **Asıl soru:** yapışan kelime PC'deki mi? | Aşağıdaki tablo |
+| C3 | iPhone'u kilitleyin, 5 dakika bekleyin, PC'de bir kelime kopyalayın, kilidi açıp Notlar'a yapıştırın | C2 ile aynı soru, uzun askıdan sonra | Aşağıdaki tablo |
+| C4 | C2'yi bir parola yöneticisinden kopyalanan parolayla yapın | iPhone'a gelir; 2 dakika sonra panodan kendiliğinden silinir, Mac'e geçmez. Kayıtta `…, sensitive` | Windows parola yöneticisinin işaretlediği içeriği hiç göndermiyorsa kayıtta satır olmaz; bu da doğru |
+| C5 | Fenpo arka planda, PC'de bir ekran görüntüsünün bir kısmını kopyalayın (Win+Shift+S, 512 KB'tan küçük) | Notlar'a resim yapışır. Kayıtta sırayla `Wi-Fi wanted by PC for Clipboard`, `Wi-Fi channel open for the PC after … s` (10 sn'den az olmalı), `Clipboard item over Wi-Fi … after the PC asked`, `Clipboard from PC over Wi-Fi: image …` | `Wi-Fi channel for the PC failed`: Wi‑Fi yolu kapalı. `open … after 12.0 s`: PC 10 sn bekleyip vazgeçmiş. `Closing Wi-Fi without the clipboard item`: PC göndermedi (Windows kaydı) |
+| C6 | Fenpo arka planda, PC'de bir kelime kopyalayın, sonra iPhone'da başka bir şey kopyalayın, Fenpo'yu açın | iPhone'da kopyaladığınız ezilmez | — |
+
+C2/C3 başarısızsa iPhone kaydındaki satırlar hangi durum olduğunu söyler:
+
+| Kayıtta | Anlamı |
+|---|---|
+| PC'nin kopyası anında hiçbir `[BLE] Received clipboard` satırı yok; Fenpo'yu açınca `Front again after … : BLE connecting` ya da `PC Hello missing` | Bluetooth kanalı askıdan sonra ayakta değildi. Windows kaydında `Clipboard … sent to the phone` satırı olmaz (ya da `Clipboard item not sent` olur) |
+| `Front again after … : BLE ready …; over BLE meanwhile: nothing` ve Windows kaydında `Clipboard text sent to the phone` | PC gönderdi ama iOS uygulamayı uyandırıp iletmedi |
+| `Dropped a BLE message from the PC: the channel key is not set yet` | Uygulama Bluetooth için yeniden başlatıldı ama anahtar henüz yüklenmemişti |
+| `Clipboard from PC over BLE: …, app background; … did not stick` | Mesaj geldi, iOS arka plandaki yazmayı kabul etmedi. Fenpo'yu açınca `Clipboard from PC written on return to the front` gelmeli |
+| `… written` ama Notlar'a eski içerik yapışıyor; belki `Pasteboard changed again after the background write` | iOS yazmayı sonradan geri aldı |
+| `Restoring 1 peripheral(s): connected, tx notifying` ve sonra `Already subscribed to tx; sending Hello` | iOS Fenpo'yu Bluetooth için yeniden başlattı ve kanal kendiliğinden ayağa kalktı (iyi) |
+
+**iPhone → PC**
+
+| # | Adım | Beklenen |
+|---|---|---|
+| C7 | Fenpo Ayarlar → **Açılınca panoyu gönder: Sor**. Safari'de bir kelime kopyalayın, Fenpo'yu açın | Ana Sayfa'da "Panoda yeni bir şey var" kartı ve **Yapıştır** düğmesi; iOS izin sormaz. Dokununca PC'nin panosunda aynı kelime, kart kalkar. Kayıtta `Clipboard on open: … : offer` |
+| C8 | C7'yi tekrarlayıp kartı **X** ile kapatın, Fenpo'yu kapatıp açın | Aynı pano için kart bir daha çıkmaz |
+| C9 | Ayarlar → **Otomatik**. iOS Ayarlar › Uygulamalar › Fenpo › Diğer Uygulamalardan Yapıştır: **Sor**. Bir şey kopyalayıp Fenpo'yu açın | iOS bir kez sorar; İzin Ver'e basınca "Pano PC’ye gitti". Reddet'e basınca "Pano okunamadı …" uyarısı ve aynı pano için bir daha sorulmaz |
+| C10 | C9'u Diğer Uygulamalardan Yapıştır: **İzin Ver** ile | Hiç sormadan gider |
+| C11 | Otomatik açıkken bir SMS kodunu (ör. 482913) ya da parola yöneticisinden bir parolayı kopyalayıp Fenpo'yu açın | Kendiliğinden gitmez, kart "Parola veya kod olabilir" der. Yapıştır'a basınca PC'ye gider ama PC'nin pano listesinde görünmez |
+| C12 | Fotoğraflar'da bir fotoğrafı kopyalayın (Paylaş → Kopyala), Fenpo'yu açıp kartta Yapıştır | PC'nin panosunda resim (512 KB'a sığacak kadar küçültülmüş) |
+| C13 | Ayarlar → **Arkaya iki dokun** sayfasındaki adımlarla kestirmeyi kurun. Başka bir uygulamada metin kopyalayıp telefonun arkasına iki kez dokunun | İlk seferde Kestirmeler pano izni ister (Her Zaman İzin Ver). Fenpo açılmadan PC'de aynı metin. Kayıtta `SendTextToPCIntent runs in the app process` |
+| C14 | Ayarlar → Eylem Düğmesi → Kestirme → Fenpo → **Panoyu PC’ye gönder** (iPhone 15 Pro ve sonrası); ya da Denetim Merkezi'ne **Panoyu gönder** | Fenpo bir an açılır, pano gider |
+| C15 | Notlar'da metin seçip Paylaş → Fenpo → **PC panosuna kopyala**; Safari'de bir sayfayı paylaşıp aynı düğme; Fotoğraflar'da tek fotoğrafla aynı düğme | Üçünde de PC'nin panosunda metin, bağlantı, resim |
+| C16 | Fenpo Ayarlar → **Pano paylaşımı** kapalıyken C1 ve C7 | iPhone panosu değişmez (kayıtta `ignored … sharing is off`), kart çıkmaz |
+| C17 | C7–C11'i koyu temada ve iPhone dili English iken | Kart, Ayarlar satırı ve Arkaya iki dokun sayfası iki temada ve iki dilde düzgün |
+
 # TestFlight
 
 Yükleme GitHub Actions'tan yapılır, Mac gerekmez. App Store Connect'te uygulama kaydı (`com.fenpo.app`) ve API anahtarı Buğra'da; repo secret'ları `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID`.

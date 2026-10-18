@@ -25,6 +25,21 @@ final class AppModel {
         case settings
     }
 
+    /// A clipboard copied while Fenpo was away, offered with the system Paste button.
+    struct ClipboardOffer: Equatable {
+        /// What the pasteboard metadata says it holds.
+        enum Kind: Equatable {
+            case text
+            case link
+            case image
+        }
+
+        let changeCount: Int
+        let kind: Kind
+        /// Marked private, or the system sees a number that may be a code.
+        let isSensitive: Bool
+    }
+
     /// A short message shown over the tab bar after an action.
     struct Toast: Identifiable {
         let id = UUID()
@@ -38,6 +53,9 @@ final class AppModel {
     private let camera: CameraService?
     private let transferActivities: TransferActivities?
     private let readsPermissions: Bool
+    private let watchesClipboard: Bool
+    /// Fenpo came to the front while the PC was not reachable yet: check the clipboard once it is.
+    @ObservationIgnored private var isClipboardCheckWaiting = false
 
     /// Touchpad, keyboard and presentation remote; `nil` in previews.
     let pcInput: PcInputService?
@@ -75,6 +93,9 @@ final class AppModel {
     /// Result of the last action, if it is still on screen.
     var toast: Toast?
 
+    /// The clipboard offered on Home, if any.
+    var clipboardOffer: ClipboardOffer?
+
     /// The PC is ringing this iPhone and Fenpo is in front.
     var isRinging = false
 
@@ -97,6 +118,8 @@ final class AppModel {
     ///   - pcInput: Touchpad and presentation remote; `nil` in previews.
     ///   - hotspot: Personal Hotspot details; `nil` in previews.
     ///   - screenshots: Screenshot sending; `nil` in previews.
+    ///   - watchesClipboard: Offers or sends a new clipboard when Fenpo comes to the front; off in
+    ///     previews and screenshot scenes.
     init(
         session: any SessionProviding,
         pairing: any PairingProviding = SamplePairing(),
@@ -107,7 +130,8 @@ final class AppModel {
         readsPermissions: Bool = false,
         pcInput: PcInputService? = nil,
         hotspot: HotspotService? = nil,
-        screenshots: ScreenshotSender? = nil
+        screenshots: ScreenshotSender? = nil,
+        watchesClipboard: Bool = false
     ) {
         self.session = session
         self.pairing = pairing
@@ -119,6 +143,12 @@ final class AppModel {
         self.pcInput = pcInput
         self.hotspot = hotspot
         self.screenshots = screenshots
+        self.watchesClipboard = watchesClipboard
+        if watchesClipboard {
+            PhoneClipboard.onHandled = { [weak self] in
+                self?.clipboardOffer = nil
+            }
+        }
     }
 
     /// The camera's live picture.
@@ -148,6 +178,7 @@ final class AppModel {
     /// Fenpo came to the front: refresh, stop a background ring, ask for notifications once paired.
     func becameActive() async {
         await refresh()
+        await checkClipboard()
         if !isRinging {
             ringer?.stop()
         }
@@ -183,6 +214,12 @@ final class AppModel {
             cameraState = camera.state
         }
         transferActivities?.update(snapshot.activeTransfers, pcName: snapshot.pc?.name ?? "")
+        if isClipboardCheckWaiting, snapshot.isConnected, UIApplication.shared.applicationState == .active {
+            isClipboardCheckWaiting = false
+            Task {
+                await checkClipboard()
+            }
+        }
         if readsPermissions {
             permissions = PermissionsSnapshot(
                 bluetooth: Self.bluetoothPermission(linkUp: snapshot.links.bluetooth, paired: snapshot.pc != nil),
@@ -289,13 +326,29 @@ final class AppModel {
     /// Sends the phone's clipboard to the PC. Reading it may show the iOS paste prompt.
     func sendClipboard() {
         Task {
+            await sendReadClipboard(success: "home.toast.sent")
+        }
+    }
+
+    /// Sends what the system Paste button handed over; no paste prompt.
+    /// - Parameter providers: Items from `PasteButton`.
+    func sendPasted(_ providers: [NSItemProvider]) {
+        let isMarked = PhoneClipboard.isMarkedSensitive
+        Task {
             await run(success: "home.toast.sent") {
-                guard let text = UIPasteboard.general.string, !text.isEmpty else {
+                guard let payload = await PhoneClipboard.payload(from: providers, isSensitive: isMarked) else {
                     throw FenpoActionError.emptyText
                 }
-                try await self.actions.sendText(text)
+                try await self.actions.sendClipboard(payload)
+                PhoneClipboard.markHandled()
             }
         }
+    }
+
+    /// Hides the offer and does not offer this clipboard again.
+    func dismissClipboardOffer() {
+        PhoneClipboard.markHandled()
+        clipboardOffer = nil
     }
 
     /// Puts the PC's latest clipboard text on the phone.
@@ -303,7 +356,67 @@ final class AppModel {
         Task {
             await run(success: "home.toast.pasted") {
                 UIPasteboard.general.string = try await self.actions.fetchPCClipboard()
+                PhoneClipboard.markHandled()
             }
+        }
+    }
+
+    /// "Açılınca panoyu gönder": offers or sends a clipboard copied while Fenpo was away. Decides on
+    /// pasteboard metadata, which needs no paste prompt; each clipboard is read at most once.
+    private func checkClipboard() async {
+        guard watchesClipboard else {
+            return
+        }
+        let defaults = UserDefaults(suiteName: FenpoIdentifiers.appGroup)
+        let changeCount = PhoneClipboard.changeCount
+        guard let handled = ClipboardOnOpen.handledChangeCount(in: defaults) else {
+            // First launch: what was copied before Fenpo was installed is not news.
+            ClipboardOnOpen.markHandled(changeCount, in: defaults)
+            return
+        }
+        guard handled != changeCount else {
+            return
+        }
+        let hasContent = PhoneClipboard.hasContent
+        let isMarked = PhoneClipboard.isMarkedSensitive
+        let mightHoldCode = hasContent ? await PhoneClipboard.mightHoldCode() : false
+        let isConnected = snapshot.isConnected && FeatureAccess.isAvailable(.clipboard)
+        let mode = ClipboardOnOpen.mode(in: defaults)
+        let decision = ClipboardOnOpen.decide(
+            changeCount: changeCount,
+            handled: handled,
+            hasContent: hasContent,
+            mightBeSensitive: isMarked || mightHoldCode,
+            isConnected: isConnected,
+            sharingEnabled: ClipboardOnOpen.isSharingEnabled(in: defaults),
+            mode: mode
+        )
+        log.info("Clipboard on open: changeCount \(handled) -> \(changeCount), content \(hasContent), marked \(isMarked), number \(mightHoldCode), connected \(isConnected), mode \(mode.rawValue): \(decision)")
+        isClipboardCheckWaiting = hasContent && !isConnected && snapshot.pc != nil && mode != .off
+        switch decision {
+        case .nothing:
+            break
+        case .offer:
+            let pasteboard = UIPasteboard.general
+            let kind: ClipboardOffer.Kind = pasteboard.hasImages ? .image : (pasteboard.hasURLs ? .link : .text)
+            clipboardOffer = ClipboardOffer(changeCount: changeCount, kind: kind, isSensitive: isMarked || mightHoldCode)
+        case .send:
+            await sendReadClipboard(success: "home.toast.sentOnOpen")
+        }
+    }
+
+    /// Reads the clipboard (iOS may ask) and sends it. A clipboard that could not be read is not
+    /// tried again, so the prompt shows once per copy.
+    private func sendReadClipboard(success: LocalizedStringResource) async {
+        let hadContent = PhoneClipboard.hasContent
+        guard let payload = PhoneClipboard.read() else {
+            PhoneClipboard.markHandled()
+            show(Toast(message: hadContent ? "home.toast.pasteNotAllowed" : "action.error.emptyText", isError: true))
+            return
+        }
+        await run(success: success) {
+            try await self.actions.sendClipboard(payload)
+            PhoneClipboard.markHandled()
         }
     }
 

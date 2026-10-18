@@ -15,6 +15,10 @@ struct HomeView: View {
                             NoticeBanner(title: "home.notificationsOff.title", message: Text("home.notificationsOff.message \(pc.name)"))
                                 .padding(.top, 12)
                         }
+                        if let offer = model.clipboardOffer {
+                            ClipboardOfferCard(offer: offer, send: { model.sendPasted($0) }, dismiss: { model.dismissClipboardOffer() })
+                                .padding(.top, 12)
+                        }
                         quickActions
                             .padding(.top, 12)
                         if !model.snapshot.transfers.isEmpty {

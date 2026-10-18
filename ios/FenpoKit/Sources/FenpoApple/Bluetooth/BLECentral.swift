@@ -128,6 +128,11 @@ public final class BLECentral: NSObject {
         self.cipher = cipher
         self.localHello = hello
         self.persistCounters = persistCounters
+        // A restored link can become ready before the key is set; its Hello failed then.
+        if state == .ready, session == nil {
+            log.info("Channel key set on a ready link; sending Hello")
+            sendHello()
+        }
     }
 
     /// Connects to the PC and keeps reconnecting until `disconnect()`.
@@ -277,7 +282,11 @@ public final class BLECentral: NSObject {
 
     private func receive(chunk: [UInt8]) {
         do {
-            guard let message = try reassembler.append(chunk), var cipher else {
+            guard let message = try reassembler.append(chunk) else {
+                return
+            }
+            guard var cipher else {
+                log.error("Dropped a BLE message from the PC: the channel key is not set yet (app \(UIApplication.shared.applicationState.logName))")
                 return
             }
             let plaintext = try cipher.open(message)
@@ -379,12 +388,18 @@ public final class BLECentral: NSObject {
         rediscoveryTask = nil
         connectedSince = nil
         state = .ready
-        if let localHello {
-            do {
-                try send(.hello(localHello))
-            } catch {
-                log.error("Sending Hello failed: \(String(describing: error))")
-            }
+        sendHello()
+    }
+
+    private func sendHello() {
+        guard let localHello else {
+            log.error("No Hello to send yet")
+            return
+        }
+        do {
+            try send(.hello(localHello))
+        } catch {
+            log.error("Sending Hello failed: \(String(describing: error))")
         }
     }
 
@@ -405,6 +420,24 @@ public final class BLECentral: NSObject {
         changeWaiters.removeAll()
         for waiter in waiters {
             waiter.resume()
+        }
+    }
+}
+
+extension CBPeripheralState {
+    /// Short name for logs.
+    var logName: String {
+        switch self {
+        case .disconnected:
+            "disconnected"
+        case .connecting:
+            "connecting"
+        case .connected:
+            "connected"
+        case .disconnecting:
+            "disconnecting"
+        @unknown default:
+            "unknown"
         }
     }
 }
@@ -431,7 +464,11 @@ extension BLECentral: @preconcurrency CBCentralManagerDelegate {
 
     public func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
         let restored = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral] ?? []
-        log.info("Restoring \(restored.count) peripheral(s)")
+        let details = restored.map { peripheral in
+            let notifying = peripheral.services?.first { $0.uuid == Self.serviceUUID }?.characteristics?.first { $0.uuid == Self.txUUID }?.isNotifying
+            return "\(peripheral.state.logName), tx \(notifying.map { $0 ? "notifying" : "not notifying" } ?? "not discovered")"
+        }
+        log.info("Restoring \(restored.count) peripheral(s): \(details.joined(separator: "; ")); app \(UIApplication.shared.applicationState.logName)")
         if let first = restored.first {
             peripheral = first
             first.delegate = self
@@ -500,6 +537,12 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
             retryDiscovery(reason: "characteristics missing")
             return
         }
+        if tx.isNotifying {
+            // A link restored by iOS keeps its subscription; no new callback comes for it.
+            log.info("Already subscribed to tx; sending Hello")
+            becameReady()
+            return
+        }
         // tx requires encryption: the first subscription makes iOS pair (bond) with the PC.
         peripheral.setNotifyValue(true, for: tx)
     }
@@ -513,7 +556,7 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
             retryDiscovery(reason: "subscribe failed")
             return
         }
-        if characteristic.isNotifying {
+        if characteristic.isNotifying, state != .ready {
             log.info("Subscribed to tx; sending Hello")
             becameReady()
         }

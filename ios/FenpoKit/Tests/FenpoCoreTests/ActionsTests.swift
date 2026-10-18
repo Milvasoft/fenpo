@@ -24,6 +24,10 @@ struct ActionsTests {
             try await actions.sendText("")
         }
         try await actions.sendText("merhaba")
+        await #expect(throws: FenpoActionError.emptyText) {
+            try await actions.sendClipboard(ClipboardPayload(.image(Data(), mimeType: "image/png")))
+        }
+        try await actions.sendClipboard(ClipboardPayload(.text("merhaba")))
         #expect(try await actions.fetchPCClipboard().isEmpty == false)
     }
 }
