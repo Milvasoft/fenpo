@@ -192,7 +192,7 @@ eşleştirdiği PC'ye gidiyor; ağda sertifikası sabitlenmiş TLS 1.3, Bluetoot
 | Uygulama kullanıcı verisi topluyor ya da paylaşıyor mu? | **Hayır** |
 | Veriler aktarım sırasında şifreleniyor mu? | Evet (soru "toplanmıyor" yanıtında gelmese de gizlilik politikasında yazıyor) |
 | Kullanıcılar veri silmeyi isteyebilir mi? | Uygulanmaz: veri toplanmıyor. Uygulamayı kaldırmak ya da eşleşmeyi silmek telefondaki her şeyi siler. |
-| Gizlilik politikası | https://github.com/Milvasoft/fenpo/blob/main/docs/PRIVACY.md |
+| Gizlilik politikası | https://fenpo-website.vercel.app/privacy |
 | Reklam içeriyor mu? | Hayır |
 | Hedef kitle | 13 yaş ve üzeri (çocuklara yönelik değil) |
 | İçerik derecelendirmesi | Araçlar / verimlilik; kullanıcılar arası iletişim yok (mesajlar yalnızca kullanıcının kendi cihazlarında) |
