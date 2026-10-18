@@ -33,6 +33,9 @@ public struct SessionSnapshot: Equatable, Sendable {
     /// What plays on the PC; `nil` when nothing does or the PC is not connected.
     public var pcMedia: PCMedia?
 
+    /// The Bluetooth link reached another Fenpo PC and was dropped; pairing again fixes it.
+    public var bluetoothNeedsPairing: Bool
+
     /// Creates a snapshot.
     public init(
         pc: PairedPC?,
@@ -44,7 +47,8 @@ public struct SessionSnapshot: Equatable, Sendable {
         readyPhotoCount: Int,
         transfers: [TransferRecord],
         activeTransfers: [ActiveTransfer] = [],
-        pcMedia: PCMedia? = nil
+        pcMedia: PCMedia? = nil,
+        bluetoothNeedsPairing: Bool = false
     ) {
         self.pc = pc
         self.links = links
@@ -56,6 +60,7 @@ public struct SessionSnapshot: Equatable, Sendable {
         self.transfers = transfers
         self.activeTransfers = activeTransfers
         self.pcMedia = pcMedia
+        self.bluetoothNeedsPairing = bluetoothNeedsPairing
     }
 
     /// State before any pairing.

@@ -158,6 +158,7 @@ public final class LivePairing: PairingProviding {
 
         var updated = record
         updated.bluetoothIdentifier = identifier
+        updated.bluetoothReachedAnotherPC = nil
         try store.update(updated)
         try configureChannel(for: updated)
         central.connect(to: identifier)
@@ -176,7 +177,7 @@ public final class LivePairing: PairingProviding {
         let store = store
         let pcID = record.pcID
         let log = log
-        central.configure(cipher: cipher, hello: makeHello()) { counters in
+        central.configure(cipher: cipher, hello: makeHello(), pcID: record.pcID, pcName: record.name) { counters in
             do {
                 try store.saveCounters(counters, for: pcID)
             } catch {

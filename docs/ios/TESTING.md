@@ -182,6 +182,8 @@ Buğra'nın Windows PC'si ve iPhone'u ile, QR → Wi‑Fi → Bluetooth eşleşm
 | M9 | Tarayıcıyı tekrar açıp 10 saniye bekleyin, kapatın. Geliştirici → Kayıt | `[Bonjour] Found ...` satırında PC'nin `_fenpo._tcp` kaydı ve TXT'deki `id`, `v`. Windows tarafı bunun telefonda doğrulanmasını istedi |
 | M10 | iPhone hücresel veride, Wi‑Fi kapalıyken QR okutun | "Tamamlanmadı" ve **Yeniden dene**. Mesaj, ne yapılacağını anlatıyor mu? |
 | M11 | QR'ın fotoğrafını çekin, 6 dakika bekleyin (QR 5 dakikada yenilenir), fotoğraftaki eski QR'ı okutun | Eşleşme reddedilir (`TOKEN_INVALID`), "Tamamlanmadı" |
+| M11b | Yakında Fenpo'su açık **ikinci bir PC** varken (ör. Buğra'nın ve Sena'nın PC'leri) eşleştirin; M2'de seçiciye bakın | Seçicide yalnızca QR'daki PC çıkar. Hiç PC çıkmazsa seçiciyi kapatıp **Yeniden dene**: ikinci seçici bütün Fenpo PC'lerini gösterir (PC'nin Bluetooth adı QR'daki adı içermiyor demektir; kayıtta `Showing the accessory picker for every Fenpo PC`). Yanlış PC'yi seçerseniz iOS eşleşme sormaz, adım "Tamamlanmadı" olur ve kayıtta `Left the Bluetooth link: Bluetooth name … is another PC` |
+| M11c | Bugün yanlış PC'ye bağlı olan bir iPhone'a (Bluetooth çipi gri, Fenpo açılınca başka PC için eşleşme isteği) bu derlemeyi kurup Fenpo'yu açın | Eşleşme isteği gelmez; ana ekranda "Bluetooth başka bir bilgisayara bağlanmıştı" uyarısı. PC sekmesi → **Eşleştirmeyi kaldır**, QR'ı yeniden okutun; Bluetooth yeşil olur |
 | M12 | PC sekmesi → **Eşleştirmeyi kaldır** | Ana ekran "Bilgisayarını ekle"ye döner; aksesuar iOS Ayarlar → Gizlilik ve Güvenlik → Aksesuarlar'dan da kalkar |
 
 ## Gerçek PC ile özellikler

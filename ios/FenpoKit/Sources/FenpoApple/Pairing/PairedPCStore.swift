@@ -21,6 +21,10 @@ public struct PairedPCRecord: Codable, Equatable, Sendable {
     /// When pairing finished.
     public var pairedAt: Date
 
+    /// Set when the Bluetooth accessory turned out to be another Fenpo PC; the phone stops using
+    /// it until the PC is paired again. `nil` in records from before this was checked.
+    public var bluetoothReachedAnotherPC: Bool?
+
     /// Creates a record.
     public init(pcID: String, name: String, certificateSHA256: [UInt8], endpoints: [String], bluetoothIdentifier: UUID? = nil, pairedAt: Date = .now) {
         self.pcID = pcID

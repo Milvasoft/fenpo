@@ -12,6 +12,12 @@ public actor SampleSession: SessionProviding {
         current = paired ? Self.pairedSnapshot(now: now) : .unpaired
     }
 
+    /// Creates a sample session with a given state.
+    /// - Parameter snapshot: The state to show.
+    public init(snapshot: SessionSnapshot) {
+        current = snapshot
+    }
+
     public func snapshot() async -> SessionSnapshot {
         current
     }

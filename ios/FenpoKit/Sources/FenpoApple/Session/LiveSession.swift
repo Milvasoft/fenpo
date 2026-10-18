@@ -55,7 +55,8 @@ public final class LiveSession: SessionProviding {
             readyPhotoCount: 0,
             transfers: transferStore.load(),
             activeTransfers: transfers.active.values.sorted { $0.id < $1.id },
-            pcMedia: pcMedia
+            pcMedia: pcMedia,
+            bluetoothNeedsPairing: record.bluetoothReachedAnotherPC == true
         )
     }
 
@@ -172,6 +173,9 @@ public final class FenpoServices {
         }
         central.onHello = { [weak self] in
             self?.channelGreeted(.bluetooth)
+        }
+        central.onWrongPC = { [weak self] _ in
+            self?.forgetWrongBluetoothPC()
         }
         wifi.onStateChange = { [weak self] state in
             if state == .connected {
@@ -515,6 +519,35 @@ public final class FenpoServices {
             return "?"
         }
         return String(format: "%.1f s", Date().timeIntervalSince(date))
+    }
+
+    /// The Bluetooth accessory is another Fenpo PC (two PCs nearby advertise the same service):
+    /// forget it so Fenpo stops connecting and iOS stops asking to pair with that PC. Wi-Fi keeps
+    /// working; Home asks the user to pair again.
+    private func forgetWrongBluetoothPC() {
+        guard var record = pairedStore.load() else {
+            return
+        }
+        let identifier = record.bluetoothIdentifier
+        record.bluetoothIdentifier = nil
+        record.bluetoothReachedAnotherPC = true
+        do {
+            try pairedStore.update(record)
+        } catch {
+            log.error("Saving the dropped Bluetooth accessory failed: \(String(describing: error))")
+        }
+        onChange?()
+        guard let identifier else {
+            return
+        }
+        Task {
+            do {
+                try await accessories.remove(bluetoothIdentifier: identifier)
+                log.info("Removed the Bluetooth accessory of another PC")
+            } catch {
+                log.error("Removing the accessory of another PC failed: \(String(describing: error))")
+            }
+        }
     }
 
     private func clearMediaIfDisconnected() {

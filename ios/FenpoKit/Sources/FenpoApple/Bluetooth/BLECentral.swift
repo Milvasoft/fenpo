@@ -40,6 +40,9 @@ public final class BLECentral: NSObject {
 
         /// Bluetooth is off, denied or missing.
         case bluetoothUnavailable(State)
+
+        /// The Bluetooth link reached a PC other than the paired one.
+        case wrongPC
     }
 
     /// Restoration identifier; must stay the same across versions.
@@ -84,6 +87,10 @@ public final class BLECentral: NSObject {
     /// Called for every Envelope from the PC that is not handled here (Hello, Ping).
     public var onEnvelope: ((Fenpo_V1_Envelope) -> Void)?
 
+    /// Called when the link turned out to reach another PC; the link is already dropped and
+    /// reconnecting has stopped. The argument says why, for the log.
+    public var onWrongPC: ((String) -> Void)?
+
     private var manager: CBCentralManager!
     private var peripheral: CBPeripheral?
     private var targetIdentifier: UUID?
@@ -93,6 +100,10 @@ public final class BLECentral: NSObject {
     private var cipher: (any ChannelCipher)?
     private var persistCounters: ((BLEChannelCounters) -> Void)?
     private var localHello: Fenpo_V1_Hello?
+    /// The paired PC, to tell it apart from another Fenpo PC nearby.
+    private var expectedPC: (id: String, name: String)?
+    /// Set when the link reached another PC; `waitUntilReady()` stops on it.
+    private var reachedWrongPC = false
     private var sequencer = EnvelopeSequencer()
     private var reassembler = BLEReassembler()
     private var outbox: [[UInt8]] = []
@@ -119,14 +130,17 @@ public final class BLECentral: NSObject {
         ])
     }
 
-    /// Sets the key, the `Hello` to send and where counters are saved. Call before `connect(to:)`.
+    /// Sets the key, the `Hello` to send, the paired PC and where counters are saved. Call before `connect(to:)`.
     /// - Parameters:
     ///   - cipher: Channel cipher keyed with the pairing's BLE key.
     ///   - hello: This phone's `Hello`.
+    ///   - pcID: The paired PC's id, checked against the `Hello` that comes back.
+    ///   - pcName: The paired PC's name, checked against the Bluetooth name before bonding.
     ///   - persistCounters: Saves counters after every seal and open.
-    public func configure(cipher: some ChannelCipher, hello: Fenpo_V1_Hello, persistCounters: @escaping (BLEChannelCounters) -> Void) {
+    public func configure(cipher: some ChannelCipher, hello: Fenpo_V1_Hello, pcID: String, pcName: String, persistCounters: @escaping (BLEChannelCounters) -> Void) {
         self.cipher = cipher
         self.localHello = hello
+        self.expectedPC = (pcID, pcName)
         self.persistCounters = persistCounters
         // A restored link can become ready before the key is set; its Hello failed then.
         if state == .ready, session == nil {
@@ -139,6 +153,7 @@ public final class BLECentral: NSObject {
     /// - Parameter identifier: Bluetooth identifier from AccessorySetupKit.
     public func connect(to identifier: UUID) {
         targetIdentifier = identifier
+        reachedWrongPC = false
         connectTarget()
     }
 
@@ -158,6 +173,9 @@ public final class BLECentral: NSObject {
     public func waitUntilReady() async throws {
         while state != .ready {
             try Task.checkCancellation()
+            if reachedWrongPC {
+                throw Error.wrongPC
+            }
             switch state {
             case .unauthorized, .unsupported:
                 throw Error.bluetoothUnavailable(state)
@@ -302,8 +320,13 @@ public final class BLECentral: NSObject {
         log.info("Received \(envelope.bodyName) #\(envelope.id), app \(UIApplication.shared.applicationState.logName)")
         if case .hello = envelope.body, let localHello {
             do {
-                session = try Handshake.negotiate(local: localHello, remote: envelope)
-                log.info("BLE Hello from \(self.session?.peerName ?? "")")
+                let negotiated = try Handshake.negotiate(local: localHello, remote: envelope)
+                if let expectedPC, !negotiated.peerDeviceID.isEmpty, negotiated.peerDeviceID != expectedPC.id {
+                    leaveWrongPC(reason: "Hello came from another PC (\(negotiated.peerName))")
+                    return
+                }
+                session = negotiated
+                log.info("BLE Hello from \(negotiated.peerName)")
                 onHello?()
             } catch {
                 log.error("BLE handshake failed: \(String(describing: error))")
@@ -380,6 +403,24 @@ public final class BLECentral: NSObject {
                 }
             }
         }
+    }
+
+    /// Whether this peripheral's Bluetooth name rules out the paired PC. Checked before the first
+    /// access to the encrypted characteristics, so iOS never asks to pair with another PC.
+    private func isAnotherPC(_ peripheral: CBPeripheral) -> Bool {
+        guard let expectedPC, expectedPC.id != TestPeripheral.pcID, let name = peripheral.name else {
+            return false
+        }
+        return !PCBluetoothName.matches(bluetoothName: name, pairedName: expectedPC.name)
+    }
+
+    /// Drops a link that reached another Fenpo PC and stops reconnecting to it.
+    private func leaveWrongPC(reason: String) {
+        log.error("Left the Bluetooth link: \(reason); expected \(self.expectedPC?.name ?? "")")
+        reachedWrongPC = true
+        disconnect()
+        notifyChange()
+        onWrongPC?(reason)
     }
 
     private func becameReady() {
@@ -535,6 +576,10 @@ extension BLECentral: @preconcurrency CBPeripheralDelegate {
         guard let tx, rx != nil else {
             log.error("Fenpo characteristics missing: \(String(describing: error)); trying again")
             retryDiscovery(reason: "characteristics missing")
+            return
+        }
+        if isAnotherPC(peripheral) {
+            leaveWrongPC(reason: "Bluetooth name \(peripheral.name ?? "") is another PC")
             return
         }
         if tx.isNotifying {

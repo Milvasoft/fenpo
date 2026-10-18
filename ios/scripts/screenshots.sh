@@ -8,7 +8,7 @@ udid="$1"
 app="$2"
 out="$3"
 bundle_id="com.fenpo.app"
-scenes=(home home-unpaired transfers pc settings developer scan steps ringing camera touchpad presenter transfer-detail camera-ready)
+scenes=(home home-unpaired home-bluetooth-other-pc transfers pc settings developer scan steps ringing camera touchpad presenter transfer-detail camera-ready)
 # The App Store set picks its own scenes, appearances and status bar time.
 if [[ -n "${SCENES:-}" ]]; then
     read -r -a scenes <<< "$SCENES"

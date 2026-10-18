@@ -7,6 +7,8 @@ import SwiftUI
 enum ScreenshotScene: String {
     case home
     case homeUnpaired = "home-unpaired"
+    /// Home after the Bluetooth link turned out to reach another PC.
+    case homeBluetoothOtherPC = "home-bluetooth-other-pc"
     case transfers
     case pc
     case settings
@@ -30,9 +32,9 @@ enum ScreenshotScene: String {
     /// A model that opens this scene.
     @MainActor
     func makeModel() -> AppModel {
-        let model = AppModel(session: SampleSession(paired: self != .homeUnpaired))
+        let model = AppModel(session: makeSession())
         switch self {
-        case .home, .homeUnpaired:
+        case .home, .homeUnpaired, .homeBluetoothOtherPC:
             model.selectedTab = .home
         case .transfers:
             model.selectedTab = .transfers
@@ -64,6 +66,20 @@ enum ScreenshotScene: String {
             }
         }
         return model
+    }
+
+    private func makeSession() -> SampleSession {
+        switch self {
+        case .homeUnpaired:
+            return SampleSession(paired: false)
+        case .homeBluetoothOtherPC:
+            var snapshot = SampleSession.pairedSnapshot()
+            snapshot.links.bluetooth = false
+            snapshot.bluetoothNeedsPairing = true
+            return SampleSession(snapshot: snapshot)
+        default:
+            return SampleSession()
+        }
     }
 
     /// Seconds each screen of the demo tour stays; the App Store preview's captions follow the same

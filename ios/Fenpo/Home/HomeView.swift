@@ -11,6 +11,10 @@ struct HomeView: View {
                 VStack(spacing: 0) {
                     if let pc = model.snapshot.pc {
                         PCCard(pc: pc, isConnected: model.snapshot.isConnected, proximity: model.snapshot.proximity, links: model.snapshot.links)
+                        if model.snapshot.bluetoothNeedsPairing {
+                            NoticeBanner(title: "home.bluetoothOtherPC.title", message: Text("home.bluetoothOtherPC.message \(pc.name)"))
+                                .padding(.top, 12)
+                        }
                         if model.snapshot.notificationsShared == false {
                             NoticeBanner(title: "home.notificationsOff.title", message: Text("home.notificationsOff.message \(pc.name)"))
                                 .padding(.top, 12)

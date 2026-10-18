@@ -1395,6 +1395,40 @@
         }
       }
     },
+    "home.bluetoothOtherPC.message %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo dropped a Bluetooth link to a nearby PC that isn’t %@. Tap Remove pairing on the PC tab, then scan the code on your PC again. Wi‑Fi keeps working meanwhile."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo, Bluetooth’ta %@ yerine yakındaki başka bir bilgisayara bağlanmıştı ve bu bağlantıyı bıraktı. PC sekmesinde Eşleştirmeyi kaldır’a dokun, sonra bilgisayarındaki kodu yeniden okut. Wi‑Fi bu arada çalışmaya devam eder."
+          }
+        }
+      }
+    },
+    "home.bluetoothOtherPC.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth reached another PC"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bluetooth başka bir bilgisayara bağlanmıştı"
+          }
+        }
+      }
+    },
     "home.camera": {
       "extractionState": "manual",
       "localizations": {
