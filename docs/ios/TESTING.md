@@ -258,11 +258,13 @@ Ne beklendiği ve iOS'un neye izin verip vermediği: [CLIPBOARD.md](CLIPBOARD.md
 
 **PC → iPhone**
 
+PC'nin kopyası iPhone'a **sadece Fenpo açıkken** gelir. Build 89'da C2 başarısız oldu ve Buğra bunu kabul etti. C2–C5 ve aşağıdaki tablo, ileride sebebe bakılırsa diye duruyor; bugün beklenen sonuç "gelmez".
+
 | # | Adım | Beklenen | Olmazsa kayıtta neye bakılır |
 |---|---|---|---|
 | C1 | Fenpo açıkken PC'de bir kelime kopyalayın | Notlar'a aynı kelime yapışır; kayıtta `Clipboard from PC over BLE: text …, app active, … written` | — |
-| C2 | Fenpo'dan başka uygulamaya geçin (kapatmayın), 1 dakika bekleyin, PC'de bir kelime kopyalayın, 5 saniye sonra Notlar'a yapıştırın | **Asıl soru:** yapışan kelime PC'deki mi? | Aşağıdaki tablo |
-| C3 | iPhone'u kilitleyin, 5 dakika bekleyin, PC'de bir kelime kopyalayın, kilidi açıp Notlar'a yapıştırın | C2 ile aynı soru, uzun askıdan sonra | Aşağıdaki tablo |
+| C2 | Fenpo'dan başka uygulamaya geçin (kapatmayın), 1 dakika bekleyin, PC'de bir kelime kopyalayın, 5 saniye sonra Notlar'a yapıştırın | Build 89: **gelmedi** (beklenen, kabul edildi). Fenpo açıkken Ana Sayfa'da **PC'den yapıştır** onu getirir | Aşağıdaki tablo |
+| C3 | iPhone'u kilitleyin, 5 dakika bekleyin, PC'de bir kelime kopyalayın, kilidi açıp Notlar'a yapıştırın | C2 gibi: gelmez | Aşağıdaki tablo |
 | C4 | C2'yi bir parola yöneticisinden kopyalanan parolayla yapın | iPhone'a gelir; 2 dakika sonra panodan kendiliğinden silinir, Mac'e geçmez. Kayıtta `…, sensitive` | Windows parola yöneticisinin işaretlediği içeriği hiç göndermiyorsa kayıtta satır olmaz; bu da doğru |
 | C5 | Fenpo arka planda, PC'de bir ekran görüntüsünün bir kısmını kopyalayın (Win+Shift+S, 512 KB'tan küçük) | Notlar'a resim yapışır. Kayıtta sırayla `Wi-Fi wanted by PC for Clipboard`, `Wi-Fi channel open for the PC after … s` (10 sn'den az olmalı), `Clipboard item over Wi-Fi … after the PC asked`, `Clipboard from PC over Wi-Fi: image …` | `Wi-Fi channel for the PC failed`: Wi‑Fi yolu kapalı. `open … after 12.0 s`: PC 10 sn bekleyip vazgeçmiş. `Closing Wi-Fi without the clipboard item`: PC göndermedi (Windows kaydı) |
 | C6 | Fenpo arka planda, PC'de bir kelime kopyalayın, sonra iPhone'da başka bir şey kopyalayın, Fenpo'yu açın | iPhone'da kopyaladığınız ezilmez | — |

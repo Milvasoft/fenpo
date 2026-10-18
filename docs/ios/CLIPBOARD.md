@@ -1,8 +1,10 @@
 # Pano: iOS neye izin veriyor, neye vermiyor
 
-Buğra için sade bir özet. Kısaca: **PC'den iPhone'a** pano kendiliğinden gelebilir; ama iOS'un bunu arka planda kabul edip etmediği ancak cihazda belli olur. **iPhone'dan PC'ye** pano kendiliğinden gidemez; iOS buna izin vermez. Fenpo bunun yerine en kısa yolları sunuyor. Cihaz testleri: [TESTING.md › Pano, Fenpo'yu açmadan](TESTING.md#pano-fenpoyu-açmadan).
+Buğra için sade bir özet. Kısaca: **PC'den iPhone'a** pano **sadece Fenpo iPhone'da açıkken** gelir. Build 89'un testinde Fenpo arka plandayken PC'nin kopyası iPhone'a gelmedi; Buğra bunun böyle kalmasına karar verdi. **iPhone'dan PC'ye** pano kendiliğinden gidemez; iOS buna izin vermez. Fenpo bunun yerine en kısa yolları sunuyor. Cihaz testleri: [TESTING.md › Pano, Fenpo'yu açmadan](TESTING.md#pano-fenpoyu-açmadan).
 
 ## PC → iPhone
+
+> **Şu anki durum:** PC'de kopyaladığın şey iPhone'a sadece Fenpo açıkken (ön plandayken) gelir. Fenpo arka plandayken ya da telefon kilitliyken gelmez. Build 89'da denendi (18 Ekim 2026): PC metni Bluetooth'tan gönderdi, iPhone panosuna düşmedi. Sebebi araştırılmadı, çünkü Buğra arka planda çalışmasa da olur dedi. Kaçırılan bir kopya için Fenpo'yu açıp Ana Sayfa'da **PC'den yapıştır**'a dokun ya da PC'de yeniden kopyala. Aşağıdaki maddeler o testten önce yazıldı, ne denendiğini anlatıyor.
 
 **Ne oluyor:** PC'de bir şey kopyaladığında Windows'taki Fenpo bunu hemen telefona yollar. Metin Bluetooth'tan gider. Resim Bluetooth'a sığmaz; PC önce telefona "Wi‑Fi'yi aç" der (`WifiWanted`), resim de Wi‑Fi'den gelir.
 
@@ -52,5 +54,6 @@ Buğra için sade bir özet. Kısaca: **PC'den iPhone'a** pano kendiliğinden ge
 
 ## Durum
 
-- Derleniyor: CI'da yeşil olunca. Cihazda **denenmedi**. TestFlight build'i çıkınca TESTING.md'deki C1–C17 adımları.
-- En önemli soru C2: Fenpo arka plandayken PC'nin kopyası iPhone panosuna yazılabiliyor mu? Cevap "hayır" çıkarsa iOS'un sınırı demektir. O zaman PC'den gelen öğe Fenpo'yu açınca yazılır; bunu bu build zaten yapıyor. Ayrıca bildirimle haber verme gibi seçenekleri konuşuruz.
+- Build 89 (1.0.0) TestFlight'ta. CI yeşil.
+- C2 cevaplandı: **hayır.** Fenpo arka plandayken PC'nin kopyası iPhone panosuna gelmedi. PC'den iPhone'a pano sadece Fenpo açıkken çalışıyor. Buğra bunu kabul etti; iPhone kaydı alınmadığı için sebep (Bluetooth uyandırmadı mı, iOS yazmayı mı reddetti) bilinmiyor. İleride bakılırsa TESTING.md'deki tablo kayıttan sebebi bulmayı anlatıyor.
+- iPhone'dan PC'ye: Fenpo açıkken gönderme çalıştı. Arkaya iki dokun, Denetim Merkezi ve Eylem düğmesi yolları cihazda henüz denenmedi (C13, C14).
