@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fenpo sosyal medya</title>
+<style>
+  :root { --bg: #F6F7FB; --text: #1B1F3B; --muted: #5D6382; --card: #fff; --line: rgba(27,31,59,.1); --accent: #C93A63; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #11132A; --text: #EEF0F8; --muted: #A3A8C3; --card: #1B1F3B; --line: #2C3152; --accent: #FF86A6; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif; }
+  header { padding: 40px 40px 10px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 32px; }
+  h2 { padding: 0 40px; margin: 34px 0 14px; font-size: 22px; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin-left: auto; }
+  .seg button { border: 0; background: transparent; color: var(--text); padding: 8px 18px; font: inherit; cursor: pointer; }
+  .seg button.on { background: var(--accent); color: #fff; }
+  .grid { display: grid; gap: 20px; padding: 0 40px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .grid.wide { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+  figure { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  figure video, figure img { display: block; width: 100%; background: #000; }
+  figcaption { padding: 10px 14px; font-size: 14px; color: var(--muted); }
+  @media (max-width: 600px) { header, h2, .grid { padding-left: 16px; padding-right: 16px; } .grid.wide { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header><h1>Fenpo sosyal medya paketi</h1><div class="seg"><button data-l="tr" class="on">Türkçe</button><button data-l="en">English</button></div></header>
+<h2>Instagram reels</h2><div class="grid" id="reels"></div>
+<h2>LinkedIn videoları</h2><div class="grid wide" id="li"></div>
+<h2>Görseller · Instagram 4:5</h2><div class="grid" id="pig"></div>
+<h2>Görseller · LinkedIn 1.91:1</h2><div class="grid wide" id="pli"></div>
+<script>
+const reels = ['r01-tanitim', 'r02-bildirimler', 'r03-aramalar-mesajlar', 'r04-pano', 'r05-dosyalar', 'r06-kamera', 'r07-gizlilik', 'r08-super-gucler'];
+const lis = ['l01-tanitim', 'l02-nasil-calisir'];
+const draw = l => {
+  const v = id => `<figure><video src="videos/${l}/fenpo-${id}-${l}.mp4" controls preload="metadata" playsinline></video><figcaption>${id}</figcaption></figure>`;
+  document.getElementById('reels').innerHTML = reels.map(v).join('');
+  document.getElementById('li').innerHTML = lis.map(v).join('');
+  const p = f => Array.from({ length: 10 }, (_, i) => { const n = String(i + 1).padStart(2, '0'); return `<figure><img loading="lazy" src="posts/${l}/fenpo-post-${n}-${f}-${l}.png" alt="Post ${n}"><figcaption>post ${n}</figcaption></figure>`; }).join('');
+  document.getElementById('pig').innerHTML = p('ig');
+  document.getElementById('pli').innerHTML = p('li');
+};
+document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b));
+  draw(b.dataset.l);
+});
+draw('tr');
+</script>
+</body>
+</html>

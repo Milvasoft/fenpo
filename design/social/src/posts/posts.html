@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Fenpo posts</title>
+<link rel="stylesheet" href="../lib/core.css">
+<style>
+  .post { position: absolute; inset: 0; }
+  .brandbar { position: absolute; display: flex; align-items: center; gap: 14px; font-family: var(--brand); font-weight: 800; letter-spacing: -0.03em; color: #F6F7FB; }
+  .txt { position: absolute; }
+  .txt .kicker { margin-bottom: 28px; }
+  .txt .hd { font-family: var(--brand); font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: #fff; }
+  .txt .sb { font-family: var(--sys); color: var(--glass); opacity: .88; line-height: 1.38; }
+  .vis { position: absolute; }
+  .vin { position: absolute; left: 0; top: 0; width: 920px; height: 680px; transform-origin: 0 0; }
+  .foot { position: absolute; display: flex; align-items: center; gap: 14px; }
+  .foot .end-url { font-size: inherit; }
+  .foot .end-url svg { width: 1.1em; height: 1.1em; }
+
+  /* Instagram 4:5 */
+  .fmt-ig .brandbar { left: 80px; top: 72px; font-size: 44px; }
+  .fmt-ig .txt { left: 80px; right: 80px; top: 170px; }
+  .fmt-ig .txt .kicker { font-size: 28px; padding: 12px 22px; }
+  .fmt-ig .txt .hd { font-size: 86px; }
+  .fmt-ig .txt .sb { font-size: 32px; margin-top: 26px; max-width: 900px; }
+  .fmt-ig .vis { left: 80px; top: 590px; width: 920px; height: 680px; }
+  .fmt-ig .foot { left: 80px; right: 80px; bottom: 54px; font-size: 26px; justify-content: space-between; }
+  .fmt-ig .foot .chip { font-size: 24px; padding: 10px 18px; }
+
+  /* LinkedIn 1.91:1 */
+  .fmt-li .brandbar { left: 56px; top: 44px; font-size: 30px; gap: 10px; }
+  .fmt-li .txt { left: 56px; width: 520px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; }
+  .fmt-li .txt .kicker { font-size: 17px; padding: 8px 15px; gap: 9px; margin-bottom: 18px; align-self: flex-start; }
+  .fmt-li .txt .kicker svg.i { width: 20px; height: 20px; }
+  .fmt-li .txt .hd { font-size: 50px; }
+  .fmt-li .txt .sb { font-size: 19px; margin-top: 18px; }
+  .fmt-li .vis { left: 590px; top: 30px; width: 580px; height: 567px; }
+  .fmt-li .foot { left: 56px; bottom: 36px; font-size: 16px; }
+  .fmt-li .foot .chip { display: none; }
+
+  /* visual pieces */
+  .w-shot { position: absolute; border-radius: 14px; overflow: hidden; box-shadow: 0 40px 90px -20px rgba(0,0,0,.75), 0 0 0 1.5px rgba(255,255,255,.1); }
+  .w-shot img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: left top; }
+  .pp { position: absolute; }
+  .backside .sb, .backside .pill { display: none; }
+  .pp .phone { position: relative; }
+  .pp .pn { font-size: calc(var(--pw) * .042); }
+  .winz { position: absolute; }
+  .arrow { position: absolute; }
+  .key { position: absolute; width: 150px; height: 140px; border-radius: 30px; background: linear-gradient(180deg, #2A2E55, #1B1F3B); box-shadow: 0 12px 0 #0B0D1E, 0 26px 44px rgba(0,0,0,.5), inset 0 2px 0 rgba(255,255,255,.12); display: grid; place-items: center; font-weight: 600; font-size: 50px; color: #fff; }
+  .card { position: absolute; border-radius: 22px; background: #F3F4FA; box-shadow: 0 40px 90px -20px rgba(0,0,0,.6); overflow: hidden; }
+  .row3 { position: absolute; display: flex; align-items: center; gap: 34px; }
+  .row3 .ic { width: 150px; height: 150px; border-radius: 44px; display: grid; place-items: center; position: relative; }
+  .row3 .ic svg { width: 86px; height: 86px; }
+  .row3 .ic .sl { position: absolute; left: 18px; right: 18px; top: 50%; height: 10px; margin-top: -5px; border-radius: 5px; background: #fff; transform: rotate(-38deg); box-shadow: 0 0 0 5px rgba(0,0,0,.18); }
+  .row3 .t { font-family: var(--brand); font-weight: 800; font-size: 96px; letter-spacing: -0.035em; }
+  .tiles { position: absolute; inset: 0 0 40px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .tile { border-radius: 30px; background: rgba(255,255,255,.07); border: 1.5px solid rgba(255,255,255,.12); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 18px; padding: 0 30px; }
+  .tile .ti { width: 74px; height: 74px; border-radius: 22px; display: grid; place-items: center; }
+  .tile .ti svg.i { width: 42px; height: 42px; color: #fff; }
+  .tile span { font-size: 32px; font-weight: 600; color: #fff; }
+  .lane-lb { position: absolute; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-radius: 18px; background: rgba(17,19,42,.94); border: 1.5px solid rgba(255,255,255,.12); white-space: nowrap; }
+  .lane-lb .n { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: var(--brand); font-weight: 800; font-size: 22px; color: #1B1F3B; }
+  .lane-lb b { font-size: 24px; font-weight: 600; display: block; }
+  .lane-lb span { font-size: 19px; color: var(--muted); }
+  .box { position: absolute; border-radius: 32px; background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
+  .box svg.i { width: 80px; height: 80px; color: #DCE6F5; stroke-width: 1.3; }
+  .box b { font-family: var(--brand); font-size: 32px; }
+  .bub { position: absolute; padding: 14px 20px; border-radius: 24px; font-size: 24px; line-height: 1.3; }
+  .bub.in { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.1); border-bottom-left-radius: 8px; color: #EEF0F8; }
+  .bub.out { background: #2F8F6B; color: #fff; border-bottom-right-radius: 8px; }
+</style>
+</head>
+<body>
+<div id="stage"><div class="post" id="post">
+  <div class="brandbar" id="bb"></div>
+  <div class="txt"><div class="kicker" id="kick"></div><div class="hd" id="hd"></div><div class="sb" id="sb"></div></div>
+  <div class="vis" id="vis"><div class="vin" id="vin"></div></div>
+  <div class="foot"><span class="end-url"><svg class="i"><use href="#i-link"/></svg><span data-s="c.url"></span></span><span class="chip"><span class="dot"></span><span data-s="c.platforms"></span></span></div>
+</div></div>
+
+<script src="../lib/icons.js"></script>
+<script src="../lib/engine.js"></script>
+<script src="../lib/components.js"></script>
+<script>
+const P = new URLSearchParams(location.search);
+const NUM = +(P.get('post') || 1);
+const FMT = P.get('fmt') || 'ig';
+const IG = FMT === 'ig';
+
+Object.assign(STR.tr, {
+  posts: [
+    ['i-link', 'Windows için Fenpo', 'Telefonun ve Windows<br><span class="grad-text">aynı masada.</span>', 'Bildirimler, mesajlar, aramalar, pano, dosyalar ve kamera tek yerde. Bulut yok, hesap yok.'],
+    ['i-bell', 'Bildirimler', 'Telefon titredi.<br><span class="grad-text">Bakmana gerek yok.</span>', 'Telefonundaki bildirimler Windows bildirimi olarak gelir. Mesajlara oradan yanıt ver.'],
+    ['i-chat', 'Mesajlar ve aramalar', 'Klavyeyle yaz,<br><span class="grad-text">aramayı buradan yanıtla.</span>', 'SMS’leri bilgisayardan oku ve gönder. Gelen arama ekranın üstünde çıkar, görüşme telefonda sürer.'],
+    ['i-clip', 'Pano', 'Telefonda kopyala,<br><span class="grad-text">bilgisayarda yapıştır.</span>', 'Bilgisayarda kopyaladığın telefona kendiliğinden gider. Telefondan tek dokunuşla gelir.'],
+    ['i-folder', 'Dosyalar ve fotoğraflar', 'Kablo yok. E-posta yok.<br><span class="grad-text">Sadece gönder.</span>', 'Dosya Gezgini’nde sağ tıkla, telefona gönder. Fotoğraflar paylaşım menüsünden bilgisayara gelir.'],
+    ['i-cam', 'Fenpo Kamera', 'Telefonun artık<br><span class="grad-text">web kameran.</span>', 'Görüntülü görüşme uygulamalarında normal bir kamera olarak görünür. Geniş, ultra geniş ya da ön kamera.'],
+    ['i-lock', 'Gizlilik', 'Verilerin<br><span class="grad-text">hiçbir yere gitmez.</span>', 'Her şey Bluetooth ve yerel ağ üzerinden, cihazlarının arasında şifreli gider. Kodu açık.'],
+    ['i-focus', 'Nasıl çalışır?', 'Dört yol, tek protokol,<br><span class="grad-text">sıfır sunucu.</span>', 'Her özellik çalışabildiği en hafif yolu seçer. iPhone’da bildirim, mesaj ve arama için uygulama bile gerekmez.'],
+    ['i-phone', 'iPhone ve Android', 'iPhone mu, Android mi?<br><span class="grad-text">Fark etmez.</span>', 'Windows bilgisayarın iki telefonla da konuşur. Aynı uygulama, aynı sade arayüz, açık ve koyu temada.'],
+    ['i-pc', 'Hepsi bir arada', 'Telefona uzanmadan<br><span class="grad-text">yapabileceklerin.</span>', 'Fenpo ile telefonun bilgisayarının bir parçası olur.'],
+  ],
+  tiles: [['i-bell', 'Bildirimler'], ['i-chat', 'Mesajlar'], ['i-call', 'Aramalar'], ['i-clip', 'Pano'], ['i-folder', 'Dosyalar'], ['i-cam', 'Kamera'], ['i-mirror', 'Ekran yansıtma'], ['i-lock', 'Yakınlık kilidi'], ['i-ring', 'Telefonu çaldır']],
+  msg: 'Akşam 7’de sahilde buluşuyoruz, unutma!', reply: 'Geliyorum 👋', from: 'Fenpo, Mesajlar', ring: 'iPhone’dan arıyor',
+  m1: 'Bu akşam müsait misin?', m2: 'Evet, 7 gibi çıkarım.', m3: 'Süper! Ben de Mert’i çağırdım 🎉',
+  addr: 'Lale Sokak No: 12, Kat 3', laddr: 'Teslimat adresi', copied: 'Kopyalandı',
+  menu: ['Aç', 'Kopyala', 'Yeniden adlandır', 'Fenpo ile telefona gönder'], got: 'Teklif_2026.pdf alındı', me: 'Sen · Fenpo Kamera',
+  st: ['Bulut yok.', 'Hesap yok.', 'Reklam yok.'],
+  lanes: [['BLE GATT', 'Bildirim, medya, pil'], ['Klasik Bluetooth', 'Mesajlar, rehber, aramalar'], ['Fenpo BLE kanalı', 'Uyandırma, pano'], ['Wi‑Fi · TLS 1.3', 'Dosya, fotoğraf, kamera']], phone: 'Telefon',
+});
+Object.assign(STR.en, {
+  posts: [
+    ['i-link', 'Fenpo for Windows', 'Your phone and Windows,<br><span class="grad-text">at the same desk.</span>', 'Notifications, messages, calls, clipboard, files and camera in one place. No cloud, no account.'],
+    ['i-bell', 'Notifications', 'Your phone buzzed.<br><span class="grad-text">No need to look.</span>', 'Phone notifications show up as Windows notifications. Reply to messages right there.'],
+    ['i-chat', 'Messages and calls', 'Type with a keyboard,<br><span class="grad-text">answer calls here.</span>', 'Read and send texts from the PC. Incoming calls pop up at the top of the screen; the call goes on on your phone.'],
+    ['i-clip', 'Clipboard', 'Copy on your phone,<br><span class="grad-text">paste on your PC.</span>', 'What you copy on the PC goes to the phone on its own. From the phone it takes one tap.'],
+    ['i-folder', 'Files and photos', 'No cable. No email.<br><span class="grad-text">Just send it.</span>', 'Right-click in File Explorer to send to your phone. Photos come to the PC from the share menu.'],
+    ['i-cam', 'Fenpo Kamera', 'Your phone is now<br><span class="grad-text">your webcam.</span>', 'It shows up as a regular camera in video calling apps. Wide, ultra wide or the front camera.'],
+    ['i-lock', 'Privacy', 'Your data<br><span class="grad-text">goes nowhere.</span>', 'Everything travels encrypted between your devices over Bluetooth and your local network. The code is open.'],
+    ['i-focus', 'How it works', 'Four paths, one protocol,<br><span class="grad-text">zero servers.</span>', 'Each feature takes the lightest path that works. On iPhone, notifications, messages and calls need no app at all.'],
+    ['i-phone', 'iPhone and Android', 'iPhone or Android?<br><span class="grad-text">Doesn’t matter.</span>', 'Your Windows PC talks to both. Same app, same simple design, in light and dark.'],
+    ['i-pc', 'All in one', 'What you can do<br><span class="grad-text">without your phone.</span>', 'With Fenpo, your phone becomes part of your PC.'],
+  ],
+  tiles: [['i-bell', 'Notifications'], ['i-chat', 'Messages'], ['i-call', 'Calls'], ['i-clip', 'Clipboard'], ['i-folder', 'Files'], ['i-cam', 'Camera'], ['i-mirror', 'Screen mirroring'], ['i-lock', 'Proximity lock'], ['i-ring', 'Ring your phone']],
+  msg: 'Meet at the beach at 7 tonight, don’t forget!', reply: 'On my way 👋', from: 'Fenpo, Messages', ring: 'Calling from iPhone',
+  m1: 'Free tonight?', m2: 'Yes, I’ll head out around 7.', m3: 'Great! I invited Mert too 🎉',
+  addr: '12 Lale Street, Floor 3', laddr: 'Delivery address', copied: 'Copied',
+  menu: ['Open', 'Copy', 'Rename', 'Send to phone with Fenpo'], got: 'Got Teklif_2026.pdf', me: 'You · Fenpo Kamera',
+  st: ['No cloud.', 'No account.', 'No ads.'],
+  lanes: [['BLE GATT', 'Notifications, media, battery'], ['Classic Bluetooth', 'Messages, contacts, calls'], ['Fenpo BLE channel', 'Wake-ups, clipboard'], ['Wi‑Fi · TLS 1.3', 'Files, photos, camera']], phone: 'Phone',
+});
+
+const W = IG ? 1080 : 1200, H = IG ? 1350 : 627;
+window.META = { id: `post-${NUM}-${FMT}`, w: W, h: H, scale: IG ? 1 : 2, duration: 1, fps: 1, still: 0 };
+setupStage(W, H);
+$('#stage').classList.add('fmt-' + FMT);
+applyStrings();
+const st = $('#stage');
+const bgSets = [
+  [{ col: '#E8577E', d: 1300, x: .85, y: .15, a: .5 }, { col: '#4E54C8', d: 1500, x: .1, y: .9, a: .55 }],
+  [{ col: '#E8577E', d: 1300, x: .1, y: .2, a: .45 }, { col: '#F2994A', d: 900, x: .9, y: .9, a: .2 }, { col: '#4E54C8', d: 1300, x: .9, y: .4, a: .45 }],
+  [{ col: '#2F8F6B', d: 1200, x: .9, y: .2, a: .35 }, { col: '#4E54C8', d: 1500, x: .1, y: .8, a: .55 }],
+  [{ col: '#4E54C8', d: 1400, x: .85, y: .25, a: .55 }, { col: '#E8577E', d: 1200, x: .1, y: .85, a: .45 }],
+  [{ col: '#E8577E', d: 1300, x: .2, y: .2, a: .45 }, { col: '#2F8F6B', d: 1100, x: .9, y: .8, a: .3 }],
+  [{ col: '#4E54C8', d: 1500, x: .8, y: .2, a: .55 }, { col: '#E8577E', d: 1300, x: .2, y: .85, a: .45 }],
+  [{ col: '#4E54C8', d: 1400, x: .5, y: .3, a: .35 }, { col: '#2F8F6B', d: 1000, x: .9, y: .85, a: .25 }],
+  [{ col: '#4E54C8', d: 1600, x: .3, y: .3, a: .5 }, { col: '#E8577E', d: 1200, x: .9, y: .9, a: .35 }],
+  [{ col: '#E8577E', d: 1300, x: .85, y: .2, a: .5 }, { col: '#2F8F6B', d: 1200, x: .1, y: .85, a: .3 }],
+  [{ col: '#E8577E', d: 1300, x: .1, y: .1, a: .45 }, { col: '#4E54C8', d: 1600, x: .9, y: .9, a: .55 }],
+];
+background(st, { blobs: bgSets[NUM - 1].map(b => ({ ...b, sp: 0 })), grid: NUM === 8, base: NUM === 7 ? 'radial-gradient(140% 100% at 50% 0%, #161937 0%, #0B0D1E 70%, #06070F 100%)' : undefined });
+
+const [kic, kt, hd, sb] = S('posts')[NUM - 1];
+$('#bb').innerHTML = logoSVG(IG ? 56 : 38) + 'Fenpo';
+$('#kick').innerHTML = icon(kic) + `<span>${kt}</span>`;
+$('#hd').innerHTML = hd;
+$('#sb').innerHTML = sb;
+
+// Visual canvas is 920x680; LinkedIn scales it into the right column.
+const vin = $('#vin');
+if (!IG) {
+  const k = Math.min(580 / 920, 567 / 680);
+  vin.style.transform = `translate(${(580 - 920 * k) / 2}px, ${(567 - 680 * k) / 2}px) scale(${k})`;
+}
+const toastHTML = (z = 1.6) => `<div class="winui winz" style="zoom:${z}"><div class="toast">
+  <div class="hd">${logoSVG(16)}<span>${S('from')}</span><span class="x"><svg class="i" style="width:14px;height:14px"><use href="#i-x"/></svg></span></div>
+  <div class="bd"><div class="av" style="background:#E8577E;width:44px;height:44px">D</div><div><b style="font-weight:600">Deniz Yılmaz</b><div class="sub">${S('msg')}</div></div></div>
+  <div class="reply"><div class="field">${S('reply')}</div><button class="btn primary"><svg class="i" style="width:16px;height:16px"><use href="#i-send"/></svg></button></div></div></div>`;
+const notifs = () => [['M', '#2FB36B', 'Deniz Yılmaz', S('msg'), '2 dk'], ['T', '#4E54C8', LANG === 'tr' ? 'Takvim' : 'Calendar', LANG === 'tr' ? 'Ekip toplantısı · 15:30' : 'Team meeting · 15:30', '9 dk']];
+const phoneWith = (w, inner, x, y, extra = '') => `<div class="pp" style="left:${x}px;top:${y}px;${extra}">${phoneHTML(w, inner)}</div>`;
+const lockWithNotifs = w => lockHTML('09:41') + notifs().map((n, i) => `<div style="position:absolute;left:0;right:0;top:${w * (1.0 + i * .27)}px">${pnHTML(...n)}</div>`).join('');
+
+const V = {
+  1: () => `
+    <div class="w-shot" style="left:150px;top:30px;width:770px;height:433px"><img src="${shotUrl('Home', 'Dark')}"></div>
+    ${phoneWith(240, lockWithNotifs(240), 10, 120)}`,
+  2: () => `
+    ${phoneWith(250, lockWithNotifs(250), 0, 60, 'transform:rotate(-6deg)')}
+    <svg class="arrow" style="left:250px;top:120px;width:300px;height:200px" viewBox="0 0 300 200"><path d="M 10 170 C 80 40, 200 30, 280 90" fill="none" stroke="#FF86A6" stroke-width="6" stroke-dasharray="12 14" stroke-linecap="round"/></svg>
+    <div style="position:absolute;left:330px;top:270px">${toastHTML(1.6)}</div>`,
+  3: () => `
+    <div class="winui" style="position:absolute;left:115px;top:10px;zoom:1.65"><div class="island" style="width:420px"><div class="av" style="background:#E8577E">D</div><div class="who"><b>Deniz Yılmaz</b><span>${S('ring')}</span></div><div class="cbtn dec"><svg class="i"><use href="#i-hangup"/></svg></div><div class="cbtn acc"><svg class="i"><use href="#i-call"/></svg></div></div></div>
+    <div style="position:absolute;left:60px;top:190px;width:800px;height:470px;border-radius:30px;background:#1F2136;box-shadow:0 40px 90px -20px rgba(0,0,0,.7),0 0 0 1.5px rgba(255,255,255,.08)">
+      <div class="bub in" style="left:34px;top:40px">${S('m1')}</div>
+      <div class="bub out" style="right:34px;top:140px">${S('m2')}</div>
+      <div class="bub in" style="left:34px;top:240px">${S('m3')}</div>
+      <div style="position:absolute;left:30px;right:30px;bottom:30px;height:66px;border-radius:33px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;padding:0 26px;font-size:24px;color:#EEF0F8">${LANG === 'tr' ? 'Mesaj yaz' : 'Write a message'}<span class="caret" style="margin-left:6px"></span></div>
+    </div>`,
+  4: () => `
+    ${phoneWith(250, `<div style="position:absolute;inset:0;background:#F6F7FB;color:#1B1F3B;padding:90px 22px 0;font-size:22px;line-height:1.5"><b style="font-size:28px">${LANG === 'tr' ? 'Adres' : 'Address'}</b><br><span style="background:rgba(78,84,200,.28);border-radius:3px">${S('addr')}</span><div style="margin-top:20px;display:inline-flex;gap:8px;align-items:center;background:#1B1F3B;color:#fff;border-radius:999px;padding:10px 16px;font-size:18px">${icon('i-check')}${S('copied')}</div></div>`, 0, 60)}
+    <div class="card winui light" style="left:330px;top:70px;width:590px;height:190px;padding:30px"><div style="font-size:22px;color:var(--w-text-2);margin-bottom:12px">${S('laddr')}</div><div style="height:66px;border-radius:10px;background:#fff;border:1px solid var(--w-stroke);border-bottom:3px solid var(--w-accent);display:flex;align-items:center;padding:0 20px;font-size:28px;color:#1B1F3B"><span style="background:rgba(232,87,126,.2);border-radius:4px">${S('addr')}</span></div></div>
+    <div class="key" style="left:420px;top:360px">Ctrl</div><div style="position:absolute;left:590px;top:385px;font-family:var(--brand);font-size:70px;color:var(--muted)">+</div><div class="key" style="left:660px;top:360px">V</div>
+    <svg class="arrow" style="left:240px;top:250px;width:200px;height:160px" viewBox="0 0 200 160"><path d="M 10 120 C 60 140, 130 120, 170 40" fill="none" stroke="#FF86A6" stroke-width="6" stroke-dasharray="12 14" stroke-linecap="round"/></svg>`,
+  5: () => `
+    <div class="card winui light" style="left:0;top:20px;width:620px;height:430px;padding:20px 22px;font-size:22px;color:#1B1F3B">
+      ${[['PDF', '#C93A63', 'Teklif_2026.pdf', '3,1 MB'], ['PPTX', '#E07B39', 'Ekim_Sunumu.pptx', '5,6 MB'], ['XLSX', '#2F8F6B', LANG === 'tr' ? 'Bütçe_2027.xlsx' : 'Budget_2027.xlsx', '820 KB'], ['MOV', '#4E54C8', 'Tatil_Videosu.mov', '184 MB']].map(([t, c, nm, sz], i) => `<div style="display:grid;grid-template-columns:44px 1fr auto;gap:16px;align-items:center;height:70px;padding:0 12px;border-radius:10px;${i === 0 ? 'background:rgba(78,84,200,.14)' : ''}"><div style="width:42px;height:48px;border-radius:6px;background:${c};display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff">${t}</div><div>${nm}</div><small style="color:#8A90AC;font-size:19px">${sz}</small></div>`).join('')}
+    </div>
+    <div class="winui light" style="position:absolute;left:220px;top:130px;width:400px;background:rgba(246,247,252,.98);border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.35);padding:8px;font-size:22px;color:#1B1F3B">
+      ${S('menu').slice(0, 3).map(x => `<div style="height:50px;display:flex;align-items:center;padding:0 16px">${x}</div>`).join('')}<div style="border-top:1px solid rgba(27,31,59,.1);margin:6px 0"></div>
+      <div style="height:56px;display:flex;align-items:center;gap:14px;padding:0 16px;border-radius:8px;background:rgba(232,87,126,.2);font-weight:600">${logoSVG(26)}${S('menu')[3]}</div></div>
+    ${phoneWith(230, lockHTML('09:44') + `<div style="position:absolute;left:4%;right:4%;top:60px;border-radius:22px;background:rgba(30,32,60,.94);padding:14px 16px;display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;color:#fff;font-size:15px;line-height:1.3">${logoSVG(40)}<div><b>Fenpo</b><br>${S('got')}</div></div>`, 680, 170)}
+    <div style="position:absolute;left:640px;top:70px;width:96px;height:112px;border-radius:14px;background:#fff;display:grid;place-items:center;font-weight:800;font-size:26px;color:#C93A63;box-shadow:0 20px 40px rgba(0,0,0,.5);transform:rotate(12deg)">PDF</div>`,
+  6: () => {
+    const person = `<svg viewBox="0 0 200 200" style="position:absolute;left:50%;bottom:-4%;width:48%;transform:translateX(-50%)"><circle cx="100" cy="62" r="40" fill="rgba(255,236,226,.92)"/><path d="M28 200c0-46 32-74 72-74s72 28 72 74z" fill="rgba(27,31,59,.85)"/><path d="M60 40c10-26 70-30 82 4c-14-8-30-10-46-6c-14 4-26 6-36 2z" fill="#3A2A3E"/></svg>`;
+    return `
+    <div style="position:absolute;left:60px;top:150px;width:800px;height:470px;border-radius:26px;background:#0B0C18;padding:14px;box-shadow:0 40px 90px -20px rgba(0,0,0,.8),0 0 0 2px rgba(255,255,255,.08)">
+      <div style="position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;background:#16182C;display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:10px">
+        <div style="grid-row:1/3;position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(120deg,#E8577E 0%,#8E5BB8 35%,#4E54C8 60%,#2F8F6B 100%)">${person}<div style="position:absolute;left:12px;bottom:10px;padding:5px 12px;border-radius:8px;background:rgba(0,0,0,.5);font-size:18px;font-weight:600">${S('me')}</div><div style="position:absolute;right:12px;top:12px;padding:4px 10px;border-radius:6px;background:rgba(47,143,107,.9);font-size:16px;font-weight:700">HD</div></div>
+        <div style="border-radius:12px;background:#262A48;display:grid;place-items:center"><div class="av" style="background:#E8577E;width:80px;height:80px;font-size:32px">D</div></div>
+        <div style="border-radius:12px;background:#262A48;display:grid;place-items:center"><div class="av" style="background:#F2994A;width:80px;height:80px;font-size:32px">C</div></div>
+      </div></div>
+    <div style="position:absolute;left:460px;top:92px;width:0;height:0">${`<div style="position:absolute;width:300px;height:630px;left:-150px;top:-315px;transform:rotate(-90deg) scale(.6)">${phoneHTML(300, '<div style="position:absolute;inset:0;background:linear-gradient(160deg,#2A2E55,#12152B)"></div><div style="position:absolute;left:50%;top:9%;width:30%;aspect-ratio:1;margin-left:-15%;border-radius:50%;background:radial-gradient(circle at 35% 35%,#4E54C8 0%,#12152B 50%,#000 70%);box-shadow:0 0 0 6px #22264A,0 0 0 10px #0B0C18"></div>', { cls: 'backside' })}</div>`}</div>
+    <div style="position:absolute;left:300px;top:20px;width:320px;height:320px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.35),rgba(232,87,126,.12) 50%,transparent 75%)"></div>`;
+  },
+  7: () => {
+    const ics = [
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9a4.5 4.5 0 0 0 0 9z"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8.5" r="4"/><path d="M4.5 20c.8-4 4-6 7.5-6s6.7 2 7.5 6"/></svg>',
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M4 10v4h3l7 4V6L7 10z"/><path d="M17.5 9.5a3.5 3.5 0 0 1 0 5M7 14l1.5 5h2.5l-1-5"/></svg>'];
+    const cols = ['#4E54C8', '#E8577E', '#2F8F6B'];
+    return S('st').map((t, i) => `<div class="row3" style="left:40px;top:${20 + i * 220}px"><div class="ic" style="background:${cols[i]}">${ics[i]}<div class="sl"></div></div><div class="t">${t}</div></div>`).join('');
+  },
+  8: () => {
+    const ys = [130, 260, 390, 520], cols = ['#8E93F0', '#FF86A6', '#F2C94C', '#5CC79A'];
+    return `
+    <div class="box" style="left:0;top:80px;width:190px;height:520px">${icon('i-phone')}<b>${S('phone')}</b></div>
+    <div class="box" style="right:0;top:80px;width:190px;height:520px">${icon('i-pc')}<b>Windows</b></div>
+    <svg style="position:absolute;left:0;top:0;width:920px;height:680px" viewBox="0 0 920 680">${ys.map((y, i) => `<line x1="190" y1="${y + 10}" x2="730" y2="${y + 10}" stroke="${cols[i]}" stroke-width="5" stroke-dasharray="10 12"/>`).join('')}</svg>
+    ${S('lanes').map(([a, b], i) => `<div class="lane-lb" style="left:460px;top:${ys[i] + 10}px"><div class="n" style="background:${cols[i]}">${i + 1}</div><div><b>${a}</b><span>${b}</span></div></div>`).join('')}`;
+  },
+  9: () => `
+    <div class="w-shot" style="left:190px;top:10px;width:540px;height:304px"><img src="${shotUrl('Home', 'Light')}"></div>
+    <svg style="position:absolute;left:0;top:0;width:920px;height:680px" viewBox="0 0 920 680"><path d="M 210 400 C 230 330, 300 320, 330 314" fill="none" stroke="#FF86A6" stroke-width="6" stroke-dasharray="12 14" stroke-linecap="round"/><path d="M 710 400 C 690 330, 620 320, 590 314" fill="none" stroke="#5CC79A" stroke-width="6" stroke-dasharray="12 14" stroke-linecap="round"/></svg>
+    ${phoneWith(190, lockHTML('09:41'), 120, 230, 'transform:rotate(-8deg)')}
+    <div class="pp android" style="left:610px;top:230px;transform:rotate(8deg)">${phoneHTML(190, `<div class="lock" style="background:radial-gradient(120% 70% at 80% 0%, #2F8F6B 0%, transparent 55%), radial-gradient(110% 80% at 0% 100%, #4E54C8 0%, transparent 60%), linear-gradient(170deg, #1F4D5A 0%, #1B1F3B 100%)"><div class="date">${S('c.date')}</div><div class="time">09:41</div></div>`)}</div>
+`,
+  10: () => `<div class="tiles">${S('tiles').map(([ic, t], i) => `<div class="tile"><div class="ti" style="background:${['#E8577E', '#4E54C8', '#2F8F6B'][i % 3]}">${icon(ic)}</div><span>${t}</span></div>`).join('')}</div>`,
+};
+vin.innerHTML = V[NUM]();
+// Android phone: a punch-hole camera instead of the pill.
+$$('.android .pill').forEach(p => { p.style.width = 'calc(var(--pw) * .06)'; p.style.height = 'calc(var(--pw) * .06)'; });
+boot();
+</script>
+</body>
+</html>
