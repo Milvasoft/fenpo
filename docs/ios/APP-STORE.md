@@ -8,7 +8,7 @@ hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları
 
 | Konu | Öneri |
 |---|---|
-| Sürüm | `MARKETING_VERSION` = `1.0.0` (`ios/Config/Base.xcconfig`), App Store Connect'teki sürümle aynı. |
+| Sürüm | `MARKETING_VERSION` = `1.0.1` (`ios/Config/Base.xcconfig`). 1.0.0 (89) incelemede; 1.0.1 yanlış PC'ye Bluetooth düzeltmesini (ee5d920) taşır ve App Store Connect'te yeni bir sürüm olarak açılır. |
 | Yapı | En son TestFlight yapısı (şu an 72'den sonrakiler). App Store Connect'te sürüme "Build" olarak seçilir. |
 | Platformlar | Sadece iPhone (`TARGETED_DEVICE_FAMILY = 1`), iPad ekran görüntüsü gerekmez. App Store Connect › Fiyat ve Kullanılabilirlik'te **Apple silikonlu Mac'lerde kullanılabilir** ve **Apple Vision Pro** seçeneklerini **kapat**: AccessorySetupKit ve arka plan Bluetooth'u oralarda çalışmaz. |
 | Demo videosu | İnceleyicinin Windows PC'si yok. 2–3 dakikalık bir video gerek (aşağıda "İnceleme notları"); YouTube "liste dışı" ya da Drive bağlantısı yeterli. |
