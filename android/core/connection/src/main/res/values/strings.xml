@@ -54,4 +54,6 @@
     <string name="files_error_offline">Connect to your PC on Wi‑Fi to see its folders.</string>
     <string name="files_error_failed">The PC did not answer. Pull down to try again.</string>
     <string name="clipboard_sent_auto">What you copied was sent to your PC</string>
+    <string name="connection_wrong_pc_title">Bluetooth reaches another PC</string>
+    <string name="connection_wrong_pc_text">Fenpo’s Bluetooth link does not reach %1$s, probably another PC nearby. Wi‑Fi keeps working. Pair this phone with %1$s again to fix Bluetooth.</string>
 </resources>

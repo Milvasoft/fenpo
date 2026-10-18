@@ -33,7 +33,7 @@ class PcLinkSetup
             launch: (IntentSender) -> Unit,
         ): AssociationOutcome {
             val previous = pairedPcRepository.pairedPc.first()
-            val outcome = association.associate(activity, launch)
+            val outcome = association.associate(activity, previous?.name.orEmpty(), launch)
             if (outcome is AssociationOutcome.Associated) {
                 pairedPcRepository.saveBleLink(outcome.associationId, outcome.address)
                 // A repeated association for the same PC leaves the old, outdated one behind; drop it.

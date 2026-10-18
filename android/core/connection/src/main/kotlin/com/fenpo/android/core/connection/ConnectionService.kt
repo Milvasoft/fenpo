@@ -237,6 +237,7 @@ class ConnectionService : Service() {
 
         var backoff = 1.seconds
         while (scope.isActive) {
+            var wrongPc = false
             val gatt = GattConnection(this, device)
             val channel = BleChannel(gatt, crypto, store)
             val session =
@@ -271,7 +272,16 @@ class ConnectionService : Service() {
                         },
                         // Once the PC has spoken the protocol, only answered Pings keep the link (device test A2).
                         scope.launch {
-                            session.awaitHello()
+                            // The channel's key belongs to this pairing, so another PC mostly stays silent;
+                            // one that does answer with another identity is dropped. Silence alone is not a
+                            // sign: a second Fenpo copy on the same PC stays silent too (device log, 18 October).
+                            val answer = session.awaitHello()
+                            if (answer.device_id != pc.id) {
+                                wrongPc = true
+                                Log.w(TAG, "Bluetooth reached another PC: ${answer.device_name}")
+                                gatt.close()
+                                return@launch
+                            }
                             onSession(LinkPath.BLUETOOTH, session)
                             session.heartbeat.run()
                             Log.w(TAG, "PC stopped answering Ping, reconnecting")
@@ -290,9 +300,36 @@ class ConnectionService : Service() {
                 channel.close()
                 status.update { it.copy(bluetooth = LinkState.OFF, rssi = null) }
             }
+            if (wrongPc) {
+                askToPairAgain()
+                return
+            }
             delay(backoff)
             backoff = (backoff * 2).coerceAtMost(MAX_BACKOFF)
         }
+    }
+
+    /**
+     * The Bluetooth address Fenpo keeps leads to a PC that answers with another identity: another
+     * Fenpo PC in the house. Wi-Fi keeps working; pairing again fixes Bluetooth.
+     */
+    private fun askToPairAgain() {
+        val open =
+            packageManager.getLaunchIntentForPackage(packageName)?.let {
+                PendingIntent.getActivity(this, REPAIR_NOTIFICATION_ID, it, PendingIntent.FLAG_IMMUTABLE)
+            }
+        val notification =
+            NotificationCompat
+                .Builder(this, CHANNEL_ID)
+                .setSmallIcon(DesignR.drawable.ic_notification)
+                .setContentTitle(getString(R.string.connection_wrong_pc_title))
+                .setContentText(getString(R.string.connection_wrong_pc_text, pcName))
+                .setStyle(
+                    NotificationCompat.BigTextStyle().bigText(getString(R.string.connection_wrong_pc_text, pcName)),
+                ).setContentIntent(open)
+                .setAutoCancel(true)
+                .build()
+        getSystemService(NotificationManager::class.java).notify(REPAIR_NOTIFICATION_ID, notification)
     }
 
     /** Keeps the sessions that finished `Hello`; what the PC said goes once no path is left. */
@@ -462,6 +499,7 @@ class ConnectionService : Service() {
         private const val EXTRA_TRANSFER_ID = "transfer_id"
         private val RSSI_INTERVAL = 5.seconds
         private val MAX_BACKOFF = 60.seconds
+        private const val REPAIR_NOTIFICATION_ID = 7
 
         /** Starts or keeps the connection service; allowed from the background thanks to the association. */
         fun start(context: Context) {

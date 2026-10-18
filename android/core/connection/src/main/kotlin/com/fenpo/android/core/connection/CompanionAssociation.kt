@@ -20,6 +20,7 @@ import com.fenpo.android.core.transport.ble.FenpoBleUuids
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.regex.Pattern
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.resume
@@ -45,7 +46,10 @@ sealed interface AssociationOutcome {
 
 /**
  * Registers the PC with CompanionDeviceManager (docs/ANDROID.md §1): profile-less, single-device
- * BLE association filtered by the fixed Fenpo service UUID. The association lets Fenpo start its
+ * BLE association filtered by the fixed Fenpo service UUID and the PC's name. Every Fenpo PC
+ * advertises the same service, so with two PCs in a house the service alone picked whichever came
+ * first (device report from the iPhone, 18 October); the PC's Bluetooth name is its computer
+ * name, the same one its QR code carries. The association lets Fenpo start its
  * connection service from the background, exempts it from battery optimization and wakes it when
  * the PC comes into range.
  *
@@ -71,21 +75,26 @@ class CompanionAssociation
          */
         suspend fun associate(
             activity: Activity,
+            pcName: String,
             launch: (IntentSender) -> Unit,
         ): AssociationOutcome =
             suspendCancellableCoroutine { continuation ->
                 pending = continuation
                 continuation.invokeOnCancellation { pending = null }
+                val filter =
+                    BluetoothLeDeviceFilter
+                        .Builder()
+                        .setScanFilter(ScanFilter.Builder().setServiceUuid(ParcelUuid(FenpoBleUuids.SERVICE)).build())
+                if (pcName.isNotBlank()) {
+                    filter.setNamePattern(
+                        Pattern.compile("^" + Pattern.quote(pcName.trim()) + "$", Pattern.CASE_INSENSITIVE),
+                    )
+                }
                 val request =
                     AssociationRequest
                         .Builder()
-                        .addDeviceFilter(
-                            BluetoothLeDeviceFilter
-                                .Builder()
-                                .setScanFilter(
-                                    ScanFilter.Builder().setServiceUuid(ParcelUuid(FenpoBleUuids.SERVICE)).build(),
-                                ).build(),
-                        ).setSingleDevice(true)
+                        .addDeviceFilter(filter.build())
+                        .setSingleDevice(true)
                         .build()
                 val activityManager = activity.getSystemService(CompanionDeviceManager::class.java)
                 if (Build.VERSION.SDK_INT >= ANDROID_13) {

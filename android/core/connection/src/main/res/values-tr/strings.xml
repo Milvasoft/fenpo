@@ -54,4 +54,6 @@
     <string name="files_error_offline">Klasörleri görmek için PC’ne Wi‑Fi ile bağlan.</string>
     <string name="files_error_failed">PC yanıt vermedi. Yeniden denemek için aşağı çek.</string>
     <string name="clipboard_sent_auto">Kopyaladığın PC’ye gönderildi</string>
+    <string name="connection_wrong_pc_title">Bluetooth başka bir PC’ye bağlanıyor</string>
+    <string name="connection_wrong_pc_text">Fenpo’nun Bluetooth bağlantısı %1$s yerine büyük ihtimalle yakındaki başka bir PC’ye gidiyor. Wi‑Fi çalışmaya devam ediyor. Bluetooth’u düzeltmek için telefonu %1$s ile yeniden eşleştir.</string>
 </resources>
