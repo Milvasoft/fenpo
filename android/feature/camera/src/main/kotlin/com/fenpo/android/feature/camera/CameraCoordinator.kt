@@ -41,7 +41,7 @@ data class CameraUiState(
     val state: CameraState = CameraState.CAMERA_STATE_STOPPED,
     val consumer: String = "",
     val settings: CameraSettings =
-        CameraSettings(facing = CameraFacing.CAMERA_FACING_BACK, zoom = 1f, center_stage = true),
+        CameraSettings(facing = CameraFacing.CAMERA_FACING_BACK, zoom = 1f),
     val zoomPresets: List<Float> = listOf(1f),
     val frontAvailable: Boolean = true,
     val dimmed: Boolean = false,
@@ -239,7 +239,10 @@ class CameraCoordinator
             incoming: CameraSettings?,
         ): CameraSettings {
             if (incoming == null) return current
+            // Centring on the face and the phone's microphone were removed (Buğra, 18 October).
             return incoming.copy(
+                center_stage = false,
+                microphone = false,
                 facing =
                     if (incoming.facing ==
                         CameraFacing.CAMERA_FACING_UNSPECIFIED

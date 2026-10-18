@@ -32,7 +32,7 @@ Notifications and messages
 • Your PC's notifications can come to the phone too.
 
 Camera and screen
-• Use your phone's camera as the PC's webcam, with ultra-wide, zoom and keeping your face centred.
+• Use your phone's camera as the PC's webcam: front or back camera, ultra-wide and zoom.
 • See your phone's screen on the PC and use it with the PC's mouse and keyboard.
 
 Remote

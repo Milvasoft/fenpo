@@ -201,20 +201,6 @@ private fun Controls(
             val front = settings.facing == CameraFacing.CAMERA_FACING_FRONT
             val flipped = if (front) CameraFacing.CAMERA_FACING_BACK else CameraFacing.CAMERA_FACING_FRONT
             Toggle(
-                icon = FenpoIcons.Center,
-                label = R.string.camera_center,
-                on = settings.center_stage,
-                onClick = { onSettingsChange(settings.copy(center_stage = !settings.center_stage)) },
-                modifier = Modifier.weight(1f),
-            )
-            Toggle(
-                icon = FenpoIcons.Microphone,
-                label = R.string.camera_microphone,
-                on = settings.microphone,
-                onClick = { onSettingsChange(settings.copy(microphone = !settings.microphone)) },
-                modifier = Modifier.weight(1f),
-            )
-            Toggle(
                 icon = FenpoIcons.Flip,
                 label = R.string.camera_flip,
                 on = false,

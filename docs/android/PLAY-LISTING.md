@@ -45,7 +45,7 @@ BİLDİRİMLER
 • İstersen PC'nin bildirimleri de telefonuna gelir.
 
 KAMERA VE EKRAN
-• Telefonunun kamerasını PC'de web kamerası olarak kullan; geniş açı, yakınlaştırma ve yüzünü ortalama ile.
+• Telefonunun kamerasını PC'de web kamerası olarak kullan; ön ya da arka kamera, geniş açı ve yakınlaştırmayla.
 • Telefonunun ekranını PC'de gör ve PC'nin faresi ve klavyesiyle kullan.
 
 KUMANDA
@@ -92,7 +92,7 @@ NOTIFICATIONS
 • Your PC's notifications can come to the phone too.
 
 CAMERA AND SCREEN
-• Use your phone's camera as the PC's webcam, with ultra-wide, zoom and keeping your face centred.
+• Use your phone's camera as the PC's webcam: front or back camera, ultra-wide and zoom.
 • See your phone's screen on the PC and use it with the PC's mouse and keyboard.
 
 REMOTE
@@ -151,7 +151,7 @@ yazılmaması ve SMS satırı.
 | 4.1 | SMS izinleri (`READ_SMS`, `RECEIVE_SMS`, `SEND_SMS`) | MAP'i olmayan telefonlarda SMS'leri PC'de okumak ve yanıtlamak (`messages.proto`). | Varsayılan SMS uygulaması olmayanlar için yalnızca istisnayla; "Cihazlar arası SMS ve arama eşitleme" istisnası bu izinlerin hepsini kapsıyor. İzin Beyan Formu ve video gerekiyor; "başka yol yoksa" şartı var. | İlk sürüm SMS'le gidiyor: beyan §4.7'de. Gerekçe: bazı Android telefonları Bluetooth MAP'i hiç sunmuyor ya da mesaj göndermeden sunuyor (Fenpo bunu kendi telefonlarımızda görmedi; S10+ MAP'i destekliyor); o telefonlarda SMS'i PC'ye taşımanın başka yolu yok. Fenpo varsayılan SMS uygulaması olmaz; mesajlar yalnızca kullanıcının eşleştirdiği PC'ye, şifreli gider. Reddedilirse izinleri `tools:node="remove"` ile çıkar; özellik kendiliğinden kapanır. |
 | 4.2 | Erişilebilirlik hizmeti ("Fenpo: PC'den kontrol") | `isAccessibilityTool="false"`; yalnızca ekran paylaşılırken PC'nin dokunma, kaydırma ve yazma girdisini telefonda uygular. | Erişilebilirlik API beyanı (Play Console, App content), **uygulama içinde göze çarpan açıklama ve onay** (kullanıcı ayarlara gitmeden önce), gizlilik politikasında anlatım, beyan videosu. | Açıklama ve onay ekranı bu dalda eklendi (`MirrorControlDisclosureActivity`). Beyan metni §4.7'de. Gizlilik politikasına eklenmesi gerekiyor (§6). |
 | 4.3 | Fotoğraf ve video (`READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, `READ_MEDIA_VISUAL_USER_SELECTED`) | PC'den fotoğraf arşivine göz atmak ve yeni ekran görüntülerini kendiliğinden göndermek. İkisi de seçiciyle yapılamaz. | Beyan formu: sistem fotoğraf seçicisinin neden yetmediği. İzni vermeyen için çalışan bir yol. | Beyan: "PC'den telefonun tüm fotoğraf arşivine göz atılıyor ve yeni ekran görüntüleri arka planda PC'ye gönderiliyor; seçici, kullanıcı telefonun başında değilken çalışamaz." İzin verilmezse PC "erişim yok" der, ekran görüntüsü anahtarı kapalı kalır; Android 14+ kısmi izin `LIMITED` olarak destekleniyor. |
-| 4.4 | Ön plan servisleri | `connectedDevice` (bağlantı), `mediaProjection` (ekran), `camera` + `microphone` (web kamerası). | Play Console > App content > Foreground service permissions: her tür için açıklama ve kısa video. | Açıklamalar §4.7'de. Videolar: eşleşmiş telefonla PC'ye dosya gönderimi (connectedDevice), PC'den ekran yansıtma (mediaProjection), PC'de web kamerası (camera, microphone). |
+| 4.4 | Ön plan servisleri | `connectedDevice` (bağlantı), `mediaProjection` (ekran), `camera` (web kamerası; telefonun mikrofonu Buğra'nın kararıyla kaldırıldı). | Play Console > App content > Foreground service permissions: her tür için açıklama ve kısa video. | Açıklamalar §4.7'de. Videolar: eşleşmiş telefonla PC'ye dosya gönderimi (connectedDevice), PC'den ekran yansıtma (mediaProjection), PC'de web kamerası (camera). |
 | 4.5 | Bildirim erişimi (`NotificationListenerService`) | Bildirimleri seçilen uygulamalar için PC'ye aynalamak. | Özel bir beyan yok; Kullanıcı Verisi politikası gereği açık bilgi ve gizlilik politikasında anlatım. | İzinler ekranında açıklaması var; gizlilik politikası anlatıyor. |
 | 4.6 | Diğer | targetSdk 37 (Play şartı 36+), `QUERY_ALL_PACKAGES` yok (yalnızca başlatıcı uygulamaları için `<queries>`), `BLUETOOTH_SCAN` `neverForLocation` ile (konum için kullanılmıyor), konum izni yok, `USE_FULL_SCREEN_INTENT` yok. | — | Uygun. |
 
@@ -178,7 +178,7 @@ the background.
 **mediaProjection (EN):** Shows the phone's screen on the user's paired PC after the system's screen-capture consent,
 started by the user from the PC.
 
-**camera, microphone (EN):** Uses the phone as the paired PC's webcam (and microphone, if the user turns it on); started
+**camera (EN):** Uses the phone as the paired PC's webcam; started
 by the user with a tap on the phone, with a visible notification while it runs.
 
 ## 5. Data safety

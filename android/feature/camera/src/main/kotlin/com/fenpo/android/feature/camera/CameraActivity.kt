@@ -97,7 +97,6 @@ class CameraActivity : ComponentActivity() {
         val wanted =
             buildList {
                 add(Manifest.permission.CAMERA)
-                if (coordinator.ui.value.settings.microphone) add(Manifest.permission.RECORD_AUDIO)
             }.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
         if (wanted.isEmpty()) startStream() else permissions.launch(wanted.toTypedArray())
     }

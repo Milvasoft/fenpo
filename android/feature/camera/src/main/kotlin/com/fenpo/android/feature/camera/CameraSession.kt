@@ -9,8 +9,6 @@ import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata
 import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult
-import android.hardware.camera2.TotalCaptureResult
 import android.hardware.camera2.params.OutputConfiguration
 import android.hardware.camera2.params.SessionConfiguration
 import android.os.Handler
@@ -25,8 +23,8 @@ import java.util.concurrent.Executor
 /**
  * Camera2 for the webcam (docs/ANDROID.md §10): one capture session feeds the encoder and, while
  * the camera screen is open, its preview. CameraX's `Preview` gives frames to a single surface,
- * which is why this uses Camera2. Zoom uses `CONTROL_ZOOM_RATIO`; "Center" crops around the face
- * the camera detects.
+ * which is why this uses Camera2. Zoom uses `CONTROL_ZOOM_RATIO`. (Centring on the face was
+ * removed: it did not work well enough, Buğra's decision, 18 October.)
  *
  * Frames come in the sensor's orientation; [GlFrameRotator] turns them upright for the PC using
  * [sensorOrientation] and [isFront].
@@ -57,8 +55,6 @@ class CameraSession(
     private var lens = lenses.main
     private var mainMinZoom = 1f
     private var opening: String? = null
-    private var faceCenter: Pair<Float, Float>? = null
-    private var lastCropUpdate = 0L
 
     /** Zoom ratios worth offering for the current camera (design: 0,5 / 1× / 2). */
     var zoomPresets: List<Float> = listOf(1f)
@@ -281,51 +277,10 @@ class CameraSession(
                 previewSurface?.let { addTarget(it) }
                 set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, Range(fps, fps))
                 set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, CameraMetadata.CONTROL_VIDEO_STABILIZATION_MODE_ON)
-                if (settings.center_stage) {
-                    set(CaptureRequest.STATISTICS_FACE_DETECT_MODE, CameraMetadata.STATISTICS_FACE_DETECT_MODE_SIMPLE)
-                    set(CaptureRequest.CONTROL_ZOOM_RATIO, 1f)
-                    set(CaptureRequest.SCALER_CROP_REGION, centerCrop())
-                } else {
-                    set(CaptureRequest.CONTROL_ZOOM_RATIO, effectiveZoom())
-                }
+                set(CaptureRequest.CONTROL_ZOOM_RATIO, effectiveZoom())
             }
-        runCatching { current.setRepeatingRequest(request.build(), FaceTracker(), handler) }
+        runCatching { current.setRepeatingRequest(request.build(), null, handler) }
             .onFailure { Log.w(TAG, "Repeating request failed: ${it.message}") }
-    }
-
-    /** Follows the largest face; the crop moves at most five times a second to stay calm. */
-    private inner class FaceTracker : CameraCaptureSession.CaptureCallback() {
-        override fun onCaptureCompleted(
-            session: CameraCaptureSession,
-            request: CaptureRequest,
-            result: TotalCaptureResult,
-        ) {
-            if (!settings.center_stage) return
-            val face =
-                result.get(CaptureResult.STATISTICS_FACES)?.maxByOrNull { it.bounds.width() * it.bounds.height() }
-                    ?: return
-            val target = face.bounds.exactCenterX() to face.bounds.exactCenterY()
-            val previous = faceCenter ?: target
-            faceCenter =
-                (previous.first + (target.first - previous.first) * SMOOTHING) to
-                (previous.second + (target.second - previous.second) * SMOOTHING)
-            val now = System.currentTimeMillis()
-            if (now - lastCropUpdate >= CROP_INTERVAL_MS) {
-                lastCropUpdate = now
-                repeat()
-            }
-        }
-    }
-
-    /** A crop of the active array around the face, as tight as the zoom setting (at least 1.4×). */
-    private fun centerCrop(): Rect {
-        val zoom = maxOf(settings.zoom, CENTER_MIN_ZOOM) * lens.reach / cropCompensation
-        val width = (activeArray.width() / zoom.coerceAtLeast(1f)).toInt()
-        val height = (activeArray.height() / zoom.coerceAtLeast(1f)).toInt()
-        val (cx, cy) = faceCenter ?: (activeArray.exactCenterX() to activeArray.exactCenterY())
-        val left = (cx - width / 2).toInt().coerceIn(activeArray.left, activeArray.right - width)
-        val top = (cy - height / 2).toInt().coerceIn(activeArray.top, activeArray.bottom - height)
-        return Rect(left, top, left + width, top + height)
     }
 
     private fun closeCamera() {
@@ -333,7 +288,6 @@ class CameraSession(
         session = null
         device?.close()
         device = null
-        faceCenter = null
     }
 
     private fun lensesFor(facing: CameraFacing): Lenses? {
@@ -389,9 +343,6 @@ class CameraSession(
 
     companion object {
         private const val TAG = "FenpoCamera"
-        private const val SMOOTHING = 0.3f
-        private const val CROP_INTERVAL_MS = 200L
-        private const val CENTER_MIN_ZOOM = 1.4f
 
         /** A lens counts as the ultra-wide when it sees at least this much wider than the main one. */
         private const val WIDER_LENS = 1.3f

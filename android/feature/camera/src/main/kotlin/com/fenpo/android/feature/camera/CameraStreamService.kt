@@ -1,6 +1,5 @@
 package com.fenpo.android.feature.camera
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,7 +7,6 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.SystemClock
@@ -18,12 +16,10 @@ import android.view.Surface
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.fenpo.android.core.connection.PcMessenger
-import com.fenpo.android.core.media.AudioCapture
 import com.fenpo.android.core.media.BitrateController
 import com.fenpo.android.core.media.LowLatencyWifi
 import com.fenpo.android.core.media.MediaStreamSender
 import com.fenpo.android.core.media.VideoEncoder
-import com.fenpo.protocol.v1.AudioCodec
 import com.fenpo.protocol.v1.CameraSettings
 import com.fenpo.protocol.v1.CameraState
 import com.fenpo.protocol.v1.MediaStreamOpen
@@ -42,7 +38,7 @@ import javax.inject.Inject
 import com.fenpo.android.core.designsystem.R as DesignR
 
 /**
- * Runs the webcam (docs/ANDROID.md §10): a `camera` (and `microphone`) foreground service, started
+ * Runs the webcam (docs/ANDROID.md §10): a `camera` foreground service, started
  * from the camera screen because Android allows that type only while the app is visible. It keeps
  * streaming after the screen is left or dimmed, until the PC or the user stops it.
  */
@@ -57,7 +53,6 @@ class CameraStreamService :
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var session: CameraSession? = null
     private var encoder: VideoEncoder? = null
-    private var audio: AudioCapture? = null
     private var sender: MediaStreamSender? = null
     private val wifi by lazy { LowLatencyWifi(this) }
     private var rotator: GlFrameRotator? = null
@@ -79,17 +74,13 @@ class CameraStreamService :
         }
         if (started) return START_NOT_STICKY
         started = true
-        val microphone = coordinator.ui.value.settings.microphone && hasMicrophonePermission()
-        val types =
-            ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA or
-                if (microphone) ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE else 0
-        startForeground(NOTIFICATION_ID, notification(), types)
+        startForeground(NOTIFICATION_ID, notification(), ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA)
         coordinator.attach(this)
-        scope.launch { stream(microphone) }
+        scope.launch { stream() }
         return START_NOT_STICKY
     }
 
-    private suspend fun stream(microphone: Boolean) {
+    private suspend fun stream() {
         val request = coordinator.request
         val wanted = request?.video
         val codec = VideoEncoder.choose(request?.accepted?.video.orEmpty())
@@ -97,14 +88,6 @@ class CameraStreamService :
         val height = (wanted?.height?.takeIf { it > 0 } ?: DEFAULT_HEIGHT).coerceAtMost(MAX_HEIGHT)
         val fps = (wanted?.fps?.takeIf { it > 0 } ?: DEFAULT_FPS).coerceAtMost(DEFAULT_FPS)
         val bitrate = BitrateController(TARGET_KBPS, FLOOR_KBPS)
-        val audioCodec =
-            if (microphone) {
-                AudioCapture.choose(
-                    request?.accepted?.audio.orEmpty(),
-                )
-            } else {
-                AudioCodec.AUDIO_CODEC_UNSPECIFIED
-            }
         streamId = UUID.randomUUID().toString()
         val video = VideoFormat(codec = codec, width = width, height = height, fps = fps, bitrate_kbps = TARGET_KBPS)
         format = video
@@ -117,16 +100,6 @@ class CameraStreamService :
                     stream_id = streamId,
                     kind = StreamKind.STREAM_KIND_CAMERA,
                     video = video,
-                    audio = audioCodec,
-                    audio_sample_rate =
-                        if (audioCodec ==
-                            AudioCodec.AUDIO_CODEC_UNSPECIFIED
-                        ) {
-                            0
-                        } else {
-                            AudioCapture.SAMPLE_RATE
-                        },
-                    audio_channels = if (audioCodec == AudioCodec.AUDIO_CODEC_UNSPECIFIED) 0 else AudioCapture.CHANNELS,
                 ),
                 onCongestion = {
                     videoEncoder.setBitrate(bitrate.onDrop(SystemClock.elapsedRealtime()))
@@ -175,10 +148,6 @@ class CameraStreamService :
                     turnUpright()
                 }
             }.also { it.enable() }
-        if (audioCodec != AudioCodec.AUDIO_CODEC_UNSPECIFIED && hasMicrophonePermission()) {
-            @Suppress("MissingPermission")
-            audio = AudioCapture.microphone(audioCodec, mediaSender::offer).also { it.start() }
-        }
         coordinator.report(CameraState.CAMERA_STATE_STARTING, streamId, video, camera)
         scope.launch {
             delay(STREAMING_AFTER_MS)
@@ -235,8 +204,6 @@ class CameraStreamService :
         orientation = null
         sender?.close()
         sender = null
-        audio?.stop()
-        audio = null
         session?.stop()
         session = null
         rotator?.release()
@@ -257,9 +224,6 @@ class CameraStreamService :
         scope.cancel()
         super.onDestroy()
     }
-
-    private fun hasMicrophonePermission() =
-        ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
 
     private fun notification(): Notification {
         val manager = getSystemService(NotificationManager::class.java)

@@ -3,8 +3,6 @@
 
     <!-- Webcam mode (docs/ANDROID.md §10). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application>
         <activity
@@ -17,6 +15,6 @@
         <service
             android:name=".CameraStreamService"
             android:exported="false"
-            android:foregroundServiceType="camera|microphone" />
+            android:foregroundServiceType="camera" />
     </application>
 </manifest>

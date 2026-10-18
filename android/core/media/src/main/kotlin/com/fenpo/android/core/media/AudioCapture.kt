@@ -1,6 +1,5 @@
 package com.fenpo.android.core.media
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.media.AudioAttributes
 import android.media.AudioFormat
@@ -9,10 +8,8 @@ import android.media.AudioRecord
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
-import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.util.Log
-import androidx.annotation.RequiresPermission
 import com.fenpo.protocol.v1.AudioCodec
 import com.fenpo.protocol.v1.StreamPacket
 import com.fenpo.protocol.v1.StreamTrack
@@ -20,7 +17,7 @@ import okio.ByteString.Companion.toByteString
 import kotlin.concurrent.thread
 
 /**
- * Audio for a media connection: the microphone (camera) or the phone's own sound (screen), as
+ * Audio for a media connection: the phone's own sound (screen mirroring), as
  * 48 kHz 16-bit PCM in 20 ms packets, or AAC-LC when the PC prefers it (protocol/README).
  */
 class AudioCapture private constructor(
@@ -114,18 +111,6 @@ class AudioCapture private constructor(
         fun choose(accepted: List<AudioCodec>): AudioCodec =
             accepted.firstOrNull { it == AudioCodec.AUDIO_CODEC_PCM_S16LE || it == AudioCodec.AUDIO_CODEC_AAC }
                 ?: AudioCodec.AUDIO_CODEC_UNSPECIFIED
-
-        /** The microphone, with Android's echo cancellation for calls. */
-        @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-        fun microphone(
-            codec: AudioCodec,
-            onPacket: (StreamPacket) -> Unit,
-        ): AudioCapture =
-            AudioCapture(
-                AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, SAMPLE_RATE, MONO, PCM_16, bufferBytes()),
-                codec,
-                onPacket,
-            )
 
         /** What the phone plays (media, games); apps that forbid capture stay silent. */
         @SuppressLint("MissingPermission") // Checked by the caller before screen capture starts.

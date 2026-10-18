@@ -32,7 +32,7 @@ Bildirimler ve mesajlar
 • İstersen PC'nin bildirimleri de telefonuna gelir.
 
 Kamera ve ekran
-• Telefonunun kamerasını PC'de web kamerası olarak kullan; geniş açı, yakınlaştırma ve yüzünü ortalama ile.
+• Telefonunun kamerasını PC'de web kamerası olarak kullan; ön ya da arka kamera, geniş açı ve yakınlaştırmayla.
 • Telefonunun ekranını PC'de gör ve PC'nin faresi ve klavyesiyle kullan.
 
 Kumanda
