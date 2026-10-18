@@ -81,7 +81,7 @@ without the app too.
 
 ## Gerekli bağlantılar
 
-- Gizlilik politikası: <https://fenpo-website.vercel.app/privacy> (kaynağı `docs/PRIVACY.md`; 1.0.0 GitHub adresiyle
+- Gizlilik politikası: <https://fenpo.milvasoft.com/privacy> (kaynağı `docs/PRIVACY.md`; 1.0.0 GitHub adresiyle
   yayınlandı, bir sonraki gönderimde bu adres girilir)
 - Destek: <https://github.com/Milvasoft/fenpo/issues>
 - Web sitesi: <https://github.com/Milvasoft/fenpo>
