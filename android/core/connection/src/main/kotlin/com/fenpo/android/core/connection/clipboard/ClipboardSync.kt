@@ -14,6 +14,10 @@ import android.util.Patterns
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import com.fenpo.android.core.connection.PcMessenger
 import com.fenpo.android.core.connection.R
 import com.fenpo.android.core.data.settings.SettingsRepository
@@ -56,6 +60,7 @@ class ClipboardSync
         @param:ApplicationContext private val context: Context,
         private val messenger: PcMessenger,
         private val settingsRepository: SettingsRepository,
+        private val dataStore: DataStore<Preferences>,
     ) {
         private val clipboard = context.getSystemService(ClipboardManager::class.java)
         private val sentIds = ArrayDeque<String>()
@@ -101,6 +106,26 @@ class ClipboardSync
         suspend fun requestFromPc(): Boolean =
             messenger.send(Envelope.Body.ClipboardRequest(ClipboardRequest()), Capability.CAPABILITY_CLIPBOARD)
 
+        /**
+         * Sends what the user copied elsewhere since the last item that went either way, when Fenpo
+         * comes to the front (Android lets only the focused app read the clipboard, so this is as
+         * close to automatic as it gets). Leaves out clips marked sensitive and clips older than ten
+         * minutes, and does nothing while sharing is off or the PC is not connected.
+         *
+         * @return [ClipboardSendResult.SENT] when something went, else `null`.
+         */
+        suspend fun sendIfNew(): ClipboardSendResult? {
+            if (!sharingOn() || !messenger.connected) return null
+            val description = clipboard.primaryClipDescription ?: return null
+            val copiedAt = description.timestamp
+            val lastSeen = dataStore.data.first()[LAST_SEEN] ?: 0L
+            if (copiedAt <= lastSeen || System.currentTimeMillis() - copiedAt > AUTO_SEND_WINDOW_MS) return null
+            if (description.extras?.getBoolean(EXTRA_IS_SENSITIVE) == true) return null
+            return sendCurrent().takeIf { it == ClipboardSendResult.SENT }?.also {
+                Log.i(TAG, "Sent what was copied while Fenpo was in the background")
+            }
+        }
+
         /** Reads the clipboard and sends it. Call only while an activity of this app has focus. */
         suspend fun sendCurrent(): ClipboardSendResult {
             if (!sharingOn()) return ClipboardSendResult.TURNED_OFF
@@ -120,6 +145,7 @@ class ClipboardSync
                 return if (image) ClipboardSendResult.TOO_LARGE else ClipboardSendResult.NOT_CONNECTED
             }
             _toPc.value = if (item.sensitive) hidden() else item.content.plainText()?.take(PREVIEW_CHARS)
+            seen(clip.description.timestamp)
             return ClipboardSendResult.SENT
         }
 
@@ -210,10 +236,13 @@ class ClipboardSync
                     PersistableBundle().apply { putBoolean(EXTRA_IS_SENSITIVE, true) }
             }
             clipboard.setPrimaryClip(clip)
+            val setAt = System.currentTimeMillis()
             val preview = if (item.sensitive) hidden() else text?.take(PREVIEW_CHARS)
             _fromPc.value = preview ?: context.getString(R.string.clipboard_image)
             Log.i(TAG, "Clipboard from the PC: ${if (image != null) "image" else "${preview?.length} chars"}")
             notifyReceived(preview)
+            // Not to be sent back when Fenpo comes to the front.
+            seen(setAt)
         }
 
         private suspend fun imageClip(
@@ -277,6 +306,11 @@ class ClipboardSync
                 else -> null
             }
 
+        /** Remembers that the clip copied at [timestamp] went to or came from the PC. */
+        private suspend fun seen(timestamp: Long) {
+            dataStore.edit { it[LAST_SEEN] = maxOf(timestamp, it[LAST_SEEN] ?: 0L) }
+        }
+
         private fun remember(id: String) {
             sentIds.addLast(id)
             while (sentIds.size > SENT_IDS) sentIds.removeFirst()
@@ -294,6 +328,8 @@ class ClipboardSync
             const val CLIPBOARD_FOLDER = "clipboard"
             const val AUTHORITY_SUFFIX = ".files"
             const val BUFFER_BYTES = 16 * 1024
+            const val AUTO_SEND_WINDOW_MS = 10 * 60 * 1000L
+            val LAST_SEEN = longPreferencesKey("clipboard_last_seen")
 
             /** ClipDescription.EXTRA_IS_SENSITIVE, API 33; the key is honoured as a plain string before that. */
             const val EXTRA_IS_SENSITIVE = "android.content.extra.IS_SENSITIVE"

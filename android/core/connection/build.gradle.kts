@@ -11,6 +11,7 @@ dependencies {
     api(project(":core:ble"))
     api(project(":core:data"))
     implementation(project(":core:designsystem"))
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.lifecycle.runtime.ktx)

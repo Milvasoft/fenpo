@@ -53,4 +53,5 @@
     <string name="files_root_summary">Paylaşılan klasörler</string>
     <string name="files_error_offline">Klasörleri görmek için PC’ne Wi‑Fi ile bağlan.</string>
     <string name="files_error_failed">PC yanıt vermedi. Yeniden denemek için aşağı çek.</string>
+    <string name="clipboard_sent_auto">Kopyaladığın PC’ye gönderildi</string>
 </resources>

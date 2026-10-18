@@ -53,4 +53,5 @@
     <string name="files_root_summary">Shared folders</string>
     <string name="files_error_offline">Connect to your PC on Wi‑Fi to see its folders.</string>
     <string name="files_error_failed">The PC did not answer. Pull down to try again.</string>
+    <string name="clipboard_sent_auto">What you copied was sent to your PC</string>
 </resources>

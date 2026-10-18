@@ -3,6 +3,7 @@ package com.fenpo.android.core.connection
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.fenpo.android.core.connection.clipboard.ClipboardSendResult
@@ -18,8 +19,11 @@ import com.fenpo.protocol.v1.LockPc
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
+import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -33,6 +37,11 @@ class FeatureMessagesTest {
     private val messenger = PcMessenger()
     private val sent = mutableListOf<Pair<Envelope.Body, Long>>()
     private val settings = FakeSettings()
+
+    @get:Rule val folder = TemporaryFolder()
+    private val dataStore by lazy {
+        PreferenceDataStoreFactory.create(produceFile = { File(folder.root, "test.preferences_pb") })
+    }
 
     /** A Wi-Fi session whose PC offered [capabilities] in its Hello. */
     private suspend fun connect(vararg capabilities: Capability) {
@@ -61,7 +70,7 @@ class FeatureMessagesTest {
     @Test
     fun textFromThePcGoesToTheClipboard() =
         runTest {
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             val job = launch { sync.run() }
             runCurrent()
             val item = ClipboardItem(item_id = "a", content = ClipboardItem.Content.Text("docker compose up -d"))
@@ -84,7 +93,7 @@ class FeatureMessagesTest {
     fun clipboardRequestIsDeclinedBecauseAndroidForbidsBackgroundReads() =
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             val job = launch { sync.run() }
             runCurrent()
 
@@ -103,7 +112,7 @@ class FeatureMessagesTest {
     @Test
     fun sendsTextAndLinksWithTheirKind() =
         runTest {
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             assertEquals(ClipboardSendResult.NOT_CONNECTED, sync.sendCurrent())
 
             connect(Capability.CAPABILITY_CLIPBOARD)
@@ -127,7 +136,7 @@ class FeatureMessagesTest {
     fun ignoresItsOwnItemComingBack() =
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             clipboard.setPrimaryClip(ClipData.newPlainText("t", "mine"))
             sync.sendCurrent()
             val echoed = assertIs<Envelope.Body.Clipboard>(sent.single().first)
@@ -146,7 +155,7 @@ class FeatureMessagesTest {
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
             settings.update { it.copy(features = it.features.copy(clipboardSharing = false)) }
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             clipboard.setPrimaryClip(ClipData.newPlainText("t", "before"))
             val job = launch { sync.run() }
             runCurrent()
@@ -178,7 +187,7 @@ class FeatureMessagesTest {
     fun sensitiveItemsAreMarkedAndNotPreviewed() =
         runTest {
             connect(Capability.CAPABILITY_CLIPBOARD)
-            val sync = ClipboardSync(context, messenger, settings)
+            val sync = ClipboardSync(context, messenger, settings, dataStore)
             val copied = ClipData.newPlainText("t", "hunter2")
             copied.description.extras =
                 android.os.PersistableBundle().apply { putBoolean("android.content.extra.IS_SENSITIVE", true) }
