@@ -131,6 +131,29 @@ iPhone'da Fenpo uygulaması olmadan çalışan her şey.
 - PC'nin iPhone için klavye ve fare olması (HID over GATT) → yansıtma ile birlikte "iPhone Mirroring"
 - Üçüncü taraf programlar için yerel API ve `Fenpo.Sdk` (Kabuk modülü planda yok; Buğra 17 Ekim'de istemedi)
 
+### Sıradaki: hızlı işlem widget'ları (iPhone ve Android)
+
+Buğra'nın isteği (21 Ekim 2026), mağaza sürümlerinden sonra yapılacak. Ana ekrana Fenpo widget'ı: uygulamayı açmadan
+dokunarak çalışan düğmeler. Öncelik pano.
+
+- **Panoyu gönder:** telefonun panosu PC'ye gider. Uygulama açılmadan, widget'a tek dokunuşla.
+- **Panoyu al:** PC'nin panosu telefonun panosuna gelir. Uygulama açılmadan.
+- **Dosya gönder:** dosya ya da fotoğraf seçip PC'ye gönderme. Seçici açılması kaçınılmaz; amaç uygulamanın ana
+  ekranına girmeden seçiciye düşmek.
+- **Dosya al:** PC'den son gelen dosyayı açma ya da PC'den "telefona gönder" bekleyenleri alma.
+- Widget, bağlı PC'nin adını ve bağlantı durumunu da gösterir; iki tema, iki dil.
+
+Önce araştırılacaklar (RESEARCH.md'ye işlenecek):
+
+- **iPhone:** etkileşimli widget (`Button(intent:)`, iOS 17+) App Intent'i uygulamayı açmadan çalıştırır. Ama arka
+  planda `UIPasteboard` okumak iOS'un yapıştırma iznini tetikler ya da engellenir; widget'tan panoyu okuyup
+  gönderebilmek denenmeli, olmazsa düğme `openAppWhenRun` ile yarım saniyelik açılışa düşer. Panoyu yazmak ("al")
+  arka planda mümkün olmalı; BLE ya da Wi‑Fi kanalının intent süresi içinde açılması gerekiyor. `FenpoWidgets`
+  (StatusWidget, ClipboardControls) mevcut; yeni widget oraya eklenir.
+- **Android:** Glance widget'ı ve `actionRunCallback`. Android 10+ arka planda panoyu okumayı engeller; okumak için
+  odak alan, görünmez bir etkinlik gerekiyor (KDE Connect'in yolu). Yazmak serbest.
+- **Protokol:** mevcut `ClipboardItem` ve dosya aktarımı yeterli; yeni mesaj beklenmiyor.
+
 ## Kapsam dışı
 
 - macOS ve Linux
