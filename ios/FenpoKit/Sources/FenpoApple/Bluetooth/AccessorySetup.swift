@@ -25,7 +25,6 @@ public final class AccessorySetup {
     private var pickerContinuation: CheckedContinuation<ASAccessory, Swift.Error>?
     /// PC names whose name-filtered picker was closed without a PC: the next picker for them lists
     /// every Fenpo PC, in case the PC's Bluetooth name does not contain its pairing name.
-    private var unfilteredNames: Set<String> = []
     private let log = FenpoLog("AccessorySetup")
 
     /// Accessories this app has added.
@@ -49,9 +48,11 @@ public final class AccessorySetup {
     }
 
     /// Shows the system picker for nearby Fenpo PCs and returns the one the user added. Every Fenpo
-    /// PC advertises the same service, so the picker only lists PCs whose Bluetooth name contains
-    /// the pairing name (S4); if the user closes it without a PC, the next try lists them all and
-    /// `BLECentral` turns away another PC by its name before bonding.
+    /// PC advertises the same service, so the picker can list another Fenpo PC nearby; `BLECentral`
+    /// turns that one away by its name before bonding. The picker is not narrowed with
+    /// `bluetoothNameSubstring`: AccessorySetupKit stops the app (FatalError in
+    /// `_validateDiscoveryDescriptor`) for a name that is not listed in Info.plist's
+    /// `NSAccessorySetupBluetoothNames`, and a PC's name is only known at pairing (build 94).
     /// - Parameters:
     ///   - name: PC name from pairing, shown in the picker.
     ///   - image: Picture shown in the picker.
@@ -61,18 +62,9 @@ public final class AccessorySetup {
         }
         let descriptor = ASDiscoveryDescriptor()
         descriptor.bluetoothServiceUUID = CBUUID(string: BLEChannelIdentifiers.service)
-        let filtered = !unfilteredNames.contains(name)
-        if filtered {
-            descriptor.bluetoothNameSubstring = name
-        }
         let item = ASPickerDisplayItem(name: name, productImage: image, descriptor: descriptor)
-        log.info("Showing the accessory picker\(filtered ? " for the PC's name" : " for every Fenpo PC")")
-        do {
-            return try await showPicker(for: item)
-        } catch Error.cancelled where filtered {
-            unfilteredNames.insert(name)
-            throw Error.cancelled
-        }
+        log.info("Showing the accessory picker")
+        return try await showPicker(for: item)
     }
 
     private func showPicker(for item: ASPickerDisplayItem) async throws -> ASAccessory {
