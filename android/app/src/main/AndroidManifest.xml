@@ -17,10 +17,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- SMS for phones without Bluetooth MAP (§5, §7). -->
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
+    <!-- No SMS permissions: Google Play rejected 1.0.1 because it could not verify the SMS use (22 October).
+         Messages reach the PC over Bluetooth MAP; SmsBridge stays for a later, separately declared release. -->
 
     <uses-feature
         android:name="android.hardware.camera"

@@ -28,12 +28,14 @@ Clipboard
 Notifications and messages
 • Your phone's notifications appear on the PC; reply to messages and dismiss notifications there.
 • You choose which apps send notifications.
-• Read and reply to your text messages on the PC.
+• Read and reply to your text messages on the PC, over Bluetooth.
 • Your PC's notifications can come to the phone too.
 
 Camera and screen
 • Use your phone's camera as the PC's webcam: front or back camera, ultra-wide and zoom.
 • See your phone's screen on the PC and use it with the PC's mouse and keyboard.
+
+Control from the PC uses Android's AccessibilityService API. Only while you share your screen with your PC, Fenpo performs on the phone the taps, swipes and typing you make on the PC. It does not read the screen for any other purpose and sends nothing anywhere but your own PC. You turn it on yourself, after Fenpo explains it, in Settings › Control from the PC, and you can turn it off there at any time.
 
 Remote
 • The phone becomes the PC's touchpad and keyboard.

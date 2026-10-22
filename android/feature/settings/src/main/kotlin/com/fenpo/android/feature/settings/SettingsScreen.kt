@@ -61,6 +61,7 @@ fun SettingsRoute(
     onOpenNotificationApps: () -> Unit,
     modifier: Modifier = Modifier,
     onOpenHotspot: () -> Unit = {},
+    onOpenPcControl: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val stored by viewModel.uiState.collectAsStateWithLifecycle()
@@ -126,6 +127,7 @@ fun SettingsRoute(
             }
         },
         onOpenHotspot = onOpenHotspot,
+        onOpenPcControl = onOpenPcControl,
         onOpenPermissions = onOpenPermissions,
         onOpenNotificationApps = onOpenNotificationApps,
         modifier = modifier,
@@ -150,6 +152,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     onOpenNotificationApps: () -> Unit = {},
     onOpenHotspot: () -> Unit = {},
+    onOpenPcControl: () -> Unit = {},
     showLanguageDialog: Boolean = false,
 ) {
     var languageDialog by rememberSaveable { mutableStateOf(showLanguageDialog) }
@@ -251,6 +254,14 @@ fun SettingsScreen(
             supporting = state.hotspotName ?: stringResource(R.string.hotspot_not_set_up),
             leading = { LeadingIcon(FenpoIcons.Hotspot) },
             modifier = Modifier.clickable(onClick = onOpenHotspot),
+        )
+        // Control from the PC uses an accessibility service; its prominent disclosure opens from here as well as from
+        // a PC's screen request, so it can be read without a PC (Google Play rejected 1.0.1 for not finding it).
+        FenpoListRow(
+            title = stringResource(R.string.pc_control_row),
+            supporting = stringResource(R.string.pc_control_summary),
+            leading = { LeadingIcon(FenpoIcons.Pc) },
+            modifier = Modifier.clickable(onClick = onOpenPcControl),
         )
 
         SectionLabel(stringResource(R.string.section_permissions))

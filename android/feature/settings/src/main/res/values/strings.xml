@@ -18,7 +18,7 @@
     <string name="section_features">Features</string>
     <string name="feature_notifications">Send notifications to PC</string>
     <string name="feature_messages">Sync messages</string>
-    <string name="feature_messages_summary">Read and reply to SMS on your PC</string>
+    <string name="feature_messages_summary">Your PC reads and sends your texts over Bluetooth</string>
     <string name="feature_clipboard">Clipboard sharing</string>
     <string name="feature_screenshots">Send screenshots</string>
     <string name="feature_dnd">Sync Do Not Disturb</string>
@@ -56,4 +56,6 @@
     <string name="hotspot_save">Save</string>
     <string name="hotspot_remove">Remove</string>
     <string name="hotspot_note">Android does not let apps read the hotspot’s name and password. Type them here once: they are kept encrypted on this phone and go only to your PC. When the PC wants to join, a notification opens the hotspot settings.</string>
+    <string name="pc_control_row">Control from the PC</string>
+    <string name="pc_control_summary">While you share this screen, your PC can tap, swipe and type on this phone</string>
 </resources>

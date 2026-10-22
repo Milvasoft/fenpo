@@ -69,8 +69,8 @@ enum class AppPermission {
             }
 
     companion object {
-        /** Permissions the Permissions screen lists. */
-        val shown: List<AppPermission> = entries
+        /** Permissions the Permissions screen lists. SMS is not declared in this release (no SMS permissions in the manifest). */
+        val shown: List<AppPermission> = entries.filterNot { it == SMS }
 
         private const val ANDROID_13 = 33
         private const val ANDROID_17 = 37

@@ -33,6 +33,7 @@ import com.fenpo.android.feature.home.HomeKey
 import com.fenpo.android.feature.home.HomeRoute
 import com.fenpo.android.feature.home.PcKey
 import com.fenpo.android.feature.home.PcRoute
+import com.fenpo.android.feature.mirror.MirrorControlDisclosureActivity
 import com.fenpo.android.feature.pairing.PairingStepsKey
 import com.fenpo.android.feature.pairing.PairingStepsRoute
 import com.fenpo.android.feature.pairing.PermissionsKey
@@ -139,6 +140,11 @@ fun FenpoApp(modifier: Modifier = Modifier) {
                                 onOpenPermissions = { backStack.add(PermissionsKey) },
                                 onOpenNotificationApps = { backStack.add(NotificationAppsKey) },
                                 onOpenHotspot = { backStack.add(HotspotKey) },
+                                onOpenPcControl = {
+                                    context.startActivity(
+                                        MirrorControlDisclosureActivity.intent(context),
+                                    )
+                                },
                             )
                         }
                     }

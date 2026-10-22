@@ -18,8 +18,8 @@ android {
     defaultConfig {
         applicationId = "com.fenpo.android"
         // Every upload to Play needs a higher versionCode.
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
 
     signingConfigs {

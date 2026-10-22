@@ -16,7 +16,7 @@
     <string name="section_features">Özellikler</string>
     <string name="feature_notifications">Bildirimleri PC’ye gönder</string>
     <string name="feature_messages">Mesajları eşitle</string>
-    <string name="feature_messages_summary">SMS’ler PC’de okunur ve yanıtlanır</string>
+    <string name="feature_messages_summary">PC mesajlarını Bluetooth üzerinden okur ve gönderir</string>
     <string name="feature_clipboard">Pano paylaşımı</string>
     <string name="feature_screenshots">Ekran görüntülerini gönder</string>
     <string name="feature_dnd">Rahatsız etmeyin’i eşitle</string>
@@ -54,4 +54,6 @@
     <string name="hotspot_save">Kaydet</string>
     <string name="hotspot_remove">Kaldır</string>
     <string name="hotspot_note">Android, uygulamaların hotspot adını ve şifresini okumasına izin vermiyor. Bir kez buraya yaz: bu telefonda şifreli saklanır ve sadece PC’ne gider. PC bağlanmak isteyince hotspot ayarlarını açan bir bildirim gelir.</string>
+    <string name="pc_control_row">PC’den kontrol</string>
+    <string name="pc_control_summary">Ekranı paylaşırken PC bu telefonda dokunabilir, kaydırabilir ve yazabilir</string>
 </resources>

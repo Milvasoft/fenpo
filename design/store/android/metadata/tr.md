@@ -28,12 +28,14 @@ Pano
 Bildirimler ve mesajlar
 • Telefonunun bildirimleri PC'de görünür; mesajları PC'den yanıtla, bildirimleri kapat.
 • Hangi uygulamaların bildirim göndereceğini sen seçersin.
-• SMS'lerini PC'de oku ve yanıtla.
+• SMS'lerini Bluetooth üzerinden PC'de oku ve yanıtla.
 • İstersen PC'nin bildirimleri de telefonuna gelir.
 
 Kamera ve ekran
 • Telefonunun kamerasını PC'de web kamerası olarak kullan; ön ya da arka kamera, geniş açı ve yakınlaştırmayla.
 • Telefonunun ekranını PC'de gör ve PC'nin faresi ve klavyesiyle kullan.
+
+PC'den kontrol, Android'in AccessibilityService API'sini kullanır. Yalnızca ekranını PC'nle paylaşırken, PC'de yaptığın dokunma, kaydırma ve yazmaları Fenpo telefonda uygular. Ekranı başka hiçbir amaçla okumaz ve kendi PC'n dışında hiçbir yere bir şey göndermez. Fenpo açıkladıktan sonra Ayarlar › PC'den kontrol bölümünden kendin açarsın ve istediğin zaman oradan kapatabilirsin.
 
 Kumanda
 • Telefonun PC'nin dokunmatik yüzeyi ve klavyesi olur.
