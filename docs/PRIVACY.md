@@ -1,6 +1,6 @@
 # Fenpo Privacy Policy / Gizlilik Politikası
 
-Last updated / Son güncelleme: 17 October 2026
+Last updated / Son güncelleme: 22 October 2026
 
 Published at / Yayınlandığı yer: <https://fenpo.milvasoft.com/privacy>. This file is its source; the two are
 updated together. / Bu dosya o sayfanın kaynağıdır; ikisi birlikte güncellenir.
@@ -34,7 +34,7 @@ Pairing uses a QR code shown on your PC; the keys it creates never leave your de
 ### Permissions
 
 Fenpo asks for permissions such as Bluetooth, local network, notifications, camera, photos and screen recording
-and, on Android, microphone, SMS (only on phones without Bluetooth message access), notification access and an
+and, on Android, microphone, notification access and an
 accessibility service. Each one is used only for the feature you turn on, and only to exchange data with your paired
 PC. You can turn any of them off in your phone's or PC's settings.
 
@@ -88,8 +88,7 @@ Eşleşme bilgisayarında gösterilen bir QR koduyla yapılır; oluşan anahtarl
 
 ### İzinler
 
-Fenpo Bluetooth, yerel ağ, bildirimler, kamera, fotoğraflar ve ekran kaydı, Android'de ise mikrofon, SMS (yalnızca
-Bluetooth ile mesaj erişimi olmayan telefonlarda), bildirim erişimi ve erişilebilirlik hizmeti gibi izinler ister. Her
+Fenpo Bluetooth, yerel ağ, bildirimler, kamera, fotoğraflar ve ekran kaydı, Android'de ise mikrofon, bildirim erişimi ve erişilebilirlik hizmeti gibi izinler ister. Her
 biri yalnızca açtığın özellik için ve yalnızca eşleştirdiğin bilgisayarla veri alışverişi için kullanılır. Hepsini
 telefonunun ya da bilgisayarının ayarlarından kapatabilirsin.
 
