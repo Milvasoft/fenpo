@@ -51,10 +51,16 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
     public event EventHandler<bool>? ConnectionChanged;
 
     /// <summary>
-    /// Raised when the link looks like a broken bond: it connects and drops again within seconds, repeatedly (S1), or
-    /// it cannot be encrypted. Windows stops reconnecting by itself from then on.
+    /// Raised when the phone refuses to encrypt the link with this PC's bond: it has no bond for this PC any more.
+    /// Windows stops reconnecting by itself from then on.
     /// </summary>
     public event EventHandler? BrokenBondDetected;
+
+    /// <summary>
+    /// Raised when the link connects and drops again within seconds, repeatedly (S1). That is how a broken bond looks,
+    /// but also how a phone at the edge of Bluetooth range looks (21 October), so the link keeps reconnecting.
+    /// </summary>
+    public event EventHandler? UnstableLinkDetected;
 
     /// <summary>
     /// Gets the phone's name.
@@ -176,7 +182,8 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
             _shortConnections.Clear();
         }
 
-        ReportBrokenBond("it keeps dropping right after connecting");
+        _logger.LogWarning("{Name} keeps dropping right after connecting: out of range, or a broken bond", Name);
+        UnstableLinkDetected?.Invoke(this, EventArgs.Empty);
     }
 
     // A phone without this PC's bond asks its user to pair whenever the link tries to encrypt, for example a phone that
@@ -192,6 +199,17 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
         }
 
         BrokenBondDetected?.Invoke(this, EventArgs.Empty);
+    }
+
+    // Only the phone's own answer counts: an attribute error for missing authentication or encryption. A read that is
+    // merely unreachable (the phone walked away mid-read) says nothing about the bond.
+    private static bool RefusedEncryption(GattReadResult read)
+    {
+        return read.Status == GattCommunicationStatus.ProtocolError
+            && read.ProtocolError is { } error
+            && (error == GattProtocolError.InsufficientAuthentication
+                || error == GattProtocolError.InsufficientEncryption
+                || error == GattProtocolError.InsufficientEncryptionKeySize);
     }
 
     private void TrackEncryption(bool failed)
@@ -286,13 +304,15 @@ public sealed class IphoneLink(ILogger<IphoneLink> logger) : IAsyncDisposable
 
                 if (!services.ContainsKey(GattUuids.Ancs) && attempt < 3 && services.TryGetValue(GattUuids.Battery, out var battery) && await battery.GetCharacteristicAsync(GattUuids.BatteryLevel) is { } level)
                 {
-                    if (await level.ReadAsync() is not null)
+                    var read = await level.ReadValueAsync(BluetoothCacheMode.Uncached).AsTask(cancellationToken);
+
+                    if (!RefusedEncryption(read))
                     {
                         await Task.Delay(TimeSpan.FromSeconds(2), cancellationToken);
                         continue;
                     }
 
-                    _logger.LogInformation("Discovery ({Reason}): reading the battery level failed, the link is not encrypted", reason);
+                    _logger.LogInformation("Discovery ({Reason}): the phone refused to encrypt ({Status} 0x{Error:X2})", reason, read.Status, read.ProtocolError);
                     unencrypted = true;
                 }
 

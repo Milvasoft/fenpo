@@ -85,6 +85,7 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
         });
         _link.ServicesReady += (sender, services) => _ = ReadServicesAsync(services);
         _link.BrokenBondDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
+        _link.UnstableLinkDetected += (_, _) => Update(s => s with { State = PhoneConnectionState.BrokenBond });
         _ancs.AvailabilityChanged += (_, available) => Update(s => s with { NotificationsAvailable = available, NotificationsRefused = !available && s.NotificationsRefused });
         _ancs.RefusedChanged += (_, refused) => Update(s => s with { NotificationsRefused = refused });
 
@@ -174,7 +175,8 @@ public sealed class PhoneStatusTracker(IphoneLink link, AncsClient ancs, ISettin
 
     private async Task ReadServicesAsync(LinkServices services)
     {
-        Update(s => s with { State = PhoneConnectionState.Connected, BluetoothConnected = true, Name = _link.Name });
+        // The name from the locator (the classic record's, as the user named the phone) wins over the LE record's "iPhone".
+        Update(s => s with { State = PhoneConnectionState.Connected, BluetoothConnected = true, Name = string.IsNullOrEmpty(s.Name) ? _link.Name : s.Name });
 
         try
         {

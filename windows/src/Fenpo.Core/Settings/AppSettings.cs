@@ -121,7 +121,8 @@ public sealed record AppSettings
 
     /// <summary>
     /// Gets the Bluetooth LE ids of paired iPhones that no longer have this PC's bond. Connecting to one makes it ask its
-    /// user to pair again every time, so Fenpo leaves it alone until Windows forgets it or it is forgotten in Fenpo.
+    /// user to pair again every time, so Fenpo leaves it alone for the rest of the run, until Windows forgets it, it is
+    /// forgotten in Fenpo, or its Fenpo app says hello over an encrypted channel.
     /// </summary>
     public IReadOnlyList<string> BrokenPhoneIds { get; init; } = [];
 

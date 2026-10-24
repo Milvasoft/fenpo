@@ -106,6 +106,14 @@ public sealed class BluetoothHostedService(
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // A broken mark lasts one run: a phone that really lost the bond refuses encryption again within a minute, and a
+        // wrong mark (1.0.2 set them on a phone at the edge of range) does not keep the iPhone away for good.
+        if (_settings.Current.BrokenPhoneIds.Count > 0)
+        {
+            _logger.LogInformation("Trying {Count} iPhone(s) marked with a broken bond again", _settings.Current.BrokenPhoneIds.Count);
+            _settings.Update(s => s with { BrokenPhoneIds = [] });
+        }
+
         _ancs.Attach();
         _ams.Attach();
         _messages.Attach();
@@ -114,6 +122,7 @@ public sealed class BluetoothHostedService(
         // The Fenpo service is advertised all the time so the iPhone app can find and wake for this PC (S4).
         await _channel.StartAsync();
         _channel.AndroidPhoneSeen += (sender, id) => OnAndroidPhoneSeen(id);
+        _channel.IphoneSeen += (sender, id) => OnIphoneSeen(id);
         _link.ServicesReady += (sender, services) => OnServicesReady(services);
         _link.BrokenBondDetected += (sender, args) => OnBrokenBond();
         _status.ActiveChanged += (sender, kind) => _ = UseMessagesOfAsync(kind);
@@ -238,6 +247,19 @@ public sealed class BluetoothHostedService(
         }
 
         return stillPaired;
+    }
+
+    // The iPhone's Fenpo app said hello over an encrypted channel, so its bond with this PC works: a broken mark on it
+    // was wrong (1.0.2 set one on a phone at the edge of range) and the search picks it up again.
+    private void OnIphoneSeen(string leDeviceId)
+    {
+        if (!_settings.Current.BrokenPhoneIds.Contains(leDeviceId, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        _logger.LogInformation("The iPhone's Fenpo channel works; {Id} no longer counts as a broken bond", leDeviceId);
+        _settings.Update(s => s with { BrokenPhoneIds = [.. s.BrokenPhoneIds.Where(id => !string.Equals(id, leDeviceId, StringComparison.OrdinalIgnoreCase))] });
     }
 
     private void OnAndroidPhoneSeen(string leDeviceId)

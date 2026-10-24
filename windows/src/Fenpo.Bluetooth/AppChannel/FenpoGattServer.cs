@@ -62,6 +62,12 @@ public sealed class FenpoGattServer(
     public event EventHandler<string>? AndroidPhoneSeen;
 
     /// <summary>
+    /// Raised with the Bluetooth LE id of a phone that said Hello as iOS. Its channel is encrypted with the bond, so the
+    /// bond works.
+    /// </summary>
+    public event EventHandler<string>? IphoneSeen;
+
+    /// <summary>
     /// Raised for messages from the phone app that the channel does not answer itself.
     /// </summary>
     public event EventHandler<(PairedAppDevice Device, Envelope Envelope)>? MessageReceived;
@@ -299,6 +305,10 @@ public sealed class FenpoGattServer(
             if (hello.Platform == DevicePlatform.Android)
             {
                 AndroidPhoneSeen?.Invoke(this, id);
+            }
+            else if (hello.Platform == DevicePlatform.Ios)
+            {
+                IphoneSeen?.Invoke(this, id);
             }
 
             if (session.Device is { } device)

@@ -67,9 +67,11 @@ public sealed class PairedPhoneLocator(ILogger<PairedPhoneLocator> logger)
             return null;
         }
 
+        // The LE record keeps "iPhone"; the classic record has the name the user gave the phone ("bugiphone").
         var classic = ClassicOf(chosen, classicDevices);
-        _logger.LogInformation("Using {Name} (classic record {Classic})", chosen.Name, classic is null ? "missing" : "present");
-        return new PairedPhone(chosen.Id, classic?.Id, chosen.Name);
+        var name = string.IsNullOrWhiteSpace(classic?.Name) ? chosen.Name : classic.Name;
+        _logger.LogInformation("Using {Name} (classic record {Classic})", name, classic is null ? "missing" : "present");
+        return new PairedPhone(chosen.Id, classic?.Id, name);
     }
 
     private static bool IsIphone(DeviceInformation le, IReadOnlyList<DeviceInformation> classicDevices)
