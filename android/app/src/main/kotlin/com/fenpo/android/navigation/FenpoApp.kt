@@ -1,5 +1,8 @@
 package com.fenpo.android.navigation
 
+import android.content.Context
+import android.content.Intent
+import android.provider.Settings
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
@@ -15,6 +18,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -33,6 +41,7 @@ import com.fenpo.android.feature.home.HomeKey
 import com.fenpo.android.feature.home.HomeRoute
 import com.fenpo.android.feature.home.PcKey
 import com.fenpo.android.feature.home.PcRoute
+import com.fenpo.android.feature.mirror.ControlDisclosureDialog
 import com.fenpo.android.feature.mirror.MirrorControlDisclosureActivity
 import com.fenpo.android.feature.pairing.PairingStepsKey
 import com.fenpo.android.feature.pairing.PairingStepsRoute
@@ -81,6 +90,24 @@ fun FenpoApp(modifier: Modifier = Modifier) {
     val current = backStack.lastOrNull()
     val showNavigationBar = topLevelDestinations.any { it.key == current }
     val pop: () -> Unit = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
+
+    // Google Play wants the accessibility disclosure in the app's normal flow, not only behind Settings (rejected on
+    // 22 and 25 October), so it is shown once when Fenpo first opens; Settings › Control from the PC shows it again.
+    val prefs = remember(context) { context.getSharedPreferences(DISCLOSURE_PREFS, Context.MODE_PRIVATE) }
+    var showDisclosure by rememberSaveable { mutableStateOf(!prefs.getBoolean(DISCLOSURE_SHOWN, false)) }
+    if (showDisclosure) {
+        val done = {
+            prefs.edit().putBoolean(DISCLOSURE_SHOWN, true).apply()
+            showDisclosure = false
+        }
+        ControlDisclosureDialog(
+            onAccept = {
+                done()
+                context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            },
+            onDecline = done,
+        )
+    }
 
     Scaffold(
         modifier = modifier,
@@ -199,6 +226,9 @@ private fun Inset(
     val base = Modifier.fillMaxSize().statusBarsPadding()
     Box(if (bottom) base.navigationBarsPadding() else base) { content() }
 }
+
+private const val DISCLOSURE_PREFS = "fenpo_disclosures"
+private const val DISCLOSURE_SHOWN = "pc_control_disclosure_shown"
 
 /** Switches tabs: Home stays at the root, the chosen tab goes on top of it. */
 private fun NavBackStack<NavKey>.selectTab(key: NavKey) {

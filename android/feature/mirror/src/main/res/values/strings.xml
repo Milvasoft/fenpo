@@ -13,7 +13,7 @@
     <string name="mirror_accessibility_description">Lets your PC tap, swipe and type on this phone while you share its screen with Fenpo. It does nothing at other times.</string>
     <string name="mirror_accessibility_label">Fenpo: control from the PC</string>
     <string name="mirror_disclosure_title">Control your phone from the PC</string>
-    <string name="mirror_disclosure_what">Fenpo uses Android’s accessibility service so that, while you share this phone’s screen with your PC, the taps, swipes and typing you make on the PC happen on the phone. It finds the field you are typing into on the screen for that.</string>
+    <string name="mirror_disclosure_what">Fenpo uses Android’s AccessibilityService API (accessibility service) so that, while you share this phone’s screen with your PC, the taps, swipes and typing you make on the PC happen on the phone. It finds the field you are typing into on the screen for that.</string>
     <string name="mirror_disclosure_data">It works only while you are sharing the screen. It does not read or keep your screen for anything else, and sends nothing to anyone but your own PC.</string>
     <string name="mirror_disclosure_how">Next, turn on “Fenpo: control from the PC” in Accessibility. You can turn it off there at any time.</string>
     <string name="mirror_disclosure_accept">Agree and open settings</string>
