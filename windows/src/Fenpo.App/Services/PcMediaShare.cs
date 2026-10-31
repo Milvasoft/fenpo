@@ -23,20 +23,11 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
     private string _ownId = string.Empty;
 
     /// <inheritdoc/>
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            _ownId = Windows.ApplicationModel.AppInfo.Current.AppUserModelId;
-            _manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
-            _manager.SessionsChanged += (sender, e) => Follow();
-            _manager.CurrentSessionChanged += (sender, e) => Follow();
-            Follow();
-        }
-        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
-        {
-            _logger.LogWarning(exception, "The PC's media sessions are not available");
-        }
+        // Windows' media session manager sometimes never answers; awaited here it held up the whole start, so the main
+        // window never appeared (31 October). It is attached in the background instead.
+        _ = AttachSessionsAsync();
 
         _channel.HelloReceived += (sender, hello) =>
         {
@@ -52,10 +43,34 @@ public sealed class PcMediaShare(PhoneChannel channel, ILogger<PcMediaShare> log
                 _ = RunAsync(message);
             }
         };
+        return Task.CompletedTask;
     }
 
     /// <inheritdoc/>
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    private async Task AttachSessionsAsync()
+    {
+        try
+        {
+            _ownId = Windows.ApplicationModel.AppInfo.Current.AppUserModelId;
+            var request = GlobalSystemMediaTransportControlsSessionManager.RequestAsync().AsTask();
+
+            if (await Task.WhenAny(request, Task.Delay(TimeSpan.FromSeconds(10))) != request)
+            {
+                _logger.LogWarning("Windows' media session manager has not answered within 10 seconds; still waiting");
+            }
+
+            _manager = await request;
+            _manager.SessionsChanged += (sender, e) => Follow();
+            _manager.CurrentSessionChanged += (sender, e) => Follow();
+            Follow();
+        }
+        catch (Exception exception) when (exception is System.Runtime.InteropServices.COMException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(exception, "The PC's media sessions are not available");
+        }
+    }
 
     // The session that plays, else the current one; never Fenpo's own.
     private GlobalSystemMediaTransportControlsSession? Pick()
