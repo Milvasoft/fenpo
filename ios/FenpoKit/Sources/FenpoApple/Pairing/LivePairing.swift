@@ -124,10 +124,14 @@ public final class LivePairing: PairingProviding {
         }
 
         let name = result.pcName.isEmpty ? code.pcName : result.pcName
-        try store.save(
-            PairedPCRecord(pcID: code.pcID, name: name, certificateSHA256: code.certificateSHA256, endpoints: code.endpoints.map(\.description)),
-            bleChannelKey: Array(result.bleChannelKey)
-        )
+        // Pairing the same PC again keeps its Bluetooth accessory: AccessorySetupKit does not list an accessory the
+        // app already has, so the picker would come up empty and the channel would stay without its key (31 October).
+        let previous = store.load()
+        var record = PairedPCRecord(pcID: code.pcID, name: name, certificateSHA256: code.certificateSHA256, endpoints: code.endpoints.map(\.description))
+        if let previous, previous.pcID == code.pcID, previous.bluetoothReachedAnotherPC != true {
+            record.bluetoothIdentifier = previous.bluetoothIdentifier
+        }
+        try store.save(record, bleChannelKey: Array(result.bleChannelKey))
         log.info("Paired with \(name)")
 
         // S5: the pairing connection continues as a normal session with Hello.
@@ -150,11 +154,7 @@ public final class LivePairing: PairingProviding {
         guard let record = store.load() else {
             throw Error.notPaired
         }
-        let image = UIImage(systemName: "laptopcomputer") ?? UIImage()
-        let accessory = try await accessories.pickPC(named: record.name, image: image)
-        guard let identifier = accessory.bluetoothIdentifier else {
-            throw AccessorySetup.Error.missingBluetoothIdentifier
-        }
+        let identifier = try await bluetoothIdentifier(for: record)
 
         var updated = record
         updated.bluetoothIdentifier = identifier
@@ -166,6 +166,27 @@ public final class LivePairing: PairingProviding {
         let central = central
         try await withTimeout(.seconds(120)) {
             try await central.waitUntilReady()
+        }
+    }
+
+    // The PC's accessory: the one this record already has, else the one the user picks. When the picker closes
+    // without a new accessory and the app has exactly one, that one is the PC (it is never listed again).
+    private func bluetoothIdentifier(for record: PairedPCRecord) async throws -> UUID {
+        let added = accessories.accessories.compactMap(\.bluetoothIdentifier)
+        if let identifier = record.bluetoothIdentifier, added.contains(identifier) {
+            log.info("Using the PC's Bluetooth accessory from before")
+            return identifier
+        }
+        let image = UIImage(systemName: "laptopcomputer") ?? UIImage()
+        do {
+            let accessory = try await accessories.pickPC(named: record.name, image: image)
+            guard let identifier = accessory.bluetoothIdentifier else {
+                throw AccessorySetup.Error.missingBluetoothIdentifier
+            }
+            return identifier
+        } catch AccessorySetup.Error.cancelled where added.count == 1 {
+            log.info("Picker closed; using the one Bluetooth accessory already added")
+            return added[0]
         }
     }
 
