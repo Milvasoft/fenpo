@@ -15,6 +15,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Program.cs keeps a single instance before XAML starts. -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+    <!-- Fenpo is an MSIX package that declares its Windows App Runtime dependency, so it does not need the deployment
+         manager's start-up check. That check crashed every start (REGDB_E_CLASSNOTREG for DeploymentInitializeOptions)
+         once Windows App Runtime 2.6 arrived on the PC (31 October): the framework resolves to the newest 2.x. -->
+    <WindowsAppSdkDeploymentManagerInitialize>false</WindowsAppSdkDeploymentManagerInitialize>
   </PropertyGroup>
 
   <ItemGroup>
