@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
@@ -20,6 +21,14 @@ public static class Program
     [STAThread]
     private static int Main()
     {
+        // Started as a plain exe (a search result or Explorer pointing at Fenpo.exe) there is no package identity, and
+        // every Windows App SDK class fails with REGDB_E_CLASSNOTREG. Start the package through its alias instead.
+        if (!NativeMethods.HasPackageIdentity())
+        {
+            RelaunchAsPackage();
+            return 0;
+        }
+
         WinRT.ComWrappersSupport.InitializeComWrappers();
 
         if (RedirectedToRunningInstance())
@@ -43,6 +52,25 @@ public static class Program
         });
 
         return 0;
+    }
+
+    private static void RelaunchAsPackage()
+    {
+        var alias = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Microsoft", "WindowsApps", "fenpo.exe");
+
+        if (!File.Exists(alias))
+        {
+            return;
+        }
+
+        var start = new ProcessStartInfo(alias) { UseShellExecute = false };
+
+        foreach (var argument in Environment.GetCommandLineArgs().Skip(1))
+        {
+            start.ArgumentList.Add(argument);
+        }
+
+        Process.Start(start)?.Dispose();
     }
 
     private static bool RedirectedToRunningInstance()

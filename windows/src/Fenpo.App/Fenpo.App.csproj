@@ -16,8 +16,8 @@
     <!-- Program.cs keeps a single instance before XAML starts. -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
     <!-- Fenpo is an MSIX package that declares its Windows App Runtime dependency, so it does not need the deployment
-         manager's start-up check. That check crashed every start (REGDB_E_CLASSNOTREG for DeploymentInitializeOptions)
-         once Windows App Runtime 2.6 arrived on the PC (31 October): the framework resolves to the newest 2.x. -->
+         manager's start-up check. That check runs before Main and crashed (REGDB_E_CLASSNOTREG) when Fenpo.exe was
+         started directly, without package identity, so Program could not hand over to the package (31 October). -->
     <WindowsAppSdkDeploymentManagerInitialize>false</WindowsAppSdkDeploymentManagerInitialize>
   </PropertyGroup>
 

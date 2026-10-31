@@ -15,6 +15,21 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll")]
     internal static partial uint GetDpiForWindow(nint hwnd);
 
+    /// <summary>
+    /// Whether this process runs with package identity (started from the package, not from Fenpo.exe directly).
+    /// </summary>
+    /// <returns>False when GetCurrentPackageFullName reports APPMODEL_ERROR_NO_PACKAGE.</returns>
+    internal static bool HasPackageIdentity()
+    {
+        var length = 0u;
+        return GetCurrentPackageFullName(ref length, 0) != AppModelErrorNoPackage;
+    }
+
+    private const int AppModelErrorNoPackage = 15700;
+
+    [LibraryImport("kernel32.dll")]
+    private static partial int GetCurrentPackageFullName(ref uint packageFullNameLength, nint packageFullName);
+
     [LibraryImport("user32.dll", EntryPoint = "MessageBoxW", StringMarshalling = StringMarshalling.Utf16)]
     internal static partial int MessageBox(nint owner, string text, string caption, uint type);
 
