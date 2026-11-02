@@ -170,7 +170,7 @@ Kaynaklar: [KeyGenParameterSpec](https://raw.githubusercontent.com/aosp-mirror/p
 | QR | zxing-cpp Android 3.1.1 | Aktif, ekrandaki QR'da dayanıklı. Yedek: `com.google.zxing:core` 3.5.4 (saf Java). zxing-android-embedded 2021'den beri durgun; ML Kit kapalı kaynak |
 | Dil | AppCompat 1.8.0 | `setApplicationLocales` + `autoStoreLocales`; API 33+'te sistemin `LocaleManager`'ı |
 | TLS, kripto | Platform (Conscrypt, Keystore, `javax.crypto`) | Ek bağımlılık yok |
-| Test | JUnit (saf JVM modüllerde JUnit Platform + `kotlin.test`, Android modüllerinde JUnit 4), kotlinx-coroutines-test, Turbine 1.2.1, Robolectric 4.17, Roborazzi 1.76.0 | Roborazzi, Robolectric niteleyicileriyle (`+night`, `tr`) her ekranı iki tema ve iki dilde fotoğraflar: CLAUDE.md'deki "tema ve dil her ekranda" kuralının testi |
+| Test | JUnit (saf JVM modüllerde JUnit Platform + `kotlin.test`, Android modüllerinde JUnit 4), kotlinx-coroutines-test, Turbine 1.2.1, Robolectric 4.17, Roborazzi 1.76.0 | Roborazzi, Robolectric niteleyicileriyle (`+night`, `tr`) her ekranı iki tema ve iki dilde fotoğraflar: "tema ve dil her ekranda" kuralının testi |
 | Biçim | Spotless 8.10.4 + ktlint 1.8.0 (`ktlint_official`) + compose-rules 0.6.8, Android Lint | detekt 2.0 hâlâ alpha |
 
 Kaynaklar: [Kotlin sürümleri](https://kotlinlang.org/docs/releases.html), [AGP sürüm notları](https://developer.android.com/build/releases/gradle-plugin), [Yerleşik Kotlin'e geçiş](https://developer.android.com/build/migrate-to-built-in-kotlin), [Gradle](https://gradle.org/releases/), [BOM eşlemesi](https://developer.android.com/develop/ui/compose/bom/bom-mapping), [Material 3 sürümleri](https://developer.android.com/jetpack/androidx/releases/compose-material3), [Navigation 3](https://developer.android.com/jetpack/androidx/releases/navigation3), [Wire](https://square.github.io/wire/), [Wire CHANGELOG](https://github.com/square/wire/blob/master/CHANGELOG.md), [Dagger](https://github.com/google/dagger/releases), [Metro uyumluluk](https://zacsweers.github.io/metro/latest/compatibility/), [Koin](https://github.com/InsertKoinIO/koin/releases), [zxing-cpp Android](https://github.com/zxing-cpp/zxing-cpp/tree/master/wrappers/android), [ML Kit barkod](https://developers.google.com/ml-kit/vision/barcode-scanning/android)
@@ -209,7 +209,7 @@ android/
 
 Kaynaklar: [Now in Android](https://github.com/android/nowinandroid)
 
-## 16. Kotlin kod stili ve test (CLAUDE.md'ye işlenecek öneri)
+## 16. Kotlin kod stili ve test
 **Karar: Resmi Kotlin kodlama kuralları + Android Kotlin stil rehberi, `ktlint_official` ile zorlanır.**
 - Satır sonu LF, girinti 4 boşluk, satır uzunluğu 120. `android/.editorconfig` ktlint ayarlarını taşır (kökteki `.editorconfig`'e dokunmadan; oraya `[*.{kt,kts}]` eklemek istersek önce Buğra'ya sorulur).
 - Core modüllerde `explicitApi()`. Public API'lerde İngilizce KDoc. Kod, log ve yorumlar İngilizce.

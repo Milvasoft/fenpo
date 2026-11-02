@@ -12,7 +12,7 @@ import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.robolectric.RuntimeEnvironment
 
-/** Languages every screen is checked in (CLAUDE.md: "Tema ve dil her ekranda"). */
+/** Languages every screen is checked in ("Tema ve dil her ekranda"). */
 private val languages = listOf("en", "tr")
 
 /** Small tolerance so anti-aliasing differences between machines do not fail the check. */

@@ -188,7 +188,7 @@ class StoreScreenshotTest {
     }
 
     private companion object {
-        // Brand colours for marketing art only (CLAUDE.md: Çiçek, Cam); the app takes colours from the theme.
+        // Brand colours for marketing art only (Çiçek, Cam); the app takes colours from the theme.
         val BLOOM = Color(0xFFE8577E)
         val GLASS = Color(0xFFDCE6F5)
     }

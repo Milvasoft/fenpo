@@ -368,7 +368,7 @@ private val BEZEL: Dp = 7.dp
 private const val FRAME_SCALE = 0.8f
 private const val VIDEO_SCALE = 0.5f
 
-// Brand colours for marketing art only (CLAUDE.md: Mürekkep, Alacakaranlık, Çiçek); the app takes colours from the theme.
+// Brand colours for marketing art only (Mürekkep, Alacakaranlık, Çiçek); the app takes colours from the theme.
 private val INK = Color(0xFF1B1F3B)
 private val NIGHT = Color(0xFF2A2E6B)
 private val DUSK = Color(0xFF4E54C8)
