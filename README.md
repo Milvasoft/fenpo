@@ -58,7 +58,8 @@ The Fenpo BLE channel needs a PC Bluetooth adapter that supports the peripheral 
 ## Getting it
 
 - Windows: [Microsoft Store](https://apps.microsoft.com/detail/9MTTKJ8BV1LG). Windows 11 22H2 or later, with Bluetooth.
-- iPhone and Android: in store review.
+- Android: [Google Play](https://play.google.com/store/apps/details?id=com.fenpo.android).
+- iPhone: in App Store review.
 
 Website: <https://fenpo.milvasoft.com>. Privacy policy: <https://fenpo.milvasoft.com/privacy>.
 
