@@ -2,7 +2,7 @@
 
 Buğra'nın gözden geçirip App Store Connect'e gireceği taslaklar. Uygulama tarafında gereken her şey `ios` dalında
 hazır; buradaki metinler önerdir, değiştirmekte serbestsin. Apple markaları ("AirDrop", "Handoff", "Continuity",
-"AirPlay") hiçbir metinde özellik adı olarak geçmiyor (CLAUDE.md, App Review 5.2.5).
+"AirPlay") hiçbir metinde özellik adı olarak geçmiyor (App Review 5.2.5).
 
 ## Gönderimden önce karar verilecekler
 

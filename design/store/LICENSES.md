@@ -33,4 +33,4 @@ mağazaya giden görseller CI'da SF Pro ile üretilir.
 - Uygulama simgesi ve "Çekirdek" logosu Fenpo'nun (`design/logo`).
 - Ekranlardaki içerik uydurma demo verisi: "Ofis PC" / "Office PC", dosya, şarkı ve sanatçı adları hayali; gerçek bir kişi,
   marka ya da hesap yok.
-- Renkler Fenpo'nun tasarım sözlüğünden (CLAUDE.md).
+- Renkler Fenpo'nun tasarım sözlüğünden.

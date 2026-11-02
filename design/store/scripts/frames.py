@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 DESIGN_WIDTH = 1320  # Every measure below is for this width and scales with the canvas.
 
-# Fenpo's palette (CLAUDE.md, "Tasarım sözlüğü").
+# Fenpo's palette ("Tasarım sözlüğü").
 INK = (0x1B, 0x1F, 0x3B)
 BLOOM = (0xE8, 0x57, 0x7E)
 DUSK = (0x4E, 0x54, 0xC8)
