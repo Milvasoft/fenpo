@@ -76,6 +76,6 @@ Ara dosyalar `.work/` altında; silinebilir.
 
 ## Notlar
 
-- Arayüzde ve metinlerde Apple ve Microsoft özellik adları geçmez (CLAUDE.md). "iPhone", "Android", "Windows" yalnızca uyumluluğu anlatmak için kullanıldı.
+- Arayüzde ve metinlerde Apple ve Microsoft özellik adları geçmez. "iPhone", "Android", "Windows" yalnızca uyumluluğu anlatmak için kullanıldı.
 - Ekran görüntüleri `design/screenshots/windows/` altındaki gösterim verili görüntüler; gerçek kişisel veri yok.
 - Aramalar bölümü uygulamanın bugünkü davranışını anlatır: arama bilgisayardan yanıtlanır ya da reddedilir, görüşme telefonda sürer.

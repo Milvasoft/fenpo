@@ -49,7 +49,7 @@ Sürümler Ekim 2026 itibarıyla. Her seçimin yanında neden seçildiği ve ney
 | Kamera | AVFoundation + VideoToolbox (HEVC/H.264 donanım kodlama) | Düşük gecikme, düşük pil |
 | Ekran yansıtma | ReplayKit Broadcast Upload Extension | 50 MB bellek sınırı var; kodlamayı VideoToolbox yapar |
 | Protokol | swift-protobuf (SPM) | Tek dış bağımlılık |
-| Proje dosyası | **XcodeGen** (`project.yml`) | `.xcodeproj` yerine okunabilir YAML; Claude Code ile düzenlemesi ve git farkları çok daha temiz |
+| Proje dosyası | **XcodeGen** (`project.yml`) | `.xcodeproj` yerine okunabilir YAML; düzenlemesi ve git farkları çok daha temiz |
 | Test | Swift Testing | Xcode 16+ yerleşik |
 | Derleme (Mac yok) | GitHub Actions `macos` runner: XcodeGen → `xcodebuild build` ve simülatörde testler. `FenpoKit` çekirdeği Windows'taki Swift araç zinciriyle de derlenebilir | Mac almadan ilerlemek; cihaz testi TestFlight ile |
 | Tema | Sistem / Açık / Koyu: `preferredColorScheme`, seçim App Group'taki `UserDefaults`'ta | Uygulama ve paylaşım uzantısı seçimi izler. Widget'lar ve Denetim Merkezi düğmeleri iOS gereği sistemin görünümünü izler |
