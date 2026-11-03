@@ -7,6 +7,7 @@ using Fenpo.Protocol.V1;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using Windows.Storage;
 
 namespace Fenpo.App.Services;
 
@@ -79,6 +80,16 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
     /// <returns>True when installed.</returns>
     public async Task<bool> InstallAsync()
     {
+        if (!File.Exists(PackagedPath))
+        {
+            _logger.LogWarning("Fenpo Kamera cannot be installed: {Path} is missing", PackagedPath);
+            return false;
+        }
+
+        // An installed package lives in WindowsApps, which the elevated command may not read; Fenpo can, so the DLL
+        // goes through Fenpo's temporary folder.
+        var source = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, _dllName);
+        File.Copy(PackagedPath, source, overwrite: true);
         var target = Path.Combine(InstallFolder, _dllName);
         var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fenpo", "Camera");
 
@@ -88,12 +99,15 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
             "sc stop FrameServer >nul 2>&1",
             "sc stop FrameServerMonitor >nul 2>&1",
             $"mkdir \"{InstallFolder}\" 2>nul",
-            $"copy /y \"{PackagedPath}\" \"{target}\" >nul",
+            $"copy /y \"{source}\" \"{target}\" >nul",
             $"mkdir \"{data}\" 2>nul",
             $"icacls \"{data}\" /grant *S-1-5-19:(OI)(CI)M >nul",
             $"regsvr32 /s \"{target}\"");
 
-        if (!await RunElevatedAsync(command))
+        var approved = await RunElevatedAsync(command);
+        File.Delete(source);
+
+        if (!approved)
         {
             return false;
         }
@@ -325,6 +339,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
             }
 
             await process.WaitForExitAsync();
+            _logger.LogInformation("Fenpo Kamera's elevated command finished: {ExitCode}", process.ExitCode);
             return true;
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)

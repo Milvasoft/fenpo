@@ -27,7 +27,8 @@
   </ItemGroup>
 
   <!-- File Explorer's right-click command is a Native AOT DLL (Fenpo.ShellExtension); it is published for this
-       platform and copied next to Fenpo.exe. Native AOT links with Visual Studio's tools, found through vswhere. -->
+       platform before the build and goes next to Fenpo.exe as content, so it is in the MSIX too. Native AOT links with
+       Visual Studio's tools, found through vswhere. -->
   <PropertyGroup>
     <ShellExtensionRid Condition="'$(Platform)' == 'ARM64'">win-arm64</ShellExtensionRid>
     <ShellExtensionRid Condition="'$(Platform)' != 'ARM64'">win-x64</ShellExtensionRid>
@@ -35,12 +36,8 @@
     <ShellExtensionOut>$(MSBuildThisFileDirectory)obj\shell\$(ShellExtensionRid)\</ShellExtensionOut>
   </PropertyGroup>
 
-  <Target Name="PublishShellExtension" BeforeTargets="Build" Inputs="$(ShellExtensionProject);@(ShellExtensionSource)" Outputs="$(ShellExtensionOut)Fenpo.ShellExtension.dll">
+  <Target Name="PublishShellExtension" BeforeTargets="BeforeBuild" Inputs="$(ShellExtensionProject);@(ShellExtensionSource)" Outputs="$(ShellExtensionOut)Fenpo.ShellExtension.dll">
     <Exec Command="set &quot;PATH=%PATH%;$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer&quot; &amp;&amp; dotnet publish &quot;$(ShellExtensionProject)&quot; -c Release -r $(ShellExtensionRid) -o &quot;$(ShellExtensionOut).&quot; -nologo -v q" />
-  </Target>
-
-  <Target Name="CopyShellExtension" AfterTargets="Build">
-    <Copy SourceFiles="$(ShellExtensionOut)Fenpo.ShellExtension.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
   </Target>
 
   <!-- Fenpo Kamera's media source (Fenpo.VirtualCamera, Native AOT) ships next to Fenpo.exe; Settings › Camera installs
@@ -54,13 +51,14 @@
     <VirtualCameraSource Include="..\Fenpo.VirtualCamera\**\*.cs;..\Fenpo.Core\Camera\CameraRing.cs" Exclude="..\Fenpo.VirtualCamera\obj\**;..\Fenpo.VirtualCamera\bin\**" />
   </ItemGroup>
 
-  <Target Name="PublishVirtualCamera" BeforeTargets="Build" Inputs="$(VirtualCameraProject);@(VirtualCameraSource)" Outputs="$(VirtualCameraOut)Fenpo.VirtualCamera.dll">
+  <Target Name="PublishVirtualCamera" BeforeTargets="BeforeBuild" Inputs="$(VirtualCameraProject);@(VirtualCameraSource)" Outputs="$(VirtualCameraOut)Fenpo.VirtualCamera.dll">
     <Exec Command="set &quot;PATH=%PATH%;$(MSBuildProgramFiles32)\Microsoft Visual Studio\Installer&quot; &amp;&amp; dotnet publish &quot;$(VirtualCameraProject)&quot; -c Release -r $(ShellExtensionRid) -o &quot;$(VirtualCameraOut).&quot; -nologo -v q" />
   </Target>
 
-  <Target Name="CopyVirtualCamera" AfterTargets="Build">
-    <Copy SourceFiles="$(VirtualCameraOut)Fenpo.VirtualCamera.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-  </Target>
+  <ItemGroup>
+    <Content Include="$(ShellExtensionOut)Fenpo.ShellExtension.dll" Link="Fenpo.ShellExtension.dll" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(VirtualCameraOut)Fenpo.VirtualCamera.dll" Link="Fenpo.VirtualCamera.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <ShellExtensionSource Include="..\Fenpo.ShellExtension\**\*.cs" Exclude="..\Fenpo.ShellExtension\obj\**;..\Fenpo.ShellExtension\bin\**" />
