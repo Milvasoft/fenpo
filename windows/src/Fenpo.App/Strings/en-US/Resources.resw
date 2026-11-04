@@ -141,6 +141,15 @@
   <data name="Camera_Hint.Text" xml:space="preserve">
     <value>The preview shows the phone's camera. With Fenpo Kamera installed it shows up in Teams, Zoom, Meet and OBS as an ordinary webcam. Keep Fenpo open on the phone; a landscape stand works best.</value>
   </data>
+  <data name="Camera_Mirror.Text" xml:space="preserve">
+    <value>Mirror the picture</value>
+  </data>
+  <data name="Camera_MirrorHint.Text" xml:space="preserve">
+    <value>Flips the picture left to right, like a mirror. Applies at once, in the preview and in apps using Fenpo Kamera.</value>
+  </data>
+  <data name="Camera_MirrorToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Mirror the picture</value>
+  </data>
   <data name="Camera_Idle" xml:space="preserve">
     <value>Preview the phone's camera here.</value>
   </data>

@@ -99,6 +99,12 @@ public sealed record AppSettings
     public CameraLens CameraLens { get; init; } = CameraLens.Wide;
 
     /// <summary>
+    /// Gets a value indicating whether Fenpo Kamera and the Camera page's preview show the picture mirrored (flipped
+    /// horizontally). The PC flips it, so it works the same for both phones.
+    /// </summary>
+    public bool CameraMirrored { get; init; }
+
+    /// <summary>
     /// Gets the folder for files received from the phone, or null for Downloads\Fenpo.
     /// </summary>
     public string? IncomingFolder { get; init; }

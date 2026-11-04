@@ -54,12 +54,14 @@ public sealed unsafe partial class PhoneFrames(int width, int height) : IDisposa
     }
 
     /// <summary>
-    /// Writes the newest frame into a sample buffer (NV12, stride = width).
+    /// Writes the newest frame into a sample buffer (NV12, stride = width), mirrored when Fenpo.exe asks for it.
     /// </summary>
     /// <param name="target">Sample buffer.</param>
     /// <param name="length">Its size.</param>
     public void Fill(nint target, int length)
     {
+        var mirrored = false;
+
         if (_memory != null)
         {
             CameraRing.SetReader(_memory, active: true);
@@ -71,9 +73,20 @@ public sealed unsafe partial class PhoneFrames(int width, int height) : IDisposa
                 Placeholder(_latest, _width, _height);
                 _hasPicture = false;
             }
+
+            // Only the phone's picture is mirrored, never the placeholder.
+            mirrored = _hasPicture && CameraRing.Mirrored(_memory);
         }
 
-        new ReadOnlySpan<byte>(_latest, 0, Math.Min(length, _latest.Length)).CopyTo(new Span<byte>((void*)target, length));
+        var sample = new Span<byte>((void*)target, length);
+
+        if (mirrored && length >= _latest.Length && ((_width | _height) & 1) == 0)
+        {
+            Nv12Mirror.Copy(_latest, sample, _width, _height);
+            return;
+        }
+
+        new ReadOnlySpan<byte>(_latest, 0, Math.Min(length, _latest.Length)).CopyTo(sample);
     }
 
     /// <inheritdoc/>

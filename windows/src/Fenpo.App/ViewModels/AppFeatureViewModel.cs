@@ -30,6 +30,7 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
         var current = settings.Current;
         ShareClipboard = current.ShareClipboard;
         LensIndex = (int)current.CameraLens;
+        CameraMirrored = current.CameraMirrored;
         _loaded = true;
     }
 
@@ -46,6 +47,14 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial int LensIndex { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the camera picture is mirrored.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PreviewScaleX))]
+    public partial bool CameraMirrored { get; set; }
+
+    /// <summary>Gets the preview's horizontal scale: -1 flips it to match a mirrored Fenpo Kamera.</summary>
+    public double PreviewScaleX => CameraMirrored ? -1 : 1;
+
     /// <summary>Gets a value indicating whether the needs-app banner is shown.</summary>
     public bool NeedsApp => !AppConnected;
 
@@ -58,6 +67,8 @@ public sealed partial class AppFeatureViewModel : ObservableObject, IDisposable
     partial void OnShareClipboardChanged(bool value) => Save(s => s with { ShareClipboard = value });
 
     partial void OnLensIndexChanged(int value) => Save(s => s with { CameraLens = (CameraLens)value });
+
+    partial void OnCameraMirroredChanged(bool value) => Save(s => s with { CameraMirrored = value });
 
     private void Save(Func<AppSettings, AppSettings> change)
     {

@@ -141,6 +141,15 @@
   <data name="Camera_Hint.Text" xml:space="preserve">
     <value>Önizleme telefonun kamerasını gösterir. Fenpo Kamera kuruluysa Teams, Zoom, Meet ve OBS'de normal bir web kamerası olarak görünür. Telefonda Fenpo açık kalmalı; en iyisi telefonu yatay bir standa koymak.</value>
   </data>
+  <data name="Camera_Mirror.Text" xml:space="preserve">
+    <value>Görüntüyü aynala</value>
+  </data>
+  <data name="Camera_MirrorHint.Text" xml:space="preserve">
+    <value>Görüntüyü sağdan sola çevirir, ayna gibi. Önizlemede ve Fenpo Kamera'yı kullanan uygulamalarda hemen uygulanır.</value>
+  </data>
+  <data name="Camera_MirrorToggle.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Görüntüyü aynala</value>
+  </data>
   <data name="Camera_Idle" xml:space="preserve">
     <value>Telefonun kamerasını burada önizle.</value>
   </data>

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.InteropServices;
 using Fenpo.Core.Camera;
+using Fenpo.Core.Settings;
 using Fenpo.Protocol.V1;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,16 +15,17 @@ namespace Fenpo.App.Services;
 /// <summary>
 /// Fenpo Kamera on the PC: installs the media source (Fenpo.VirtualCamera.dll, HKLM, with the user's administrator
 /// approval), makes Windows show "Fenpo Kamera" while Fenpo runs (MFCreateVirtualCamera), starts the phone's camera
-/// when an app opens it and stops it when the app is done, and writes the phone's frames for the media source
-/// (<see cref="CameraRing"/>).
+/// when an app opens it and stops it when the app is done, and writes the phone's frames and whether to mirror them for
+/// the media source (<see cref="CameraRing"/>).
 /// </summary>
-public sealed partial class VirtualCameraService(CameraService camera, ILogger<VirtualCameraService> logger) : IHostedService
+public sealed partial class VirtualCameraService(CameraService camera, ISettingsStore settings, ILogger<VirtualCameraService> logger) : IHostedService
 {
     private const string _classId = "{8D2E6A54-3C1B-4F8E-A6C9-7B5E2F1D0C34}";
     private const string _dllName = "Fenpo.VirtualCamera.dll";
     private static readonly TimeSpan _readerStale = TimeSpan.FromSeconds(3);
 
     private readonly CameraService _camera = camera;
+    private readonly ISettingsStore _settings = settings;
     private readonly ILogger<VirtualCameraService> _logger = logger;
     private readonly Lock _writeLock = new();
     private readonly CancellationTokenSource _stopping = new();
@@ -61,6 +63,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
     /// <inheritdoc/>
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        _settings.Changed += OnSettingsChanged;
         _ = Task.Run(() => RunAsync(_stopping.Token), CancellationToken.None);
         return Task.CompletedTask;
     }
@@ -68,6 +71,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
     /// <inheritdoc/>
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        _settings.Changed -= OnSettingsChanged;
         await _stopping.CancelAsync();
         RemoveCamera();
         _view?.Dispose();
@@ -174,6 +178,19 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
         }
     }
 
+    // Applies at once, also while an app has the camera open; before the media source made the shared memory there is
+    // nothing to tell, and opening it writes the current setting.
+    private unsafe void OnSettingsChanged(object? sender, AppSettings current)
+    {
+        lock (_writeLock)
+        {
+            if (_memory != null)
+            {
+                CameraRing.SetMirrored(_memory, current.CameraMirrored);
+            }
+        }
+    }
+
     private async Task RunAsync(CancellationToken cancellationToken)
     {
         if (IsInstalled)
@@ -257,6 +274,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ILogger<V
             lock (_writeLock)
             {
                 _memory = pointer;
+                CameraRing.SetMirrored(_memory, _settings.Current.CameraMirrored);
             }
 
             _logger.LogInformation("Fenpo Kamera's shared memory is open");

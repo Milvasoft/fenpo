@@ -56,6 +56,33 @@ public sealed unsafe class CameraRingTests : IDisposable
     public void AFrameTooBigForASlotIsRefused() => Assert.False(CameraRing.Write(_memory, new byte[CameraRing.MaxFrame + 1], 0, keyFrame: true));
 
     [Fact]
+    public void TheMirrorFlagIsOffUntilTheWriterSetsIt()
+    {
+        Assert.False(CameraRing.Mirrored(_memory));
+        CameraRing.SetMirrored(_memory, mirrored: true);
+        Assert.True(CameraRing.Mirrored(_memory));
+        CameraRing.SetMirrored(_memory, mirrored: false);
+        Assert.False(CameraRing.Mirrored(_memory));
+    }
+
+    [Fact]
+    public void TheMirrorFlagKeepsTheLayoutOlderMediaSourcesKnow()
+    {
+        // Version 1 layout: magic, version, reader heartbeat, reader flag, the formerly reserved int, next sequence.
+        Assert.Equal(1u, CameraRing.Version);
+        Assert.Equal(16, (int)Marshal.OffsetOf<CameraRing.Header>(nameof(CameraRing.Header.ReaderActive)));
+        Assert.Equal(20, (int)Marshal.OffsetOf<CameraRing.Header>(nameof(CameraRing.Header.Mirrored)));
+        Assert.Equal(24, (int)Marshal.OffsetOf<CameraRing.Header>(nameof(CameraRing.Header.NextSequence)));
+        Assert.Equal(40, sizeof(CameraRing.Header));
+
+        // Setting it up again keeps the flag, as the media source does on every open.
+        CameraRing.SetMirrored(_memory, mirrored: true);
+        CameraRing.Initialize(_memory);
+        Assert.True(CameraRing.IsReady(_memory));
+        Assert.True(CameraRing.Mirrored(_memory));
+    }
+
+    [Fact]
     public void TheReaderFlagNeedsAFreshHeartbeat()
     {
         Assert.False(CameraRing.ReaderActive(_memory, TimeSpan.FromSeconds(3)));

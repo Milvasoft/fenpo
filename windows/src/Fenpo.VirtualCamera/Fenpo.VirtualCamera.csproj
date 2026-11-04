@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Compile Include="..\Fenpo.Core\Camera\CameraRing.cs" Link="Shared\CameraRing.cs" />
+    <Compile Include="..\Fenpo.Core\Camera\Nv12Mirror.cs" Link="Shared\Nv12Mirror.cs" />
   </ItemGroup>
 
   <ItemGroup>

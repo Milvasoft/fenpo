@@ -12,6 +12,7 @@ public sealed class JsonSettingsStoreTests : IDisposable
         var store = new JsonSettingsStore(Path.Combine(_directory, "settings.json"));
 
         Assert.Equal(new AppSettings(), store.Current);
+        Assert.False(store.Current.CameraMirrored);
     }
 
     [Fact]
@@ -22,13 +23,14 @@ public sealed class JsonSettingsStoreTests : IDisposable
         AppSettings? raised = null;
         store.Changed += (_, settings) => raised = settings;
 
-        store.Update(s => s with { Theme = AppTheme.Dark, Language = "en-US", ProximityLock = false });
+        store.Update(s => s with { Theme = AppTheme.Dark, Language = "en-US", ProximityLock = false, CameraMirrored = true });
 
         Assert.Equal(AppTheme.Dark, raised?.Theme);
         var reloaded = new JsonSettingsStore(path).Current;
         Assert.Equal(AppTheme.Dark, reloaded.Theme);
         Assert.Equal("en-US", reloaded.Language);
         Assert.False(reloaded.ProximityLock);
+        Assert.True(reloaded.CameraMirrored);
         Assert.Contains("\"Dark\"", File.ReadAllText(path));
     }
 

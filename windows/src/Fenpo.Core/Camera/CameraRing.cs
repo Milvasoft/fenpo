@@ -9,8 +9,8 @@ namespace Fenpo.Core.Camera;
 /// signed-in user write. The file is linked into Fenpo.VirtualCamera too, so it uses nothing else from Core.
 /// </summary>
 /// <remarks>
-/// Layout, little-endian: a 4 KiB header (magic, version, the reader's heartbeat and "in use" flag, the writer's next
-/// sequence number and heartbeat), then <see cref="SlotCount"/> slots of <see cref="SlotSize"/> bytes: sequence number,
+/// Layout, little-endian: a 4 KiB header (magic, version, the reader's heartbeat and "in use" flag, the writer's
+/// "mirror" flag, the writer's next sequence number and heartbeat), then <see cref="SlotCount"/> slots of <see cref="SlotSize"/> bytes: sequence number,
 /// presentation time in microseconds, flags, length, data. A slot is published by writing its sequence number last;
 /// a reader checks it before and after copying.
 /// </remarks>
@@ -63,8 +63,11 @@ public static unsafe class CameraRing
         /// <summary>1 while an app has the camera open.</summary>
         public int ReaderActive;
 
-        /// <summary>Unused.</summary>
-        public int Reserved;
+        /// <summary>
+        /// 1 when Fenpo.exe wants the picture mirrored (flipped horizontally). Was unused before; a media source that
+        /// does not know it leaves the picture as it is.
+        /// </summary>
+        public int Mirrored;
 
         /// <summary>The sequence number the writer gives its next frame; the newest frame is one less.</summary>
         public long NextSequence;
@@ -212,6 +215,20 @@ public static unsafe class CameraRing
         var header = (Header*)memory;
         return Volatile.Read(ref header->ReaderActive) == 1 && DateTime.UtcNow.Ticks - Volatile.Read(ref header->ReaderHeartbeat) < staleAfter.Ticks;
     }
+
+    /// <summary>
+    /// Asks the media source to mirror the picture or not (writer side); it applies from the next frame.
+    /// </summary>
+    /// <param name="memory">Start of the mapping.</param>
+    /// <param name="mirrored">Whether the picture is flipped horizontally.</param>
+    public static void SetMirrored(byte* memory, bool mirrored) => Volatile.Write(ref ((Header*)memory)->Mirrored, mirrored ? 1 : 0);
+
+    /// <summary>
+    /// Whether Fenpo.exe wants the picture mirrored (reader side).
+    /// </summary>
+    /// <param name="memory">Start of the mapping.</param>
+    /// <returns>True when the picture is to be flipped horizontally.</returns>
+    public static bool Mirrored(byte* memory) => Volatile.Read(ref ((Header*)memory)->Mirrored) == 1;
 
     /// <summary>
     /// Whether frames came lately (reader side, to show a placeholder when they stopped).
