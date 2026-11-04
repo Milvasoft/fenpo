@@ -20,9 +20,11 @@ public enum ProximityState
 
 /// <summary>
 /// Decides when the phone has left (DECISIONS #29): a 5-second moving average of advertisement RSSI below the
-/// threshold, no signal at all, or a dropped link starts the delay; staying away for the whole delay requests one lock.
-/// Coming back (average above threshold plus hysteresis, or reconnecting) re-arms it. Pure logic: callers pass the
-/// time with every call, so the S1 walk-away recording can be replayed in tests.
+/// threshold, or a phone that was being measured going silent with the link dropped, starts the delay; staying away
+/// for the whole delay requests one lock. An average back at or above the threshold restarts the delay; only an average
+/// above threshold plus hysteresis, or reconnecting, counts as back, so the state does not flap. A phone never measured
+/// since the link came up, or a live link without recent samples, is not evidence of leaving. Pure logic: callers pass
+/// the time with every call, so the S1 walk-away recording can be replayed in tests.
 /// </summary>
 public sealed class ProximityDetector
 {
@@ -30,6 +32,9 @@ public sealed class ProximityDetector
     private DateTimeOffset? _lastSample;
     private DateTimeOffset _leavingSince;
     private bool _connected;
+
+    // True when a sample arrived since the link last came up: only then does silence mean the phone went away.
+    private bool _measured;
 
     /// <summary>
     /// Raised when <see cref="State"/> changes.
@@ -91,6 +96,7 @@ public sealed class ProximityDetector
 
         _samples.Enqueue((at, rssi));
         _lastSample = at;
+        _measured = true;
         Evaluate(at);
     }
 
@@ -103,6 +109,13 @@ public sealed class ProximityDetector
     {
         var reconnected = connected && !_connected;
         _connected = connected;
+        DropOldSamples(at);
+
+        if (reconnected)
+        {
+            // Silence after this link came up only counts once the phone has been measured on it.
+            _measured = _samples.Count > 0;
+        }
 
         // Some adapters report few advertisements while connected; a fresh link is proof enough of being back.
         if (reconnected && State is ProximityState.Leaving or ProximityState.Away && !(AverageDbm < ThresholdDbm))
@@ -119,17 +132,25 @@ public sealed class ProximityDetector
     /// <param name="now">Current time.</param>
     public void Tick(DateTimeOffset now) => Evaluate(now);
 
-    private void Evaluate(DateTimeOffset now)
+    private void DropOldSamples(DateTimeOffset now)
     {
         while (_samples.Count > 0 && now - _samples.Peek().At > Window)
         {
             _samples.Dequeue();
         }
+    }
+
+    private void Evaluate(DateTimeOffset now)
+    {
+        DropOldSamples(now);
 
         var average = AverageDbm;
         var noSignal = _lastSample is null || now - _lastSample > SignalTimeout;
         var weak = average is { } a && a < ThresholdDbm;
         var strong = average is { } b && b >= ThresholdDbm + HysteresisDb;
+
+        // Measured, then gone: no advertisement for SignalTimeout and no link. Never measured is not proof of leaving.
+        var silent = _measured && noSignal && !_connected;
 
         switch (State)
         {
@@ -141,7 +162,7 @@ public sealed class ProximityDetector
 
                 break;
             case ProximityState.Near:
-                if (weak || (noSignal && !_connected))
+                if (weak || silent)
                 {
                     _leavingSince = now;
                     SetState(ProximityState.Leaving);
@@ -154,10 +175,26 @@ public sealed class ProximityDetector
                 {
                     SetState(ProximityState.Near);
                 }
+                else if (average is not null && !weak)
+                {
+                    // Back at or above the threshold: the phone did not stay away, so the delay starts again.
+                    _leavingSince = now;
+                }
                 else if (now - _leavingSince >= Delay)
                 {
-                    SetState(ProximityState.Away);
-                    LockRequested?.Invoke(this, EventArgs.Empty);
+                    if (weak || silent)
+                    {
+                        SetState(ProximityState.Away);
+                        LockRequested?.Invoke(this, EventArgs.Empty);
+                    }
+                    else if (_connected)
+                    {
+                        // A live link without recent samples is not evidence of leaving, as in Near.
+                        SetState(ProximityState.Near);
+                    }
+
+                    // Otherwise the link is gone and the last sample is younger than SignalTimeout: once that
+                    // passes the silence counts and the lock follows.
                 }
 
                 break;

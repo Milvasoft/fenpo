@@ -63,7 +63,14 @@ public sealed class ProximityLockService(
         {
             if (_status.Active == PhoneKind.Iphone)
             {
-                _detector.SetConnected(connected, DateTimeOffset.Now);
+                _detector.SetConnected(connected || _channel.OnBluetooth(PhoneKind.Iphone), DateTimeOffset.Now);
+            }
+        });
+        _channel.Changed += (_, _) => Locked(() =>
+        {
+            if (_status.Active == PhoneKind.Iphone)
+            {
+                _detector.SetConnected(IphoneConnected(), DateTimeOffset.Now);
             }
         });
         _status.Changed += (_, current) => Locked(() =>
@@ -73,7 +80,7 @@ public sealed class ProximityLockService(
                 _detector.SetConnected(current.AppConnected, DateTimeOffset.Now);
             }
         });
-        _status.ActiveChanged += (_, kind) => Locked(() => _detector.SetConnected(kind == PhoneKind.Iphone ? _link.IsConnected : _status.Current.AppConnected, DateTimeOffset.Now));
+        _status.ActiveChanged += (_, kind) => Locked(() => _detector.SetConnected(kind == PhoneKind.Iphone ? IphoneConnected() : _status.Current.AppConnected, DateTimeOffset.Now));
         _detector.StateChanged += (_, state) =>
         {
             _logger.LogInformation("Proximity {State} (average {Average:F0} dBm)", state, _detector.AverageDbm);
@@ -89,6 +96,11 @@ public sealed class ProximityLockService(
             Locked(() => _detector.Tick(DateTimeOffset.Now));
         }
     }
+
+    // The service link flaps at times while Fenpo on the iPhone stays on its Bluetooth channel; either is in Bluetooth
+    // range, so either proves the phone is around. Fenpo connected over Wi‑Fi only does not: that reaches the whole
+    // network.
+    private bool IphoneConnected() => _link.IsConnected || _channel.OnBluetooth(PhoneKind.Iphone);
 
     private void ApplySettings(AppSettings current) => Locked(() =>
     {

@@ -197,6 +197,14 @@ public sealed class PhoneChannel(
     }
 
     /// <summary>
+    /// Gets a value indicating whether Fenpo on a phone of <paramref name="kind"/> is on the Bluetooth channel, in use
+    /// or not. Unlike the Wi‑Fi connection, that channel only reaches as far as Bluetooth does (proximity lock).
+    /// </summary>
+    /// <param name="kind">Which phone.</param>
+    /// <returns>True while its Bluetooth channel is up.</returns>
+    public bool OnBluetooth(PhoneKind kind) => _bleHellos.Values.Any(hello => KindOf(hello) == kind);
+
+    /// <summary>
     /// Gets a value indicating whether Fenpo on an Android phone is connected, in use or not.
     /// </summary>
     public bool AndroidConnected => _connected.Values.Any(d => KindOf(HelloOf(d.DeviceId)) == PhoneKind.Android);
