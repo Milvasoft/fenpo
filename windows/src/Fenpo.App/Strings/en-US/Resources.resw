@@ -79,7 +79,7 @@
     <value>The code is valid for 5 minutes, then renews itself</value>
   </data>
   <data name="AppPair_Step1.Hint" xml:space="preserve">
-    <value>Search for “Fenpo” in the App Store on iPhone, in F-Droid on Android</value>
+    <value>Search for “Fenpo” in the App Store on iPhone, on Google Play on Android</value>
   </data>
   <data name="AppPair_Step1.Title" xml:space="preserve">
     <value>Install Fenpo on the phone</value>
@@ -724,7 +724,7 @@
     <value>iPhone</value>
   </data>
   <data name="Pair_Intro.Text" xml:space="preserve">
-    <value>Start without installing anything on the iPhone: notifications, messages and music come over Bluetooth. For an Android phone, use “Connect with Fenpo on the phone” below.</value>
+    <value>There are two ways. On iPhone you can start without installing anything; on Android, and for every feature, pair with Fenpo on the phone.</value>
   </data>
   <data name="Pair_Later.Content" xml:space="preserve">
     <value>Do it later</value>
@@ -740,6 +740,15 @@
   </data>
   <data name="Pair_PhoneLinkTitle.Text" xml:space="preserve">
     <value>Phone Link is running.</value>
+  </data>
+  <data name="Pair_NoAppHeader.Text" xml:space="preserve">
+    <value>Without the app (iPhone only)</value>
+  </data>
+  <data name="Pair_WithAppHeader.Text" xml:space="preserve">
+    <value>With Fenpo on the phone (iPhone and Android)</value>
+  </data>
+  <data name="Pair_WithAppText.Text" xml:space="preserve">
+    <value>Install Fenpo on the phone, then scan the QR code with it. Android pairs this way. On iPhone it also turns on files, clipboard, camera and screen mirroring.</value>
   </data>
   <data name="Pair_StatusHeader.Text" xml:space="preserve">
     <value>Connection status</value>
@@ -769,10 +778,10 @@
     <value>Allow messages</value>
   </data>
   <data name="Pair_Title.Text" xml:space="preserve">
-    <value>Connect your iPhone</value>
+    <value>Connect your phone</value>
   </data>
   <data name="Pair_WithApp.Content" xml:space="preserve">
-    <value>Connect with Fenpo on the phone</value>
+    <value>Show QR code</value>
   </data>
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>Switch to {0}</value>

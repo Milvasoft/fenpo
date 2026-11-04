@@ -6,7 +6,8 @@
     xmlns:controls="using:Fenpo.App.Controls"
     xmlns:helpers="using:Fenpo.App.Helpers">
 
-    <!-- First run without the iPhone app: design "İlk kurulum" (DECISIONS #28, #38). -->
+    <!-- First run: the two ways to connect side by side, without the app (iPhone only) on the left, with the app (either
+         phone) on the right. Design "İlk kurulum" (DECISIONS #28, #38). -->
     <Grid Background="{ThemeResource FenpoSolidBrush}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -27,6 +28,7 @@
 
             <ScrollViewer Grid.Row="1" Margin="0,24,0,16" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="14">
+                    <TextBlock x:Uid="Pair_NoAppHeader" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
                     <controls:WizardStep Number="1" x:Uid="Pair_Step1" State="{x:Bind ViewModel.OpenBluetoothStep, Mode=OneWay}" />
                     <controls:WizardStep Number="2" x:Uid="Pair_Step2" State="{x:Bind ViewModel.PairStep, Mode=OneWay}">
                         <controls:WizardStep.Extra>
@@ -40,12 +42,20 @@
 
             <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
                 <Button x:Uid="Pair_Later" Command="{x:Bind ViewModel.LaterCommand}" />
-                <Button x:Uid="Pair_WithApp" Command="{x:Bind ViewModel.WithAppCommand}" />
             </StackPanel>
         </Grid>
 
         <Border Grid.Column="1" Background="{ThemeResource FenpoCardSecondaryBrush}" BorderBrush="{ThemeResource FenpoStrokeBrush}" BorderThickness="1,0,0,0">
-            <StackPanel Width="340" VerticalAlignment="Center">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Width="340" VerticalAlignment="Center" Margin="0,24">
+                <Border Style="{StaticResource FenpoCardStyle}" Padding="16" Margin="0,0,0,24">
+                    <StackPanel Spacing="10">
+                        <TextBlock x:Uid="Pair_WithAppHeader" FontWeight="SemiBold" Foreground="{ThemeResource FenpoTextBrush}" />
+                        <TextBlock x:Uid="Pair_WithAppText" Style="{StaticResource FenpoSecondaryTextStyle}" FontSize="13" TextWrapping="Wrap" />
+                        <Button x:Uid="Pair_WithApp" Style="{StaticResource AccentButtonStyle}" Command="{x:Bind ViewModel.WithAppCommand}" />
+                    </StackPanel>
+                </Border>
+
                 <TextBlock x:Uid="Pair_StatusHeader" FontWeight="SemiBold" Margin="0,0,0,12" Foreground="{ThemeResource FenpoTextBrush}" />
                 <controls:CheckRow x:Uid="Pair_CheckBluetooth" IsOk="{x:Bind ViewModel.BluetoothOn, Mode=OneWay}" />
                 <controls:CheckRow x:Uid="Pair_CheckPhone" IsOk="{x:Bind ViewModel.PhoneFound, Mode=OneWay}" IsWaiting="{x:Bind helpers:BindHelpers.WaitingFor(ViewModel.BluetoothOn, ViewModel.PhoneFound), Mode=OneWay}" />
@@ -75,6 +85,7 @@
                     </TextBlock>
                 </Border>
             </StackPanel>
+            </ScrollViewer>
         </Border>
     </Grid>
 </UserControl>

@@ -674,7 +674,7 @@
             <h2>Telefonunu bağla</h2>
             <p class="sub" style="margin:0">Bir kere eşleştir, sonra telefon yanına geldiğinde Fenpo kendiliğinden bağlanır.</p>
             <ol class="steps">
-              <li class="done"><div><b>Telefona Fenpo’yu yükle</b><div class="tiny">iPhone’da App Store’da, Android’de F-Droid’de “Fenpo” ara</div></div></li>
+              <li class="done"><div><b>Telefona Fenpo’yu yükle</b><div class="tiny">iPhone’da App Store’da, Android’de Google Play’de “Fenpo” ara</div></div></li>
               <li class="now"><div><b>Kodu telefondaki Fenpo ile okut</b><div class="tiny">Telefon ve bilgisayar aynı Wi‑Fi ağında olmalı</div></div></li>
               <li><div><b>Bluetooth eşleşmesini onayla</b><div class="tiny">Telefon eşleşmeyi ve bildirim paylaşımını soracak, onayla</div></div></li>
               <li><div><b>Mesajlar ve aramalar için izin ver</b><div class="tiny">Telefon mesajlara ve aramalara erişim isterse izin ver</div></div></li>
@@ -693,17 +693,19 @@
           <div class="l">
             <svg width="48" height="48"><use href="#logo"/></svg>
             <h2>Telefonunu bağla</h2>
-            <p class="sub" style="margin:0">iPhone’a bir şey yüklemeden başlayabilirsin. Bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir.</p>
-            <ol class="steps">
+            <p class="sub" style="margin:0">İki yol var. iPhone’da uygulama yüklemeden başlayabilirsin; Android’de ve tüm özellikler için telefondaki Fenpo ile eşleştir.</p>
+            <b style="display:block;margin-top:24px">Uygulama olmadan (yalnızca iPhone)</b>
+            <ol class="steps" style="margin-top:12px">
               <li class="done"><div><b>iPhone’da Bluetooth ayarlarını aç</b><div class="tiny">Ayarlar > Bluetooth ekranında kal, iPhone böylece görünür olur</div></div></li>
               <li class="now"><div><b>Bu bilgisayarda eşleştir</b><div class="tiny">Cihaz ekle > Bluetooth > iPhone’unu seç, iki ekrandaki kodu onayla</div><button class="btn primary" type="button" style="margin-top:10px">Bluetooth ayarlarını aç</button></div></li>
               <li><div><b>Bildirimleri paylaşmaya izin ver</b><div class="tiny">iPhone “Bildirimleri paylaş” diye soracak, İzin Ver’e dokun</div></div></li>
               <li><div><b>Mesajlara izin ver</b><div class="tiny">Ayarlar > Bluetooth > bu bilgisayarın yanındaki (i) > Mesaj bildirimlerini göster</div></div></li>
             </ol>
-            <div style="margin-top:auto;display:flex;gap:8px"><button class="btn" type="button" data-demo="pairbt">Sonra yap</button><button class="btn" type="button" data-demo="pairswap">Telefondaki Fenpo ile bağla</button></div>
+            <div style="margin-top:auto;display:flex;gap:8px"><button class="btn" type="button" data-demo="pairbt">Sonra yap</button></div>
           </div>
           <div class="r">
-            <div class="check">
+            <div class="check" style="margin-bottom:24px;padding:16px;border:1px solid var(--w-stroke,rgba(128,128,128,.25));border-radius:8px"><b>Telefondaki Fenpo ile (iPhone ve Android)</b><div class="tiny" style="margin:8px 0 10px">Telefona Fenpo’yu yükle, sonra QR kodunu onunla okut. Android bu yolla eşleşir. iPhone’da dosya, pano, kamera ve ekran yansıtma da açılır.</div><button class="btn primary" type="button" data-demo="pairswap">QR kodunu göster</button></div>
+              <div class="check">
               <h4>Bağlantı durumu</h4>
               <div class="ck ok"><span class="mark">✓</span><div><b>Bluetooth açık</b><div class="tiny">Bu bilgisayar telefonla eşleşebilir</div></div></div>
               <div class="ck wait"><span class="mark"></span><div><b>iPhone bekleniyor</b><div class="tiny">Eşleşme bitince burada görünür</div></div></div>

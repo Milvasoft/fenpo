@@ -79,7 +79,7 @@
     <value>Kod 5 dakika geçerli, sonra kendiliğinden yenilenir</value>
   </data>
   <data name="AppPair_Step1.Hint" xml:space="preserve">
-    <value>iPhone’da App Store’da, Android’de F-Droid’de “Fenpo” ara</value>
+    <value>iPhone’da App Store’da, Android’de Google Play’de “Fenpo” ara</value>
   </data>
   <data name="AppPair_Step1.Title" xml:space="preserve">
     <value>Telefona Fenpo’yu yükle</value>
@@ -724,7 +724,7 @@
     <value>iPhone</value>
   </data>
   <data name="Pair_Intro.Text" xml:space="preserve">
-    <value>iPhone’a bir şey yüklemeden başlayabilirsin: bildirimler, mesajlar ve çalan müzik Bluetooth ile gelir. Android telefonun varsa aşağıdaki “Telefondaki Fenpo ile bağla”yı kullan.</value>
+    <value>İki yol var. iPhone’da uygulama yüklemeden başlayabilirsin; Android’de ve tüm özellikler için telefondaki Fenpo ile eşleştir.</value>
   </data>
   <data name="Pair_Later.Content" xml:space="preserve">
     <value>Sonra yap</value>
@@ -740,6 +740,15 @@
   </data>
   <data name="Pair_PhoneLinkTitle.Text" xml:space="preserve">
     <value>Telefon Bağlantısı açık.</value>
+  </data>
+  <data name="Pair_NoAppHeader.Text" xml:space="preserve">
+    <value>Uygulama olmadan (yalnızca iPhone)</value>
+  </data>
+  <data name="Pair_WithAppHeader.Text" xml:space="preserve">
+    <value>Telefondaki Fenpo ile (iPhone ve Android)</value>
+  </data>
+  <data name="Pair_WithAppText.Text" xml:space="preserve">
+    <value>Telefona Fenpo’yu yükle, sonra QR kodunu onunla okut. Android bu yolla eşleşir. iPhone’da dosya, pano, kamera ve ekran yansıtma da açılır.</value>
   </data>
   <data name="Pair_StatusHeader.Text" xml:space="preserve">
     <value>Bağlantı durumu</value>
@@ -769,10 +778,10 @@
     <value>Mesajlara izin ver</value>
   </data>
   <data name="Pair_Title.Text" xml:space="preserve">
-    <value>iPhone’unu bağla</value>
+    <value>Telefonunu bağla</value>
   </data>
   <data name="Pair_WithApp.Content" xml:space="preserve">
-    <value>Telefondaki Fenpo ile bağla</value>
+    <value>QR kodunu göster</value>
   </data>
   <data name="Phone_SwitchTo" xml:space="preserve">
     <value>{0} telefonuna geç</value>
