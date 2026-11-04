@@ -95,14 +95,19 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
         var source = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, _dllName);
         File.Copy(PackagedPath, source, overwrite: true);
         var target = Path.Combine(InstallFolder, _dllName);
-        var data = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fenpo", "Camera");
+        var oldCopies = Path.Combine(InstallFolder, "*.old");
+        var data =Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Fenpo", "Camera");
 
-        // Frame Server holds the old DLL while it runs; it starts again when an app opens a camera.
+        // Frame Server holds the old DLL while it runs; it starts again when an app opens a camera. Fenpo itself holds
+        // it too once the camera was created, and a loaded DLL cannot be overwritten but can be renamed; a renamed copy
+        // is deleted by the next install or removal, when nothing holds it any more.
         // The log folder lets Frame Server's account (Local Service) write the camera's error log.
         var command = string.Join(" & ",
             "sc stop FrameServer >nul 2>&1",
             "sc stop FrameServerMonitor >nul 2>&1",
             $"mkdir \"{InstallFolder}\" 2>nul",
+            $"del /f /q \"{oldCopies}\" >nul 2>&1",
+            $"if exist \"{target}\" move /y \"{target}\" \"{target}.{Guid.NewGuid():N}.old\" >nul",
             $"copy /y \"{source}\" \"{target}\" >nul",
             $"mkdir \"{data}\" 2>nul",
             $"icacls \"{data}\" /grant *S-1-5-19:(OI)(CI)M >nul",
@@ -124,7 +129,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
             await Task.Run(CreateCamera);
         }
 
-        return IsInstalled;
+        return IsInstalled && !NeedsUpdate;
     }
 
     /// <summary>
@@ -140,6 +145,7 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
             "sc stop FrameServer >nul 2>&1",
             "sc stop FrameServerMonitor >nul 2>&1",
             $"del /f /q \"{target}\" 2>nul",
+            $"del /f /q \"{Path.Combine(InstallFolder, "*.old")}\" >nul 2>&1",
             $"rmdir \"{InstallFolder}\" 2>nul");
 
         var done = await RunElevatedAsync(command);
