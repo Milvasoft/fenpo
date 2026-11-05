@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Fenpo.Core.Calls;
 
 namespace Fenpo.App;
 
@@ -102,7 +103,77 @@ internal static partial class NativeMethods
         _ = SetWindowLongPtr(hwnd, exStyle, (GetWindowLongPtr(hwnd, exStyle) | toolWindow) & ~appWindow);
     }
 
+    /// <summary>
+    /// Whether a game, a presentation or another full-screen app is in front. Windows reports the ones it recognizes;
+    /// a borderless game does not always count for it, so the front window's size is checked as well.
+    /// </summary>
+    /// <returns>True when a window on top would get in the way.</returns>
+    internal static unsafe bool IsFullScreenAppInFront()
+    {
+        const int busy = 2; // QUNS_BUSY
+        const int direct3D = 3; // QUNS_RUNNING_D3D_FULL_SCREEN
+        const int presentation = 4; // QUNS_PRESENTATION_MODE
+        const int style = -16; // GWL_STYLE
+        const nint caption = 0xC00000; // WS_CAPTION
+        const uint nearest = 2; // MONITOR_DEFAULTTONEAREST
+
+        if (SHQueryUserNotificationState(out var state) == 0 && state is busy or direct3D or presentation)
+        {
+            return true;
+        }
+
+        var window = GetForegroundWindow();
+
+        if (window == 0 || IsDesktop(window) || !GetWindowRect(window, out var rect))
+        {
+            return false;
+        }
+
+        var monitor = new MonitorInfo { Size = sizeof(MonitorInfo) };
+
+        if (!GetMonitorInfo(MonitorFromWindow(window, nearest), ref monitor))
+        {
+            return false;
+        }
+
+        var maximizedWithTitleBar = IsZoomed(window) && (GetWindowLongPtr(window, style) & caption) == caption;
+        return FullScreenRule.FillsMonitor(rect.ToScreenRect(), monitor.Monitor.ToScreenRect(), maximizedWithTitleBar);
+    }
+
+    // The desktop's own windows fill the screen when nothing else is in front.
+    private static unsafe bool IsDesktop(nint window)
+    {
+        var name = stackalloc char[32];
+        var length = GetClassName(window, name, 32);
+        var className = new string(name, 0, length);
+        return className is "Progman" or "WorkerW";
+    }
+
     private static nint _systemQueueController;
+
+    [LibraryImport("shell32.dll")]
+    private static partial int SHQueryUserNotificationState(out int state);
+
+    [LibraryImport("user32.dll")]
+    private static partial nint GetForegroundWindow();
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetWindowRect(nint hwnd, out Rect rect);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool IsZoomed(nint hwnd);
+
+    [LibraryImport("user32.dll")]
+    private static partial nint MonitorFromWindow(nint hwnd, uint flags);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetMonitorInfoW")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetMonitorInfo(nint monitor, ref MonitorInfo info);
+
+    [LibraryImport("user32.dll", EntryPoint = "GetClassNameW")]
+    private static unsafe partial int GetClassName(nint hwnd, char* name, int size);
 
     /// <summary>
     /// Creates a Windows.System dispatcher queue on this thread if it has none (the system compositor needs one).
@@ -151,6 +222,26 @@ internal static partial class NativeMethods
 
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmExtendFrameIntoClientArea(nint hwnd, ref Margins margins);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Rect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+
+        public readonly ScreenRect ToScreenRect() => new(Left, Top, Right, Bottom);
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MonitorInfo
+    {
+        public int Size;
+        public Rect Monitor;
+        public Rect Work;
+        public uint Flags;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Margins

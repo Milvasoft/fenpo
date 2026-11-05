@@ -86,7 +86,16 @@ public sealed class CallService(
                     var detail = string.IsNullOrEmpty(notification.Subtitle)
                         ? _localization.GetString("Island_CallOnPhone")
                         : _localization.Format("Island_CallOnPhoneWith", notification.Subtitle);
-                    _dispatcher?.TryEnqueue(() => _island?.ShowCall(caller, detail, notification.PositiveActionLabel is not null));
+
+                    // A window on top throws a game out of exclusive full screen; the phone and the PC's ring still tell.
+                    if (NativeMethods.IsFullScreenAppInFront())
+                    {
+                        _logger.LogInformation("A full-screen app is in front, so the island stays hidden for this call");
+                    }
+                    else
+                    {
+                        _dispatcher?.TryEnqueue(() => _island?.ShowCall(caller, detail, notification.PositiveActionLabel is not null));
+                    }
                 }
 
                 _ = PausePcMediaAsync();
