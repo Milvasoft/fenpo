@@ -57,6 +57,38 @@ public enum TransferPlan {
         return try EnvelopeFraming.frame(try header.serializedBytes())
     }
 
+    /// The file whose bytes can be sent for a picked or shared item. A Live Photo arrives as a `.pvt` bundle, which is
+    /// a folder holding the picture and its short movie, and only a file has bytes to send; the picture stands in for it.
+    /// - Parameter url: Item from the picker or the share sheet.
+    /// - Returns: The item itself when it is a file, otherwise the picture inside the folder.
+    public static func sendableFile(at url: URL) throws -> URL {
+        var isFolder: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isFolder) else {
+            throw CocoaError(.fileNoSuchFile)
+        }
+        guard isFolder.boolValue else {
+            return url
+        }
+        let names = try FileManager.default.contentsOfDirectory(atPath: url.path)
+        guard let still = stillImage(among: names) else {
+            throw CocoaError(.fileReadUnknown)
+        }
+        return url.appendingPathComponent(still)
+    }
+
+    /// Picks the picture among a Live Photo bundle's files.
+    /// - Parameter names: File names in the bundle.
+    /// - Returns: The first picture by format and then by name, nil when there is none.
+    public static func stillImage(among names: [String]) -> String? {
+        for format in ["heic", "heif", "jpg", "jpeg", "png"] {
+            let matches = names.filter { $0.lowercased().hasSuffix(".\(format)") && !$0.hasPrefix(".") }
+            if let first = matches.sorted().first {
+                return first
+            }
+        }
+        return nil
+    }
+
     /// MIME type for a file extension, `application/octet-stream` when unknown.
     /// - Parameter fileExtension: Extension without the dot, any case.
     public static func mimeType(forExtension fileExtension: String) -> String {

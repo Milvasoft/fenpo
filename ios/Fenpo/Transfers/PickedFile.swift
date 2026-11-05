@@ -7,16 +7,23 @@ import UniformTypeIdentifiers
 struct PickedFile: Transferable {
     let url: URL
 
+    // Image comes first so a Live Photo arrives as its picture, not as a .pvt bundle (a folder).
     static var transferRepresentation: some TransferRepresentation {
-        FileRepresentation(importedContentType: .item) { received in
-            let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Outgoing", isDirectory: true)
-            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            let existing = Set((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
-            let name = TransferPlan.safeFileName(received.file.lastPathComponent, existing: existing)
-            let target = folder.appendingPathComponent(name)
-            try FileManager.default.copyItem(at: received.file, to: target)
-            return PickedFile(url: target)
-        }
+        FileRepresentation(importedContentType: .image, importing: copy)
+        FileRepresentation(importedContentType: .movie, importing: copy)
+        FileRepresentation(importedContentType: .item, importing: copy)
+    }
+
+    @Sendable
+    private static func copy(_ received: ReceivedTransferredFile) throws -> PickedFile {
+        let source = try TransferPlan.sendableFile(at: received.file)
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent("Outgoing", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let existing = Set((try? FileManager.default.contentsOfDirectory(atPath: folder.path)) ?? [])
+        let name = TransferPlan.safeFileName(source.lastPathComponent, existing: existing)
+        let target = folder.appendingPathComponent(name)
+        try FileManager.default.copyItem(at: source, to: target)
+        return PickedFile(url: target)
     }
 }
 

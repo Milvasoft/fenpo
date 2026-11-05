@@ -151,13 +151,14 @@ final class ShareModel {
                     continuation.resume(throwing: error ?? CocoaError(.fileNoSuchFile))
                     return
                 }
-                let proposed = suggested.map { name in
-                    source.pathExtension.isEmpty || name.hasSuffix(".\(source.pathExtension)") ? name : "\(name).\(source.pathExtension)"
-                } ?? source.lastPathComponent
-                let target = folder.appendingPathComponent(TransferPlan.safeFileName(proposed, existing: existing))
                 do {
+                    let file = try TransferPlan.sendableFile(at: source)
+                    let proposed = suggested.map { name in
+                        file.pathExtension.isEmpty || name.hasSuffix(".\(file.pathExtension)") ? name : "\(name).\(file.pathExtension)"
+                    } ?? file.lastPathComponent
+                    let target = folder.appendingPathComponent(TransferPlan.safeFileName(proposed, existing: existing))
                     try? FileManager.default.removeItem(at: target)
-                    try FileManager.default.copyItem(at: source, to: target)
+                    try FileManager.default.copyItem(at: file, to: target)
                     continuation.resume(returning: target)
                 } catch {
                     continuation.resume(throwing: error)

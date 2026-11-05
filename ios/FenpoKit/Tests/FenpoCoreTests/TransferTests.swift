@@ -44,6 +44,53 @@ struct TransferPlanTests {
         #expect(TransferPlan.mimeType(forExtension: "HEIC") == "image/heic")
         #expect(TransferPlan.mimeType(forExtension: "weird") == "application/octet-stream")
     }
+
+    @Test(arguments: [
+        (["IMG_3681.MOV", "IMG_3681.HEIC"], "IMG_3681.HEIC"),
+        (["IMG_3681.mov", "IMG_3681.jpg"], "IMG_3681.jpg"),
+        (["b.heic", "a.heic", "a.png"], "a.heic"),
+        ([".hidden.heic", "photo.png"], "photo.png"),
+        (["IMG_3681.MOV", "Info.plist"], nil),
+        ([], nil),
+    ] as [([String], String?)])
+    func stillImageOfALivePhoto(names: [String], expected: String?) {
+        #expect(TransferPlan.stillImage(among: names) == expected)
+    }
+
+    @Test
+    func aFileIsSentAsItIs() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appendingPathComponent("report.pdf")
+        try Data([1]).write(to: file)
+        #expect(try TransferPlan.sendableFile(at: file) == file)
+    }
+
+    @Test
+    func aLivePhotoBundleIsSentAsItsPicture() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let bundle = folder.appendingPathComponent("IMG_3681.pvt")
+        try FileManager.default.createDirectory(at: bundle, withIntermediateDirectories: true)
+        try Data([1]).write(to: bundle.appendingPathComponent("IMG_3681.MOV"))
+        try Data([2]).write(to: bundle.appendingPathComponent("IMG_3681.HEIC"))
+        #expect(try TransferPlan.sendableFile(at: bundle).lastPathComponent == "IMG_3681.HEIC")
+    }
+
+    @Test
+    func aFolderWithoutAPictureCannotBeSent() throws {
+        let folder = try temporaryFolder()
+        defer { try? FileManager.default.removeItem(at: folder) }
+        #expect(throws: (any Error).self) {
+            try TransferPlan.sendableFile(at: folder)
+        }
+    }
+
+    private func temporaryFolder() throws -> URL {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        return folder
+    }
 }
 
 struct IncomingFileSplitterTests {
