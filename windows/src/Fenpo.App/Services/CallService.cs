@@ -80,22 +80,21 @@ public sealed class CallService(
             case NotificationCategory.IncomingCall:
                 Log.Ringing(caller, notification.Date ?? notification.ReceivedAt);
 
+                // A game or another full-screen app is left alone: no window on top, no sound, nothing paused. The phone
+                // still rings and the call is in the list.
+                if (NativeMethods.IsFullScreenAppInFront())
+                {
+                    _logger.LogInformation("A full-screen app is in front, so the PC stays quiet for this call");
+                    break;
+                }
+
                 if (_settings.Current.ShowIncomingCalls)
                 {
                     _ringingId = stored.Id;
                     var detail = string.IsNullOrEmpty(notification.Subtitle)
                         ? _localization.GetString("Island_CallOnPhone")
                         : _localization.Format("Island_CallOnPhoneWith", notification.Subtitle);
-
-                    // A window on top throws a game out of exclusive full screen; the phone and the PC's ring still tell.
-                    if (NativeMethods.IsFullScreenAppInFront())
-                    {
-                        _logger.LogInformation("A full-screen app is in front, so the island stays hidden for this call");
-                    }
-                    else
-                    {
-                        _dispatcher?.TryEnqueue(() => _island?.ShowCall(caller, detail, notification.PositiveActionLabel is not null));
-                    }
+                    _dispatcher?.TryEnqueue(() => _island?.ShowCall(caller, detail, notification.PositiveActionLabel is not null));
                 }
 
                 _ = PausePcMediaAsync();
