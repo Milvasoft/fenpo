@@ -4043,6 +4043,40 @@
         }
       }
     },
+    "settings.savePhotos": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save received photos"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelen fotoğrafları kaydet"
+          }
+        }
+      }
+    },
+    "settings.savePhotos.denied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo can’t add photos. Allow it in iPhone Settings, under Fenpo > Photos."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo fotoğraf ekleyemiyor. iPhone Ayarları’nda Fenpo > Fotoğraflar’dan izin ver."
+          }
+        }
+      }
+    },
     "settings.screenshots": {
       "extractionState": "manual",
       "localizations": {

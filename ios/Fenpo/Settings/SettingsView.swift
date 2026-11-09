@@ -24,6 +24,9 @@ struct SettingsView: View {
     @AppStorage(ScreenshotSender.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
     private var sendsScreenshots = false
 
+    @AppStorage(IncomingPhotos.enabledKey, store: UserDefaults(suiteName: FenpoIdentifiers.appGroup))
+    private var savesPhotos = false
+
     @AppStorage("developer.unlocked")
     private var isDeveloperUnlocked = false
     @State private var isDeveloperPresented = false
@@ -97,6 +100,13 @@ struct SettingsView: View {
                         ToggleRow(icon: .photo, color: .dusk, title: "settings.screenshots", isOn: $sendsScreenshots)
                             .onChange(of: sendsScreenshots) { _, isOn in
                                 model.screenshots?.setEnabled(isOn)
+                            }
+                        ToggleRow(icon: .symbol("square.and.arrow.down"), color: .green, title: "settings.savePhotos", isOn: $savesPhotos)
+                            .onChange(of: savesPhotos) { _, isOn in
+                                guard isOn else {
+                                    return
+                                }
+                                Task { savesPhotos = await model.allowSavingPhotos() }
                             }
                     }
                     if clipboardSharing, let hint = clipboardOnOpen.hint {

@@ -93,6 +93,29 @@ struct TransferPlanTests {
     }
 }
 
+struct IncomingPhotosTests {
+    @Test(arguments: [
+        ("IMG_1.HEIC", true),
+        ("photo.jpg", true),
+        ("screen.PNG", true),
+        ("clip.mov", false),
+        ("report.pdf", false),
+        ("png", false),
+        ("archive.png.zip", false),
+    ] as [(String, Bool)])
+    func picturesAreRecognizedByName(name: String, expected: Bool) {
+        #expect(IncomingPhotos.isPhoto(fileName: name) == expected)
+    }
+
+    @Test
+    func savingIsOffUntilTurnedOn() throws {
+        let defaults = try #require(UserDefaults(suiteName: "IncomingPhotosTests.\(UUID().uuidString)"))
+        #expect(!IncomingPhotos.isEnabled(in: defaults))
+        defaults.set(true, forKey: IncomingPhotos.enabledKey)
+        #expect(IncomingPhotos.isEnabled(in: defaults))
+    }
+}
+
 struct IncomingFileSplitterTests {
     @Test
     func splitsAcrossFilesWithAnyChunking() {

@@ -427,6 +427,16 @@ final class AppModel {
         isPhotoPickerPresented = true
     }
 
+    /// The switch for saving received pictures was turned on: asks for permission and says how to fix a refusal.
+    /// - Returns: Whether the switch can stay on.
+    func allowSavingPhotos() async -> Bool {
+        let allowed = await PhotoLibrarySaver.requestAccess()
+        if !allowed {
+            show(Toast(message: "settings.savePhotos.denied", isError: true))
+        }
+        return allowed
+    }
+
     /// Sends picked or shared files to the PC and removes the temporary copies afterwards.
     /// - Parameter urls: Local files.
     func sendFiles(_ urls: [URL]) {

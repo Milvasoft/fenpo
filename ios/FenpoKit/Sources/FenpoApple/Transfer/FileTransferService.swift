@@ -310,6 +310,9 @@ public final class FileTransferService {
                 TransferRecord(fileName: name, direction: .fromPC, date: Date(), outcome: .completed, size: file.size, localFileName: name)
             })
             log.info("Received \(files.count) file(s)")
+            if IncomingPhotos.isEnabled(in: UserDefaults(suiteName: FenpoIdentifiers.appGroup)) {
+                await PhotoLibrarySaver.save(urls.filter { IncomingPhotos.isPhoto(fileName: $0.lastPathComponent) })
+            }
             notifyReceived(count: files.count, firstName: names[0])
         } catch {
             log.error("Receiving failed: \(String(describing: error))")

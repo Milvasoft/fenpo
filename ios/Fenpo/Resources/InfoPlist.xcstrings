@@ -69,6 +69,23 @@
         }
       }
     },
+    "NSPhotoLibraryAddUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo adds the photos you receive from your PC to your library if you turn that on."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fenpo, açarsan PC’nden gelen fotoğrafları arşivine ekler."
+          }
+        }
+      }
+    },
     "NSPhotoLibraryUsageDescription": {
       "extractionState": "manual",
       "localizations": {

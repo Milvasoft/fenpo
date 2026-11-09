@@ -52,6 +52,7 @@ targets:
         INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: Fenpo stays connected to your paired PC over Bluetooth to share the clipboard, your PC’s notifications and its media controls, even while Fenpo is in the background.
         INFOPLIST_KEY_NSLocalNetworkUsageDescription: Fenpo connects to your paired PC on the same Wi‑Fi network to send files and photos, show the PC’s shared folders, and use your iPhone as the PC’s webcam or screen.
         INFOPLIST_KEY_NSCameraUsageDescription: Fenpo uses the camera to scan the pairing code and to be your PC’s webcam.
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: Fenpo adds the photos you receive from your PC to your library if you turn that on.
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: Fenpo shows your photos on your PC when you browse them there, and sends new screenshots if you turn that on.
     dependencies:
       - package: FenpoKit
