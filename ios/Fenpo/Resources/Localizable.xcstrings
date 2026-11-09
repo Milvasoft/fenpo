@@ -4049,13 +4049,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Save received photos"
+            "value": "Save received photos and videos"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gelen fotoğrafları kaydet"
+            "value": "Gelen fotoğraf ve videoları kaydet"
           }
         }
       }
@@ -4066,13 +4066,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo can’t add photos. Allow it in iPhone Settings, under Fenpo > Photos."
+            "value": "Fenpo can’t add to your library. Allow it in iPhone Settings, under Fenpo > Photos."
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fenpo fotoğraf ekleyemiyor. iPhone Ayarları’nda Fenpo > Fotoğraflar’dan izin ver."
+            "value": "Fenpo arşivine ekleyemiyor. iPhone Ayarları’nda Fenpo > Fotoğraflar’dan izin ver."
           }
         }
       }

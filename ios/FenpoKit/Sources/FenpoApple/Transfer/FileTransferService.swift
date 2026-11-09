@@ -311,7 +311,7 @@ public final class FileTransferService {
             })
             log.info("Received \(files.count) file(s)")
             if IncomingPhotos.isEnabled(in: UserDefaults(suiteName: FenpoIdentifiers.appGroup)) {
-                await PhotoLibrarySaver.save(urls.filter { IncomingPhotos.isPhoto(fileName: $0.lastPathComponent) })
+                await PhotoLibrarySaver.save(urls)
             }
             notifyReceived(count: files.count, firstName: names[0])
         } catch {
