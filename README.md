@@ -129,3 +129,5 @@ These are in Turkish:
 ## License
 
 MIT, for every branch of this repository. See [LICENSE](LICENSE).
+
+<a href="https://www.opensourcealternatives.to"><img src="https://www.opensourcealternatives.to/badge-osa.svg" alt="As seen on Open Source Alternatives"></a>
