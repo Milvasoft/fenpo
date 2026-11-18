@@ -102,6 +102,15 @@ public sealed partial class CameraPage : Page
 
     private void ApplyVirtualCamera()
     {
+        if (!VirtualCameraService.IsSupported)
+        {
+            InUseBadge.Visibility = Visibility.Collapsed;
+            RemoveCamera.Visibility = Visibility.Collapsed;
+            InstallCamera.Visibility = Visibility.Collapsed;
+            VirtualCameraText.Text = _localization.GetString("VirtualCamera_NeedsWindows11");
+            return;
+        }
+
         var installed = _virtualCamera.IsInstalled;
         var update = installed && _virtualCamera.NeedsUpdate;
         InUseBadge.Visibility = _virtualCamera.InUse ? Visibility.Visible : Visibility.Collapsed;

@@ -1140,6 +1140,9 @@
   <data name="VirtualCamera_NeedsUpdate" xml:space="preserve">
     <value>A newer Fenpo Kamera is here. Press Update; Windows asks for administrator approval.</value>
   </data>
+  <data name="VirtualCamera_NeedsWindows11" xml:space="preserve">
+    <value>Picking the phone's camera in Teams, Zoom, Meet and OBS needs Windows 11. The preview works on this PC too.</value>
+  </data>
   <data name="VirtualCamera_NotInstalled" xml:space="preserve">
     <value>Install Fenpo Kamera to pick the phone's camera in Teams, Zoom, Meet and OBS. Windows asks for administrator approval once.</value>
   </data>

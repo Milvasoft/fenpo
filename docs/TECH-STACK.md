@@ -9,7 +9,7 @@ Sürümler Ekim 2026 itibarıyla. Her seçimin yanında neden seçildiği ve ney
 | Çalışma zamanı | **.NET 10 LTS** (10.0.13), C# 14 | LTS, Kasım 2028'e kadar destekli. .NET 11 Kasım 2026'da çıkacak ama STS; 10'da kalıp 12 LTS'ye geçmek daha sakin |
 | UI | **WinUI 3, Windows App SDK 2.5.1** | Mica, Fluent, Segoe UI Variable, Windows bildirimleri yerel olarak geliyor. Fenpo'nun "Windows'un parçası" gibi durması için en doğru araç |
 | Paketleme | **MSIX** (tek proje paketleme), tam güven | Paket kimliği şart: `phoneLineTransportManagement` kısıtlı yeteneği, uygulama bildirimleri, paylaşım hedefi, başlangıç görevi, Dosya Gezgini komutu |
-| En düşük Windows | **Windows 11 22H2 (22621)** | Sanal kamera 22000+, `FocusSessionManager` 22H2. Windows 10 desteği Ekim 2025'te bitti |
+| En düşük Windows | **Windows 10 2004 (19041)** | Windows 10 hâlâ yaygın (DECISIONS #42). Fenpo Kamera (`MFCreateVirtualCamera`) Windows 11 22000+ ister; Windows 10'da kapalı. Derleme SDK'sı 22621 |
 | Bluetooth | WinRT `Windows.Devices.Bluetooth.*` (GATT istemci ve sunucu, RFCOMM), `Windows.ApplicationModel.Calls` (HFP) | Ek sürücü yok, yerleşik yığın. C# ile doğrudan, CsWinRT üzerinden |
 | OBEX, MAP, PBAP | Kendi kodumuz, BestOwl/MyPhone (MIT) referans | Bakımı yapılan bir .NET kütüphanesi yok. MyPhone 2022'den beri durgun, gönderme kısmı yarım |
 | MVVM | CommunityToolkit.Mvvm | Kaynak üreticili, hafif, WinUI ile standart |

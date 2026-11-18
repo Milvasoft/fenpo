@@ -1140,6 +1140,9 @@
   <data name="VirtualCamera_NeedsUpdate" xml:space="preserve">
     <value>Fenpo Kamera'nın yeni sürümü var. Güncelle'ye bas, Windows yönetici onayı ister.</value>
   </data>
+  <data name="VirtualCamera_NeedsWindows11" xml:space="preserve">
+    <value>Telefonun kamerasını Teams, Zoom, Meet ve OBS'de seçebilmek için Windows 11 gerekir. Önizleme bu bilgisayarda da çalışır.</value>
+  </data>
   <data name="VirtualCamera_NotInstalled" xml:space="preserve">
     <value>Teams, Zoom, Meet ve OBS'de telefonun kamerasını seçebilmek için Fenpo Kamera'yı kur. Windows bir kez yönetici onayı ister.</value>
   </data>

@@ -42,6 +42,11 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
     public event EventHandler? Changed;
 
     /// <summary>
+    /// Gets a value indicating whether this Windows can show a virtual camera (MFCreateVirtualCamera, Windows 11).
+    /// </summary>
+    public static bool IsSupported => OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000);
+
+    /// <summary>
     /// Gets a value indicating whether the media source is installed (registered in HKLM, file present).
     /// </summary>
     public bool IsInstalled => InstalledPath() is { } path && File.Exists(path);
@@ -84,6 +89,11 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
     /// <returns>True when installed.</returns>
     public async Task<bool> InstallAsync()
     {
+        if (!IsSupported)
+        {
+            return false;
+        }
+
         if (!File.Exists(PackagedPath))
         {
             _logger.LogWarning("Fenpo Kamera cannot be installed: {Path} is missing", PackagedPath);
@@ -199,6 +209,13 @@ public sealed partial class VirtualCameraService(CameraService camera, ISettings
 
     private async Task RunAsync(CancellationToken cancellationToken)
     {
+        // Windows 10: the phone's camera still works inside Fenpo, but other apps cannot get it.
+        if (!IsSupported)
+        {
+            _logger.LogInformation("Fenpo Kamera needs Windows 11; this PC runs {Version}", Environment.OSVersion.Version);
+            return;
+        }
+
         if (IsInstalled)
         {
             CreateCamera();
