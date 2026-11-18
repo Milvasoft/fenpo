@@ -75,6 +75,9 @@ try {
         Get-ChildItem $appx -Recurse -Filter *.msix | Where-Object { $_.FullName -notlike '*\Dependencies\*' } | Copy-Item -Destination $packages
     }
 
+    # The GitHub zips carry one platform's package each (Package-GitHub.ps1), so those are signed on their own too.
+    if ($Channel -eq 'GitHub') { Sign (Get-ChildItem $packages -Filter *.msix).FullName }
+
     $bundle = Join-Path $OutDir "Fenpo_$($Version)_$Channel.msixbundle"
     & $makeappx bundle /o /d $packages /p $bundle /bv $Version
     if ($LASTEXITCODE -ne 0) { throw 'Bundling failed' }
