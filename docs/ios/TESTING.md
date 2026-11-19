@@ -304,10 +304,11 @@ Yükleme GitHub Actions'tan yapılır, Mac gerekmez. App Store Connect'te uygula
 
 ## Yüklemek
 
-1. GitHub → **Actions → iOS → Run workflow**: dal `ios`, **Upload a Release build to TestFlight** işaretli.
-2. Önce testler koşar (Windows çekirdeği, simülatör, ekran görüntüleri). Geçerlerse **Upload to TestFlight** işi Release arşivini API anahtarıyla imzalar (uygulama, paylaşım uzantısı, widget'lar, App Group) ve yükler.
-3. İşin özetinde sürüm ve derleme numarası yazar: `Fenpo 0.1.0 (<run_number>) from <commit>`. Derleme numarası iş akışının çalışma numarasıdır, her yüklemede artar.
-4. Build birkaç dakika işlendikten sonra App Store Connect → TestFlight'ta görünür. Dahili test grubuna (ör. "Fenpo ekibi") eklenen testçiler hemen kurabilir.
+1. GitHub → **Actions → iOS → Run workflow**: dal `ios`, **Send a Release build to storeasy** işaretli.
+2. Önce testler koşar (Windows çekirdeği, simülatör, ekran görüntüleri). Geçerlerse **Send to storeasy (TestFlight)** işi Release arşivini API anahtarıyla imzalar (uygulama, paylaşım uzantısı, widget'lar, App Group), `.ipa` olarak dışa aktarır ve storeasy'ye (storeasy.milvasoft.com, Fenpo uygulaması) gönderir. `.ipa` çalışmanın `ipa-<run_number>` artifact'ında 14 gün durur.
+3. storeasy paketi denetler, App Store Connect'e kendisi yükler, Apple işlemeyi bitirince build'i Fenpo'nun teslim kuralındaki dahili TestFlight grubuna ekler. İncelemeye hiçbir şey göndermez. Kural kapalıysa ya da denetim uyarı verirse paket storeasy'de **Bekletiliyor** durumunda kalır; storeasy → Paketler'den elle teslim edilir.
+4. storeasy işi GitHub'ın OIDC belirteciyle tanır (Fenpo uygulamasında güvenilir yayıncı kuralı: `Milvasoft/fenpo`, `.github/workflows/ios.yml`, dal `ios`). Repoda storeasy için secret yok. Başka bir daldan çalıştırılan iş storeasy'de reddedilir.
+5. İşin özetinde sürüm ve derleme numarası yazar: `Fenpo 0.1.0 (<run_number>) from <commit>`. Derleme numarası iş akışının çalışma numarasıdır, her yüklemede artar.
 
 Şifreleme beyanı Info.plist'te: `ITSAppUsesNonExemptEncryption = NO`. Fenpo sadece Apple'ın Network.framework'ündeki TLS'i ve CryptoKit'teki AES-GCM'i kullanıyor. App Store Connect bu yüzden her build'de soru sormaz.
 
@@ -328,5 +329,7 @@ Burada derleme numarası commit sayısıdır (`git rev-list --count HEAD`). İki
 |---|---|
 | Arşivde `No signing certificate` ya da `Cloud signing permission error` | API anahtarının rolü bulut imzalamaya yetmiyor olabilir. App Store Connect → Kullanıcılar ve Erişim → Entegrasyonlar'da anahtarın rolünü **Admin** yapın ya da "Bulutta yönetilen dağıtım sertifikalarına erişim" iznini verin, sonra yeniden çalıştırın |
 | `No profiles for 'com.fenpo.app.share' were found` | Kimlik hesapta kayıtlı (bkz. DECISIONS #26). `-allowProvisioningUpdates` profilleri kendisi oluşturur; yine de olmazsa logu (`testflight-logs`) Buğra'ya gönderin |
+| **Send to storeasy** adımı `OIDC token did not match` (çıkış kodu 3) | İş `ios` dışındaki bir daldan çalıştı ya da storeasy'deki güvenilir yayıncı kuralı değişti. storeasy → Fenpo → Paket alma → Güvenilir yayıncılar'da son denemenin claim'lerine bakın |
+| **Send to storeasy** adımı `Rejected` (çıkış kodu 2) | storeasy denetimi geçmedi (bundle id, derleme numarası, imza, Xcode/SDK alt sınırı). Ayrıntı storeasy → Paketler'de |
 | Yükleme `ITMS-91053` (gizlilik bildirimi) uyarısı | `ios/Shared/PrivacyInfo.xcprivacy` eksik bir API nedeni bildiriyor; uyarı metnini Buğra'ya gönderin |
 | Yükleme "bundle version must be higher" | Daha büyük numaralı bir build zaten var; iş akışını yeniden çalıştırmak numarayı artırır |
