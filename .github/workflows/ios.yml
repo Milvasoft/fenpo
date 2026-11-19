@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       testflight:
-        description: "Upload a Release build to TestFlight after the tests pass"
+        description: "Send a Release build to storeasy (checks, then the TestFlight internal group) after the tests pass"
         type: boolean
         default: false
       store_screenshots:
@@ -176,13 +176,19 @@ jobs:
           path: ${{ runner.temp }}/*.log
           if-no-files-found: ignore
 
-  # Signs with the App Store Connect API key (automatic signing, cloud managed certificates) and
-  # uploads to TestFlight. Only when started by hand with "testflight" checked.
+  # Signs with the App Store Connect API key (automatic signing, cloud managed certificates), exports the
+  # .ipa and hands it to storeasy, which checks it and delivers it with the app's delivery rule (TestFlight
+  # internal group only, never review). storeasy accepts the job by its GitHub OIDC token (trusted publisher
+  # rule on the Fenpo app: this repository, this workflow, branch ios), so no storeasy secret is stored here.
+  # Only when started by hand with "testflight" checked.
   testflight:
-    name: Upload to TestFlight
+    name: Send to storeasy (TestFlight)
     needs: [core-windows, app-macos]
     if: github.event_name == 'workflow_dispatch' && inputs.testflight
     runs-on: macos-26
+    permissions:
+      contents: read
+      id-token: write # OIDC token for storeasy
     steps:
       - uses: actions/checkout@v5
 
@@ -251,23 +257,44 @@ jobs:
           path: ${{ runner.temp }}/Fenpo.xcarchive/dSYMs
           retention-days: 90
 
-      - name: Upload
+      # Same options as the Mac script (ios/scripts/archive-testflight.sh), but the .ipa is written to a
+      # file instead of being uploaded to App Store Connect: storeasy does the upload.
+      - name: Export .ipa
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: |
-          log="$RUNNER_TEMP/upload.log"
+          log="$RUNNER_TEMP/export.log"
+          options="$RUNNER_TEMP/ExportOptions.plist"
+          cp ios/Config/ExportOptions.plist "$options"
+          /usr/libexec/PlistBuddy -c "Set :destination export" "$options"
           xcodebuild -exportArchive \
             -archivePath "$RUNNER_TEMP/Fenpo.xcarchive" \
-            -exportOptionsPlist ios/Config/ExportOptions.plist \
+            -exportOptionsPlist "$options" \
             -exportPath "$RUNNER_TEMP/export" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$ASC_KEY_PATH" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
-            > "$log" 2>&1 || { grep -E "error:|ITMS|Upload" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
-          grep -E "Upload succeeded|EXPORT SUCCEEDED|Uploaded" "$log" | tail -5
-          echo "Uploaded Fenpo $(grep -m1 MARKETING_VERSION ios/Config/Base.xcconfig | cut -d= -f2 | tr -d ' ') (${{ github.run_number }}) from ${GITHUB_SHA::7}" >> "$GITHUB_STEP_SUMMARY"
+            > "$log" 2>&1 || { grep -E "error:|Signing|Provisioning|certificate" "$log" | sort -u | head -40; tail -40 "$log"; exit 1; }
+          grep -E "EXPORT SUCCEEDED" "$log" | tail -1
+          ls -l "$RUNNER_TEMP/export/Fenpo.ipa"
+
+      - name: Keep the .ipa
+        uses: actions/upload-artifact@v5
+        with:
+          name: ipa-${{ github.run_number }}
+          path: ${{ runner.temp }}/export/Fenpo.ipa
+          retention-days: 14
+
+      # storeasy app 2 is Fenpo (com.fenpo.app). --wait fails the job when storeasy rejects the package or
+      # the store refuses it; a held package (rule off, or a check warning) passes.
+      - name: Send to storeasy
+        env:
+          STOREASY_URL: https://storeasy.milvasoft.com
+        run: |
+          npx --yes storeasy@0.1.3 upload "$RUNNER_TEMP/export/Fenpo.ipa" --app 2 --store apple --wait
+          echo "Sent Fenpo $(grep -m1 MARKETING_VERSION ios/Config/Base.xcconfig | cut -d= -f2 | tr -d ' ') (${{ github.run_number }}) from ${GITHUB_SHA::7} to storeasy" >> "$GITHUB_STEP_SUMMARY"
 
       # Every run creates a development certificate on its fresh runner; revoke it so the team
       # does not reach Apple's certificate limit.
@@ -291,7 +318,7 @@ jobs:
           name: testflight-logs
           path: |
             ${{ runner.temp }}/archive.log
-            ${{ runner.temp }}/upload.log
+            ${{ runner.temp }}/export.log
           if-no-files-found: ignore
 
   # Names the functions at crash offsets of a TestFlight build made before its dSYMs were kept:
