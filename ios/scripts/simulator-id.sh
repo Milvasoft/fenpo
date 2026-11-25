@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prints the UDID of an available iPhone simulator on the newest installed iOS runtime.
+# Prints the UDID of an available single-display iPhone simulator on the newest installed iOS runtime.
 set -euo pipefail
 
 xcrun simctl list devices available --json | python3 -c '
@@ -11,7 +11,8 @@ def version(runtime):
 runtimes = sorted((r for r in devices if "iOS" in r), key=version, reverse=True)
 for runtime in runtimes:
     for device in devices[runtime]:
-        if device["name"].startswith("iPhone"):
+        # iPhone Duo (Xcode 27) has two displays; `simctl io screenshot` then needs a --display.
+        if device["name"].startswith("iPhone") and "Duo" not in device["name"]:
             print(device["udid"])
             sys.exit(0)
 sys.exit("No iPhone simulator found")
